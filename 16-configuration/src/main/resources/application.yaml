@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: sprbut-configuration
+  main:
+    banner-mode: off
+
+# Слайд 134: «значения в файле (yaml/properties)» — второй уровень приоритета
+sprbut:
+  server:
+    host: api.example.com
+    port: 8080
+    ssl-enabled: false
+    timeout: 30s
+    allowed-origins:
+      - https://app.example.com
+      - https://admin.example.com
+    # Тот же список строкой — @Value умеет читать только такой вариант,
+    # YAML-список для него невидим (см. ValueBasedConfig)
+    origins-csv: https://app.example.com,https://admin.example.com
+    headers:
+      X-Service: sprbut
+      X-Version: "1.0"
+    retry:
+      attempts: 3
+      backoff: 500ms

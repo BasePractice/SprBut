@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>ru.sprbut</groupId>
+        <artifactId>sprbut-course</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>08-apt-usage</artifactId>
+    <name>SprBut :: 08 :: APT: сборка, раунды, Filer, JavaPoet</name>
+    <description>
+        Потребитель процессоров из модуля 07. Здесь видно, как APT подключается
+        в реальной сборке Maven и как сгенерированный код используется в обычном коде.
+    </description>
+
+    <dependencies>
+        <!--
+            scope=provided: аннотации нужны только компилятору. У них retention
+            SOURCE, в байткод они не попадают, значит и в runtime они не нужны.
+        -->
+        <dependency>
+            <groupId>ru.sprbut</groupId>
+            <artifactId>07-annotation-processor</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <!--
+                        Слайд 67: «Maven/Gradle: annotationProcessor, -processorpath».
+                        Процессоры живут на ОТДЕЛЬНОМ пути, а не в classpath проекта.
+                        Так их код не попадает в итоговый артефакт.
+                    -->
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>ru.sprbut</groupId>
+                            <artifactId>07-annotation-processor</artifactId>
+                            <version>${project.version}</version>
+                        </path>
+                        <path>
+                            <groupId>com.squareup</groupId>
+                            <artifactId>javapoet</artifactId>
+                            <version>${javapoet.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                        <!-- Слайд 70: @SupportedOptions — параметры процессора -->
+                        <arg>-Aregistry.package=ru.sprbut.m08.generated</arg>
+                        <arg>-Aregistry.class=ModuleRegistry</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: sprbut-startup
+  main:
+    banner-mode: off
+
+# Читается слушателем ApplicationEnvironmentPreparedEvent: к этому моменту
+# Environment уже собран, а контекста ещё нет
+sprbut:
+  startup:
+    marker: из application.yaml

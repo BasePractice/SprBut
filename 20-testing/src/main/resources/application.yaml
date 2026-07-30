@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: sprbut-testing
+  main:
+    banner-mode: off
+  datasource:
+    url: jdbc:h2:mem:sprbut;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+
+sprbut:
+  catalog:
+    currency: RUB

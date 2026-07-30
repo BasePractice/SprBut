@@ -1,0 +1,12 @@
+# Слайд 138: «Профили: application-{profile}.yaml».
+#
+# Файл профиля НЕ заменяет application.yaml, а накладывается поверх него:
+# заданные здесь ключи перекрывают базовые, остальные берутся из базового файла.
+sprbut:
+  server:
+    host: api.prod.example.com
+    port: 443
+    ssl-enabled: true
+    timeout: 5s
+    retry:
+      attempts: 5

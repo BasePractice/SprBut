@@ -1,0 +1,108 @@
+package ru.sprbut.m18;
+
+import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
+import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
+import org.springframework.boot.context.event.ApplicationFailedEvent;
+import org.springframework.boot.context.event.ApplicationPreparedEvent;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.boot.context.event.ApplicationStartingEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+
+/**
+ * Слайды 158–172 (СХЕМА 11): «run() → события → ApplicationReadyEvent».
+ * <p>
+ * Событий много, и различаются они тем, <b>что к этому моменту уже готово</b>.
+ * Это и есть ответ на вопрос «куда вешать свой код»:
+ * <ul>
+ *   <li>{@code ApplicationStartingEvent} — не готово ничего, даже Environment.
+ *       Годится только для инициализации логирования;</li>
+ *   <li>{@code ApplicationEnvironmentPreparedEvent} — Environment есть, контекста нет.
+ *       Здесь можно добавить свой источник настроек;</li>
+ *   <li>{@code ApplicationContextInitializedEvent} — контекст создан, но бинов ещё нет;</li>
+ *   <li>{@code ApplicationPreparedEvent} — определения бинов загружены, сами бины
+ *       не созданы. Последний момент, когда можно править {@code BeanDefinition};</li>
+ *   <li>{@code ContextRefreshedEvent} — все синглтоны созданы, контекст поднят;</li>
+ *   <li>{@code ApplicationStartedEvent} — контекст поднят, но раннеры ещё не отработали;</li>
+ *   <li>{@code ApplicationReadyEvent} — <b>всё</b> готово, включая раннеры.
+ *       Именно сюда вешают «приложение запущено».</li>
+ * </ul>
+ * Ранние события ({@code Starting}, {@code EnvironmentPrepared}) невозможно
+ * поймать бином: контекста ещё нет. Их слушатели регистрируются через
+ * {@code META-INF/spring.factories} или {@code SpringApplication.addListeners}.
+ */
+public final class StartupListeners {
+
+    private StartupListeners() {
+    }
+
+    /** Самое раннее событие: нет ни Environment, ни контекста. */
+    public static class Starting implements ApplicationListener<ApplicationStartingEvent> {
+        @Override
+        public void onApplicationEvent(ApplicationStartingEvent event) {
+            StartupLog.record("1-ApplicationStartingEvent");
+        }
+    }
+
+    /** Environment готов — можно добавить свой источник настроек. */
+    public static class EnvironmentPrepared
+            implements ApplicationListener<ApplicationEnvironmentPreparedEvent> {
+        @Override
+        public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
+            StartupLog.record("2-ApplicationEnvironmentPreparedEvent");
+            StartupLog.record("2-env-has-property:"
+                    + event.getEnvironment().containsProperty("sprbut.startup.marker"));
+        }
+    }
+
+    /** Контекст создан, инициализаторы отработали, бинов ещё нет. */
+    public static class ContextInitialized
+            implements ApplicationListener<ApplicationContextInitializedEvent> {
+        @Override
+        public void onApplicationEvent(ApplicationContextInitializedEvent event) {
+            StartupLog.record("4-ApplicationContextInitializedEvent");
+        }
+    }
+
+    /** Определения бинов загружены — последний шанс их изменить. */
+    public static class Prepared implements ApplicationListener<ApplicationPreparedEvent> {
+        @Override
+        public void onApplicationEvent(ApplicationPreparedEvent event) {
+            StartupLog.record("5-ApplicationPreparedEvent");
+        }
+    }
+
+    /** refresh() завершён: все синглтоны созданы. */
+    public static class Refreshed implements ApplicationListener<ContextRefreshedEvent> {
+        @Override
+        public void onApplicationEvent(ContextRefreshedEvent event) {
+            StartupLog.record("7-ContextRefreshedEvent");
+        }
+    }
+
+    /** Контекст поднят, но раннеры ещё не выполнялись. */
+    public static class Started implements ApplicationListener<ApplicationStartedEvent> {
+        @Override
+        public void onApplicationEvent(ApplicationStartedEvent event) {
+            StartupLog.record("8-ApplicationStartedEvent");
+        }
+    }
+
+    /** Всё готово, включая раннеры. Финал последовательности. */
+    public static class Ready implements ApplicationListener<ApplicationReadyEvent> {
+        @Override
+        public void onApplicationEvent(ApplicationReadyEvent event) {
+            StartupLog.record("10-ApplicationReadyEvent");
+        }
+    }
+
+    /** Запуск не удался — единственное событие, которое отменяет остальные. */
+    public static class Failed implements ApplicationListener<ApplicationFailedEvent> {
+        @Override
+        public void onApplicationEvent(ApplicationFailedEvent event) {
+            StartupLog.record("x-ApplicationFailedEvent:"
+                    + event.getException().getClass().getSimpleName());
+        }
+    }
+}
