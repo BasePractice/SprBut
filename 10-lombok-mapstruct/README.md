@@ -16,8 +16,12 @@
 |---|---|
 | [`CustomerEntity`](src/main/java/ru/sprbut/m10/lombok/CustomerEntity.java) | `@Data` + `@NoArgsConstructor` + `@AllArgsConstructor` — три аннотации вместо 60 строк модуля 02 |
 | [`CustomerDto`](src/main/java/ru/sprbut/m10/lombok/CustomerDto.java) | `@Value` + `@Builder(toBuilder = true)` — неизменяемость и сборка по частям |
-| [`LombokFeatures`](src/main/java/ru/sprbut/m10/lombok/LombokFeatures.java) | Точечные аннотации: `AccessLevel`, `@RequiredArgsConstructor`, `@ToString(exclude)`, `@Singular`, `@Accessors(fluent)` |
-| [`LombokUnderTheHood`](src/main/java/ru/sprbut/m10/lombok/LombokUnderTheHood.java) | Доказательство «хака AST» рефлексией: методов нет в исходнике, но они есть в байткоде |
+| [`Partial`](src/main/java/ru/sprbut/m10/lombok/samples/Partial.java) | `@Getter`/`@Setter` по отдельности и `AccessLevel`, в том числе `NONE` на одном поле |
+| [`Service`](src/main/java/ru/sprbut/m10/lombok/samples/Service.java) | `@RequiredArgsConstructor` — основной способ внедрения зависимостей в Spring-коде |
+| [`Account`](src/main/java/ru/sprbut/m10/lombok/samples/Account.java) | `@ToString(exclude)` и `@EqualsAndHashCode(of)`: пароль мимо логов, равенство по идентификатору |
+| [`Order`](src/main/java/ru/sprbut/m10/lombok/samples/Order.java) | `@Builder` с `@Singular` — коллекция по элементу, результат неизменяем |
+| [`Fluent`](src/main/java/ru/sprbut/m10/lombok/samples/Fluent.java) | `@Accessors(fluent)` лишает класс статуса JavaBean — и всё, что работает по соглашению, его не увидит |
+| [`Generated`](src/main/java/ru/sprbut/m10/lombok/Generated.java) | Доказательство «хака AST» рефлексией: методов нет в исходнике, но они есть в байткоде |
 
 ## Расширенный пример
 

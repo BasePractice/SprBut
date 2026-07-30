@@ -24,17 +24,21 @@
 
 ## Расширенный пример
 
-[`MapperShowcase`](src/main/java/ru/sprbut/m09/extended/MapperShowcase.java) ставит три
-реализации рядом и превращает СХЕМУ 4 в проверяемые утверждения:
+[`Mappers`](src/main/java/ru/sprbut/m09/extended/Mappers.java) ставит три реализации
+рядом и превращает СХЕМУ 4 в проверяемые утверждения:
 
 ```java
-MapperShowcase.allProduceSameResult(entity);   // true — механизм не влияет на поведение
-MapperShowcase.benchmark(50_000);              // влияет на цену вызова
-MapperShowcase.requiredRuntimeHints();
+new Mappers().agree(entity);                       // true — механизм не влияет на поведение
+new Benchmark(new Mappers(), entity).timings(50_000);   // влияет на цену вызова
+new RequiredHints().byMapper();
 // ReflectiveMapper     → 10 hints: UserEntity#getFirstName, UserDto#setFirstName, …
 // GeneratedStyleMapper → []
 // BytecodeMapper       → «класс генерируется в runtime — native image неприменим»
 ```
+
+Замер вынесен в [`Benchmark`](src/main/java/ru/sprbut/m09/extended/Benchmark.java),
+а подсчёт подсказок для native image — в
+[`RequiredHints`](src/main/java/ru/sprbut/m09/extended/RequiredHints.java).
 
 [`MechanismProfile`](src/main/java/ru/sprbut/m09/extended/MechanismProfile.java) оформляет
 свойства механизмов как данные: фаза, гибкость, скорость, типобезопасность,
