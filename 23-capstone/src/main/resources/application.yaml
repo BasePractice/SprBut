@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: sprbut-tracker
+  # Boot по умолчанию форсирует CGLIB для всех бинов. Возвращаем поведение
+  # со слайда «Spring AOP»: есть интерфейс — JDK dynamic proxy, нет — CGLIB.
+  aop:
+    proxy-target-class: false
+  datasource:
+    url: jdbc:h2:mem:tracker;DB_CLOSE_DELAY=-1
+    username: sa
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,beans,conditions,configprops
+
+tracker:
+  title: SprBut Tracker
+  limit: 100
+  audit: true

@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Переименовывает поле при сериализации. Retention обязательно RUNTIME —
- * иначе {@link ReflectiveJsonWriter} её просто не увидит.
+ * иначе {@link Json} её просто не увидит.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

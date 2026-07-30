@@ -17,26 +17,38 @@
 
 | Класс | Слайд | Что показывает |
 |---|---|---|
-| [`ClassLoading`](src/main/java/ru/sprbut/m04/ClassLoading.java) | 30 | Три способа получить `Class`; `forName` с `initialize=false`; `int.class != Integer.class`; bootstrap-загрузчик |
-| [`JpmsAccess`](src/main/java/ru/sprbut/m04/JpmsAccess.java) | 31 | Разница **exports** и **opens**; `InaccessibleObjectException` на закрытом пакете; почему Spring просит `--add-opens` |
-| [`GenericTypes`](src/main/java/ru/sprbut/m04/GenericTypes.java) | 32 | Стирание не абсолютно: `ParameterizedType`, `WildcardType`, `TypeVariable`, приём «type token» |
+| [`LoadedClass`](src/main/java/ru/sprbut/m04/LoadedClass.java) | 30 | `forName` и загрузка без инициализации: сканеры classpath берут метаданные без побочных эффектов |
+| [`ModuleAccess`](src/main/java/ru/sprbut/m04/ModuleAccess.java) | 31 | Разница **exports** и **opens** — почему Spring просит `--add-opens` |
+| [`DeepAccess`](src/main/java/ru/sprbut/m04/DeepAccess.java) | 31 | `InaccessibleObjectException` на закрытом пакете: успех зависит не от модификатора |
+| [`GenericType`](src/main/java/ru/sprbut/m04/GenericType.java) | 32 | Стирание не абсолютно: `ParameterizedType`, `WildcardType`, `TypeVariable` |
+| [`TypeToken`](src/main/java/ru/sprbut/m04/TypeToken.java) | 32 | Приём «type token» — основа `TypeReference` и `ParameterizedTypeReference` |
 | [`InvocationCost`](src/main/java/ru/sprbut/m04/InvocationCost.java) | 33 | Измеренное сравнение: прямой вызов / `MethodHandle` / кэшированный `Method` / поиск в цикле |
-| [`FastAccess`](src/main/java/ru/sprbut/m04/FastAccess.java) | 34 | `MethodHandle`, `privateLookupIn`, `bindTo`; `VarHandle` с `compareAndSet` |
-| [`DynamicProxy`](src/main/java/ru/sprbut/m04/DynamicProxy.java) | 35–36 | `Proxy` + `InvocationHandler`, прокси без цели, **self-invocation минует прокси** |
-| [`ExecutableApi`](src/main/java/ru/sprbut/m04/ExecutableApi.java) | 36 | `Executable` как общий родитель, `Parameter` с именами, `AnnotatedElement`, `Array.newInstance` |
+| [`Handles`](src/main/java/ru/sprbut/m04/Handles.java) | 34 | `MethodHandle`, `privateLookupIn`; `VarHandle` с `compareAndSet` |
+| [`LoggingProxy`](src/main/java/ru/sprbut/m04/LoggingProxy.java) | 35–36 | `Proxy` + `InvocationHandler`, **self-invocation минует прокси** |
+| [`StubProxy`](src/main/java/ru/sprbut/m04/StubProxy.java) | 35 | Прокси без цели — так работают репозитории Spring Data |
+| [`Parameters`](src/main/java/ru/sprbut/m04/Parameters.java) | 36 | `Executable` как общий родитель, `Parameter` с именами, точки внедрения |
+| [`ReflectiveArray`](src/main/java/ru/sprbut/m04/ReflectiveArray.java) | 36 | `Array.newInstance`: `new T[n]` невозможен из-за стирания |
 
 ## Расширенный пример
 
-[`JdkAopFactory`](src/main/java/ru/sprbut/m04/extended/JdkAopFactory.java) — **работающий
+[`Aspected`](src/main/java/ru/sprbut/m04/extended/Aspected.java) — **работающий
 мини-AOP на голом JDK**, без Spring и сторонних библиотек. Читает аннотации
-[`@Retry`, `@Timed`, `@Cached`, `@Stubbed`](src/main/java/ru/sprbut/m04/extended/Aspects.java)
-и применяет их через `InvocationHandler`, вызывая цель кэшированным `MethodHandle`.
+[`@Retry`](src/main/java/ru/sprbut/m04/extended/Retry.java),
+[`@Timed`](src/main/java/ru/sprbut/m04/extended/Timed.java),
+[`@Cached`](src/main/java/ru/sprbut/m04/extended/Cached.java),
+[`@Stubbed`](src/main/java/ru/sprbut/m04/extended/Stubbed.java) и применяет их через
+[`AspectHandler`](src/main/java/ru/sprbut/m04/extended/AspectHandler.java),
+вызывая цель кэшированным `MethodHandle`.
 
 ```java
-PriceService proxy = JdkAopFactory.wrap(PriceService.class, new RealPriceService(), journal);
-proxy.compute("ABC");   // cache-miss + timed
-proxy.compute("ABC");   // cache-hit — цель не вызвана
+PriceService proxy = new Aspected<>(PriceService.class, new RealPriceService(), journal).proxy();
+proxy.price("ABC");   // cache-miss + timed
+proxy.price("ABC");   // cache-hit — цель не вызвана
 ```
+
+Аннотации ищутся на методе **реализации**, а не интерфейса
+([`TargetMethod`](src/main/java/ru/sprbut/m04/extended/TargetMethod.java)) — та же
+ловушка, что подстерегает в модуле 23 с JDK-прокси и `@Audited`.
 
 Тесты фиксируют и ограничение: `proxy.selfCalling(...)` вызывает `compute()` изнутри
 объекта, и кэш **не срабатывает**. Это тот же механизм, из-за которого в Spring молча

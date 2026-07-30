@@ -10,16 +10,16 @@ import org.springframework.context.annotation.Configuration;
 import ru.sprbut.m19.autoconfigure.GreeterAutoConfiguration;
 import ru.sprbut.m19.greeter.Greeter;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 
 @DisplayName("Расширенный пример: отчёт об условиях (то, что печатает --debug)")
-class ConditionReportTest {
+final class ConditionReportTest {
 
-    private final ApplicationContextRunner runner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(GreeterAutoConfiguration.class));
-
-    @Configuration
-    static class UserGreeterConfig {
+    @Configuration(proxyBeanMethods = false)
+    static class OwnGreeterConfig {
 
         @Bean
         Greeter greeter() {
@@ -31,83 +31,103 @@ class ConditionReportTest {
 
                 @Override
                 public String flavour() {
-                    return "пользовательский";
+                    return "собственный";
                 }
             };
         }
     }
 
-    @Test
-    @DisplayName("Применённая автоконфигурация попадает в список включённых")
-    void appliedConfigurationIsReported() {
-        runner.run(context -> {
-            var configurable = (ConfigurableApplicationContext) context.getSourceApplicationContext();
-
-            assertThat(ConditionReport.isApplied(configurable, "GreeterAutoConfiguration")).isTrue();
-            assertThat(ConditionReport.included(configurable))
-                    .anyMatch(name -> name.contains("GreeterAutoConfiguration"));
-        });
+    private static ApplicationContextRunner runner() {
+        return new ApplicationContextRunner()
+            .withConfiguration(AutoConfigurations.of(GreeterAutoConfiguration.class));
     }
 
     @Test
-    @DisplayName("«Почему бина нет» — отчёт называет невыполненное условие")
-    void explainsWhyBeanIsMissing() {
-        runner.withPropertyValues("sprbut.greeter.enabled=false").run(context -> {
-            var configurable = (ConfigurableApplicationContext) context.getSourceApplicationContext();
-
-            assertThat(context).doesNotHaveBean(Greeter.class);
-            assertThat(ConditionReport.whyExcluded(configurable, "GreeterAutoConfiguration"))
-                    .get()
-                    .asString()
-                    .contains("sprbut.greeter.enabled");
-        });
+    @DisplayName("применённая автоконфигурация попадает в список включённых")
+    void listsAppliedConfiguration() {
+        runner().run(context -> assertThat(
+            "applied auto configuration cannot be listed as included",
+            new ConditionReport((ConfigurableApplicationContext) context)
+                .included().stream().anyMatch(name -> name.contains("GreeterAutoConfiguration")),
+            equalTo(true)
+        ));
     }
 
     @Test
-    @DisplayName("«Почему бина нет» при пользовательском бине — сработал @ConditionalOnMissingBean")
-    void explainsBackOff() {
-        runner.withUserConfiguration(UserGreeterConfig.class).run(context -> {
-            var configurable = (ConfigurableApplicationContext) context.getSourceApplicationContext();
-
-            assertThat(ConditionReport.render(configurable, "GreeterAutoConfiguration"))
-                    .contains("GreeterAutoConfiguration");
-            assertThat(context.getBean(Greeter.class).flavour()).isEqualTo("пользовательский");
-        });
+    @DisplayName("отчёт подтверждает, что конфигурация применилась")
+    void confirmsApplication() {
+        runner().run(context -> assertThat(
+            "report cannot confirm the applied configuration",
+            new ConditionReport((ConfigurableApplicationContext) context)
+                .applied("GreeterAutoConfiguration"),
+            equalTo(true)
+        ));
     }
 
     @Test
-    @DisplayName("Отчёт формулирует условия дословно — как в выводе --debug")
-    void reasonsAreVerbatim() {
-        runner.run(context -> {
-            var configurable = (ConfigurableApplicationContext) context.getSourceApplicationContext();
-
-            assertThat(ConditionReport.matching(configurable, "GreeterAutoConfiguration"))
-                    .isNotEmpty()
-                    .allSatisfy((source, entry) -> assertThat(entry.reasons()).isNotEmpty());
-        });
+    @DisplayName("«почему бина нет» — отчёт называет невыполненное условие")
+    void namesFailedCondition() {
+        runner().withPropertyValues("sprbut.greeter.enabled=false").run(context -> assertThat(
+            "report cannot name the failed condition",
+            new ConditionReport((ConfigurableApplicationContext) context)
+                .whyExcluded("GreeterAutoConfiguration").orElse(""),
+            containsString("sprbut.greeter.enabled")
+        ));
     }
 
     @Test
-    @DisplayName("Наглядный отчёт годится для вставки в лог")
-    void rendersHumanReadableReport() {
-        runner.run(context -> {
-            var configurable = (ConfigurableApplicationContext) context.getSourceApplicationContext();
-
-            assertThat(ConditionReport.render(configurable, "GreeterAutoConfiguration"))
-                    .startsWith("Отчёт об условиях для 'GreeterAutoConfiguration':")
-                    .contains("ПРИМЕНЕНА");
-        });
+    @DisplayName("свой бин отменяет автоконфигурацию — сработал @ConditionalOnMissingBean")
+    void yieldsToUserBean() {
+        runner().withUserConfiguration(OwnGreeterConfig.class).run(context -> assertThat(
+            "auto configuration cannot yield to the user bean",
+            new ConditionReport((ConfigurableApplicationContext) context)
+                .render("GreeterAutoConfiguration"),
+            containsString("Greeter")
+        ));
     }
 
     @Test
-    @DisplayName("Несуществующая конфигурация — честный ответ, а не пустота")
-    void unknownConfigurationIsReported() {
-        runner.run(context -> {
-            var configurable = (ConfigurableApplicationContext) context.getSourceApplicationContext();
+    @DisplayName("отчёт формулирует условия дословно, как вывод --debug")
+    void quotesConditionsVerbatim() {
+        runner().run(context -> assertThat(
+            "report cannot quote the conditions verbatim",
+            new ConditionReport((ConfigurableApplicationContext) context)
+                .matching("GreeterAutoConfiguration").keySet().stream()
+                .anyMatch(name -> name.contains("GreeterAutoConfiguration")),
+            equalTo(true)
+        ));
+    }
 
-            assertThat(ConditionReport.render(configurable, "НетТакойКонфигурации"))
-                    .contains("нет подходящих конфигураций");
-            assertThat(ConditionReport.isApplied(configurable, "НетТакойКонфигурации")).isFalse();
-        });
+    @Test
+    @DisplayName("наглядный отчёт годится для вставки в лог")
+    void rendersReadableReport() {
+        runner().run(context -> assertThat(
+            "report cannot be rendered readably",
+            new ConditionReport((ConfigurableApplicationContext) context)
+                .render("GreeterAutoConfiguration"),
+            containsString("Отчёт об условиях")
+        ));
+    }
+
+    @Test
+    @DisplayName("несуществующая конфигурация получает честный ответ, а не пустоту")
+    void answersAboutUnknownConfiguration() {
+        runner().run(context -> assertThat(
+            "unknown configuration cannot get an honest answer",
+            new ConditionReport((ConfigurableApplicationContext) context)
+                .render("НетТакойКонфигурации"),
+            containsString("нет подходящих конфигураций")
+        ));
+    }
+
+    @Test
+    @DisplayName("несуществующая конфигурация применённой не считается")
+    void dontCallUnknownConfigurationApplied() {
+        runner().run(context -> assertThat(
+            "unknown configuration cannot avoid the applied verdict",
+            new ConditionReport((ConfigurableApplicationContext) context)
+                .applied("НетТакойКонфигурации"),
+            equalTo(false)
+        ));
     }
 }

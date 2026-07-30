@@ -27,24 +27,19 @@ import java.util.Optional;
  */
 public final class ConditionReport {
 
-    private ConditionReport() {
+    private final ConfigurableApplicationContext context;
+
+    public ConditionReport(ConfigurableApplicationContext context) {
+        this.context = context;
     }
 
-    /** Строка отчёта: конфигурация, вердикт и его обоснование. */
-    public record Entry(String configuration, boolean matched, List<String> reasons) {
-
-        public Entry {
-            reasons = List.copyOf(reasons);
-        }
-    }
-
-    private static ConditionEvaluationReport reportOf(ConfigurableApplicationContext context) {
-        return ConditionEvaluationReport.get(context.getBeanFactory());
+    private ConditionEvaluationReport evaluated() {
+        return ConditionEvaluationReport.get(this.context.getBeanFactory());
     }
 
     /** Конфигурации, условия которых выполнились. */
-    public static List<String> included(ConfigurableApplicationContext context) {
-        return reportOf(context).getConditionAndOutcomesBySource().entrySet().stream()
+    public List<String> included() {
+        return evaluated().getConditionAndOutcomesBySource().entrySet().stream()
                 .filter(entry -> entry.getValue().isFullMatch())
                 .map(Map.Entry::getKey)
                 .sorted()
@@ -52,8 +47,8 @@ public final class ConditionReport {
     }
 
     /** Конфигурации, условия которых не выполнились. */
-    public static List<String> excluded(ConfigurableApplicationContext context) {
-        return reportOf(context).getConditionAndOutcomesBySource().entrySet().stream()
+    public List<String> excluded() {
+        return evaluated().getConditionAndOutcomesBySource().entrySet().stream()
                 .filter(entry -> !entry.getValue().isFullMatch())
                 .map(Map.Entry::getKey)
                 .sorted()
@@ -61,25 +56,23 @@ public final class ConditionReport {
     }
 
     /** Полный отчёт по всем конфигурациям, чьё имя содержит фрагмент. */
-    public static Map<String, Entry> matching(ConfigurableApplicationContext context,
-                                              String nameFragment) {
-        Map<String, Entry> result = new LinkedHashMap<>();
-        reportOf(context).getConditionAndOutcomesBySource().forEach((source, outcomes) -> {
+    public Map<String, ConditionEntry> matching(String nameFragment) {
+        Map<String, ConditionEntry> result = new LinkedHashMap<>();
+        evaluated().getConditionAndOutcomesBySource().forEach((source, outcomes) -> {
             if (!source.contains(nameFragment)) {
                 return;
             }
             List<String> reasons = new java.util.ArrayList<>();
             outcomes.forEach(outcome -> reasons.add(
                     (outcome.getOutcome().isMatch() ? "✓ " : "✗ ") + outcome.getOutcome().getMessage()));
-            result.put(source, new Entry(source, outcomes.isFullMatch(), reasons));
+            result.put(source, new ConditionEntry(source, outcomes.isFullMatch(), reasons));
         });
         return result;
     }
 
     /** Почему конфигурация не применилась — дословная формулировка условия. */
-    public static Optional<String> whyExcluded(ConfigurableApplicationContext context,
-                                               String nameFragment) {
-        return matching(context, nameFragment).values().stream()
+    public Optional<String> whyExcluded(String nameFragment) {
+        return matching(nameFragment).values().stream()
                 .filter(entry -> !entry.matched())
                 .flatMap(entry -> entry.reasons().stream())
                 .filter(reason -> reason.startsWith("✗"))
@@ -87,23 +80,22 @@ public final class ConditionReport {
     }
 
     /** Почему конфигурация применилась. */
-    public static Optional<String> whyIncluded(ConfigurableApplicationContext context,
-                                               String nameFragment) {
-        return matching(context, nameFragment).values().stream()
-                .filter(Entry::matched)
+    public Optional<String> whyIncluded(String nameFragment) {
+        return matching(nameFragment).values().stream()
+                .filter(ConditionEntry::matched)
                 .flatMap(entry -> entry.reasons().stream())
                 .findFirst();
     }
 
     /** Применилась ли указанная автоконфигурация. */
-    public static boolean isApplied(ConfigurableApplicationContext context, String nameFragment) {
-        return matching(context, nameFragment).values().stream().anyMatch(Entry::matched);
+    public boolean applied(String nameFragment) {
+        return matching(nameFragment).values().stream().anyMatch(ConditionEntry::matched);
     }
 
     /** Текстовый отчёт — то же, что печатает {@code --debug}, только по одной теме. */
-    public static String render(ConfigurableApplicationContext context, String nameFragment) {
+    public String render(String nameFragment) {
         StringBuilder sb = new StringBuilder("Отчёт об условиях для '" + nameFragment + "':\n");
-        Map<String, Entry> entries = matching(context, nameFragment);
+        Map<String, ConditionEntry> entries = matching(nameFragment);
         if (entries.isEmpty()) {
             return sb.append("  (нет подходящих конфигураций)").toString();
         }

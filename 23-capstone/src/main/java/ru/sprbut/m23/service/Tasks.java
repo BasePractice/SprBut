@@ -1,0 +1,35 @@
+package ru.sprbut.m23.service;
+
+import java.util.List;
+import ru.sprbut.m23.domain.Task;
+import ru.sprbut.m23.domain.TaskStatus;
+
+/**
+ * Прикладной сценарий работы с задачами.
+ * <p>
+ * Интерфейс нужен не «для абстракции», а по делу: у бина с интерфейсом Spring
+ * строит JDK dynamic proxy, и реализация может оставаться {@code final}.
+ * Без интерфейса в дело пошёл бы CGLIB, которому нужен наследуемый класс.
+ */
+public interface Tasks {
+
+    /**
+     * Заводит новую задачу.
+     */
+    Task open(String title);
+
+    /**
+     * Переводит задачу в работу.
+     */
+    Task start(long id);
+
+    /**
+     * Закрывает задачу.
+     */
+    Task finish(long id);
+
+    /**
+     * Задачи в указанном состоянии.
+     */
+    List<Task> byStatus(TaskStatus status);
+}

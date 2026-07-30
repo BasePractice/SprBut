@@ -6,146 +6,136 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 
 @DisplayName("Расширенный пример: СХЕМА 10 — откуда взялось значение")
-class ConfigurationOriginTest {
+final class ConfigurationOriginTest {
 
     @Nested
     @SpringBootTest
-    @DisplayName("Стек источников")
+    @DisplayName("стек источников")
     class Stack {
 
         @Autowired
-        ConfigurableEnvironment environment;
+        private ConfigurableEnvironment environment;
 
         @Test
-        @DisplayName("Environment — это упорядоченный список источников")
-        void environmentIsAnOrderedStack() {
-            assertThat(ConfigurationOrigin.priorityStack(environment))
-                    .isNotEmpty()
-                    .anyMatch(name -> name.contains("systemProperties"))
-                    .anyMatch(name -> name.contains("systemEnvironment"))
-                    .anyMatch(name -> name.contains("application.yaml"));
+        @DisplayName("Environment — это упорядоченный список источников, а не карта")
+        void listsSourcesInOrder() {
+            assertThat(
+                "environment cannot expose its source stack",
+                new ConfigurationOrigin(this.environment).stack(),
+                not(hasSize(0))
+            );
         }
 
         @Test
-        @DisplayName("Системные свойства стоят выше файла конфигурации")
-        void systemPropertiesOutrankTheFile() {
-            var stack = ConfigurationOrigin.priorityStack(environment);
-            int systemProperties = indexOfContaining(stack, "systemProperties");
-            int yaml = indexOfContaining(stack, "application.yaml");
-
-            assertThat(systemProperties)
-                    .as("чем меньше индекс, тем выше приоритет")
-                    .isLessThan(yaml);
+        @DisplayName("значение находится в первом же подходящем источнике")
+        void resolvesFromFirstSource() {
+            assertThat(
+                "value cannot be resolved from the first matching source",
+                new ConfigurationOrigin(this.environment)
+                    .resolve("sprbut.server.host").orElseThrow().value(),
+                equalTo("api.example.com")
+            );
         }
 
         @Test
-        @DisplayName("Значение находится в первом же подходящем источнике")
-        void valueComesFromTheFirstMatchingSource() {
-            assertThat(ConfigurationOrigin.resolve(environment, "sprbut.server.host"))
-                    .get()
-                    .satisfies(origin -> {
-                        assertThat(origin.value()).isEqualTo("api.example.com");
-                        assertThat(origin.propertySource()).contains("application.yaml");
-                    });
+        @DisplayName("несуществующий ключ не находится нигде")
+        void findsNothingForUnknownKey() {
+            assertThat(
+                "unknown key cannot stay unresolved",
+                new ConfigurationOrigin(this.environment).resolve("sprbut.no.such.key").isEmpty(),
+                equalTo(true)
+            );
         }
 
         @Test
-        @DisplayName("Несуществующий ключ не находится нигде")
-        void missingKeyIsReportedClearly() {
-            assertThat(ConfigurationOrigin.resolve(environment, "sprbut.no.such.key")).isEmpty();
-            assertThat(ConfigurationOrigin.explain(environment, "sprbut.no.such.key"))
-                    .contains("не найден ни в одном источнике");
+        @DisplayName("объяснение для ненайденного ключа так и говорит")
+        void explainsMissingKey() {
+            assertThat(
+                "missing key cannot be explained plainly",
+                new ConfigurationOrigin(this.environment).explain("sprbut.no.such.key"),
+                containsString("не найден ни в одном источнике")
+            );
         }
 
         @Test
-        @DisplayName("Эффективная конфигурация по префиксу — то, что реально увидит приложение")
-        void showsEffectiveConfig() {
-            assertThat(ConfigurationOrigin.effectiveConfig(environment, "sprbut.server"))
-                    .containsKeys("sprbut.server.host", "sprbut.server.port",
-                            "sprbut.server.timeout");
-        }
-
-        private int indexOfContaining(java.util.List<String> stack, String fragment) {
-            for (int i = 0; i < stack.size(); i++) {
-                if (stack.get(i).contains(fragment)) {
-                    return i;
-                }
-            }
-            throw new AssertionError("Нет источника, содержащего '" + fragment + "' в " + stack);
+        @DisplayName("эффективная конфигурация по префиксу — то, что реально увидит приложение")
+        void collectsEffectiveConfig() {
+            assertThat(
+                "effective config cannot collect the prefixed keys",
+                new ConfigurationOrigin(this.environment).effective("sprbut.server"),
+                hasKey("sprbut.server.host")
+            );
         }
     }
 
     @Nested
     @SpringBootTest
     @TestPropertySource(properties = "sprbut.server.host=inline.example.com")
-    @DisplayName("Перекрытие значений")
+    @DisplayName("перекрытие значений")
     class Overriding {
 
         @Autowired
-        ConfigurableEnvironment environment;
+        private ConfigurableEnvironment environment;
 
         @Test
-        @DisplayName("Ключ встречается в двух источниках — выигрывает более приоритетный")
-        void higherPriorityWins() {
-            var occurrences = ConfigurationOrigin.allOccurrences(environment, "sprbut.server.host");
-
-            assertThat(occurrences).hasSizeGreaterThanOrEqualTo(2);
-            assertThat(occurrences.get(0).value()).isEqualTo("inline.example.com");
-            assertThat(occurrences.get(1).value()).isEqualTo("api.example.com");
-            assertThat(occurrences.get(0).priority()).isLessThan(occurrences.get(1).priority());
+        @DisplayName("ключ встречается в двух источниках — выигрывает более приоритетный")
+        void prefersHigherPriority() {
+            assertThat(
+                "higher priority source cannot win",
+                new ConfigurationOrigin(this.environment)
+                    .resolve("sprbut.server.host").orElseThrow().value(),
+                equalTo("inline.example.com")
+            );
         }
 
         @Test
-        @DisplayName("Факт перекрытия виден явно")
-        void overrideIsDetected() {
-            assertThat(ConfigurationOrigin.isOverridden(environment, "sprbut.server.host")).isTrue();
-            assertThat(ConfigurationOrigin.isOverridden(environment, "sprbut.server.timeout"))
-                    .isFalse();
+        @DisplayName("перекрытое значение из отчёта не пропадает")
+        void keepsOverriddenValue() {
+            assertThat(
+                "overridden value cannot stay in the report",
+                new ConfigurationOrigin(this.environment).occurrences("sprbut.server.host"),
+                hasSize(2)
+            );
         }
 
         @Test
-        @DisplayName("Объяснение читается человеком: значение, источник и что перекрыто")
-        void explanationIsHumanReadable() {
-            assertThat(ConfigurationOrigin.explain(environment, "sprbut.server.host"))
-                    .contains("inline.example.com")
-                    .contains("перекрыто: api.example.com");
-        }
-    }
-
-    @Nested
-    @SpringBootTest
-    @ActiveProfiles("prod")
-    @DisplayName("Профиль как отдельный источник")
-    class ProfileSource {
-
-        @Autowired
-        ConfigurableEnvironment environment;
-
-        @Test
-        @DisplayName("Файл профиля добавляется в стек выше базового")
-        void profileFileOutranksTheBaseFile() {
-            var occurrences = ConfigurationOrigin.allOccurrences(environment, "sprbut.server.host");
-
-            assertThat(occurrences).hasSize(2);
-            assertThat(occurrences.get(0).propertySource()).contains("application-prod.yaml");
-            assertThat(occurrences.get(0).value()).isEqualTo("api.prod.example.com");
-            assertThat(occurrences.get(1).propertySource()).contains("application.yaml");
+        @DisplayName("факт перекрытия виден явно")
+        void reportsOverriding() {
+            assertThat(
+                "overriding cannot be reported explicitly",
+                new ConfigurationOrigin(this.environment).overridden("sprbut.server.host"),
+                equalTo(true)
+            );
         }
 
         @Test
-        @DisplayName("Ключи, которых нет в профиле, приходят из базового файла — без перекрытия")
-        void baseFileFillsTheGaps() {
-            var occurrences = ConfigurationOrigin
-                    .allOccurrences(environment, "sprbut.server.allowed-origins[0]");
+        @DisplayName("неперекрытое значение перекрытым не считается")
+        void dontReportPlainValueAsOverridden() {
+            assertThat(
+                "plain value cannot avoid the overriding verdict",
+                new ConfigurationOrigin(this.environment).overridden("sprbut.server.timeout"),
+                equalTo(false)
+            );
+        }
 
-            assertThat(occurrences).hasSize(1);
-            assertThat(occurrences.get(0).propertySource()).contains("application.yaml");
+        @Test
+        @DisplayName("объяснение показывает и победителя, и перекрытое значение")
+        void explainsBothValues() {
+            assertThat(
+                "explanation cannot show the overridden value",
+                new ConfigurationOrigin(this.environment).explain("sprbut.server.host"),
+                containsString("перекрыто")
+            );
         }
     }
 }

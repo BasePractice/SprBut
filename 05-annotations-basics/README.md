@@ -15,18 +15,18 @@
 
 | Класс | Слайд | Что показывает |
 |---|---|---|
-| [`TargetScope`](src/main/java/ru/sprbut/m05/TargetScope.java) | 39 | `@Target` — ограничение компилятора; аннотация локальной переменной не попадает в class-файл вовсе |
-| [`RetentionVisibility`](src/main/java/ru/sprbut/m05/RetentionVisibility.java) | 40 | Три политики хранения рядом: из четырёх аннотаций на классе в runtime видна ровно одна |
-| [`InheritanceRules`](src/main/java/ru/sprbut/m05/InheritanceRules.java) | 41 | `@Inherited` и три его границы: без него ничего не наследуется, интерфейсы не в счёт, методы тоже |
-| [`RepeatableAnnotations`](src/main/java/ru/sprbut/m05/RepeatableAnnotations.java) | 44 | `@Repeatable` и аннотация-контейнер; почему `getAnnotation` возвращает `null` при двух вхождениях |
+| [`AnnotationTargets`](src/main/java/ru/sprbut/m05/AnnotationTargets.java) | 39 | `@Target` — ограничение компилятора; аннотация локальной переменной не попадает в class-файл вовсе |
+| [`AnnotationRetention`](src/main/java/ru/sprbut/m05/AnnotationRetention.java) | 40 | Три политики хранения рядом: из четырёх аннотаций на классе в runtime видна ровно одна |
+| [`InheritedAnnotation`](src/main/java/ru/sprbut/m05/InheritedAnnotation.java) | 41 | `@Inherited` и три его границы: без него ничего не наследуется, интерфейсы не в счёт, методы тоже |
+| [`Repeated`](src/main/java/ru/sprbut/m05/Repeated.java) | 44 | `@Repeatable` и аннотация-контейнер; почему `getAnnotation` возвращает `null` при двух вхождениях |
 | [Объявления аннотаций](src/main/java/ru/sprbut/m05/declarations) | 42–44 | Маркерная `@Marker`, single-value `@Level`, `@Inherited @Audited`, повторяемая `@Schedule` + контейнер `@Schedules` |
 
 ## Расширенный пример
 
-[`ValidationEngine`](src/main/java/ru/sprbut/m05/extended/ValidationEngine.java) —
+[`Validated`](src/main/java/ru/sprbut/m05/extended/Validated.java) —
 работающая мини-версия Bean Validation на собственных
-[ограничениях](src/main/java/ru/sprbut/m05/extended/Constraints.java). Каждый вид
-аннотации из презентации задействован по назначению:
+ограничениях. Каждый вид аннотации из презентации задействован по назначению,
+а каждая проверка вынесена в отдельное [`Rule`](src/main/java/ru/sprbut/m05/extended/Rule.java):
 
 ```java
 class User extends BaseEntity {
@@ -37,7 +37,7 @@ class User extends BaseEntity {
     @InvisibleNotNull                              String oops;    // retention CLASS — не работает
 }
 
-ValidationEngine.validate(user).messages();
+new Validated(user).verdict().messages();
 ```
 
 Отдельный тест фиксирует главную ловушку: поле с `@InvisibleNotNull`

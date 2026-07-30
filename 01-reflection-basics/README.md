@@ -16,20 +16,27 @@
 
 | Класс | Слайд | Что показывает |
 |---|---|---|
-| [`ClassMetadata`](src/main/java/ru/sprbut/m01/ClassMetadata.java) | 3–5 | Три способа получить `Class`, имена, иерархия наследования, `Class.forName()` |
-| [`ModifierInspector`](src/main/java/ru/sprbut/m01/ModifierInspector.java) | 6 | `getModifiers()` как битовая маска, `getDeclaredFields()` vs `getFields()` |
-| [`FieldAccessor`](src/main/java/ru/sprbut/m01/FieldAccessor.java) | 7 | `setAccessible(true)`: чтение и запись `private` и `private final` полей |
-| [`MethodInvoker`](src/main/java/ru/sprbut/m01/MethodInvoker.java) | 8 | Вызов `private` и `static` методов, разворачивание `InvocationTargetException` |
-| [`AnnotationReader`](src/main/java/ru/sprbut/m01/AnnotationReader.java) | 9 | `AnnotatedElement`, `getAnnotation`, невидимость `RetentionPolicy.SOURCE` |
+| [`ClassMetadata`](src/main/java/ru/sprbut/m01/ClassMetadata.java) | 3–5 | Имена, иерархия наследования, интерфейсы, признаки инстанцируемости |
+| [`ClassByName`](src/main/java/ru/sprbut/m01/ClassByName.java) | 4 | `Class.forName()` — связь через строку, невидимая компилятору |
+| [`Members`](src/main/java/ru/sprbut/m01/Members.java) | 6 | `getDeclaredFields()` видит `private`, `getFields()` — только `public` |
+| [`Modifiers`](src/main/java/ru/sprbut/m01/Modifiers.java) | 6 | `getModifiers()` как битовая маска |
+| [`ObjectField`](src/main/java/ru/sprbut/m01/ObjectField.java) | 7 | `setAccessible(true)`: чтение и запись `private` и `private final` полей |
+| [`StaticField`](src/main/java/ru/sprbut/m01/StaticField.java) | 7 | Статическое поле читается через `get(null)` |
+| [`ObjectMethod`](src/main/java/ru/sprbut/m01/ObjectMethod.java) | 8 | Вызов `private`-метода и разворачивание `InvocationTargetException` |
+| [`StaticMethod`](src/main/java/ru/sprbut/m01/StaticMethod.java) | 8 | Вызов статического метода без экземпляра |
+| [`Annotations`](src/main/java/ru/sprbut/m01/Annotations.java) | 9 | `AnnotatedElement`, `getAnnotation`, невидимость `RetentionPolicy.SOURCE` |
+| [`Declared`](src/main/java/ru/sprbut/m01/Declared.java) | — | Подъём по иерархии: цикл, написанный в каждом фреймворке |
 | [`Account`](src/main/java/ru/sprbut/m01/model/Account.java) | — | Подопытный класс: поля и методы всех уровней доступа |
 
 ## Расширенный пример
 
-[`ReflectiveJsonWriter`](src/main/java/ru/sprbut/m01/extended/ReflectiveJsonWriter.java) —
-JSON-сериализатор, написанный **целиком** на рефлексии. Он объединяет все пять пунктов
-слайда сразу: поднимается по иерархии классов, фильтрует поля по модификаторам
-(`static`, `transient`), читает значения `private`-полей через `setAccessible(true)`
-и управляется аннотациями `@JsonProperty` / `@JsonIgnore`.
+[`Json`](src/main/java/ru/sprbut/m01/extended/Json.java) — JSON-сериализатор,
+написанный **целиком** на рефлексии. Он объединяет все пять пунктов слайда сразу:
+поднимается по иерархии классов, фильтрует поля по модификаторам
+([`SerializableFields`](src/main/java/ru/sprbut/m01/extended/SerializableFields.java)),
+читает значения `private`-полей через `setAccessible(true)` и управляется аннотациями
+`@JsonProperty` / `@JsonIgnore`
+([`PropertyName`](src/main/java/ru/sprbut/m01/extended/PropertyName.java)).
 
 Это упрощённая модель того, как устроены Jackson, Gson и биндинг Spring: **поведение
 задаётся метаданными, а не написанным вручную кодом**.
@@ -37,9 +44,12 @@ JSON-сериализатор, написанный **целиком** на ре
 ```java
 record Person(String name, Address address) {}
 
-ReflectiveJsonWriter.write(new Person("Пётр", new Address("Москва")));
+new Json(new Person("Пётр", new Address("Москва"))).text();
 // {"name":"Пётр","address":{"city":"Москва"}}
 ```
+
+Вложенные объекты сериализует тот же класс: рекурсия здесь выражена композицией
+объектов, а не отдельным методом обхода.
 
 ## Ключевые выводы
 

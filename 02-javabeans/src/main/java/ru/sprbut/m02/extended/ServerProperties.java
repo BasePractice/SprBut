@@ -94,6 +94,6 @@ public class ServerProperties implements Serializable {
 
     @Override
     public String toString() {
-        return "ServerProperties" + BeanBinder.describe(this);
+        return "ServerProperties" + new ru.sprbut.m02.classic.BeanMap(this).text();
     }
 }

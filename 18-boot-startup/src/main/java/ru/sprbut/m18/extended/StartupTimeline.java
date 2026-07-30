@@ -20,15 +20,19 @@ import java.util.Optional;
  */
 public final class StartupTimeline {
 
-    private StartupTimeline() {
+    private final StartupLog log;
+
+    public StartupTimeline() {
+        this(new StartupLog());
+    }
+
+    public StartupTimeline(StartupLog log) {
+        this.log = log;
     }
 
     /** Точка расширения: что уже готово и что здесь принято делать. */
-    public record HookPoint(int order, String name, String whatIsReady, String typicalUse) {
-    }
-
     /** Канонический порядок точек расширения при запуске Spring Boot. */
-    public static List<HookPoint> whereToHook() {
+    public List<HookPoint> whereToHook() {
         return List.of(
                 new HookPoint(1, "ApplicationStartingEvent",
                         "ничего: ни Environment, ни контекста",
@@ -62,29 +66,29 @@ public final class StartupTimeline {
                         "сообщить, что приложение принимает нагрузку"));
     }
 
-    public static Optional<HookPoint> hook(String name) {
-        return whereToHook().stream().filter(h -> h.name().startsWith(name)).findFirst();
+    public Optional<HookPoint> hook(String name) {
+        return whereToHook().stream().filter(point -> point.name().startsWith(name)).findFirst();
     }
 
     /** Фактическая последовательность, восстановленная из журнала. */
-    public static List<String> actualSequence() {
-        return StartupLog.events().stream()
-                .map(StartupTimeline::phaseOf)
+    public List<String> actualSequence() {
+        return this.log.events().stream()
+                .map(this::phaseOf)
                 .distinct()
                 .toList();
     }
 
     /** Номера шагов в порядке их фактического выполнения. */
-    public static List<Integer> actualOrder() {
-        return StartupLog.events().stream()
-                .map(StartupTimeline::orderOf)
+    public List<Integer> actualOrder() {
+        return this.log.events().stream()
+                .map(this::orderOf)
                 .filter(order -> order > 0)
                 .distinct()
                 .toList();
     }
 
     /** Не нарушен ли порядок: номера шагов должны только возрастать. */
-    public static boolean isOrdered() {
+    public boolean isOrdered() {
         List<Integer> order = actualOrder();
         for (int i = 1; i < order.size(); i++) {
             if (order.get(i) < order.get(i - 1)) {
@@ -95,9 +99,9 @@ public final class StartupTimeline {
     }
 
     /** Наглядная диаграмма — то, что стоит распечатать при разборе старта. */
-    public static String render() {
+    public String render() {
         StringBuilder sb = new StringBuilder("SpringApplication.run()\n");
-        for (String event : StartupLog.events()) {
+        for (String event : this.log.events()) {
             sb.append("  │ ").append(event).append('\n');
         }
         sb.append("  ▼ приложение готово");
@@ -105,13 +109,13 @@ public final class StartupTimeline {
     }
 
     /** Сколько раз встретился каждый шаг. */
-    public static Map<String, Long> counts() {
+    public Map<String, Long> counts() {
         Map<String, Long> counts = new LinkedHashMap<>();
-        StartupLog.events().forEach(event -> counts.merge(phaseOf(event), 1L, Long::sum));
+        this.log.events().forEach(event -> counts.merge(phaseOf(event), 1L, Long::sum));
         return counts;
     }
 
-    static String phaseOf(String event) {
+    private String phaseOf(String event) {
         int dash = event.indexOf('-');
         String tail = dash < 0 ? event : event.substring(dash + 1);
         int colon = tail.indexOf(':');
@@ -122,7 +126,7 @@ public final class StartupTimeline {
      * Номер шага — <b>все</b> ведущие цифры, а не первая.
      * Иначе «10-ApplicationReadyEvent» превратился бы в шаг 1 и встал в начало.
      */
-    static int orderOf(String event) {
+    private int orderOf(String event) {
         int end = 0;
         while (end < event.length() && Character.isDigit(event.charAt(end))) {
             end++;

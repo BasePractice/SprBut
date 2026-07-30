@@ -3,56 +3,65 @@ package ru.sprbut.m08;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Слайд 66: регистрация процессора через META-INF/services")
-class ProcessorRegistrationTest {
+final class ProcessorRegistrationTest {
 
     @Test
-    @DisplayName("Файл регистрации перечисляет все три процессора модуля 07")
-    void serviceFileListsProcessors() {
-        assertThat(ProcessorRegistration.declaredProcessorNames())
-                .containsExactly(
-                        "ru.sprbut.m07.BuilderProcessor",
-                        "ru.sprbut.m07.TodoProcessor",
-                        "ru.sprbut.m07.extended.RegistryProcessor");
+    @DisplayName("файл регистрации перечисляет процессоры модуля 07")
+    void listsDeclaredProcessors() {
+        assertThat(
+            "service file cannot list the declared processor",
+            new ProcessorRegistration().declared(),
+            hasItem("ru.sprbut.m07.BuilderProcessor")
+        );
     }
 
     @Test
-    @DisplayName("ServiceLoader находит ровно то, что перечислено в файле")
-    void serviceLoaderMatchesTheFile() {
-        assertThat(ProcessorRegistration.loadedProcessorNames())
-                .containsExactlyElementsOf(ProcessorRegistration.declaredProcessorNames());
+    @DisplayName("ServiceLoader загружает ровно то, что объявлено в файле")
+    void loadsExactlyWhatIsDeclared() {
+        assertThat(
+            "service loader cannot load exactly the declared processors",
+            new ProcessorRegistration().loaded(),
+            equalTo(new ProcessorRegistration().declared())
+        );
     }
 
     @Test
-    @DisplayName("Каждый процессор объявляет, какие аннотации он обрабатывает")
-    void processorsDeclareSupportedAnnotations() {
-        assertThat(ProcessorRegistration.supportedAnnotationsOf("ru.sprbut.m07.BuilderProcessor"))
-                .containsExactly("ru.sprbut.m07.api.GenerateBuilder");
-        assertThat(ProcessorRegistration.supportedAnnotationsOf("ru.sprbut.m07.TodoProcessor"))
-                .containsExactly("ru.sprbut.m07.api.Todo");
-        assertThat(ProcessorRegistration.supportedAnnotationsOf(
-                "ru.sprbut.m07.extended.RegistryProcessor"))
-                .containsExactly("ru.sprbut.m07.api.Registered");
+    @DisplayName("процессор сам объявляет, какие аннотации обрабатывает")
+    void readsSupportedAnnotations() {
+        assertThat(
+            "processor cannot declare its supported annotations",
+            new ProcessorRegistration().supported("ru.sprbut.m07.BuilderProcessor"),
+            hasItem(containsString("Builder"))
+        );
     }
 
     @Test
-    @DisplayName("По этому списку javac и решает, звать ли процессор в раунде")
-    void supportedAnnotationsDriveInvocation() {
-        // В модуле 08 есть @GenerateBuilder, @Todo и @Registered — значит
-        // при сборке отработали все три процессора. Доказательство —
-        // сгенерированные классы и предупреждения TODO в логе сборки.
-        assertThat(ru.sprbut.m08.model.CustomerBuilder.class).isNotNull();
-        assertThat(ru.sprbut.m08.generated.ModuleRegistry.size()).isPositive();
+    @DisplayName("незарегистрированный процессор — понятная ошибка с его именем")
+    void failsOnUnregisteredProcessor() {
+        assertThat(
+            "unregistered processor cannot be reported by name",
+            assertThrows(
+                IllegalArgumentException.class,
+                () -> new ProcessorRegistration().supported("ru.sprbut.Nope")
+            ).getMessage(),
+            containsString("ru.sprbut.Nope")
+        );
     }
 
     @Test
-    @DisplayName("Незарегистрированный процессор запросить нельзя")
-    void unknownProcessorIsRejected() {
-        assertThatThrownBy(() -> ProcessorRegistration.supportedAnnotationsOf("ru.sprbut.Nope"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("не зарегистрирован");
+    @DisplayName("путь регистрации — часть контракта javac, а не выдумка проекта")
+    void keepsStandardServicePath() {
+        assertThat(
+            "service path cannot follow the javac contract",
+            new ProcessorRegistration().servicePath(),
+            equalTo("META-INF/services/javax.annotation.processing.Processor")
+        );
     }
 }

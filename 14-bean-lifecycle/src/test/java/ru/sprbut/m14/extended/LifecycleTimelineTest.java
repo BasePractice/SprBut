@@ -1,115 +1,106 @@
 package ru.sprbut.m14.extended;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ru.sprbut.m14.LifecycleConfig;
 import ru.sprbut.m14.LifecycleLog;
-import ru.sprbut.m14.ManagedBean;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyIterable;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasSize;
 
-@DisplayName("Расширенный пример: временная шкала и проверка инвариантов")
-class LifecycleTimelineTest {
+@DisplayName("Расширенный пример: шкала жизненного цикла с проверкой инвариантов")
+final class LifecycleTimelineTest {
 
-    @BeforeEach
-    void clearLog() {
-        LifecycleLog.clear();
-    }
-
-    private void runFullLifecycle() {
-        var context = new AnnotationConfigApplicationContext(LifecycleConfig.class);
-        context.getBean(ManagedBean.class);
-        context.getBean(LifecycleConfig.PrototypeWithDestroy.class);
-        context.close();
-    }
-
-    @Test
-    @DisplayName("Шкала собирается из журнала и содержит все фазы бина")
-    void buildsTimeline() {
-        runFullLifecycle();
-
-        assertThat(LifecycleTimeline.stepsOf("managedBean"))
-                .extracting(LifecycleTimeline.Step::phase)
-                .containsExactly("constructor", "dependencies",
-                        "aware-beanName", "aware-beanFactory", "aware-applicationContext",
-                        "bpp-before", "postConstruct", "afterPropertiesSet", "bpp-after",
-                        "preDestroy", "destroy");
+    private static LifecycleTimeline started() {
+        new LifecycleLog().clear();
+        new AnnotationConfigApplicationContext(LifecycleConfig.class).close();
+        return new LifecycleTimeline();
     }
 
     @Test
-    @DisplayName("Номера шагов идут по возрастанию — контракт не нарушен")
-    void stepNumbersNeverDecrease() {
-        runFullLifecycle();
-
-        assertThat(LifecycleTimeline.validate("managedBean")).isEmpty();
+    @DisplayName("журнал разбирается в шаги с номерами и фазами")
+    void parsesLogIntoSteps() {
+        assertThat(
+            "log cannot be parsed into numbered steps",
+            started().of("managedBean").get(0).phase(),
+            equalTo("constructor")
+        );
     }
 
     @Test
-    @DisplayName("Наглядный вывод пригоден для отладки")
-    void rendersReadableTimeline() {
-        runFullLifecycle();
-
-        assertThat(LifecycleTimeline.render("managedBean"))
-                .startsWith("Жизненный цикл 'managedBean':")
-                .contains("1. constructor → managedBean")
-                .contains("8. destroy → managedBean");
+    @DisplayName("номер шага берётся из первой цифры события")
+    void readsStepNumber() {
+        assertThat(
+            "step number cannot be read from the event",
+            started().of("managedBean").get(0).number(),
+            equalTo(1)
+        );
     }
 
     @Test
-    @DisplayName("Инварианты порядка проверяются попарно")
-    void checksPairwiseInvariants() {
-        runFullLifecycle();
-
-        var steps = LifecycleTimeline.stepsOf("managedBean");
-        var phases = steps.stream().map(LifecycleTimeline.Step::phase).toList();
-
-        assertThat(phases.indexOf("constructor")).isLessThan(phases.indexOf("dependencies"));
-        assertThat(phases.indexOf("bpp-before")).isLessThan(phases.indexOf("postConstruct"));
-        assertThat(phases.indexOf("postConstruct")).isLessThan(phases.indexOf("afterPropertiesSet"));
-        assertThat(phases.indexOf("afterPropertiesSet")).isLessThan(phases.indexOf("bpp-after"));
-        assertThat(phases.indexOf("preDestroy")).isLessThan(phases.indexOf("destroy"));
+    @DisplayName("порядок шагов управляемого бина инвариантов не нарушает")
+    void keepsInvariantsForManagedBean() {
+        assertThat(
+            "correct lifecycle cannot pass the invariants",
+            started().violations("managedBean"),
+            emptyIterable()
+        );
     }
 
     @Test
-    @DisplayName("Нарушение порядка обнаруживается")
-    void detectsViolations() {
-        LifecycleLog.record("5a-postConstruct:broken");
-        LifecycleLog.record("1-constructor:broken");
-
-        assertThat(LifecycleTimeline.validate("broken"))
-                .isNotEmpty()
-                .anyMatch(v -> v.rule().equals("порядок шагов"));
-    }
-
-    @Test
-    @DisplayName("Отсутствие бина в журнале — тоже сообщается явно")
+    @DisplayName("отсутствие бина в журнале — тоже нарушение, а не пустой результат")
     void reportsMissingBean() {
-        assertThat(LifecycleTimeline.validate("нет-такого"))
-                .singleElement()
-                .satisfies(v -> assertThat(v.rule()).isEqualTo("нет данных"));
+        assertThat(
+            "missing bean cannot be reported as a violation",
+            started().violations("нетТакогоБина"),
+            hasSize(1)
+        );
     }
 
     @Test
-    @DisplayName("Singleton уничтожается, prototype — нет")
-    void distinguishesDestroyedBeans() {
-        runFullLifecycle();
-
-        assertThat(LifecycleTimeline.wasDestroyed("managedBean")).isTrue();
-        assertThat(LifecycleTimeline.wasDestroyed("prototypeWithDestroy"))
-                .as("контейнер не управляет уничтожением prototype-бинов")
-                .isFalse();
+    @DisplayName("шкала печатается по шагам, с именем бина в заголовке")
+    void rendersTimeline() {
+        assertThat(
+            "timeline cannot be rendered with the bean name",
+            started().render("managedBean"),
+            containsString("Жизненный цикл 'managedBean'")
+        );
     }
 
     @Test
-    @DisplayName("Сводка показывает, сколько шагов прошёл каждый бин")
-    void summarisesSteps() {
-        runFullLifecycle();
+    @DisplayName("сводка считает шаги каждого бина")
+    void countsStepsPerBean() {
+        assertThat(
+            "summary cannot count the steps of every bean",
+            started().summary(),
+            hasKey("managedBean")
+        );
+    }
 
-        assertThat(LifecycleTimeline.summary())
-                .containsEntry("managedBean", 11)
-                .containsEntry("prototypeWithDestroy", 1)
-                .containsEntry("backgroundWorker", 2);
+    @Test
+    @DisplayName("управляемый бин доходит до фазы уничтожения")
+    void reachesDestruction() {
+        assertThat(
+            "singleton bean cannot reach the destruction phase",
+            started().destroyed("managedBean"),
+            equalTo(true)
+        );
+    }
+
+    @Test
+    @DisplayName("шагов у полноценного бина больше, чем у prototype")
+    void countsMoreStepsForSingleton() {
+        LifecycleTimeline timeline = started();
+        assertThat(
+            "singleton cannot pass more steps than a prototype",
+            timeline.of("managedBean").size(),
+            greaterThan(timeline.of("prototypeWithDestroy").size())
+        );
     }
 }

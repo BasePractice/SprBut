@@ -1,69 +1,140 @@
 package ru.sprbut.m01;
 
+import java.math.BigDecimal;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.sprbut.m01.model.Account;
 
-import java.math.BigDecimal;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.emptyIterable;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.sameInstance;
 
 @DisplayName("Слайды 3–5: метаданные класса в runtime")
-class ClassMetadataTest {
-
-    private final Account account = new Account("ACC-1", "Иванов", new BigDecimal("100.00"));
+final class ClassMetadataTest {
 
     @Test
-    @DisplayName("getName() отдаёт полное имя с пакетом, getSimpleName() — короткое")
-    void readsNames() {
-        assertThat(ClassMetadata.fullName(account)).isEqualTo("ru.sprbut.m01.model.Account");
-        assertThat(ClassMetadata.simpleName(account)).isEqualTo("Account");
-        assertThat(ClassMetadata.packageName(account)).isEqualTo("ru.sprbut.m01.model");
+    @DisplayName("полное имя включает пакет")
+    void readsFullName() {
+        assertThat(
+            "class metadata cannot report the fully qualified name",
+            new ClassMetadata(new Account("ACC-1", "Иванов", new BigDecimal("100.00"))).fullName(),
+            equalTo("ru.sprbut.m01.model.Account")
+        );
     }
 
     @Test
-    @DisplayName("Иерархия наследования доходит до Object — по ней фреймворки ищут поля родителей")
-    void walksHierarchy() {
-        assertThat(ClassMetadata.hierarchy(account)).containsExactly("Account", "Object");
-        assertThat(ClassMetadata.hierarchyOf(java.util.ArrayList.class))
-                .containsExactly("ArrayList", "AbstractList", "AbstractCollection", "Object");
+    @DisplayName("короткое имя пакет не включает")
+    void readsSimpleName() {
+        assertThat(
+            "class metadata cannot report the simple name",
+            new ClassMetadata(new Account("ACC-2", "Петров", BigDecimal.ONE)).simpleName(),
+            equalTo("Account")
+        );
     }
 
     @Test
-    @DisplayName("getInterfaces() возвращает только напрямую реализованные интерфейсы")
+    @DisplayName("имя пакета читается отдельно от имени класса")
+    void readsPackageName() {
+        assertThat(
+            "class metadata cannot report the package name",
+            new ClassMetadata(Account.class).packageName(),
+            equalTo("ru.sprbut.m01.model")
+        );
+    }
+
+    @Test
+    @DisplayName("иерархия наследования доходит до Object")
+    void walksHierarchyUpToObject() {
+        assertThat(
+            "hierarchy cannot reach Object",
+            new ClassMetadata(Account.class).hierarchy(),
+            contains("Account", "Object")
+        );
+    }
+
+    @Test
+    @DisplayName("иерархия перечисляет все промежуточные классы")
+    void listsIntermediateClasses() {
+        assertThat(
+            "hierarchy cannot list the intermediate superclasses",
+            new ClassMetadata(ArrayList.class).hierarchy(),
+            contains("ArrayList", "AbstractList", "AbstractCollection", "Object")
+        );
+    }
+
+    @Test
+    @DisplayName("getInterfaces() отдаёт только напрямую реализованные интерфейсы")
     void readsDirectInterfaces() {
-        assertThat(ClassMetadata.directInterfaces(Account.class)).isEmpty();
-        assertThat(ClassMetadata.directInterfaces(java.util.ArrayList.class))
-                .contains("List", "RandomAccess", "Cloneable");
+        assertThat(
+            "direct interfaces cannot be listed",
+            new ClassMetadata(ArrayList.class).interfaces(),
+            hasItems("List", "RandomAccess", "Cloneable")
+        );
     }
 
     @Test
-    @DisplayName("Class.forName() загружает класс по строке — так читаются конфиги с именами классов")
-    void loadsClassByName() throws ClassNotFoundException {
-        Class<?> loaded = ClassMetadata.byName("ru.sprbut.m01.model.Account");
-
-        assertThat(loaded).isSameAs(Account.class);
-        assertThatThrownBy(() -> ClassMetadata.byName("ru.sprbut.NoSuchClass"))
-                .isInstanceOf(ClassNotFoundException.class);
+    @DisplayName("класс без интерфейсов даёт пустой список, а не null")
+    void reportsNoInterfaces() {
+        assertThat(
+            "class without interfaces cannot yield an empty list",
+            new ClassMetadata(Account.class).interfaces(),
+            emptyIterable()
+        );
     }
 
     @Test
-    @DisplayName("Три способа получить Class дают один и тот же объект")
-    void classObjectIsASingleton() throws ClassNotFoundException {
-        assertThat(Account.class)
-                .isSameAs(account.getClass())
-                .isSameAs(Class.forName(Account.class.getName(), false, getClass().getClassLoader()));
+    @DisplayName("Class — единственный объект на загруженный класс")
+    void keepsSingleClassObject() {
+        assertThat(
+            "two ways of getting Class cannot lead to the same object",
+            new Account("ACC-3", "Сидоров", BigDecimal.TEN).getClass(),
+            sameInstance(Account.class)
+        );
     }
 
     @Test
-    @DisplayName("Интерфейсы, абстрактные классы и примитивы инстанцировать нельзя")
-    void detectsInstantiableTypes() {
-        assertThat(ClassMetadata.isInstantiable(Account.class)).isTrue();
-        assertThat(ClassMetadata.isInstantiable(List.class)).isFalse();
-        assertThat(ClassMetadata.isInstantiable(java.util.AbstractList.class)).isFalse();
-        assertThat(ClassMetadata.isInstantiable(int.class)).isFalse();
-        assertThat(ClassMetadata.isInstantiable(String[].class)).isFalse();
+    @DisplayName("обычный класс инстанцировать можно")
+    void detectsInstantiableClass() {
+        assertThat(
+            "plain class cannot be recognised as instantiable",
+            new ClassMetadata(Account.class).instantiable(),
+            equalTo(true)
+        );
+    }
+
+    @Test
+    @DisplayName("интерфейс инстанцировать нельзя")
+    void dontInstantiateInterface() {
+        assertThat(
+            "interface cannot be rejected as non instantiable",
+            new ClassMetadata(List.class).instantiable(),
+            equalTo(false)
+        );
+    }
+
+    @Test
+    @DisplayName("абстрактный класс инстанцировать нельзя")
+    void dontInstantiateAbstractClass() {
+        assertThat(
+            "abstract class cannot be rejected as non instantiable",
+            new ClassMetadata(AbstractList.class).instantiable(),
+            equalTo(false)
+        );
+    }
+
+    @Test
+    @DisplayName("примитив инстанцировать нельзя")
+    void dontInstantiatePrimitive() {
+        assertThat(
+            "primitive cannot be rejected as non instantiable",
+            new ClassMetadata(int.class).instantiable(),
+            equalTo(false)
+        );
     }
 }

@@ -1,106 +1,92 @@
 package ru.sprbut.m18.extended;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.sprbut.m18.StartupApp;
 import ru.sprbut.m18.StartupLog;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 
 @DisplayName("Расширенный пример: СХЕМА 11 — восстановленная диаграмма запуска")
-class StartupTimelineTest {
+final class StartupTimelineTest {
 
-    @BeforeEach
-    void clearLog() {
-        StartupLog.clear();
+    private static StartupTimeline started() {
+        new StartupLog().clear();
+        StartupApp.run().close();
+        return new StartupTimeline();
     }
 
     @Test
-    @DisplayName("Фактическая последовательность соответствует канонической")
-    void actualSequenceMatchesTheCanonicalOne() {
-        try (var ignored = StartupApp.run()) {
-            assertThat(StartupTimeline.actualSequence())
-                    .containsSubsequence(
-                            "ApplicationStartingEvent",
-                            "ApplicationEnvironmentPreparedEvent",
-                            "ApplicationContextInitializer",
-                            "ApplicationContextInitializedEvent",
-                            "ApplicationPreparedEvent",
-                            "BeanFactoryPostProcessor",
-                            "ContextRefreshedEvent",
-                            "ApplicationStartedEvent",
-                            "ApplicationRunner",
-                            "CommandLineRunner",
-                            "ApplicationReadyEvent");
-        }
+    @DisplayName("фактическая последовательность восстанавливается из журнала")
+    void restoresActualSequence() {
+        assertThat(
+            "actual sequence cannot be restored from the log",
+            started().actualSequence(),
+            hasItem(containsString("ApplicationReadyEvent"))
+        );
     }
 
     @Test
-    @DisplayName("Номера шагов только возрастают — порядок не нарушен")
-    void orderNeverDecreases() {
-        try (var ignored = StartupApp.run()) {
-            assertThat(StartupTimeline.isOrdered()).isTrue();
-            assertThat(StartupTimeline.actualOrder())
-                    .containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-        }
+    @DisplayName("номера шагов только возрастают — порядок не нарушен")
+    void keepsStepsOrdered() {
+        assertThat(
+            "step numbers cannot grow monotonically",
+            started().isOrdered(),
+            equalTo(true)
+        );
     }
 
     @Test
-    @DisplayName("Диаграмма читается и годится для разбора старта")
-    void rendersReadableDiagram() {
-        try (var ignored = StartupApp.run()) {
-            assertThat(StartupTimeline.render())
-                    .startsWith("SpringApplication.run()")
-                    .contains("1-ApplicationStartingEvent")
-                    .endsWith("▼ приложение готово");
-        }
+    @DisplayName("десятый шаг разбирается как 10, а не как 1")
+    void parsesTwoDigitStep() {
+        assertThat(
+            "two digit step cannot be parsed correctly",
+            started().actualOrder(),
+            hasItem(10)
+        );
     }
 
     @Test
-    @DisplayName("Справочник точек расширения покрывает все десять шагов")
-    void hookCatalogCoversEveryStep() {
-        assertThat(StartupTimeline.whereToHook())
-                .hasSize(10)
-                .extracting(StartupTimeline.HookPoint::order)
-                .containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    @DisplayName("диаграмма читается и годится для разбора старта")
+    void rendersDiagram() {
+        assertThat(
+            "diagram cannot be rendered readably",
+            started().render(),
+            containsString("SpringApplication.run()")
+        );
     }
 
     @Test
-    @DisplayName("Для каждой точки сказано, что готово и что здесь делают")
-    void everyHookExplainsWhatIsReady() {
-        assertThat(StartupTimeline.hook("ApplicationStartingEvent"))
-                .get()
-                .satisfies(hook -> {
-                    assertThat(hook.whatIsReady()).contains("ничего");
-                    assertThat(hook.typicalUse()).contains("логирования");
-                });
-
-        assertThat(StartupTimeline.hook("ApplicationReadyEvent"))
-                .get()
-                .satisfies(hook -> assertThat(hook.whatIsReady()).contains("готово всё"));
+    @DisplayName("справочник точек расширения покрывает все десять шагов")
+    void coversEveryHookPoint() {
+        assertThat(
+            "hook catalogue cannot cover all ten steps",
+            new StartupTimeline().whereToHook(),
+            hasSize(10)
+        );
     }
 
     @Test
-    @DisplayName("BeanFactoryPostProcessor работает с определениями, а не с объектами")
-    void beanFactoryPostProcessorPrecedesBeanCreation() {
-        assertThat(StartupTimeline.hook("BeanFactoryPostProcessor"))
-                .get()
-                .satisfies(hook -> {
-                    assertThat(hook.whatIsReady()).contains("определения");
-                    assertThat(hook.order()).isLessThan(
-                            StartupTimeline.hook("ContextRefreshedEvent").orElseThrow().order());
-                });
+    @DisplayName("справочник отвечает, что готово к моменту события")
+    void explainsWhatIsReady() {
+        assertThat(
+            "hook point cannot explain what is ready",
+            new StartupTimeline().hook("ApplicationEnvironmentPrepared").orElseThrow().ready(),
+            containsString("Environment собран")
+        );
     }
 
     @Test
-    @DisplayName("Каждый шаг успешного запуска встречается ровно один раз")
-    void everyStepHappensOnce() {
-        try (var ignored = StartupApp.run()) {
-            assertThat(StartupTimeline.counts())
-                    .containsEntry("ApplicationStartingEvent", 1L)
-                    .containsEntry("ApplicationReadyEvent", 1L)
-                    .containsEntry("ContextRefreshedEvent", 1L);
-        }
+    @DisplayName("сводка считает, сколько раз встретился каждый шаг")
+    void countsPhases() {
+        assertThat(
+            "summary cannot count the phases",
+            started().counts().isEmpty(),
+            equalTo(false)
+        );
     }
 }

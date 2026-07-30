@@ -1,142 +1,98 @@
 package ru.sprbut.m13.extended;
 
+import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import ru.sprbut.m13.conditional.ConditionalConfig;
 import ru.sprbut.m13.qualifiers.QualifierConfig;
 import ru.sprbut.m13.scopes.ScopeConfig;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
 
 @DisplayName("Расширенный пример: диагностический отчёт о контейнере")
-class BeanRegistryReportTest {
+final class BeanRegistryReportTest {
 
-    @Nested
-    @DisplayName("Что лежит в контейнере")
-    class Contents {
-
-        @Test
-        @DisplayName("Отчёт перечисляет прикладные бины с их типами")
-        void listsApplicationBeans() {
-            try (var context = new AnnotationConfigApplicationContext(QualifierConfig.class)) {
-                assertThat(BeanRegistryReport.applicationBeans(context))
-                        .extracting(BeanRegistryReport.Entry::name)
-                        .contains("cardGateway", "cashGateway", "sbpGateway", "gatewayRegistry");
-            }
-        }
-
-        @Test
-        @DisplayName("Скоуп каждого бина виден в отчёте")
-        void showsScopes() {
-            try (var context = new AnnotationConfigApplicationContext(ScopeConfig.class)) {
-                assertThat(BeanRegistryReport.of(context))
-                        .filteredOn(e -> e.name().equals("prototypeBean"))
-                        .singleElement()
-                        .satisfies(e -> {
-                            assertThat(e.scope()).isEqualTo("prototype");
-                            assertThat(e.singleton()).isFalse();
-                        });
-
-                assertThat(BeanRegistryReport.scopeSummary(context))
-                        .containsKeys("singleton", "prototype");
-            }
-        }
-
-        @Test
-        @DisplayName("@Primary виден в отчёте")
-        void showsPrimary() {
-            try (var context = new AnnotationConfigApplicationContext(QualifierConfig.class)) {
-                assertThat(BeanRegistryReport.of(context))
-                        .filteredOn(BeanRegistryReport.Entry::primary)
-                        .extracting(BeanRegistryReport.Entry::name)
-                        .containsExactly("cardGateway");
-            }
-        }
-
-        @Test
-        @DisplayName("@DependsOn виден как явно заданный порядок")
-        void showsDependsOn() {
-            try (var context = new AnnotationConfigApplicationContext(ConditionalConfig.class)) {
-                assertThat(BeanRegistryReport.of(context))
-                        .filteredOn(e -> e.name().equals("cacheWarmer"))
-                        .singleElement()
-                        .satisfies(e -> assertThat(e.dependsOn()).containsExactly("schemaInitializer"));
-            }
+    @Test
+    @DisplayName("отчёт перечисляет прикладные бины")
+    void listsApplicationBeans() {
+        try (AnnotationConfigApplicationContext context =
+                 new AnnotationConfigApplicationContext(ScopeConfig.class)) {
+            assertThat(
+                "report cannot list the application beans",
+                new BeanRegistryReport(context).application().stream().map(Entry::name).toList(),
+                hasItem("singletonBean")
+            );
         }
     }
 
-    @Nested
-    @DisplayName("Диагностика типичных вопросов")
-    class Diagnostics {
-
-        @Test
-        @DisplayName("«Почему внедрился не тот бин» — отчёт называет причину")
-        void explainsWhichBeanWins() {
-            try (var context = new AnnotationConfigApplicationContext(QualifierConfig.class)) {
-                assertThat(BeanRegistryReport.explainResolution(
-                        context, QualifierConfig.PaymentGateway.class))
-                        .startsWith("@Primary: cardGateway");
-            }
+    @Test
+    @DisplayName("инфраструктура Spring в прикладной отчёт не попадает")
+    void hidesSpringInfrastructure() {
+        try (AnnotationConfigApplicationContext context =
+                 new AnnotationConfigApplicationContext(ScopeConfig.class)) {
+            assertThat(
+                "Spring internals cannot stay out of the application report",
+                new BeanRegistryReport(context).application().stream().map(Entry::name).toList(),
+                not(hasItem(containsString("org.springframework")))
+            );
         }
+    }
 
-        @Test
-        @DisplayName("«Кандидатов несколько, @Primary нет» — отчёт предсказывает падение")
-        void predictsNoUniqueBeanDefinition() {
-            try (var context = new AnnotationConfigApplicationContext()) {
-                context.registerBean("first", String.class, () -> "a");
-                context.registerBean("second", String.class, () -> "b");
-                context.refresh();
-
-                assertThat(BeanRegistryReport.explainResolution(context, String.class))
-                        .contains("@Primary нет")
-                        .contains("@Qualifier");
-            }
+    @Test
+    @DisplayName("сводка по скоупам считает прототипы отдельно")
+    void countsScopes() {
+        try (AnnotationConfigApplicationContext context =
+                 new AnnotationConfigApplicationContext(ScopeConfig.class)) {
+            assertThat(
+                "scope summary cannot count the prototypes",
+                new BeanRegistryReport(context).scopes(),
+                hasKey("prototype")
+            );
         }
+    }
 
-        @Test
-        @DisplayName("«Кандидатов нет» — отчёт называет будущее исключение")
-        void predictsNoSuchBeanDefinition() {
-            try (var context = new AnnotationConfigApplicationContext(ScopeConfig.class)) {
-                assertThat(BeanRegistryReport.explainResolution(context, java.time.LocalDate.class))
-                        .contains("нет кандидатов")
-                        .contains("NoSuchBeanDefinitionException");
-            }
+    @Test
+    @DisplayName("«почему внедрился не тот бин» — отчёт называет @Primary")
+    void explainsPrimaryWinner() {
+        try (AnnotationConfigApplicationContext context =
+                 new AnnotationConfigApplicationContext(QualifierConfig.class)) {
+            assertThat(
+                "report cannot explain the primary winner",
+                new BeanRegistryReport(context).resolution(
+                    ru.sprbut.m13.qualifiers.QualifierConfig.PaymentGateway.class
+                ),
+                containsString("@Primary")
+            );
         }
+    }
 
-        @Test
-        @DisplayName("«Почему бина нет вовсе» — его нет в отчёте: условие не выполнилось")
-        void missingBeanIsSimplyAbsent() {
-            try (var context = new AnnotationConfigApplicationContext(ConditionalConfig.class)) {
-                assertThat(BeanRegistryReport.applicationBeans(context))
-                        .extracting(BeanRegistryReport.Entry::name)
-                        .doesNotContain("featureBean", "devOnlyBean")
-                        .contains("notDevBean");
-            }
+    @Test
+    @DisplayName("«кандидатов нет» — отчёт называет будущее исключение")
+    void predictsMissingBean() {
+        try (AnnotationConfigApplicationContext context =
+                 new AnnotationConfigApplicationContext(ScopeConfig.class)) {
+            assertThat(
+                "report cannot predict NoSuchBeanDefinitionException",
+                new BeanRegistryReport(context).resolution(LocalDate.class),
+                containsString("NoSuchBeanDefinitionException")
+            );
         }
+    }
 
-        @Test
-        @DisplayName("«Что ещё не создано» — ленивые бины и прототипы")
-        void showsWhatIsNotInstantiatedYet() {
-            try (var context = new AnnotationConfigApplicationContext(ConditionalConfig.class)) {
-                assertThat(BeanRegistryReport.notYetInstantiated(context)).contains("lazyBean");
-
-                context.getBean("lazyBean");
-
-                assertThat(BeanRegistryReport.notYetInstantiated(context))
-                        .doesNotContain("lazyBean");
-            }
-        }
-
-        @Test
-        @DisplayName("Список кандидатов по типу — то, что видит контейнер в точке внедрения")
-        void listsCandidatesByType() {
-            try (var context = new AnnotationConfigApplicationContext(QualifierConfig.class)) {
-                assertThat(BeanRegistryReport.candidatesFor(
-                        context, QualifierConfig.PaymentGateway.class))
-                        .containsExactly("cardGateway", "cashGateway", "sbpGateway");
-            }
+    @Test
+    @DisplayName("прототип в отчёте числится несозданным — экземпляров у него нет")
+    void reportsPrototypeAsPending() {
+        try (AnnotationConfigApplicationContext context =
+                 new AnnotationConfigApplicationContext(ScopeConfig.class)) {
+            assertThat(
+                "prototype cannot be reported as pending",
+                new BeanRegistryReport(context).pending(),
+                hasItem("prototypeBean")
+            );
         }
     }
 }

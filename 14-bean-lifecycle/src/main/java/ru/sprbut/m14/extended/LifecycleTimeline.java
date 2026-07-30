@@ -1,11 +1,10 @@
 package ru.sprbut.m14.extended;
 
-import ru.sprbut.m14.LifecycleLog;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import ru.sprbut.m14.LifecycleLog;
 
 /**
  * <b>Расширенный пример модуля 14.</b>
@@ -13,127 +12,128 @@ import java.util.Map;
  * Временная шкала жизненного цикла: собирает журнал в наглядный вид
  * и <b>проверяет инварианты</b> восьми шагов со слайда 118 (СХЕМА 7).
  * <p>
- * Это не украшательство, а рабочий инструмент. Ровно эти инварианты
- * нарушаются в типичных ошибках:
- * <ul>
- *   <li>обращение к зависимости в конструкторе — она ещё не внедрена;</li>
- *   <li>запуск фонового потока в {@code @PostConstruct} — контекст ещё не готов,
- *       для этого есть {@code SmartLifecycle.start};</li>
- *   <li>ожидание {@code @PreDestroy} у prototype-бина — его не будет никогда;</li>
- *   <li>непонимание, почему в контексте лежит прокси, а не ваш объект —
- *       его подменил {@code BeanPostProcessor} на шаге 6.</li>
- * </ul>
+ * Это не украшательство, а рабочий инструмент: ровно эти инварианты нарушаются
+ * в типичных ошибках — обращение к зависимости в конструкторе, запуск фонового
+ * потока в {@code @PostConstruct} вместо {@code SmartLifecycle.start}, ожидание
+ * {@code @PreDestroy} у prototype-бина, недоумение по поводу прокси вместо
+ * своего объекта.
  */
 public final class LifecycleTimeline {
 
-    private LifecycleTimeline() {
+    private final LifecycleLog log;
+
+    public LifecycleTimeline() {
+        this(new LifecycleLog());
     }
 
-    /** Шаг жизненного цикла: номер, название, бин. */
-    public record Step(int number, String phase, String bean) {
-
-        @Override
-        public String toString() {
-            return number + ". " + phase + " → " + bean;
-        }
-    }
-
-    /** Нарушение ожидаемого порядка. */
-    public record Violation(String rule, String detail) {
-    }
-
-    /** Разбирает журнал в список шагов. */
-    public static List<Step> steps() {
-        List<Step> steps = new ArrayList<>();
-        for (String event : LifecycleLog.events()) {
-            int colon = event.indexOf(':');
-            String left = event.substring(0, colon);
-            String bean = event.substring(colon + 1);
-            int dash = left.indexOf('-');
-            int number = Character.getNumericValue(left.charAt(0));
-            steps.add(new Step(number, left.substring(dash + 1), bean));
-        }
-        return steps;
-    }
-
-    /** Шаги одного бина в порядке выполнения. */
-    public static List<Step> stepsOf(String bean) {
-        return steps().stream().filter(s -> s.bean().equals(bean)).toList();
-    }
-
-    /** Наглядная шкала — то, что имеет смысл распечатать при отладке. */
-    public static String render(String bean) {
-        StringBuilder sb = new StringBuilder("Жизненный цикл '" + bean + "':\n");
-        for (Step step : stepsOf(bean)) {
-            sb.append("  ").append(step).append('\n');
-        }
-        return sb.toString();
+    public LifecycleTimeline(LifecycleLog log) {
+        this.log = log;
     }
 
     /**
-     * Проверка инвариантов. Пустой список означает, что порядок соответствует
-     * контракту контейнера.
+     * Журнал, разобранный в список шагов.
      */
-    public static List<Violation> validate(String bean) {
-        List<Violation> violations = new ArrayList<>();
-        List<Step> steps = stepsOf(bean);
-        if (steps.isEmpty()) {
-            return List.of(new Violation("нет данных", "бин '" + bean + "' не встречается в журнале"));
+    public List<Step> steps() {
+        List<Step> steps = new ArrayList<>();
+        for (String event : this.log.events()) {
+            int colon = event.indexOf(':');
+            String left = event.substring(0, colon);
+            steps.add(new Step(
+                Character.getNumericValue(left.charAt(0)),
+                left.substring(left.indexOf('-') + 1),
+                event.substring(colon + 1)
+            ));
         }
+        return List.copyOf(steps);
+    }
 
-        List<Integer> numbers = steps.stream().map(Step::number).toList();
-        for (int i = 1; i < numbers.size(); i++) {
-            if (numbers.get(i) < numbers.get(i - 1)) {
-                violations.add(new Violation("порядок шагов",
-                        steps.get(i) + " выполнен после " + steps.get(i - 1)));
+    /**
+     * Шаги одного бина в порядке выполнения.
+     */
+    public List<Step> of(String bean) {
+        return steps().stream().filter(step -> step.bean().equals(bean)).toList();
+    }
+
+    /**
+     * Наглядная шкала — то, что имеет смысл распечатать при отладке.
+     */
+    public String render(String bean) {
+        StringBuilder text = new StringBuilder("Жизненный цикл '").append(bean).append("':\n");
+        for (Step step : of(bean)) {
+            text.append("  ").append(step).append('\n');
+        }
+        return text.toString();
+    }
+
+    /**
+     * Нарушения контракта контейнера; пустой список означает, что порядок верен.
+     */
+    public List<Violation> violations(String bean) {
+        List<Step> steps = of(bean);
+        if (steps.isEmpty()) {
+            return List.of(
+                new Violation("нет данных", "бин '" + bean + "' не встречается в журнале")
+            );
+        }
+        List<Violation> found = new ArrayList<>();
+        for (int index = 1; index < steps.size(); index++) {
+            if (steps.get(index).number() < steps.get(index - 1).number()) {
+                found.add(new Violation(
+                    "порядок шагов",
+                    steps.get(index) + " выполнен после " + steps.get(index - 1)
+                ));
             }
         }
-
-        checkPrecedes(steps, "constructor", "dependencies", violations);
-        checkPrecedes(steps, "dependencies", "aware-beanName", violations);
-        checkPrecedes(steps, "aware-applicationContext", "bpp-before", violations);
-        checkPrecedes(steps, "bpp-before", "postConstruct", violations);
-        checkPrecedes(steps, "postConstruct", "afterPropertiesSet", violations);
-        checkPrecedes(steps, "afterPropertiesSet", "bpp-after", violations);
-        checkPrecedes(steps, "preDestroy", "destroy", violations);
-
-        return violations;
+        precedes(steps, "constructor", "dependencies", found);
+        precedes(steps, "dependencies", "aware-beanName", found);
+        precedes(steps, "aware-applicationContext", "bpp-before", found);
+        precedes(steps, "bpp-before", "postConstruct", found);
+        precedes(steps, "postConstruct", "afterPropertiesSet", found);
+        precedes(steps, "afterPropertiesSet", "bpp-after", found);
+        precedes(steps, "preDestroy", "destroy", found);
+        return List.copyOf(found);
     }
 
-    private static void checkPrecedes(List<Step> steps, String earlier, String later,
-                                      List<Violation> sink) {
-        int earlierIndex = indexOfPhase(steps, earlier);
-        int laterIndex = indexOfPhase(steps, later);
-        if (earlierIndex < 0 || laterIndex < 0) {
+    /**
+     * Сводка «бин — сколько шагов жизненного цикла он прошёл».
+     */
+    public Map<String, Integer> summary() {
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        for (Step step : steps()) {
+            counts.merge(step.bean(), 1, Integer::sum);
+        }
+        return Map.copyOf(counts);
+    }
+
+    /**
+     * Дошёл ли бин до фазы уничтожения.
+     */
+    public boolean destroyed(String bean) {
+        return of(bean).stream().anyMatch(
+            step -> step.phase().startsWith("preDestroy") || step.phase().startsWith("destroy")
+        );
+    }
+
+    private void precedes(List<Step> steps, String earlier, String later, List<Violation> sink) {
+        int first = position(steps, earlier);
+        int second = position(steps, later);
+        if (first < 0 || second < 0) {
             return;
         }
-        if (earlierIndex > laterIndex) {
-            sink.add(new Violation(earlier + " перед " + later,
-                    earlier + " на позиции " + earlierIndex + ", " + later + " на " + laterIndex));
+        if (first > second) {
+            sink.add(new Violation(
+                earlier + " перед " + later,
+                earlier + " на позиции " + first + ", " + later + " на " + second
+            ));
         }
     }
 
-    private static int indexOfPhase(List<Step> steps, String phase) {
-        for (int i = 0; i < steps.size(); i++) {
-            if (steps.get(i).phase().equals(phase)) {
-                return i;
+    private int position(List<Step> steps, String phase) {
+        for (int index = 0; index < steps.size(); index++) {
+            if (steps.get(index).phase().equals(phase)) {
+                return index;
             }
         }
         return -1;
-    }
-
-    /** Сводка «бин → сколько шагов жизненного цикла он прошёл». */
-    public static Map<String, Integer> summary() {
-        Map<String, Integer> summary = new LinkedHashMap<>();
-        for (Step step : steps()) {
-            summary.merge(step.bean(), 1, Integer::sum);
-        }
-        return summary;
-    }
-
-    /** Дошёл ли бин до фазы уничтожения. */
-    public static boolean wasDestroyed(String bean) {
-        return stepsOf(bean).stream()
-                .anyMatch(s -> s.phase().startsWith("preDestroy") || s.phase().startsWith("destroy"));
     }
 }

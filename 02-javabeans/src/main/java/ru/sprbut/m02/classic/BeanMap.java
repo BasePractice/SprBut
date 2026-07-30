@@ -1,0 +1,45 @@
+package ru.sprbut.m02.classic;
+
+import java.beans.PropertyDescriptor;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+/**
+ * Бин, представленный картой «свойство → значение».
+ * <p>
+ * Порядок отсортирован, чтобы результат был предсказуемым: в отчёте
+ * об эффективной конфигурации приложения случайный порядок свойств
+ * делает вывод бесполезным для сравнения.
+ */
+public final class BeanMap {
+
+    private final Object bean;
+
+    public BeanMap(Object bean) {
+        this.bean = bean;
+    }
+
+    /**
+     * Значения всех читаемых свойств.
+     */
+    public Map<String, Object> values() {
+        Map<String, Object> collected = new LinkedHashMap<>();
+        Introspected introspected = new Introspected(this.bean.getClass());
+        for (String name : introspected.names()) {
+            PropertyDescriptor described = introspected.descriptor(name).orElseThrow();
+            if (described.getReadMethod() != null) {
+                collected.put(name, new Invoked(described.getReadMethod(), this.bean).value());
+            }
+        }
+        return Map.copyOf(collected);
+    }
+
+    /**
+     * То же, но значениями-строками — годится, чтобы напечатать конфигурацию.
+     */
+    public Map<String, String> text() {
+        Map<String, String> printed = new LinkedHashMap<>();
+        values().forEach((key, value) -> printed.put(key, String.valueOf(value)));
+        return Map.copyOf(printed);
+    }
+}

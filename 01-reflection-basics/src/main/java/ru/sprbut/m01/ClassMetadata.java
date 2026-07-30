@@ -1,5 +1,7 @@
 package ru.sprbut.m01;
 
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -7,47 +9,52 @@ import java.util.List;
  * Слайды 3–5: «Механизм работы с метаданными объектов в runtime»,
  * «Позволяет узнать имя класса объекта».
  * <p>
- * Три способа получить {@link Class} и то, что из него сразу читается:
- * имена, иерархия, интерфейсы.
+ * Метаданные одного класса: имена, иерархия, интерфейсы. Объект строится
+ * от {@code Class} или сразу от экземпляра — это и есть два из трёх способов
+ * получить {@code Class}, о которых говорит слайд; третий, {@code Class.forName},
+ * живёт в {@link ClassByName}.
  */
 public final class ClassMetadata {
 
-    private ClassMetadata() {
+    private final Class<?> type;
+
+    public ClassMetadata(Object target) {
+        this(target.getClass());
+    }
+
+    public ClassMetadata(Class<?> type) {
+        this.type = type;
     }
 
     /**
      * Полное имя класса вместе с пакетом: {@code ru.sprbut.m01.model.Account}.
      */
-    public static String fullName(Object target) {
-        return target.getClass().getName();
+    public String fullName() {
+        return this.type.getName();
     }
 
     /**
      * Короткое имя без пакета: {@code Account}.
      */
-    public static String simpleName(Object target) {
-        return target.getClass().getSimpleName();
+    public String simpleName() {
+        return this.type.getSimpleName();
     }
 
     /**
-     * Имя пакета, в котором объявлен класс объекта.
+     * Имя пакета, в котором объявлен класс.
      */
-    public static String packageName(Object target) {
-        return target.getClass().getPackageName();
+    public String packageName() {
+        return this.type.getPackageName();
     }
 
     /**
-     * Цепочка наследования от класса объекта до {@link Object} включительно.
+     * Цепочка наследования до {@link Object} включительно.
      * Именно так фреймворки ищут аннотации и поля в родителях.
      */
-    public static List<String> hierarchy(Object target) {
-        return hierarchyOf(target.getClass());
-    }
-
-    public static List<String> hierarchyOf(Class<?> type) {
-        List<String> names = new java.util.ArrayList<>();
-        for (Class<?> c = type; c != null; c = c.getSuperclass()) {
-            names.add(c.getSimpleName());
+    public List<String> hierarchy() {
+        List<String> names = new ArrayList<>();
+        for (Class<?> current = this.type; current != null; current = current.getSuperclass()) {
+            names.add(current.getSimpleName());
         }
         return List.copyOf(names);
     }
@@ -55,29 +62,20 @@ public final class ClassMetadata {
     /**
      * Интерфейсы, которые класс реализует напрямую.
      */
-    public static List<String> directInterfaces(Class<?> type) {
-        return Arrays.stream(type.getInterfaces())
-                .map(Class::getSimpleName)
-                .toList();
+    public List<String> interfaces() {
+        return Arrays.stream(this.type.getInterfaces())
+            .map(Class::getSimpleName)
+            .toList();
     }
 
     /**
-     * Слайд 4 (Reflection: детали, забегая вперёд): {@code Class.forName()} —
-     * загрузка класса по строковому имени. Так работает чтение конфигов,
-     * где имя класса лежит в текстовом файле.
+     * Признаки, по которым фреймворки решают, можно ли создать экземпляр типа.
      */
-    public static Class<?> byName(String className) throws ClassNotFoundException {
-        return Class.forName(className);
-    }
-
-    /**
-     * Признаки, по которым фреймворки решают, можно ли инстанцировать тип.
-     */
-    public static boolean isInstantiable(Class<?> type) {
-        return !type.isInterface()
-                && !java.lang.reflect.Modifier.isAbstract(type.getModifiers())
-                && !type.isPrimitive()
-                && !type.isEnum()
-                && !type.isArray();
+    public boolean instantiable() {
+        return !this.type.isInterface()
+            && !Modifier.isAbstract(this.type.getModifiers())
+            && !this.type.isPrimitive()
+            && !this.type.isEnum()
+            && !this.type.isArray();
     }
 }

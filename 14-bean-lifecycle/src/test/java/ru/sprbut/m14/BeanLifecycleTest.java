@@ -1,158 +1,142 @@
 package ru.sprbut.m14;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.lessThan;
 
-@DisplayName("Слайды 111–118 (СХЕМА 7): восемь шагов жизненного цикла бина")
-class BeanLifecycleTest {
+@DisplayName("Слайд 118 (СХЕМА 7): восемь шагов жизненного цикла бина")
+final class BeanLifecycleTest {
 
-    @BeforeEach
-    void clearLog() {
-        LifecycleLog.clear();
+    private static LifecycleLog started() {
+        LifecycleLog log = new LifecycleLog();
+        log.clear();
+        new AnnotationConfigApplicationContext(LifecycleConfig.class).close();
+        return log;
     }
 
-    @Nested
-    @DisplayName("Порядок шагов 1–7 при старте контекста")
-    class Startup {
-
-        @Test
-        @DisplayName("Все восемь шагов проходятся строго по порядку")
-        void stepsHappenInOrder() {
-            try (var context = new AnnotationConfigApplicationContext(LifecycleConfig.class)) {
-                context.getBean(ManagedBean.class);
-
-                assertThat(LifecycleLog.eventsOf("managedBean")).containsExactly(
-                        "1-constructor:managedBean",
-                        "2-dependencies:managedBean",
-                        "3-aware-beanName:managedBean",
-                        "3-aware-beanFactory:managedBean",
-                        "3-aware-applicationContext:managedBean",
-                        "4-bpp-before:managedBean",
-                        "5a-postConstruct:managedBean",
-                        "5b-afterPropertiesSet:managedBean",
-                        "6-bpp-after:managedBean");
-            }
-        }
-
-        @Test
-        @DisplayName("Шаг 2: зависимость создаётся раньше того, кому она нужна")
-        void dependenciesComeFirst() {
-            try (var ignored = new AnnotationConfigApplicationContext(LifecycleConfig.class)) {
-                assertThat(LifecycleLog.indexOf("0-dependency-created:dependency"))
-                        .isLessThan(LifecycleLog.indexOf("1-constructor:managedBean"));
-            }
-        }
-
-        @Test
-        @DisplayName("Шаг 3: *Aware-интерфейсы отдают бину сведения о контейнере")
-        void awareInterfacesAreCalled() {
-            try (var context = new AnnotationConfigApplicationContext(LifecycleConfig.class)) {
-                ManagedBean bean = context.getBean(ManagedBean.class);
-
-                assertThat(bean.beanName()).isEqualTo("managedBean");
-                assertThat(bean.fullyAware()).isTrue();
-            }
-        }
-
-        @Test
-        @DisplayName("Шаг 5: @PostConstruct вызывается раньше afterPropertiesSet")
-        void postConstructPrecedesAfterPropertiesSet() {
-            try (var ignored = new AnnotationConfigApplicationContext(LifecycleConfig.class)) {
-                assertThat(LifecycleLog.indexOf("5a-postConstruct:managedBean"))
-                        .isLessThan(LifecycleLog.indexOf("5b-afterPropertiesSet:managedBean"));
-            }
-        }
-
-        @Test
-        @DisplayName("Шаги 4 и 6: BeanPostProcessor обрамляет инициализацию с двух сторон")
-        void beanPostProcessorWrapsInitialization() {
-            try (var ignored = new AnnotationConfigApplicationContext(LifecycleConfig.class)) {
-                assertThat(LifecycleLog.indexOf("4-bpp-before:managedBean"))
-                        .isLessThan(LifecycleLog.indexOf("5a-postConstruct:managedBean"));
-                assertThat(LifecycleLog.indexOf("6-bpp-after:managedBean"))
-                        .isGreaterThan(LifecycleLog.indexOf("5b-afterPropertiesSet:managedBean"));
-            }
-        }
-
-        @Test
-        @DisplayName("Шаг 7: SmartLifecycle.start вызывается после готовности контекста")
-        void smartLifecycleStartsLast() {
-            try (var context = new AnnotationConfigApplicationContext(LifecycleConfig.class)) {
-                assertThat(context.getBean(BackgroundWorker.class).isRunning()).isTrue();
-                assertThat(LifecycleLog.indexOf("7-smartLifecycle-start:backgroundWorker"))
-                        .isGreaterThan(LifecycleLog.indexOf("6-bpp-after:managedBean"));
-            }
-        }
+    @Test
+    @DisplayName("шаги проходятся в порядке, объявленном контрактом контейнера")
+    void keepsDeclaredOrder() {
+        assertThat(
+            "lifecycle steps cannot follow the declared order",
+            started().of("managedBean"),
+            contains(
+                "1-constructor:managedBean",
+                "2-dependencies:managedBean",
+                "3-aware-beanName:managedBean",
+                "3-aware-beanFactory:managedBean",
+                "3-aware-applicationContext:managedBean",
+                "4-bpp-before:managedBean",
+                "5a-postConstruct:managedBean",
+                "5b-afterPropertiesSet:managedBean",
+                "6-bpp-after:managedBean",
+                "8a-preDestroy:managedBean",
+                "8b-destroy:managedBean"
+            )
+        );
     }
 
-    @Nested
-    @DisplayName("Шаг 8: уничтожение")
-    class Shutdown {
-
-        @Test
-        @DisplayName("@PreDestroy вызывается раньше DisposableBean.destroy")
-        void preDestroyPrecedesDestroy() {
-            var context = new AnnotationConfigApplicationContext(LifecycleConfig.class);
-            context.getBean(ManagedBean.class);
-            context.close();
-
-            assertThat(LifecycleLog.indexOf("8a-preDestroy:managedBean"))
-                    .isLessThan(LifecycleLog.indexOf("8b-destroy:managedBean"));
-        }
-
-        @Test
-        @DisplayName("SmartLifecycle.stop вызывается раньше уничтожения бинов")
-        void stopPrecedesDestruction() {
-            var context = new AnnotationConfigApplicationContext(LifecycleConfig.class);
-            context.close();
-
-            assertThat(LifecycleLog.indexOf("9-smartLifecycle-stop:backgroundWorker"))
-                    .isLessThan(LifecycleLog.indexOf("8a-preDestroy:managedBean"));
-        }
-
-        @Test
-        @DisplayName("У prototype-бина @PreDestroy не вызывается никогда")
-        void prototypeIsNeverDestroyed() {
-            var context = new AnnotationConfigApplicationContext(LifecycleConfig.class);
-            context.getBean(LifecycleConfig.PrototypeWithDestroy.class);
-            context.close();
-
-            assertThat(LifecycleLog.events())
-                    .contains("1-constructor:prototypeWithDestroy")
-                    .doesNotContain("8a-preDestroy:prototypeWithDestroy");
-        }
+    @Test
+    @DisplayName("зависимость создаётся раньше того, кому она нужна")
+    void createsDependencyFirst() {
+        LifecycleLog log = started();
+        assertThat(
+            "dependency cannot be created before its consumer",
+            log.indexOf("0-dependency-created:dependency"),
+            lessThan(log.indexOf("1-constructor:managedBean"))
+        );
     }
 
-    @Nested
-    @DisplayName("Шаг 6 умеет подменить объект")
-    class BeanReplacement {
+    @Test
+    @DisplayName("@PostConstruct вызывается раньше afterPropertiesSet")
+    void callsPostConstructFirst() {
+        LifecycleLog log = started();
+        assertThat(
+            "@PostConstruct cannot run before afterPropertiesSet",
+            log.indexOf("5a-postConstruct:managedBean"),
+            lessThan(log.indexOf("5b-afterPropertiesSet:managedBean"))
+        );
+    }
 
-        @Test
-        @DisplayName("В контексте лежит прокси, а не тот объект, который создал @Bean-метод")
-        void postProcessorCanReturnADifferentObject() {
-            try (var context = new AnnotationConfigApplicationContext(LifecycleConfig.class)) {
-                AuditBeanPostProcessor.Auditable bean =
-                        context.getBean(AuditBeanPostProcessor.Auditable.class);
+    @Test
+    @DisplayName("BeanPostProcessor.before идёт до инициализации")
+    void runsPostProcessorBeforeInit() {
+        LifecycleLog log = started();
+        assertThat(
+            "post processor cannot run before the initialisation",
+            log.indexOf("4-bpp-before:managedBean"),
+            lessThan(log.indexOf("5a-postConstruct:managedBean"))
+        );
+    }
 
-                assertThat(bean.describe()).isEqualTo("оригинал (через прокси)");
-                assertThat(java.lang.reflect.Proxy.isProxyClass(bean.getClass())).isTrue();
-                assertThat(bean).isNotInstanceOf(AuditBeanPostProcessor.AuditableBean.class);
-            }
-        }
+    @Test
+    @DisplayName("BeanPostProcessor.after идёт после инициализации — здесь и появляется прокси")
+    void runsPostProcessorAfterInit() {
+        LifecycleLog log = started();
+        assertThat(
+            "post processor cannot run after the initialisation",
+            log.indexOf("6-bpp-after:managedBean"),
+            greaterThan(log.indexOf("5b-afterPropertiesSet:managedBean"))
+        );
+    }
 
-        @Test
-        @DisplayName("Именно так Spring и подставляет AOP-прокси на место бина")
-        void thisIsHowSpringAopWorks() {
-            try (var context = new AnnotationConfigApplicationContext(LifecycleConfig.class)) {
-                assertThat(LifecycleLog.events()).contains("6-bpp-after:auditableBean");
-                assertThat(context.getBean("auditableBean"))
-                        .isNotInstanceOf(AuditBeanPostProcessor.AuditableBean.class);
-            }
-        }
+    @Test
+    @DisplayName("SmartLifecycle.start ждёт готовности всего контекста")
+    void startsLifecycleAfterAllBeans() {
+        LifecycleLog log = started();
+        assertThat(
+            "SmartLifecycle cannot wait for the whole context",
+            log.indexOf("7-smartLifecycle-start:backgroundWorker"),
+            greaterThan(log.indexOf("6-bpp-after:managedBean"))
+        );
+    }
+
+    @Test
+    @DisplayName("@PreDestroy вызывается раньше DisposableBean.destroy")
+    void callsPreDestroyFirst() {
+        LifecycleLog log = started();
+        assertThat(
+            "@PreDestroy cannot run before destroy",
+            log.indexOf("8a-preDestroy:managedBean"),
+            lessThan(log.indexOf("8b-destroy:managedBean"))
+        );
+    }
+
+    @Test
+    @DisplayName("остановка SmartLifecycle предшествует уничтожению бинов")
+    void stopsLifecycleBeforeDestroy() {
+        LifecycleLog log = started();
+        assertThat(
+            "SmartLifecycle cannot stop before the beans are destroyed",
+            log.indexOf("9-smartLifecycle-stop:backgroundWorker"),
+            lessThan(log.indexOf("8a-preDestroy:managedBean"))
+        );
+    }
+
+    @Test
+    @DisplayName("BeanPostProcessor видит каждый бин, а не только помеченный")
+    void processesEveryBean() {
+        assertThat(
+            "post processor cannot see every bean",
+            started().events(),
+            hasItem("6-bpp-after:auditableBean")
+        );
+    }
+
+    @Test
+    @DisplayName("prototype-бин до фазы уничтожения не доходит вовсе")
+    void dontDestroyPrototype() {
+        assertThat(
+            "prototype bean cannot skip the destruction phase",
+            started().of("prototypeWithDestroy").contains("8a-preDestroy:prototypeWithDestroy"),
+            equalTo(false)
+        );
     }
 }

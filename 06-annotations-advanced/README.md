@@ -15,13 +15,13 @@
 
 | Класс | Слайд | Что показывает |
 |---|---|---|
-| [`MemberTypes`](src/main/java/ru/sprbut/m06/MemberTypes.java) | 50–52 | Аннотация со всеми шестью допустимыми типами элементов и массивами; чтение `default`-значений отдельно от фактических |
-| [`ModernTargets`](src/main/java/ru/sprbut/m06/ModernTargets.java) | 48–49 | `TYPE_USE` внутри дженерика (`List<@NonNull String>`), `TYPE_PARAMETER`, `RECORD_COMPONENT`, `ANNOTATION_TYPE` |
-| [`Composition`](src/main/java/ru/sprbut/m06/Composition.java) | 55 | Композиция мета-аннотаций и рекурсивный поиск; почему `getAnnotation(Controller.class)` возвращает `null` |
+| [`AnnotationMembers`](src/main/java/ru/sprbut/m06/members/AnnotationMembers.java) | 50–52 | Аннотация со всеми шестью допустимыми типами элементов и массивами; чтение `default`-значений отдельно от фактических |
+| [`TypeUse`](src/main/java/ru/sprbut/m06/targets/TypeUse.java) | 48–49 | `TYPE_USE` внутри дженерика (`List<@NonNull String>`), `TYPE_PARAMETER`, `RECORD_COMPONENT`, `ANNOTATION_TYPE` |
+| [`MetaAnnotated`](src/main/java/ru/sprbut/m06/MetaAnnotated.java) | 55 | Композиция мета-аннотаций и рекурсивный поиск; почему `getAnnotation(Controller.class)` возвращает `null` |
 
 ## Расширенный пример
 
-[`MergedAnnotationScanner`](src/main/java/ru/sprbut/m06/extended/MergedAnnotationScanner.java) —
+[`MergedAnnotation`](src/main/java/ru/sprbut/m06/extended/MergedAnnotation.java) —
 рабочая мини-версия `AnnotatedElementUtils.findMergedAnnotation` из Spring. Делает
 то, чего **не делает сам язык**: находит аннотацию через цепочку мета-аннотаций
 любой длины и **сливает значения элементов**, уважая
@@ -31,7 +31,7 @@
 @GetJson("/users/json")            // @GetJson → @GetMapping → @RequestMapping
 public void json() {}
 
-MergedAnnotationScanner.find(method, RequestMapping.class).orElseThrow();
+new MergedAnnotation<>(method, RequestMapping.class).orElseThrow();
 // path = /users/json   (из @GetJson через @AliasFor)
 // method = GET         (из @GetMapping, никем не переопределён)
 // produces = [application/json]  (из @GetJson → @GetMapping, по совпадению имени)

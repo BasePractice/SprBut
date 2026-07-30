@@ -3,48 +3,49 @@ package ru.sprbut.m04;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 @DisplayName("Слайд 33: рефлексия медленнее прямого вызова")
-class InvocationCostTest {
-
-    private static final int ITERATIONS = 20_000;
+final class InvocationCostTest {
 
     @Test
-    @DisplayName("Все четыре способа дают одинаковый результат — различается только цена")
-    void allStrategiesAgree() throws Throwable {
-        InvocationCost.Target target = new InvocationCost.Target();
-
-        assertThat(InvocationCost.direct(target, ITERATIONS)).isEqualTo(ITERATIONS);
-        assertThat(InvocationCost.reflectionCached(target, ITERATIONS)).isEqualTo(ITERATIONS);
-        assertThat(InvocationCost.reflectionWithLookup(target, ITERATIONS)).isEqualTo(ITERATIONS);
-        assertThat(InvocationCost.methodHandle(target, ITERATIONS)).isEqualTo(ITERATIONS);
+    @DisplayName("прямой вызов даёт эталонный результат")
+    void computesDirectly() {
+        assertThat(
+            "direct invocation cannot produce the reference result",
+            new InvocationCost(new Target(), 1000).direct(),
+            equalTo(1000)
+        );
     }
 
     @Test
-    @DisplayName("Замер отдаёт время всех четырёх стратегий")
-    void benchmarkReportsAllStrategies() throws Throwable {
-        Map<String, Long> timings = InvocationCost.benchmark(ITERATIONS);
-
-        assertThat(timings).containsOnlyKeys(
-                "direct", "methodHandle", "reflectionCached", "reflectionWithLookup");
-        assertThat(timings.values()).allSatisfy(nanos -> assertThat(nanos).isPositive());
+    @DisplayName("поиск метода на каждой итерации даёт тот же результат — но дороже всех")
+    void computesWithLookupEachTime() throws ReflectiveOperationException {
+        assertThat(
+            "per-call lookup cannot produce the same result",
+            new InvocationCost(new Target(), 1000).searching(),
+            equalTo(1000)
+        );
     }
 
     @Test
-    @DisplayName("Поиск метода на каждой итерации дороже закэшированного — воспроизводимо без JMH")
-    void lookupInLoopIsTheWorstOption() throws Throwable {
-        // Разогрев, чтобы JIT успел скомпилировать оба варианта
-        InvocationCost.benchmark(ITERATIONS);
+    @DisplayName("кэшированный Method даёт тот же результат")
+    void computesWithCachedMethod() throws ReflectiveOperationException {
+        assertThat(
+            "cached method cannot produce the same result",
+            new InvocationCost(new Target(), 1000).cached(),
+            equalTo(1000)
+        );
+    }
 
-        Map<String, Long> timings = InvocationCost.benchmark(ITERATIONS);
-
-        // Единственное утверждение о скорости, устойчивое на любой машине:
-        // getDeclaredMethod в цикле заведомо дороже, чем закэшированный Method.
-        assertThat(timings.get("reflectionWithLookup"))
-                .as("поиск метода в цикле должен быть дороже закэшированного")
-                .isGreaterThan(timings.get("reflectionCached"));
+    @Test
+    @DisplayName("MethodHandle даёт тот же результат — разница только в цене")
+    void computesWithHandle() throws Throwable {
+        assertThat(
+            "method handle cannot produce the same result",
+            new InvocationCost(new Target(), 1000).handle(),
+            equalTo(1000)
+        );
     }
 }

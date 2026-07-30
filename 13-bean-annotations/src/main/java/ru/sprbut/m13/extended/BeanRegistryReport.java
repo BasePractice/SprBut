@@ -1,134 +1,127 @@
 package ru.sprbut.m13.extended;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.ConfigurableApplicationContext;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * <b>Расширенный пример модуля 13.</b>
  * <p>
  * Отчёт о содержимом контейнера: что в нём есть, с каким скоупом, что помечено
- * {@code @Primary}, что ленивое, что уже создано, а что ещё нет.
+ * {@code @Primary}, что ленивое, а что уже создано.
  * <p>
- * Практическая ценность — диагностика. Ровно эти вопросы возникают, когда
- * приложение ведёт себя не так, как ожидалось:
- * <ul>
- *   <li>«почему внедрился не тот бин» → {@link Entry#primary()} и список кандидатов;</li>
- *   <li>«почему бин создался дважды» → {@link Entry#scope()};</li>
- *   <li>«почему бин не создался при старте» → {@link Entry#lazyInit()};</li>
- *   <li>«почему бин вообще не появился» → его просто нет в отчёте (условие
- *       {@code @Conditional} или {@code @Profile} не выполнилось).</li>
- * </ul>
- * Spring Boot делает то же самое в отчёте об условиях по флагу {@code --debug}
- * (модуль 19).
+ * Главная ценность — {@link #resolution(Class)}: он объясняет, какой бин
+ * контейнер выберет из нескольких кандидатов и почему. Ровно тот вопрос,
+ * на который приходится отвечать, читая {@code NoUniqueBeanDefinitionException}.
+ * Spring Boot делает то же самое в отчёте об условиях по флагу {@code --debug}.
  */
 public final class BeanRegistryReport {
 
-    private BeanRegistryReport() {
-    }
+    private final ConfigurableApplicationContext context;
 
-    /** Строка отчёта об одном бине. */
-    public record Entry(String name,
-                        String type,
-                        String scope,
-                        boolean primary,
-                        boolean lazyInit,
-                        boolean instantiated,
-                        List<String> dependsOn) {
-
-        public Entry {
-            dependsOn = List.copyOf(dependsOn);
-        }
-
-        public boolean singleton() {
-            return BeanDefinition.SCOPE_SINGLETON.equals(scope) || scope.isEmpty();
-        }
-    }
-
-    /** Весь отчёт, отсортированный по имени бина. */
-    public static List<Entry> of(ConfigurableApplicationContext context) {
-        ConfigurableListableBeanFactory factory = context.getBeanFactory();
-        List<Entry> entries = new ArrayList<>();
-
-        for (String name : factory.getBeanDefinitionNames()) {
-            BeanDefinition definition = factory.getBeanDefinition(name);
-            Class<?> type = factory.getType(name);
-            entries.add(new Entry(
-                    name,
-                    type == null ? "?" : type.getSimpleName(),
-                    definition.getScope(),
-                    definition.isPrimary(),
-                    definition.isLazyInit(),
-                    factory.containsSingleton(name),
-                    definition.getDependsOn() == null
-                            ? List.of()
-                            : Arrays.asList(definition.getDependsOn())));
-        }
-        entries.sort(Comparator.comparing(Entry::name));
-        return entries;
-    }
-
-    /** Только бины прикладных пакетов — без инфраструктуры самого Spring. */
-    public static List<Entry> applicationBeans(ConfigurableApplicationContext context) {
-        return of(context).stream()
-                .filter(e -> !e.name().startsWith("org.springframework"))
-                .toList();
-    }
-
-    /** Кандидаты на внедрение по типу — то, что контейнер увидит в точке внедрения. */
-    public static List<String> candidatesFor(ConfigurableApplicationContext context, Class<?> type) {
-        return Arrays.stream(context.getBeanNamesForType(type)).sorted().toList();
+    public BeanRegistryReport(ConfigurableApplicationContext context) {
+        this.context = context;
     }
 
     /**
-     * Объяснение, какой бин будет выбран из нескольких кандидатов и почему.
-     * Повторяет порядок разрешения, принятый в Spring.
+     * Весь отчёт, отсортированный по имени бина.
      */
-    public static String explainResolution(ConfigurableApplicationContext context, Class<?> type) {
-        List<String> candidates = candidatesFor(context, type);
+    public List<Entry> entries() {
+        ConfigurableListableBeanFactory beans = this.context.getBeanFactory();
+        List<Entry> collected = new ArrayList<>();
+        for (String name : beans.getBeanDefinitionNames()) {
+            BeanDefinition definition = beans.getBeanDefinition(name);
+            Class<?> type = beans.getType(name);
+            collected.add(new Entry(
+                name,
+                type == null ? "?" : type.getSimpleName(),
+                definition.getScope(),
+                definition.isPrimary(),
+                definition.isLazyInit(),
+                beans.containsSingleton(name),
+                definition.getDependsOn() == null
+                    ? List.of()
+                    : Arrays.asList(definition.getDependsOn())
+            ));
+        }
+        collected.sort(Comparator.comparing(Entry::name));
+        return List.copyOf(collected);
+    }
+
+    /**
+     * Только бины прикладных пакетов — без инфраструктуры самого Spring.
+     */
+    public List<Entry> application() {
+        return entries().stream()
+            .filter(entry -> !entry.name().startsWith("org.springframework"))
+            .toList();
+    }
+
+    /**
+     * Кандидаты на внедрение по типу — то, что контейнер увидит в точке внедрения.
+     */
+    public List<String> candidates(Class<?> type) {
+        return Arrays.stream(this.context.getBeanNamesForType(type)).sorted().toList();
+    }
+
+    /**
+     * Объяснение, какой бин будет выбран и почему.
+     * <p>
+     * Порядок разрешения повторяет принятый в Spring: единственный кандидат,
+     * затем {@code @Primary}, затем отказ с требованием {@code @Qualifier}.
+     */
+    public String resolution(Class<?> type) {
+        List<String> candidates = candidates(type);
         if (candidates.isEmpty()) {
-            return "нет кандидатов типа " + type.getSimpleName() + " → NoSuchBeanDefinitionException";
+            return "нет кандидатов типа " + type.getSimpleName()
+                + " → NoSuchBeanDefinitionException";
         }
         if (candidates.size() == 1) {
             return "единственный кандидат: " + candidates.get(0);
         }
-        List<String> primaries = of(context).stream()
-                .filter(Entry::primary)
-                .filter(e -> candidates.contains(e.name()))
-                .map(Entry::name)
-                .toList();
-        if (primaries.size() == 1) {
-            return "@Primary: " + primaries.get(0) + " из " + candidates;
+        List<String> primary = entries().stream()
+            .filter(Entry::primary)
+            .filter(entry -> candidates.contains(entry.name()))
+            .map(Entry::name)
+            .toList();
+        if (primary.size() == 1) {
+            return "@Primary: " + primary.get(0) + " из " + candidates;
         }
-        if (primaries.size() > 1) {
-            return "несколько @Primary " + primaries + " → NoUniqueBeanDefinitionException";
+        if (primary.size() > 1) {
+            return "несколько @Primary " + primary + " → NoUniqueBeanDefinitionException";
         }
         return "кандидатов " + candidates.size() + " " + candidates
-                + ", @Primary нет → нужен @Qualifier, иначе NoUniqueBeanDefinitionException";
+            + ", @Primary нет → нужен @Qualifier, иначе NoUniqueBeanDefinitionException";
     }
 
-    /** Сводка «скоуп → сколько бинов». */
-    public static Map<String, Long> scopeSummary(ConfigurableApplicationContext context) {
+    /**
+     * Сводка «скоуп — сколько бинов».
+     */
+    public Map<String, Long> scopes() {
         Map<String, Long> summary = new LinkedHashMap<>();
-        for (Entry entry : applicationBeans(context)) {
-            String scope = entry.scope().isEmpty() ? BeanDefinition.SCOPE_SINGLETON : entry.scope();
-            summary.merge(scope, 1L, Long::sum);
+        for (Entry entry : application()) {
+            summary.merge(
+                entry.scope().isEmpty() ? BeanDefinition.SCOPE_SINGLETON : entry.scope(),
+                1L,
+                Long::sum
+            );
         }
-        return summary;
+        return Map.copyOf(summary);
     }
 
-    /** Бины, которые объявлены, но ещё не созданы — то есть ленивые или прототипы. */
-    public static List<String> notYetInstantiated(ConfigurableApplicationContext context) {
-        return applicationBeans(context).stream()
-                .filter(e -> !e.instantiated())
-                .map(Entry::name)
-                .toList();
+    /**
+     * Бины, которые объявлены, но ещё не созданы, — ленивые и прототипы.
+     */
+    public List<String> pending() {
+        return application().stream()
+            .filter(entry -> !entry.instantiated())
+            .map(Entry::name)
+            .toList();
     }
 }

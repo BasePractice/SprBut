@@ -1,131 +1,124 @@
 package ru.sprbut.m03;
 
-import java.lang.reflect.Constructor;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.RecordComponent;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
- * Слайд 26–27 (СХЕМА 1): {@link Class} — центр карты Reflection API.
+ * Слайды 26–27 (СХЕМА 1): {@link Class} — центр карты Reflection API.
  * <p>
  * Всё остальное — {@code Field}, {@code Method}, {@code Constructor} — добывается
  * из него. Сам {@code Class} при этом отвечает и на вопросы о природе типа:
- * примитив, массив, enum, интерфейс, record, вложенный класс.
+ * массив ли это, enum, record, вложенный класс.
  */
 public final class ClassApi {
 
-    private ClassApi() {
-    }
+    private final Class<?> type;
 
-    public static List<String> declaredFields(Class<?> type) {
-        return Arrays.stream(type.getDeclaredFields())
-                .filter(f -> !f.isSynthetic())
-                .map(Field::getName)
-                .sorted()
-                .toList();
-    }
-
-    public static List<String> declaredMethods(Class<?> type) {
-        return Arrays.stream(type.getDeclaredMethods())
-                .filter(m -> !m.isSynthetic())
-                .map(Method::getName)
-                .sorted()
-                .distinct()
-                .toList();
-    }
-
-    public static int declaredConstructorCount(Class<?> type) {
-        return type.getDeclaredConstructors().length;
-    }
-
-    /** Тип элемента массива: {@code String} для {@code String[]}, {@code null} иначе. */
-    public static Class<?> componentType(Class<?> type) {
-        return type.getComponentType();
-    }
-
-    /** Класс, внутри которого объявлен вложенный тип. */
-    public static Class<?> enclosingClass(Class<?> type) {
-        return type.getEnclosingClass();
+    public ClassApi(Class<?> type) {
+        this.type = type;
     }
 
     /**
-     * Категория типа одним словом. Проверки нужно делать именно в этом порядке:
-     * например, enum одновременно является и классом.
+     * Имена объявленных полей в алфавитном порядке.
      */
-    public static String kindOf(Class<?> type) {
-        if (type.isPrimitive()) {
-            return "primitive";
-        }
-        if (type.isArray()) {
-            return "array";
-        }
-        if (type.isEnum()) {
-            return "enum";
-        }
-        if (type.isAnnotation()) {
-            // проверяем ДО isInterface: аннотация — тоже интерфейс
-            return "annotation";
-        }
-        if (type.isInterface()) {
-            return "interface";
-        }
-        if (type.isRecord()) {
-            return "record";
-        }
-        return "class";
+    public List<String> fields() {
+        return Arrays.stream(this.type.getDeclaredFields())
+            .filter(field -> !field.isSynthetic())
+            .map(Field::getName)
+            .sorted()
+            .toList();
     }
 
-    /** Иерархия наследования снизу вверх, до {@code Object} включительно. */
-    public static List<String> superChain(Class<?> type) {
-        List<String> chain = new java.util.ArrayList<>();
-        for (Class<?> c = type; c != null; c = c.getSuperclass()) {
-            chain.add(c.getSimpleName());
+    /**
+     * Имена объявленных методов без повторов от перегрузок.
+     */
+    public List<String> methods() {
+        return Arrays.stream(this.type.getDeclaredMethods())
+            .filter(method -> !method.isSynthetic())
+            .map(Method::getName)
+            .sorted()
+            .distinct()
+            .toList();
+    }
+
+    /**
+     * Сколько всего конструкторов объявлено, включая непубличные.
+     */
+    public int constructorCount() {
+        return this.type.getDeclaredConstructors().length;
+    }
+
+    /**
+     * Тип элемента массива: {@code String} для {@code String[]}, иначе {@code null}.
+     */
+    public Class<?> componentType() {
+        return this.type.getComponentType();
+    }
+
+    /**
+     * Класс, внутри которого объявлен вложенный тип.
+     */
+    public Class<?> enclosing() {
+        return this.type.getEnclosingClass();
+    }
+
+    /**
+     * Иерархия наследования снизу вверх, до {@code Object} включительно.
+     */
+    public List<String> superChain() {
+        List<String> chain = new ArrayList<>();
+        for (Class<?> current = this.type; current != null; current = current.getSuperclass()) {
+            chain.add(current.getSimpleName());
         }
         return List.copyOf(chain);
     }
 
     /**
-     * Все интерфейсы, включая унаследованные — то, что фреймворки используют,
-     * чтобы решить, подходит ли бин под тип зависимости.
+     * Все интерфейсы, включая унаследованные, — по ним фреймворки решают,
+     * подходит ли бин под тип зависимости.
      */
-    public static List<String> allInterfaces(Class<?> type) {
-        java.util.Set<String> result = new java.util.TreeSet<>();
-        for (Class<?> c = type; c != null; c = c.getSuperclass()) {
-            collectInterfaces(c, result);
+    public List<String> allInterfaces() {
+        Set<String> collected = new TreeSet<>();
+        for (Class<?> current = this.type; current != null; current = current.getSuperclass()) {
+            collect(current, collected);
         }
-        return List.copyOf(result);
-    }
-
-    private static void collectInterfaces(Class<?> type, java.util.Set<String> sink) {
-        for (Class<?> iface : type.getInterfaces()) {
-            if (sink.add(iface.getSimpleName())) {
-                collectInterfaces(iface, sink);
-            }
-        }
+        return List.copyOf(collected);
     }
 
     /**
+     * Может ли переменная этого типа хранить значение другого.
+     * <p>
      * {@code isAssignableFrom} читается наоборот, чем кажется:
      * {@code Number.class.isAssignableFrom(Integer.class)} — истина.
      */
-    public static boolean canHold(Class<?> declaredType, Class<?> actualType) {
-        return declaredType.isAssignableFrom(actualType);
+    public boolean canHold(Class<?> actual) {
+        return this.type.isAssignableFrom(actual);
     }
 
-    /** Компоненты record — отдельная сущность API, появившаяся в Java 16. */
-    public static List<String> recordComponents(Class<?> type) {
-        if (!type.isRecord()) {
+    /**
+     * Компоненты record — отдельная сущность API, появившаяся в Java 16.
+     */
+    public List<String> recordComponents() {
+        if (!this.type.isRecord()) {
             return List.of();
         }
-        return Arrays.stream(type.getRecordComponents())
-                .map(java.lang.reflect.RecordComponent::getName)
-                .toList();
+        return Arrays.stream(this.type.getRecordComponents())
+            .map(RecordComponent::getName)
+            .toList();
     }
 
-    /** Константы enum в порядке объявления. */
-    public static List<String> enumConstants(Class<?> type) {
-        Object[] constants = type.getEnumConstants();
+    /**
+     * Константы enum в порядке объявления.
+     */
+    public List<String> enumConstants() {
+        Object[] constants = this.type.getEnumConstants();
         if (constants == null) {
             return List.of();
         }
@@ -133,14 +126,20 @@ public final class ClassApi {
     }
 
     /**
-     * Массив создаётся не конструктором, а фабрикой {@code java.lang.reflect.Array}.
-     * Это отдельная ветка API, которую легко упустить.
+     * Новый массив этого типа элементов.
+     * <p>
+     * Массив создаётся не конструктором, а фабрикой {@link Array} — отдельная
+     * ветка API, которую легко упустить.
      */
-    public static Object newArray(Class<?> componentType, int length) {
-        return java.lang.reflect.Array.newInstance(componentType, length);
+    public Object array(int length) {
+        return Array.newInstance(this.type, length);
     }
 
-    public static Constructor<?>[] constructors(Class<?> type) {
-        return type.getDeclaredConstructors();
+    private void collect(Class<?> from, Set<String> sink) {
+        for (Class<?> each : from.getInterfaces()) {
+            if (sink.add(each.getSimpleName())) {
+                collect(each, sink);
+            }
+        }
     }
 }

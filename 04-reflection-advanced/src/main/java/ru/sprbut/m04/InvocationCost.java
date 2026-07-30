@@ -1,122 +1,79 @@
 package ru.sprbut.m04;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * Слайд 33: «Рефлексия медленнее прямого вызова».
  * <p>
- * Здесь эта фраза измеряется — а не принимается на веру. Замер намеренно
- * <b>не</b> микробенчмарк уровня JMH: цель не получить точные наносекунды,
- * а показать порядок величины и, главное, разницу между «искать каждый раз»
- * и «искать один раз, вызывать много».
+ * Здесь эта фраза измеряется, а не принимается на веру. Замер намеренно
+ * <b>не</b> микробенчмарк уровня JMH: цель — не точные наносекунды, а порядок
+ * величины и, главное, разница между «искать каждый раз» и «искать один раз,
+ * вызывать много».
  * <p>
- * Тесты на этих числах ничего не утверждают о скорости — только о том, что
- * все четыре способа дают одинаковый результат. Замеры на CI флаки по природе.
+ * Тесты на этих числах ничего не утверждают о скорости — только о том, что все
+ * четыре способа дают одинаковый результат. Замеры на CI флаки по природе,
+ * и тест, зависящий от них, ломался бы через раз.
  */
 public final class InvocationCost {
 
-    private static final MethodHandle CACHED_HANDLE = cachedHandle();
-    private static final Method CACHED_METHOD = cachedMethod();
+    private final Target target;
 
-    private InvocationCost() {
+    private final int iterations;
+
+    public InvocationCost(Target target, int iterations) {
+        this.target = target;
+        this.iterations = iterations;
     }
 
-    private static MethodHandle cachedHandle() {
-        try {
-            return MethodHandles.lookup().findVirtual(Target.class, "add",
-                    MethodType.methodType(int.class, int.class, int.class));
-        } catch (ReflectiveOperationException e) {
-            throw new ExceptionInInitializerError(e);
+    /**
+     * Прямой вызов — эталон.
+     */
+    public int direct() {
+        int sum = 0;
+        for (int step = 0; step < this.iterations; step++) {
+            sum = this.target.add(sum, 1);
         }
-    }
-
-    private static Method cachedMethod() {
-        try {
-            return Target.class.getDeclaredMethod("add", int.class, int.class);
-        } catch (NoSuchMethodException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
-
-    /** Прямой вызов — эталон. */
-    public static int direct(Target target, int iterations) {
-        int acc = 0;
-        for (int i = 0; i < iterations; i++) {
-            acc = target.add(acc, 1);
-        }
-        return acc;
+        return sum;
     }
 
     /**
      * Худший вариант: поиск метода на каждой итерации. Так писать нельзя,
      * но именно так выглядит наивный код «на рефлексии».
      */
-    public static int reflectionWithLookup(Target target, int iterations) throws ReflectiveOperationException {
-        int acc = 0;
-        for (int i = 0; i < iterations; i++) {
-            Method method = Target.class.getDeclaredMethod("add", int.class, int.class);
-            acc = (int) method.invoke(target, acc, 1);
+    public int searching() throws ReflectiveOperationException {
+        int sum = 0;
+        for (int step = 0; step < this.iterations; step++) {
+            Method found = Target.class.getDeclaredMethod("add", int.class, int.class);
+            sum = (int) found.invoke(this.target, sum, 1);
         }
-        return acc;
-    }
-
-    /** Метод найден один раз и закэширован — минимально приемлемый вариант. */
-    public static int reflectionCached(Target target, int iterations) throws ReflectiveOperationException {
-        int acc = 0;
-        for (int i = 0; i < iterations; i++) {
-            acc = (int) CACHED_METHOD.invoke(target, acc, 1);
-        }
-        return acc;
+        return sum;
     }
 
     /**
-     * {@code MethodHandle} в {@code static final} поле: JIT видит его как константу
-     * и может заинлайнить вызов почти как прямой.
+     * Метод найден один раз и переиспользуется — минимально приемлемый вариант.
      */
-    public static int methodHandle(Target target, int iterations) throws Throwable {
-        int acc = 0;
-        for (int i = 0; i < iterations; i++) {
-            acc = (int) CACHED_HANDLE.invokeExact(target, acc, 1);
+    public int cached() throws ReflectiveOperationException {
+        Method found = Target.class.getDeclaredMethod("add", int.class, int.class);
+        int sum = 0;
+        for (int step = 0; step < this.iterations; step++) {
+            sum = (int) found.invoke(this.target, sum, 1);
         }
-        return acc;
+        return sum;
     }
 
     /**
-     * Прогоняет все четыре способа и возвращает время в наносекундах.
-     * Полезно запустить руками; в тестах используется только для проверки
-     * совпадения результатов.
+     * Через {@link MethodHandle}: доступ проверен при создании, и JIT способен
+     * встроить такой вызов почти как прямой.
      */
-    public static Map<String, Long> benchmark(int iterations) throws Throwable {
-        Target target = new Target();
-        Map<String, Long> timings = new LinkedHashMap<>();
-
-        long start = System.nanoTime();
-        direct(target, iterations);
-        timings.put("direct", System.nanoTime() - start);
-
-        start = System.nanoTime();
-        methodHandle(target, iterations);
-        timings.put("methodHandle", System.nanoTime() - start);
-
-        start = System.nanoTime();
-        reflectionCached(target, iterations);
-        timings.put("reflectionCached", System.nanoTime() - start);
-
-        start = System.nanoTime();
-        reflectionWithLookup(target, iterations);
-        timings.put("reflectionWithLookup", System.nanoTime() - start);
-
-        return timings;
-    }
-
-    public static class Target {
-        public int add(int a, int b) {
-            return a + b;
+    public int handle() throws Throwable {
+        MethodHandle found = new Handles(Target.class).virtual(
+            "add", int.class, int.class, int.class
+        );
+        int sum = 0;
+        for (int step = 0; step < this.iterations; step++) {
+            sum = (int) found.invokeExact(this.target, sum, 1);
         }
+        return sum;
     }
 }

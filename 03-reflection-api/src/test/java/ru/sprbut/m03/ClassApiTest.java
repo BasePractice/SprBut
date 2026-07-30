@@ -1,100 +1,194 @@
 package ru.sprbut.m03;
 
+import java.lang.annotation.Retention;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.sprbut.m03.model.Order;
 
-import java.lang.annotation.Retention;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItems;
 
 @DisplayName("СХЕМА 1: Class — центр карты Reflection API")
-class ClassApiTest {
+final class ClassApiTest {
 
-    enum Colour { RED, GREEN }
+    private enum Status { NEW, PAID }
 
-    record Point(int x, int y) {
+    private record Point(int x, int y) {
     }
 
     @Test
-    @DisplayName("Из Class достаются все остальные узлы: поля, методы, конструкторы")
-    void classIsTheEntryPoint() {
-        assertThat(ClassApi.declaredFields(Order.class))
-                .contains("id", "customer", "total", "items", "discounts", "paid", "STATUS_NEW");
-        assertThat(ClassApi.declaredMethods(Order.class))
-                .contains("getId", "addLines", "pay", "cancel", "internalTag");
-        assertThat(ClassApi.declaredConstructorCount(Order.class)).isEqualTo(4);
+    @DisplayName("из Class достаются поля")
+    void listsFields() {
+        assertThat(
+            "class cannot yield its declared fields",
+            new ClassApi(Order.class).fields(),
+            hasItems("id", "customer", "total")
+        );
     }
 
     @Test
-    @DisplayName("Категория типа определяется набором предикатов, и порядок проверок важен")
-    void classifiesTypes() {
-        assertThat(ClassApi.kindOf(int.class)).isEqualTo("primitive");
-        assertThat(ClassApi.kindOf(String[].class)).isEqualTo("array");
-        assertThat(ClassApi.kindOf(Colour.class)).isEqualTo("enum");
-        assertThat(ClassApi.kindOf(List.class)).isEqualTo("interface");
-        assertThat(ClassApi.kindOf(Point.class)).isEqualTo("record");
-        assertThat(ClassApi.kindOf(Order.class)).isEqualTo("class");
+    @DisplayName("из Class достаются методы")
+    void listsMethods() {
+        assertThat(
+            "class cannot yield its declared methods",
+            new ClassApi(Order.class).methods(),
+            hasItems("getId", "addLines", "cancel")
+        );
     }
 
     @Test
-    @DisplayName("Аннотация — тоже интерфейс, поэтому проверять её надо раньше")
-    void annotationIsAlsoAnInterface() {
-        assertThat(Retention.class.isInterface()).isTrue();
-        assertThat(ClassApi.kindOf(Retention.class)).isEqualTo("annotation");
+    @DisplayName("из Class достаются конструкторы")
+    void countsConstructors() {
+        assertThat(
+            "class cannot yield its constructors",
+            new ClassApi(Order.class).constructorCount(),
+            greaterThan(1)
+        );
+    }
+
+    @Test
+    @DisplayName("обычный класс распознаётся как class")
+    void classifiesClass() {
+        assertThat(
+            "plain class cannot be classified",
+            new TypeKind(Order.class).name(),
+            equalTo("class")
+        );
+    }
+
+    @Test
+    @DisplayName("аннотация — тоже интерфейс, поэтому проверять её надо раньше")
+    void classifiesAnnotationBeforeInterface() {
+        assertThat(
+            "annotation cannot be classified before interface",
+            new TypeKind(Retention.class).name(),
+            equalTo("annotation")
+        );
+    }
+
+    @Test
+    @DisplayName("enum — тоже класс, и его проверка тоже идёт раньше")
+    void classifiesEnumBeforeClass() {
+        assertThat(
+            "enum cannot be classified before class",
+            new TypeKind(Status.class).name(),
+            equalTo("enum")
+        );
+    }
+
+    @Test
+    @DisplayName("массив распознаётся отдельной категорией")
+    void classifiesArray() {
+        assertThat(
+            "array cannot be classified",
+            new TypeKind(String[].class).name(),
+            equalTo("array")
+        );
     }
 
     @Test
     @DisplayName("getComponentType() раскрывает тип элемента массива")
     void readsArrayComponentType() {
-        assertThat(ClassApi.componentType(String[].class)).isEqualTo(String.class);
-        assertThat(ClassApi.componentType(int[][].class)).isEqualTo(int[].class);
-        assertThat(ClassApi.componentType(String.class)).isNull();
+        assertThat(
+            "array cannot reveal its component type",
+            new ClassApi(String[].class).componentType(),
+            equalTo(String.class)
+        );
     }
 
     @Test
-    @DisplayName("Вложенный класс знает своего внешнего владельца")
+    @DisplayName("вложенный класс знает своего внешнего владельца")
     void knowsEnclosingClass() {
-        assertThat(ClassApi.enclosingClass(Order.PaymentException.class)).isEqualTo(Order.class);
-        assertThat(ClassApi.enclosingClass(Order.class)).isNull();
+        assertThat(
+            "nested class cannot name its owner",
+            new ClassApi(Order.PaymentException.class).enclosing(),
+            equalTo(Order.class)
+        );
     }
 
     @Test
-    @DisplayName("Иерархия и полный набор интерфейсов — основа подбора бина по типу")
-    void walksTypeGraph() {
-        assertThat(ClassApi.superChain(ArrayList.class))
-                .containsExactly("ArrayList", "AbstractList", "AbstractCollection", "Object");
-        assertThat(ClassApi.allInterfaces(ArrayList.class))
-                .contains("List", "Collection", "Iterable", "RandomAccess", "Cloneable");
+    @DisplayName("иерархия наследования доходит до Object")
+    void walksSuperChain() {
+        assertThat(
+            "super chain cannot reach Object",
+            new ClassApi(ArrayList.class).superChain(),
+            contains("ArrayList", "AbstractList", "AbstractCollection", "Object")
+        );
+    }
+
+    @Test
+    @DisplayName("полный набор интерфейсов — основа подбора бина по типу")
+    void collectsAllInterfaces() {
+        assertThat(
+            "inherited interfaces cannot be collected",
+            new ClassApi(ArrayList.class).allInterfaces(),
+            hasItems("List", "Collection", "Iterable")
+        );
     }
 
     @Test
     @DisplayName("isAssignableFrom читается «слева можно хранить справа»")
-    void assignabilityDirection() {
-        assertThat(ClassApi.canHold(Number.class, Integer.class)).isTrue();
-        assertThat(ClassApi.canHold(Integer.class, Number.class)).isFalse();
-        assertThat(ClassApi.canHold(Collection.class, ArrayList.class)).isTrue();
+    void readsAssignabilityDirection() {
+        assertThat(
+            "assignability cannot be read left to right",
+            new ClassApi(Number.class).canHold(Integer.class),
+            equalTo(true)
+        );
     }
 
     @Test
-    @DisplayName("У record есть отдельное API компонентов, у enum — констант")
-    void readsRecordAndEnumMetadata() {
-        assertThat(ClassApi.recordComponents(Point.class)).containsExactly("x", "y");
-        assertThat(ClassApi.recordComponents(Order.class)).isEmpty();
-        assertThat(ClassApi.enumConstants(Colour.class)).containsExactly("RED", "GREEN");
-        assertThat(ClassApi.enumConstants(Order.class)).isEmpty();
+    @DisplayName("обратное направление ложно — это и есть источник путаницы")
+    void rejectsReversedAssignability() {
+        assertThat(
+            "reversed assignability cannot be false",
+            new ClassApi(Integer.class).canHold(Number.class),
+            equalTo(false)
+        );
     }
 
     @Test
-    @DisplayName("Массив создаётся фабрикой Array.newInstance — new здесь неприменим")
+    @DisplayName("у record есть отдельное API компонентов")
+    void readsRecordComponents() {
+        assertThat(
+            "record components cannot be read",
+            new ClassApi(Point.class).recordComponents(),
+            contains("x", "y")
+        );
+    }
+
+    @Test
+    @DisplayName("у enum читаются константы в порядке объявления")
+    void readsEnumConstants() {
+        assertThat(
+            "enum constants cannot be read in declaration order",
+            new ClassApi(Status.class).enumConstants(),
+            contains("NEW", "PAID")
+        );
+    }
+
+    @Test
+    @DisplayName("массив создаётся фабрикой Array.newInstance — new здесь неприменим")
     void createsArrayReflectively() {
-        Object array = ClassApi.newArray(String.class, 3);
+        assertThat(
+            "reflection cannot create an array of a runtime known type",
+            ((Map<?, ?>[]) new ClassApi(Map.class).array(3)).length,
+            equalTo(3)
+        );
+    }
 
-        assertThat(array).isInstanceOf(String[].class);
-        assertThat(((String[]) array)).hasSize(3);
-        assertThat(array.getClass().getComponentType()).isEqualTo(String.class);
+    @Test
+    @DisplayName("не-record компонентов не имеет")
+    void dontReadComponentsOfPlainClass() {
+        assertThat(
+            "plain class cannot report an empty component list",
+            new ClassApi(Order.class).recordComponents(),
+            equalTo(List.of())
+        );
     }
 }

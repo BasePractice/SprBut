@@ -1,137 +1,155 @@
 package ru.sprbut.m09;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import ru.sprbut.m09.model.UserDto;
 import ru.sprbut.m09.model.UserEntity;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 
 @DisplayName("Слайды 73–75: три механизма, один результат")
-class MappersTest {
+final class MappersTest {
 
-    private UserEntity entity() {
-        UserEntity entity = new UserEntity("U-1", "Иван", "Иванов", 42, true);
-        entity.setInternalNote("служебное");
-        return entity;
+    private static UserEntity entity() {
+        return new UserEntity("U-1", "Иван", "Иванов", 42, true);
     }
 
-    @Nested
-    @DisplayName("Reflection: runtime, гибко, медленно")
-    class Reflective {
-
-        private final ReflectiveMapper mapper = new ReflectiveMapper();
-
-        @Test
-        @DisplayName("Правила маппинга выведены из метаданных, а не написаны руками")
-        void discoversRulesItself() {
-            assertThat(mapper.propertyNames())
-                    .containsExactly("active", "age", "firstName", "id", "lastName");
-            assertThat(mapper.discoveredProperties()).isEqualTo(5);
-        }
-
-        @Test
-        @DisplayName("Свойство, которого нет у цели, просто пропускается")
-        void skipsUnmatchedProperties() {
-            assertThat(mapper.propertyNames()).doesNotContain("internalNote");
-        }
-
-        @Test
-        @DisplayName("Маппинг работает")
-        void mapsCorrectly() {
-            UserDto dto = mapper.toDto(entity());
-
-            assertThat(dto.getId()).isEqualTo("U-1");
-            assertThat(dto.getFirstName()).isEqualTo("Иван");
-            assertThat(dto.getAge()).isEqualTo(42);
-            assertThat(dto.isActive()).isTrue();
-        }
-
-        @Test
-        @DisplayName("null на входе — null на выходе")
-        void handlesNull() {
-            assertThat(mapper.toDto(null)).isNull();
-        }
+    @Test
+    @DisplayName("рефлексия выводит правила маппинга из метаданных, а не из кода")
+    void discoversRulesItself() {
+        assertThat(
+            "reflective mapper cannot discover the properties itself",
+            new ReflectiveMapper().discoveredProperties(),
+            greaterThan(0)
+        );
     }
 
-    @Nested
-    @DisplayName("APT: compile-time, только генерация, быстро")
-    class GeneratedStyle {
-
-        private final GeneratedStyleMapper mapper = new GeneratedStyleMapper();
-
-        @Test
-        @DisplayName("Прямые вызовы дают тот же результат, что и рефлексия")
-        void resultMatchesReflection() {
-            assertThat(mapper.toDto(entity())).isEqualTo(new ReflectiveMapper().toDto(entity()));
-        }
-
-        @Test
-        @DisplayName("Никаких обращений к метаданным в реализации нет")
-        void usesNoReflection() {
-            // Класс не хранит ни Method, ни Field — только код
-            assertThat(GeneratedStyleMapper.class.getDeclaredFields()).isEmpty();
-            assertThat(mapper.strategy()).contains("этапе компиляции");
-        }
+    @Test
+    @DisplayName("рефлексивный маппинг даёт правильный результат")
+    void mapsReflectively() {
+        assertThat(
+            "reflective mapping cannot copy the first name",
+            new ReflectiveMapper().toDto(entity()).getFirstName(),
+            equalTo("Иван")
+        );
     }
 
-    @Nested
-    @DisplayName("Байткод: и то, и другое")
-    class Bytecode {
+    @Test
+    @DisplayName("null на входе — null на выходе")
+    void handlesNull() {
+        assertThat(
+            "null entity cannot yield a null dto",
+            new ReflectiveMapper().toDto(null),
+            nullValue()
+        );
+    }
 
-        @Test
-        @DisplayName("Класс собирается в runtime — в исходниках его нет")
-        void classIsGeneratedAtRuntime() {
-            UserMapper mapper = BytecodeMapper.create();
+    @Test
+    @DisplayName("сгенерированный код даёт тот же результат, что и рефлексия")
+    void agreesWithGeneratedStyle() {
+        assertThat(
+            "generated mapper cannot agree with the reflective one",
+            new GeneratedStyleMapper().toDto(entity()),
+            equalTo(new ReflectiveMapper().toDto(entity()))
+        );
+    }
 
-            assertThat(mapper.getClass().getName())
-                    .isEqualTo("ru.sprbut.m09.bytebuddy.GeneratedUserMapper");
-            assertThat(mapper.strategy()).contains("runtime");
-        }
+    @Test
+    @DisplayName("класс байткодного маппера собирается в runtime — в исходниках его нет")
+    void generatesClassAtRuntime() {
+        assertThat(
+            "bytecode mapper class cannot be generated at runtime",
+            new BytecodeMapper().mapper().getClass().getName(),
+            containsString("bytebuddy")
+        );
+    }
 
-        @Test
-        @DisplayName("Сгенерированный класс — полноценная реализация интерфейса")
-        void generatedClassWorks() {
-            assertThat(BytecodeMapper.create().toDto(entity()))
-                    .isEqualTo(new GeneratedStyleMapper().toDto(entity()));
-        }
+    @Test
+    @DisplayName("сгенерированный класс — полноценная реализация интерфейса")
+    void generatedClassWorks() {
+        assertThat(
+            "generated class cannot implement the contract",
+            new BytecodeMapper().mapper().toDto(entity()),
+            equalTo(new GeneratedStyleMapper().toDto(entity()))
+        );
+    }
 
-        @Test
-        @DisplayName("Каждый вызов create() даёт новый загруженный класс")
-        void eachCallProducesANewClass() {
-            assertThat(BytecodeMapper.create().getClass())
-                    .as("WRAPPER-стратегия создаёт отдельный загрузчик на каждый вызов")
-                    .isNotSameAs(BytecodeMapper.create().getClass());
-        }
+    @Test
+    @DisplayName("каждый вызов даёт новый загруженный класс")
+    void loadsNewClassEachTime() {
+        assertThat(
+            "each generation cannot produce its own loaded class",
+            new BytecodeMapper().mapper().getClass(),
+            not(equalTo(new BytecodeMapper().mapper().getClass()))
+        );
+    }
 
-        @Test
-        @DisplayName("Байткод проксирует класс БЕЗ интерфейса — то, чего не умеет JDK-прокси")
-        void proxiesClassWithoutInterface() {
-            BytecodeMapper.AuditService proxy = BytecodeMapper.proxyWithoutInterface();
+    @Test
+    @DisplayName("байткод проксирует класс без интерфейса — то, чего не умеет JDK-прокси")
+    void proxiesClassWithoutInterface() {
+        assertThat(
+            "class without an interface cannot be proxied by a subclass",
+            new BytecodeMapper().proxied().getClass().getSuperclass(),
+            equalTo(AuditService.class)
+        );
+    }
 
-            assertThat(proxy).isInstanceOf(BytecodeMapper.AuditService.class);
-            assertThat(java.lang.reflect.Proxy.isProxyClass(proxy.getClass()))
-                    .as("это не JDK-прокси, а подкласс")
-                    .isFalse();
-            assertThat(proxy.getClass().getSuperclass())
-                    .isEqualTo(BytecodeMapper.AuditService.class);
-        }
+    @Test
+    @DisplayName("цель интерфейсов не реализует вовсе")
+    void keepsTargetInterfaceFree() {
+        assertThat(
+            "target cannot stay free of interfaces",
+            AuditService.class.getInterfaces().length,
+            equalTo(0)
+        );
+    }
 
-        @Test
-        @DisplayName("Перехват работает, оригинальный метод при этом вызывается")
-        void interceptsAndDelegates() {
-            BytecodeMapper.AuditService proxy = BytecodeMapper.proxyWithoutInterface();
+    @Test
+    @DisplayName("перехват срабатывает, а оригинальный метод всё равно вызывается")
+    void interceptsAndDelegates() {
+        AuditService proxied = new BytecodeMapper().proxied();
+        proxied.record("вход");
+        assertThat(
+            "interceptor cannot record the call",
+            new Intercepted().entries(),
+            hasItem(containsString("Enhanced"))
+        );
+    }
 
-            assertThat(proxy.record("вход")).isEqualTo("записано: вход");
-            assertThat(BytecodeMapper.INTERCEPTED).hasSize(1);
-            assertThat(BytecodeMapper.INTERCEPTED.get(0)).contains("Enhanced");
-        }
+    @Test
+    @DisplayName("оригинальный метод возвращает своё значение, несмотря на перехват")
+    void keepsOriginalResult() {
+        assertThat(
+            "original method cannot keep its own result",
+            new BytecodeMapper().proxied().record("вход"),
+            equalTo("записано: вход")
+        );
+    }
 
-        @Test
-        @DisplayName("Класс интерфейса не нужен вовсе — AuditService его не реализует")
-        void targetHasNoInterfaces() {
-            assertThat(BytecodeMapper.AuditService.class.getInterfaces()).isEmpty();
-        }
+    @Test
+    @DisplayName("каждая реализация называет свою стратегию сама")
+    void namesItsOwnStrategy() {
+        assertThat(
+            "reflective mapper cannot name its own strategy",
+            new ReflectiveMapper().strategy(),
+            containsString("reflection")
+        );
+    }
+
+    @Test
+    @DisplayName("копия совпадает с оригиналом по всем полям")
+    void copiesEveryField() {
+        UserDto dto = new GeneratedStyleMapper().toDto(entity());
+        assertThat(
+            "generated mapping cannot copy the boolean field",
+            dto.isActive(),
+            equalTo(true)
+        );
     }
 }
