@@ -10,8 +10,22 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.comparesEqualTo;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Расширенный пример: своя @Retryable через AOP и обход self-invocation")
 class RetryAspectTest {
@@ -44,8 +58,16 @@ class RetryAspectTest {
         @Test
         @DisplayName("Успешный вызов проходит с первой попытки")
         void succeedsImmediately() {
-            assertThat(payments.charge("ORD-1")).isEqualTo("оплачен ORD-1");
-            assertThat(aspect.log()).containsExactly("success:charge:попытка1");
+            assertThat(
+                "cannot verify that succeeds immediately",
+                payments.charge("ORD-1"),
+                equalTo("оплачен ORD-1")
+            );
+            assertThat(
+                "cannot verify that succeeds immediately",
+                aspect.log(),
+                contains("success:charge:попытка1")
+            );
         }
 
         @Test
@@ -53,11 +75,22 @@ class RetryAspectTest {
         void retriesUntilSuccess() {
             payments.failFirst(2);
 
-            assertThat(payments.charge("ORD-2")).isEqualTo("оплачен ORD-2");
+            assertThat(
+                "cannot verify that retries until success",
+                payments.charge("ORD-2"),
+                equalTo("оплачен ORD-2")
+            );
 
-            assertThat(payments.executions()).isEqualTo(3);
-            assertThat(aspect.log()).containsExactly(
-                    "fail:charge:попытка1", "fail:charge:попытка2", "success:charge:попытка3");
+            assertThat(
+                "cannot verify that retries until success",
+                payments.executions(),
+                equalTo(3)
+            );
+            assertThat(
+                "cannot verify that retries until success",
+                aspect.log(),
+                contains( "fail:charge:попытка1", "fail:charge:попытка2", "success:charge:попытка3")
+            );
         }
 
         @Test
@@ -65,12 +98,22 @@ class RetryAspectTest {
         void rethrowsAfterExhaustion() {
             payments.failFirst(99);
 
-            assertThatThrownBy(() -> payments.charge("ORD-3"))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("сбой платежа №3");
+            assertThat(
+                "cannot verify that rethrows after exhaustion",
+                assertThrows(IllegalStateException.class, () -> payments.charge("ORD-3")).getMessage(),
+                containsString("сбой платежа №3")
+            );
 
-            assertThat(aspect.log()).contains("exhausted:charge");
-            assertThat(payments.executions()).isEqualTo(3);
+            assertThat(
+                "cannot verify that rethrows after exhaustion",
+                aspect.log(),
+                hasItems("exhausted:charge")
+            );
+            assertThat(
+                "cannot verify that rethrows after exhaustion",
+                payments.executions(),
+                equalTo(3)
+            );
         }
 
         @Test
@@ -82,8 +125,16 @@ class RetryAspectTest {
             payments.charge("ORD-4");
             executor.execute("ORD-5");
 
-            assertThat(aspect.attemptsOf("charge")).isEqualTo(2);
-            assertThat(aspect.attemptsOf("execute")).isEqualTo(2);
+            assertThat(
+                "cannot verify that pointcut is annotation driven",
+                aspect.attemptsOf("charge"),
+                equalTo(2L)
+            );
+            assertThat(
+                "cannot verify that pointcut is annotation driven",
+                aspect.attemptsOf("execute"),
+                equalTo(2L)
+            );
         }
     }
 
@@ -96,12 +147,22 @@ class RetryAspectTest {
         void thisCallBypassesTheProxy() {
             payments.failFirst(1);
 
-            assertThatThrownBy(() -> payments.chargeViaThis("ORD-6"))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("сбой платежа №1");
+            assertThat(
+                "cannot verify that this call bypasses the proxy",
+                assertThrows(IllegalStateException.class, () -> payments.chargeViaThis("ORD-6")).getMessage(),
+                containsString("сбой платежа №1")
+            );
 
-            assertThat(payments.executions()).isEqualTo(1);
-            assertThat(aspect.log()).noneMatch(e -> e.contains(":charge:"));
+            assertThat(
+                "cannot verify that this call bypasses the proxy",
+                payments.executions(),
+                equalTo(1)
+            );
+            assertThat(
+                "cannot verify that this call bypasses the proxy",
+                aspect.log().stream().anyMatch(e -> e.contains(":charge:")),
+                equalTo(false)
+            );
         }
 
         @Test
@@ -109,10 +170,22 @@ class RetryAspectTest {
         void selfInjectionRestoresTheAspect() {
             payments.failFirst(1);
 
-            assertThat(payments.chargeViaSelf("ORD-7")).isEqualTo("оплачен ORD-7");
+            assertThat(
+                "cannot verify that self injection restores the aspect",
+                payments.chargeViaSelf("ORD-7"),
+                equalTo("оплачен ORD-7")
+            );
 
-            assertThat(payments.executions()).isEqualTo(2);
-            assertThat(aspect.attemptsOf("charge")).isEqualTo(2);
+            assertThat(
+                "cannot verify that self injection restores the aspect",
+                payments.executions(),
+                equalTo(2)
+            );
+            assertThat(
+                "cannot verify that self injection restores the aspect",
+                aspect.attemptsOf("charge"),
+                equalTo(2L)
+            );
         }
 
         @Test
@@ -120,9 +193,17 @@ class RetryAspectTest {
         void aopContextRestoresTheAspect() {
             payments.failFirst(1);
 
-            assertThat(payments.chargeViaAopContext("ORD-8")).isEqualTo("оплачен ORD-8");
+            assertThat(
+                "cannot verify that aop context restores the aspect",
+                payments.chargeViaAopContext("ORD-8"),
+                equalTo("оплачен ORD-8")
+            );
 
-            assertThat(aspect.attemptsOf("charge")).isEqualTo(2);
+            assertThat(
+                "cannot verify that aop context restores the aspect",
+                aspect.attemptsOf("charge"),
+                equalTo(2L)
+            );
         }
 
         @Test
@@ -130,10 +211,22 @@ class RetryAspectTest {
         void separateBeanIsTheCleanSolution() {
             executor.failFirst(2);
 
-            assertThat(payments.chargeViaSeparateBean("ORD-9")).isEqualTo("оплачен ORD-9");
+            assertThat(
+                "cannot verify that separate bean is the clean solution",
+                payments.chargeViaSeparateBean("ORD-9"),
+                equalTo("оплачен ORD-9")
+            );
 
-            assertThat(executor.executions()).isEqualTo(3);
-            assertThat(aspect.attemptsOf("execute")).isEqualTo(3);
+            assertThat(
+                "cannot verify that separate bean is the clean solution",
+                executor.executions(),
+                equalTo(3)
+            );
+            assertThat(
+                "cannot verify that separate bean is the clean solution",
+                aspect.attemptsOf("execute"),
+                equalTo(3L)
+            );
         }
 
         @Test
@@ -142,9 +235,11 @@ class RetryAspectTest {
             try (var plain = new AnnotationConfigApplicationContext(PlainConfig.class)) {
                 PaymentService service = plain.getBean(PaymentService.class);
 
-                assertThatThrownBy(() -> service.chargeViaAopContext("ORD-10"))
-                        .isInstanceOf(IllegalStateException.class)
-                        .hasMessageContaining("Cannot find current proxy");
+                assertThat(
+                    "cannot verify that aop context needs expose proxy",
+                    assertThrows(IllegalStateException.class, () -> service.chargeViaAopContext("ORD-10")).getMessage(),
+                    containsString("Cannot find current proxy")
+                );
             }
         }
 
@@ -163,9 +258,21 @@ class RetryAspectTest {
         @Test
         @DisplayName("Из контекста приходит CGLIB-подкласс, а не сам PaymentService")
         void contextReturnsAProxy() {
-            assertThat(org.springframework.aop.support.AopUtils.isCglibProxy(payments)).isTrue();
-            assertThat(payments.getClass()).isNotEqualTo(PaymentService.class);
-            assertThat(payments.getClass().getSuperclass()).isEqualTo(PaymentService.class);
+            assertThat(
+                "cannot verify that context returns a proxy",
+                org.springframework.aop.support.AopUtils.isCglibProxy(payments),
+                equalTo(true)
+            );
+            assertThat(
+                "proxy class cannot differ from the target class",
+                payments.getClass(),
+                not(equalTo(PaymentService.class))
+            );
+            assertThat(
+                "cannot verify that context returns a proxy",
+                payments.getClass().getSuperclass(),
+                equalTo(PaymentService.class)
+            );
         }
 
         @Test
@@ -175,7 +282,11 @@ class RetryAspectTest {
             payments.charge("ORD-11");
 
             // executions() — метод, вызов делегируется настоящему бину
-            assertThat(payments.executions()).isEqualTo(2);
+            assertThat(
+                "cannot verify that state is reachable only through methods",
+                payments.executions(),
+                equalTo(2)
+            );
         }
     }
 }

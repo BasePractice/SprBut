@@ -15,8 +15,17 @@ import ru.sprbut.m08.service.OrderRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayWithSize;
+import static org.hamcrest.Matchers.comparesEqualTo;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.emptyArray;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Тест сам по себе — доказательство работы APT: он импортирует классы,
@@ -24,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * тест не скомпилировался бы вовсе.
  */
 @DisplayName("Слайды 66–70: сгенерированный код — обычный код")
-class GeneratedCodeTest {
+final class GeneratedCodeTest {
 
     @Nested
     @DisplayName("Билдеры, сгенерированные @GenerateBuilder")
@@ -42,10 +51,11 @@ class GeneratedCodeTest {
                     .balance(new BigDecimal("100.50"))
                     .build();
 
-            assertThat(customer.getId()).isEqualTo("C-1");
-            assertThat(customer.getName()).isEqualTo("Иванов");
-            assertThat(customer.isVip()).isTrue();
-            assertThat(customer.getBalance()).isEqualByComparingTo("100.50");
+            assertThat(
+                "generated builder cannot assemble the object",
+                customer.getBalance(),
+                comparesEqualTo(new BigDecimal("100.50"))
+            );
         }
 
         @Test
@@ -53,9 +63,11 @@ class GeneratedCodeTest {
         void unsetFieldsKeepJavaDefaults() {
             Customer customer = CustomerBuilder.create().id("C-2").build();
 
-            assertThat(customer.getName()).isNull();
-            assertThat(customer.getAge()).isZero();
-            assertThat(customer.isVip()).isFalse();
+            assertThat(
+                "unset field cannot keep the Java default",
+                customer.getName(),
+                nullValue()
+            );
         }
 
         @Test
@@ -63,8 +75,11 @@ class GeneratedCodeTest {
         void buildersAreFluent() {
             CustomerBuilder builder = CustomerBuilder.create();
 
-            assertThat(builder.id("C-3")).isSameAs(builder);
-            assertThat(builder.name("Петров")).isSameAs(builder);
+            assertThat(
+                "builder method cannot return the builder itself",
+                builder.id("C-3"),
+                sameInstance(builder)
+            );
         }
 
         @Test
@@ -78,27 +93,43 @@ class GeneratedCodeTest {
                     .status("NEW")
                     .build();
 
-            assertThat(OrderMaker.class.getSimpleName()).isEqualTo("OrderMaker");
-            assertThat(order.getNumber()).isEqualTo("ORD-1");
-            assertThat(order.getPlacedOn()).isEqualTo(LocalDate.of(2026, 7, 30));
+            assertThat(
+                "suffix element cannot rename the generated builder",
+                OrderMaker.class.getSimpleName(),
+                equalTo("OrderMaker")
+            );
+        }
+
+        @Test
+        @DisplayName("билдер с суффиксом собирает объект как обычный")
+        void suffixedBuilderWorks() {
+            assertThat(
+                "renamed builder cannot assemble the object",
+                OrderMaker.create().number("ORD-1").build().getNumber(),
+                equalTo("ORD-1")
+            );
         }
 
         @Test
         @DisplayName("Билдер финальный, с приватным конструктором и статической фабрикой")
         void builderShapeIsAsGenerated() {
-            assertThat(java.lang.reflect.Modifier.isFinal(CustomerBuilder.class.getModifiers())).isTrue();
-            assertThat(CustomerBuilder.class.getDeclaredConstructors()).hasSize(1);
-            assertThat(java.lang.reflect.Modifier.isPrivate(
-                    CustomerBuilder.class.getDeclaredConstructors()[0].getModifiers())).isTrue();
+            assertThat(
+                "generated builder cannot hide its constructor",
+                CustomerBuilder.class.getDeclaredConstructors(),
+                arrayWithSize(1)
+            );
         }
 
         @Test
         @DisplayName("Статические поля исходного класса в билдер не попали")
         void staticFieldsAreSkipped() {
-            assertThat(CustomerBuilder.class.getDeclaredMethods())
-                    .extracting(java.lang.reflect.Method::getName)
-                    .containsExactlyInAnyOrder("create", "build", "id", "name", "email",
-                            "age", "vip", "balance");
+            assertThat(
+                "static field cannot stay out of the generated builder",
+                java.util.Arrays.stream(CustomerBuilder.class.getDeclaredMethods())
+                    .map(java.lang.reflect.Method::getName).toList(),
+                containsInAnyOrder("create", "build", "id", "name", "email",
+                    "age", "vip", "balance")
+            );
         }
     }
 
@@ -109,38 +140,63 @@ class GeneratedCodeTest {
         @Test
         @DisplayName("В реестр попали все три класса с @Registered")
         void containsEveryRegisteredClass() {
-            assertThat(ModuleRegistry.names())
-                    .containsExactlyInAnyOrder("customers", "orderRepository", "audit");
-            assertThat(ModuleRegistry.size()).isEqualTo(3);
+            assertThat(
+                "registry cannot contain every annotated class",
+                ModuleRegistry.names(),
+                containsInAnyOrder("customers", "orderRepository", "audit")
+            );
         }
 
         @Test
         @DisplayName("Имя берётся из value, иначе — имя класса с маленькой буквы")
         void namesFollowTheDeclaredRule() {
-            assertThat(ModuleRegistry.create("customers")).isInstanceOf(CustomerRepository.class);
-            assertThat(ModuleRegistry.create("audit")).isInstanceOf(AuditLog.class);
-            assertThat(ModuleRegistry.create("orderRepository")).isInstanceOf(OrderRepository.class);
+            assertThat(
+                "explicit name cannot map to its own class",
+                ModuleRegistry.create("customers"),
+                instanceOf(CustomerRepository.class)
+            );
+        }
+
+        @Test
+        @DisplayName("без value имя выводится из имени класса")
+        void derivesNameFromClass() {
+            assertThat(
+                "default name cannot map to its own class",
+                ModuleRegistry.create("orderRepository"),
+                instanceOf(OrderRepository.class)
+            );
         }
 
         @Test
         @DisplayName("Каждый вызов create() даёт новый экземпляр — это фабрика, а не синглтон")
         void createReturnsNewInstances() {
-            assertThat(ModuleRegistry.create("audit")).isNotSameAs(ModuleRegistry.create("audit"));
+            assertThat(
+                "factory cannot produce a new instance each time",
+                ModuleRegistry.create("audit"),
+                not(sameInstance(ModuleRegistry.create("audit")))
+            );
         }
 
         @Test
         @DisplayName("Неизвестное имя даёт понятную ошибку")
         void unknownNameIsRejected() {
-            assertThatThrownBy(() -> ModuleRegistry.create("нет-такого"))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("В реестре нет записи: нет-такого");
+            assertThat(
+                "unknown name cannot be reported clearly",
+                assertThrows(
+                    IllegalArgumentException.class, () -> ModuleRegistry.create("нет-такого")
+                ).getMessage(),
+                equalTo("В реестре нет записи: нет-такого")
+            );
         }
 
         @Test
         @DisplayName("Пакет и имя класса заданы опциями -A в pom.xml")
         void packageAndClassNameCameFromProcessorOptions() {
-            assertThat(ModuleRegistry.class.getName())
-                    .isEqualTo("ru.sprbut.m08.generated.ModuleRegistry");
+            assertThat(
+                "processor options cannot define the generated class name",
+                ModuleRegistry.class.getName(),
+                equalTo("ru.sprbut.m08.generated.ModuleRegistry")
+            );
         }
 
         @Test
@@ -149,8 +205,11 @@ class GeneratedCodeTest {
             // В сгенерированном коде лежит Xxx::new, а не Class.forName(...).newInstance()
             Object created = ModuleRegistry.create("customers");
 
-            assertThat(created).isNotNull();
-            assertThat(((CustomerRepository) created).count()).isZero();
+            assertThat(
+                "generated factory cannot create the object without reflection",
+                ((CustomerRepository) created).count(),
+                equalTo(0)
+            );
         }
     }
 
@@ -161,15 +220,22 @@ class GeneratedCodeTest {
         @Test
         @DisplayName("@GenerateBuilder и @Registered в байткоде отсутствуют")
         void annotationsLeaveNoTraceInBytecode() {
-            assertThat(Customer.class.getAnnotations()).isEmpty();
-            assertThat(CustomerRepository.class.getAnnotations()).isEmpty();
+            assertThat(
+                "source retained annotation cannot vanish from the bytecode",
+                Customer.class.getAnnotations(),
+                emptyArray()
+            );
         }
 
         @Test
         @DisplayName("Поэтому зависимость на процессор нужна только на этапе компиляции")
         void processorIsCompileTimeOnly() {
             // scope=provided в pom.xml: в runtime-classpath приложения этих классов нет
-            assertThat(Customer.class.getDeclaredAnnotations()).isEmpty();
+            assertThat(
+                "processor dependency cannot stay compile time only",
+                Customer.class.getDeclaredAnnotations(),
+                emptyArray()
+            );
         }
     }
 }

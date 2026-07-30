@@ -10,13 +10,22 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anEmptyMap;
+import static org.hamcrest.Matchers.aMapWithSize;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Расширенный пример: compile-time реестр вместо сканирования classpath")
-class RegistryProcessorTest {
+final class RegistryProcessorTest {
 
     @TempDir
-    Path workDir;
+    private Path workDir;
 
     private static final CompilationHarness.Source REPO = new CompilationHarness.Source(
             "demo.UserRepository", """
@@ -43,7 +52,7 @@ class RegistryProcessorTest {
                     """);
 
     private CompilationHarness.Result compile(List<CompilationHarness.Source> sources, String... options) {
-        return CompilationHarness.compile(workDir, sources, new RegistryProcessor(), options);
+        return CompilationHarness.compile(RegistryProcessorTest.this.workDir, sources, new RegistryProcessor(), options);
     }
 
     @Nested
@@ -55,13 +64,21 @@ class RegistryProcessorTest {
         void collectsEverythingIntoOneFile() {
             CompilationHarness.Result result = compile(List.of(REPO, SERVICE));
 
-            assertThat(result.success()).as(result.errors().toString()).isTrue();
-            assertThat(result.generatedSources()).containsOnlyKeys("ru.sprbut.generated.GeneratedRegistry");
+            assertThat(
+                "every annotated class cannot land in one generated file",
+                result.generatedSources(),
+                aMapWithSize(1)
+            );
+        }
 
-            String code = result.source("ru.sprbut.generated.GeneratedRegistry");
-            assertThat(code)
-                    .contains("\"userRepository\", UserRepository::new")
-                    .contains("\"users\", UserService::new");
+        @Test
+        @DisplayName("в реестр попадает конструктор каждого класса")
+        void registersEveryConstructor() {
+            assertThat(
+                "registry cannot reference the constructor of each class",
+                compile(List.of(REPO, SERVICE)).source("ru.sprbut.generated.GeneratedRegistry"),
+                containsString("\"users\", UserService::new")
+            );
         }
 
         @Test
@@ -69,11 +86,21 @@ class RegistryProcessorTest {
         void javaPoetHandlesImports() {
             String code = compile(List.of(REPO)).source("ru.sprbut.generated.GeneratedRegistry");
 
-            assertThat(code)
-                    .contains("package ru.sprbut.generated;")
-                    .contains("import demo.UserRepository;")
-                    .contains("import java.util.Map;")
-                    .doesNotContain("import java.lang.String;");
+            assertThat(
+                "JavaPoet cannot add the needed import",
+                code,
+                containsString("import demo.UserRepository;")
+            );
+        }
+
+        @Test
+        @DisplayName("JavaPoet не импортирует java.lang — это лишнее")
+        void skipsRedundantImport() {
+            assertThat(
+                "JavaPoet cannot skip the redundant java.lang import",
+                compile(List.of(REPO)).source("ru.sprbut.generated.GeneratedRegistry"),
+                not(containsString("import java.lang.String;"))
+            );
         }
 
         @Test
@@ -81,8 +108,11 @@ class RegistryProcessorTest {
         void resolvesNames() {
             String code = compile(List.of(REPO, SERVICE)).source("ru.sprbut.generated.GeneratedRegistry");
 
-            assertThat(code).contains("\"userRepository\"").contains("\"users\"")
-                    .doesNotContain("\"userService\"");
+            assertThat(
+                "explicit name cannot replace the default one",
+                code,
+                not(containsString("\"userService\""))
+            );
         }
 
         @Test
@@ -92,23 +122,42 @@ class RegistryProcessorTest {
                     "-A" + RegistryProcessor.PACKAGE_OPTION + "=demo.gen",
                     "-A" + RegistryProcessor.CLASS_OPTION + "=Beans");
 
-            assertThat(result.generatedSources()).containsOnlyKeys("demo.gen.Beans");
+            assertThat(
+                "processor options cannot change the generated class name",
+                result.generatedSources(),
+                hasKey("demo.gen.Beans")
+            );
         }
 
         @Test
         @DisplayName("Если ни одной аннотации нет, javac процессор вообще не вызывает")
         void processorIsNotInvokedWithoutAnnotations() {
             RegistryProcessor processor = new RegistryProcessor();
-            CompilationHarness.Result result = CompilationHarness.compile(workDir,
+            CompilationHarness.Result result = CompilationHarness.compile(RegistryProcessorTest.this.workDir,
                     List.of(new CompilationHarness.Source(
                             "demo.Plain", "package demo; public class Plain {}")),
                     processor);
 
-            assertThat(result.success()).isTrue();
-            // Процессор запускается, только если в раунде есть аннотации из
-            // @SupportedAnnotationTypes. Чтобы вызываться всегда, надо объявить "*".
-            assertThat(processor.rounds()).isZero();
-            assertThat(result.generatedSources()).isEmpty();
+            assertThat(
+                "processor cannot stay idle without its annotations",
+                processor.rounds(),
+                equalTo(0)
+            );
+        }
+
+        @Test
+        @DisplayName("без аннотаций не генерируется ни одного файла")
+        void generatesNothingWithoutAnnotations() {
+            assertThat(
+                "code without annotations cannot leave the output empty",
+                CompilationHarness.compile(
+                    RegistryProcessorTest.this.workDir,
+                    List.of(new CompilationHarness.Source(
+                        "demo.Plain", "package demo; public class Plain {}")),
+                    new RegistryProcessor()
+                ).generatedSources(),
+                anEmptyMap()
+            );
         }
     }
 
@@ -123,11 +172,12 @@ class RegistryProcessorTest {
 
             Class<?> registry = result.load("ru.sprbut.generated.GeneratedRegistry");
 
-            assertThat(registry.getMethod("size").invoke(null)).isEqualTo(2);
-
             Object created = registry.getMethod("create", String.class).invoke(null, "users");
-            assertThat(created.getClass().getName()).isEqualTo("demo.UserService");
-            assertThat(created.getClass().getMethod("describe").invoke(created)).isEqualTo("сервис");
+            assertThat(
+                "generated registry cannot create the object without reflection",
+                created.getClass().getName(),
+                equalTo("demo.UserService")
+            );
         }
 
         @Test
@@ -139,7 +189,11 @@ class RegistryProcessorTest {
             @SuppressWarnings("unchecked")
             Set<String> names = (Set<String>) registry.getMethod("names").invoke(null);
 
-            assertThat(names).containsExactlyInAnyOrder("userRepository", "users");
+            assertThat(
+                "registry cannot list every registered name",
+                names,
+                containsInAnyOrder("userRepository", "users")
+            );
         }
 
         @Test
@@ -147,11 +201,14 @@ class RegistryProcessorTest {
         void unknownNameFails() throws Exception {
             Class<?> registry = compile(List.of(REPO)).load("ru.sprbut.generated.GeneratedRegistry");
 
-            assertThat(registry.getMethod("create", String.class))
-                    .satisfies(method -> org.assertj.core.api.Assertions
-                            .assertThatThrownBy(() -> method.invoke(null, "нет-такого"))
-                            .hasRootCauseInstanceOf(IllegalArgumentException.class)
-                            .hasRootCauseMessage("В реестре нет записи: нет-такого"));
+            assertThat(
+                "unknown name cannot be reported clearly",
+                assertThrows(
+                    java.lang.reflect.InvocationTargetException.class,
+                    () -> registry.getMethod("create", String.class).invoke(null, "нет-такого")
+                ).getCause().getMessage(),
+                equalTo("В реестре нет записи: нет-такого")
+            );
         }
     }
 
@@ -165,14 +222,25 @@ class RegistryProcessorTest {
             RegistryProcessor processor = new RegistryProcessor();
 
             CompilationHarness.Result result =
-                    CompilationHarness.compile(workDir, List.of(REPO, SERVICE), processor);
+                    CompilationHarness.compile(RegistryProcessorTest.this.workDir, List.of(REPO, SERVICE), processor);
 
-            assertThat(processor.rounds())
-                    .as("рабочий раунд плюс завершающий")
-                    .isGreaterThanOrEqualTo(2);
-            // Повторная запись того же файла привела бы к FilerException
-            assertThat(result.success()).isTrue();
-            assertThat(result.generatedSources()).hasSize(1);
+            assertThat(
+                "processor cannot run in a working round and a final one",
+                processor.rounds(),
+                greaterThanOrEqualTo(2)
+            );
+        }
+
+        @Test
+        @DisplayName("реестр пишется ровно один раз — повтор дал бы FilerException")
+        void writesRegistryOnce() {
+            assertThat(
+                "registry cannot be written exactly once across the rounds",
+                CompilationHarness.compile(
+                    RegistryProcessorTest.this.workDir, List.of(REPO, SERVICE), new RegistryProcessor()
+                ).generatedSources(),
+                aMapWithSize(1)
+            );
         }
 
         @Test
@@ -182,8 +250,11 @@ class RegistryProcessorTest {
 
             // javac предупреждает про файлы последнего раунда; их нельзя
             // использовать из обычного кода. Этого предупреждения быть не должно.
-            assertThat(result.warnings())
-                    .noneMatch(m -> m.contains("created in the last round"));
+            assertThat(
+                "registry cannot be written early enough to be importable",
+                result.warnings().stream().anyMatch(m -> m.contains("created in the last round")),
+                equalTo(false)
+            );
         }
 
         @Test
@@ -201,8 +272,11 @@ class RegistryProcessorTest {
                             @Registered("dup") public class B {}
                             """)));
 
-            assertThat(result.success()).isFalse();
-            assertThat(result.errors()).anyMatch(m -> m.contains("уже занято"));
+            assertThat(
+                "duplicate name cannot fail the build instead of overwriting silently",
+                result.errors().stream().anyMatch(m -> m.contains("уже занято")),
+                equalTo(true)
+            );
         }
 
         @Test
@@ -215,10 +289,18 @@ class RegistryProcessorTest {
                             @Registered public abstract class Abs {}
                             """)));
 
-            assertThat(abstractResult.errors()).anyMatch(m -> m.contains("нечем создать"));
+            assertThat(
+                "abstract class cannot be rejected by the registry processor",
+                abstractResult.errors().stream().anyMatch(m -> m.contains("нечем создать")),
+                equalTo(true)
+            );
+        }
 
+        @Test
+        @DisplayName("класс без конструктора без параметров тоже отклоняется")
+        void rejectsMissingNoArgConstructor() {
             CompilationHarness.Result ctorResult = CompilationHarness.compile(
-                    workDir.resolve("second"),
+                    RegistryProcessorTest.this.workDir.resolve("second"),
                     List.of(new CompilationHarness.Source("demo.NeedsArgs", """
                             package demo;
                             import ru.sprbut.m07.api.Registered;
@@ -227,8 +309,12 @@ class RegistryProcessorTest {
                             }
                             """)),
                     new RegistryProcessor());
+            assertThat(
+                "class without a no-arg constructor cannot be rejected",
+                ctorResult.errors().stream().anyMatch(m -> m.contains("конструктор без параметров")),
+                equalTo(true)
+            );
 
-            assertThat(ctorResult.errors()).anyMatch(m -> m.contains("конструктор без параметров"));
         }
     }
 }

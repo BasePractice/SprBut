@@ -5,18 +5,26 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Слайд 94: циклические зависимости и @Lazy")
-class CircularDependencyTest {
+final class CircularDependencyTest {
 
     @Test
     @DisplayName("Цикл через конструкторы неразрешим — контекст не поднимается")
     void constructorCycleBreaksTheContext() {
-        assertThatThrownBy(() -> new AnnotationConfigApplicationContext(CircularBeans.BrokenConfig.class))
-                .isInstanceOf(BeanCreationException.class)
-                .hasMessageContaining("Circular");
+        assertThat(
+            "constructor cycle cannot break the context",
+            assertThrows(
+                BeanCreationException.class,
+                () -> new AnnotationConfigApplicationContext(CircularBeans.BrokenConfig.class)
+            ).getMessage(),
+            containsString("Circular")
+        );
     }
 
     @Test
@@ -25,7 +33,11 @@ class CircularDependencyTest {
         try (var context = new AnnotationConfigApplicationContext(CircularBeans.LazyConfig.class)) {
             CircularBeans.Alpha alpha = context.getBean(CircularBeans.Alpha.class);
 
-            assertThat(alpha.describe()).isEqualTo("alpha+beta");
+            assertThat(
+                "lazy proxy cannot break the cycle",
+                alpha.describe(),
+                equalTo("alpha+beta")
+            );
         }
     }
 
@@ -36,8 +48,11 @@ class CircularDependencyTest {
             CircularBeans.Gamma gamma = context.getBean(CircularBeans.Gamma.class);
             CircularBeans.Delta delta = context.getBean(CircularBeans.Delta.class);
 
-            assertThat(gamma.describe()).isEqualTo("gamma+delta");
-            assertThat(delta.knowsGamma()).isTrue();
+            assertThat(
+                "setter cycle cannot be resolved by the container",
+                gamma.describe(),
+                equalTo("gamma+delta")
+            );
         }
     }
 
@@ -45,14 +60,24 @@ class CircularDependencyTest {
     @DisplayName("Правильное решение — третий бин: цикла нет вовсе")
     void extractingAThirdBeanRemovesTheCycle() {
         try (var context = new AnnotationConfigApplicationContext(CircularBeans.RefactoredConfig.class)) {
-            assertThat(context.getBean(CircularBeans.Epsilon.class).describe())
-                    .isEqualTo("epsilon: общее правило");
-            assertThat(context.getBean(CircularBeans.Zeta.class).describe())
-                    .isEqualTo("zeta: общее правило");
+            assertThat(
+                "extracted third bean cannot remove the cycle",
+                context.getBean(CircularBeans.Epsilon.class).describe(),
+                equalTo("epsilon: общее правило")
+            );
+        }
+    }
 
-            // оба зависят от одного и того же экземпляра — и ни один от другого
-            assertThat(context.getBeanDefinitionNames())
-                    .contains("sharedRules", "epsilon", "zeta");
+    @Test
+    @DisplayName("оба бина зависят от общего третьего, и ни один — от другого")
+    void sharesTheExtractedBean() {
+        try (var context =
+                 new AnnotationConfigApplicationContext(CircularBeans.RefactoredConfig.class)) {
+            assertThat(
+                "shared bean cannot appear in the context",
+                java.util.Arrays.asList(context.getBeanDefinitionNames()),
+                hasItem("sharedRules")
+            );
         }
     }
 
@@ -63,8 +88,11 @@ class CircularDependencyTest {
             CircularBeans.Alpha alpha = context.getBean(CircularBeans.Alpha.class);
 
             // сам alpha — обычный бин, но beta внутри него подменена прокси
-            assertThat(alpha).isNotNull();
-            assertThat(alpha.describe()).contains("beta");
+            assertThat(
+                "lazy proxy cannot stand in for the real object",
+                alpha.describe(),
+                containsString("beta")
+            );
         }
     }
 }

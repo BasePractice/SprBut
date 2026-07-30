@@ -24,8 +24,22 @@ import ru.sprbut.m20.web.ProductController;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.comparesEqualTo;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
@@ -52,10 +66,26 @@ class SliceTests {
         @Test
         @DisplayName("Поднимаются все слои: web, сервис, репозиторий, JPA")
         void everyLayerIsPresent() {
-            assertThat(context.containsBean("productController")).isTrue();
-            assertThat(context.getBean(CatalogService.class)).isNotNull();
-            assertThat(context.getBean(ProductRepository.class)).isNotNull();
-            assertThat(context.containsBean("entityManagerFactory")).isTrue();
+            assertThat(
+                "cannot verify that every layer is present",
+                context.containsBean("productController"),
+                equalTo(true)
+            );
+            assertThat(
+                "cannot verify that every layer is present",
+                context.getBean(CatalogService.class),
+                notNullValue()
+            );
+            assertThat(
+                "cannot verify that every layer is present",
+                context.getBean(ProductRepository.class),
+                notNullValue()
+            );
+            assertThat(
+                "cannot verify that every layer is present",
+                context.containsBean("entityManagerFactory"),
+                equalTo(true)
+            );
         }
 
         @Test
@@ -63,9 +93,21 @@ class SliceTests {
         void endToEndScenarioWorks() {
             catalog.add("SKU-1", "Кофемолка", new BigDecimal("4990.00"));
 
-            assertThat(catalog.bySku("SKU-1").getName()).isEqualTo("Кофемолка");
-            assertThat(catalog.available()).extracting(Product::getSku).contains("SKU-1");
-            assertThat(catalog.priceTag(catalog.bySku("SKU-1"))).isEqualTo("4990.00 RUB");
+            assertThat(
+                "cannot verify that end to end scenario works",
+                catalog.bySku("SKU-1").getName(),
+                equalTo("Кофемолка")
+            );
+            assertThat(
+                "cannot verify that end to end scenario works",
+                catalog.available().stream().map(Product::getSku).toList(),
+                hasItems("SKU-1")
+            );
+            assertThat(
+                "cannot verify that end to end scenario works",
+                catalog.priceTag(catalog.bySku("SKU-1")),
+                equalTo("4990.00 RUB")
+            );
         }
 
         @Test
@@ -73,9 +115,11 @@ class SliceTests {
         void duplicateSkuIsRejected() {
             catalog.add("SKU-DUP", "Первый", BigDecimal.TEN);
 
-            assertThatThrownBy(() -> catalog.add("SKU-DUP", "Второй", BigDecimal.ONE))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("уже есть");
+            assertThat(
+                "cannot verify that duplicate sku is rejected",
+                assertThrows(IllegalArgumentException.class, () -> catalog.add("SKU-DUP", "Второй", BigDecimal.ONE)).getMessage(),
+                containsString("уже есть")
+            );
         }
     }
 
@@ -93,10 +137,16 @@ class SliceTests {
         @Test
         @DisplayName("Репозиторий работает, web-слой не поднимается вовсе")
         void onlyPersistenceLayerIsLoaded() {
-            assertThat(repository).isNotNull();
-            assertThat(context.containsBean("productController"))
-                    .as("контроллеры в срез данных не входят")
-                    .isFalse();
+            assertThat(
+                "cannot verify that only persistence layer is loaded",
+                repository,
+                notNullValue()
+            );
+            assertThat(
+                "data slice cannot leave the controllers out",
+                context.containsBean("productController"),
+                equalTo(false)
+            );
         }
 
         @Test
@@ -105,18 +155,26 @@ class SliceTests {
             repository.save(new Product("SKU-A", "Дешёвый", new BigDecimal("100")));
             repository.save(new Product("SKU-B", "Дорогой", new BigDecimal("100000")));
 
-            assertThat(repository.findBySku("SKU-A")).isPresent();
-            assertThat(repository.findCheaperThan(new BigDecimal("1000")))
-                    .extracting(Product::getSku)
-                    .containsExactly("SKU-A");
+            assertThat(
+                "derived query cannot find the saved product",
+                repository.findBySku("SKU-A").isPresent(),
+                equalTo(true)
+            );
+            assertThat(
+                "cannot verify that derived queries work",
+                repository.findCheaperThan(new BigDecimal("1000")).stream().map(Product::getSku).toList(),
+                contains("SKU-A")
+            );
         }
 
         @Test
         @DisplayName("Каждый тест среза откатывается — данные не протекают между тестами")
         void eachTestIsRolledBack() {
-            assertThat(repository.count())
-                    .as("предыдущий тест сохранил два товара, но транзакция откатилась")
-                    .isZero();
+            assertThat(
+                "slice test cannot roll back its data",
+                repository.count(),
+                equalTo(0L)
+            );
         }
     }
 
@@ -141,9 +199,21 @@ class SliceTests {
         @Test
         @DisplayName("Поднят только web-слой: репозитория и JPA в контексте нет")
         void onlyWebLayerIsLoaded() {
-            assertThat(context.containsBean("productController")).isTrue();
-            assertThat(context.getBeanNamesForType(ProductRepository.class)).isEmpty();
-            assertThat(context.containsBean("entityManagerFactory")).isFalse();
+            assertThat(
+                "cannot verify that only web layer is loaded",
+                context.containsBean("productController"),
+                equalTo(true)
+            );
+            assertThat(
+                "web slice cannot leave the repositories out",
+                context.getBeanNamesForType(ProductRepository.class).length,
+                equalTo(0)
+            );
+            assertThat(
+                "cannot verify that only web layer is loaded",
+                context.containsBean("entityManagerFactory"),
+                equalTo(false)
+            );
         }
 
         @Test
@@ -212,9 +282,21 @@ class SliceTests {
         @Test
         @DisplayName("Поднят только Jackson: ни web, ни данных")
         void onlyJacksonIsLoaded() {
-            assertThat(context.containsBean("productController")).isFalse();
-            assertThat(context.getBeanNamesForType(ProductRepository.class)).isEmpty();
-            assertThat(context.getBean(ObjectMapper.class)).isNotNull();
+            assertThat(
+                "cannot verify that only jackson is loaded",
+                context.containsBean("productController"),
+                equalTo(false)
+            );
+            assertThat(
+                "json slice cannot leave the repositories out",
+                context.getBeanNamesForType(ProductRepository.class).length,
+                equalTo(0)
+            );
+            assertThat(
+                "cannot verify that only jackson is loaded",
+                context.getBean(ObjectMapper.class),
+                notNullValue()
+            );
         }
 
         @Test
@@ -223,9 +305,11 @@ class SliceTests {
             var view = new ProductController.ProductView(
                     "SKU-1", "Кофемолка", new BigDecimal("4990.00"), true);
 
-            assertThat(json.write(view))
-                    .hasJsonPathStringValue("$.sku")
-                    .extractingJsonPathStringValue("$.name").isEqualTo("Кофемолка");
+            assertThat(
+                "serialisation cannot produce the expected JSON",
+                json.write(view).getJson(),
+                containsString("Кофемолка")
+            );
         }
 
         @Test
@@ -234,8 +318,16 @@ class SliceTests {
             var parsed = json.parseObject(
                     "{\"sku\":\"SKU-1\",\"name\":\"Кофемолка\",\"price\":4990.00,\"available\":true}");
 
-            assertThat(parsed.sku()).isEqualTo("SKU-1");
-            assertThat(parsed.price()).isEqualByComparingTo("4990.00");
+            assertThat(
+                "cannot verify that deserialises",
+                parsed.sku(),
+                equalTo("SKU-1")
+            );
+            assertThat(
+                "cannot verify that deserialises",
+                parsed.price(),
+                comparesEqualTo(new java.math.BigDecimal("4990.00"))
+            );
         }
     }
 
@@ -253,7 +345,11 @@ class SliceTests {
 
             CatalogService service = new CatalogService(fakeRepository, "EUR");
 
-            assertThat(service.priceTag(service.bySku("SKU-1"))).isEqualTo("4990.00 EUR");
+            assertThat(
+                "cannot verify that service is testable without spring",
+                service.priceTag(service.bySku("SKU-1")),
+                equalTo("4990.00 EUR")
+            );
         }
 
         @Test

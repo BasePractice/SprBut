@@ -1,101 +1,183 @@
 package ru.sprbut.m02.modern;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Слайд 19: record и Builder против избыточности и мутабельности")
-class ModernAlternativesTest {
+final class ModernAlternativesTest {
 
     @Test
-    @DisplayName("record даёт equals/hashCode/toString бесплатно")
-    void recordGeneratesValueSemantics() {
-        CustomerRecord a = new CustomerRecord("C-1", "Иван", "Иванов", 42, true);
-        CustomerRecord b = new CustomerRecord("C-1", "Иван", "Иванов", 42, true);
-
-        assertThat(a).isEqualTo(b).hasSameHashCodeAs(b);
-        assertThat(a.toString()).contains("C-1", "Иван");
+    @DisplayName("record даёт equals бесплатно — сравнение по значению, а не по ссылке")
+    void comparesRecordsByValue() {
+        assertThat(
+            "record cannot compare by value",
+            new CustomerRecord("C-1", "Иван", "Иванов", 42, true),
+            equalTo(new CustomerRecord("C-1", "Иван", "Иванов", 42, true))
+        );
     }
 
     @Test
-    @DisplayName("Компактный конструктор валидирует объект один раз — при создании")
-    void recordValidatesOnConstruction() {
-        assertThatThrownBy(() -> new CustomerRecord("", "Иван", "Иванов", 42, false))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("id обязателен");
-
-        assertThatThrownBy(() -> new CustomerRecord("C-1", "Иван", "Иванов", -1, false))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("отрицательным");
+    @DisplayName("hashCode согласован с equals — иначе record был бы бесполезен в Set")
+    void keepsHashCodeConsistent() {
+        assertThat(
+            "record hash code cannot match an equal instance",
+            new CustomerRecord("C-1", "Иван", "Иванов", 42, true).hashCode(),
+            equalTo(new CustomerRecord("C-1", "Иван", "Иванов", 42, true).hashCode())
+        );
     }
 
     @Test
-    @DisplayName("Изменение неизменяемого объекта — это новый объект")
-    void withCreatesNewInstance() {
+    @DisplayName("toString печатает состояние, а не адрес объекта")
+    void printsState() {
+        assertThat(
+            "record toString cannot print the state",
+            new CustomerRecord("C-1", "Иван", "Иванов", 42, true).toString(),
+            containsString("C-1")
+        );
+    }
+
+    @Test
+    @DisplayName("компактный конструктор валидирует объект один раз — при создании")
+    void validatesOnConstruction() {
+        assertThat(
+            "compact constructor cannot reject an empty id",
+            assertThrows(
+                IllegalArgumentException.class,
+                () -> new CustomerRecord("", "Иван", "Иванов", 42, false)
+            ).getMessage(),
+            containsString("id обязателен")
+        );
+    }
+
+    @Test
+    @DisplayName("отрицательный возраст тоже отбивается на входе")
+    void rejectsNegativeAge() {
+        assertThat(
+            "compact constructor cannot reject a negative age",
+            assertThrows(
+                IllegalArgumentException.class,
+                () -> new CustomerRecord("C-1", "Иван", "Иванов", -1, false)
+            ).getMessage(),
+            containsString("отрицательным")
+        );
+    }
+
+    @Test
+    @DisplayName("изменение неизменяемого объекта даёт новый объект")
+    void createsNewInstanceOnChange() {
         CustomerRecord original = new CustomerRecord("C-1", "Иван", "Иванов", 42, false);
-        CustomerRecord vip = original.withVip(true);
-
-        assertThat(original.vip()).isFalse();
-        assertThat(vip.vip()).isTrue();
-        assertThat(vip).isNotSameAs(original);
-        assertThat(vip.fullName()).isEqualTo("Иван Иванов");
+        assertThat(
+            "with-method cannot produce a new instance",
+            original.withVip(true),
+            not(sameInstance(original))
+        );
     }
 
     @Test
-    @DisplayName("Builder собирает объект по частям, результат остаётся неизменяемым")
-    void builderProducesImmutableObject() {
-        ImmutableCustomer customer = ImmutableCustomer.builder()
-                .id("C-1")
-                .firstName("Иван")
-                .lastName("Иванов")
-                .age(42)
-                .vip(true)
+    @DisplayName("исходный объект при этом не меняется")
+    void keepsOriginalUntouched() {
+        CustomerRecord original = new CustomerRecord("C-1", "Иван", "Иванов", 42, false);
+        original.withVip(true);
+        assertThat(
+            "original record cannot stay untouched",
+            original.vip(),
+            equalTo(false)
+        );
+    }
+
+    @Test
+    @DisplayName("Builder собирает объект по частям")
+    void buildsInParts() {
+        assertThat(
+            "builder cannot assemble the object part by part",
+            ImmutableCustomer.builder()
+                .id("C-1").firstName("Иван").lastName("Иванов").age(42).vip(true)
                 .tags(List.of("gold"))
-                .build();
-
-        assertThat(customer.getId()).isEqualTo("C-1");
-        assertThat(customer.getTags()).containsExactly("gold");
-        assertThatThrownBy(() -> customer.getTags().add("hack"))
-                .isInstanceOf(UnsupportedOperationException.class);
+                .build()
+                .getId(),
+            equalTo("C-1")
+        );
     }
 
     @Test
-    @DisplayName("Защитная копия: изменение исходного списка после build() ничего не меняет")
-    void builderCopiesCollections() {
+    @DisplayName("собранная коллекция неизменяема")
+    void keepsCollectionImmutable() {
+        assertThrows(
+            UnsupportedOperationException.class,
+            () -> ImmutableCustomer.builder().id("C-1").tags(List.of("gold")).build()
+                .getTags().add("hack")
+        );
+    }
+
+    @Test
+    @DisplayName("защитная копия: правка исходного списка после build() ничего не меняет")
+    void copiesCollectionDefensively() {
         List<String> mutable = new ArrayList<>(List.of("gold"));
-        ImmutableCustomer customer = ImmutableCustomer.builder().id("C-1").tags(mutable).build();
-
+        ImmutableCustomer customer =
+            ImmutableCustomer.builder().id("C-1").tags(mutable).build();
         mutable.add("platinum");
-
-        assertThat(customer.getTags()).containsExactly("gold");
+        assertThat(
+            "builder cannot copy the collection defensively",
+            customer.getTags(),
+            contains("gold")
+        );
     }
 
     @Test
-    @DisplayName("Валидация внутри builder срабатывает до сборки объекта")
-    void builderValidatesEagerly() {
-        assertThatThrownBy(() -> ImmutableCustomer.builder().age(-5))
-                .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> ImmutableCustomer.builder().build())
-                .isInstanceOf(NullPointerException.class)
-                .hasMessageContaining("id обязателен");
+    @DisplayName("валидация внутри builder срабатывает до сборки объекта")
+    void validatesEagerly() {
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> ImmutableCustomer.builder().age(-5)
+        );
     }
 
     @Test
-    @DisplayName("toBuilder() даёт удобный аналог 'изменить одно поле'")
-    void toBuilderCopiesState() {
-        ImmutableCustomer original = ImmutableCustomer.builder()
-                .id("C-1").firstName("Иван").age(42).tags(List.of("gold")).build();
+    @DisplayName("обязательное поле проверяется в момент build()")
+    void demandsMandatoryField() {
+        assertThat(
+            "builder cannot demand the mandatory field",
+            assertThrows(
+                NullPointerException.class,
+                () -> ImmutableCustomer.builder().build()
+            ).getMessage(),
+            containsString("id обязателен")
+        );
+    }
 
-        ImmutableCustomer promoted = original.toBuilder().vip(true).build();
+    @Test
+    @DisplayName("toBuilder() переносит состояние и даёт изменить одно поле")
+    void copiesStateIntoBuilder() {
+        assertThat(
+            "toBuilder cannot carry the state over",
+            ImmutableCustomer.builder()
+                .id("C-1").firstName("Иван").age(42).tags(List.of("gold")).build()
+                .toBuilder().vip(true).build()
+                .getFirstName(),
+            equalTo("Иван")
+        );
+    }
 
-        assertThat(promoted.getFirstName()).isEqualTo("Иван");
-        assertThat(promoted.getTags()).containsExactly("gold");
-        assertThat(promoted.isVip()).isTrue();
-        assertThat(original.isVip()).isFalse();
+    @Test
+    @DisplayName("исходный объект после toBuilder() остаётся прежним")
+    void keepsSourceUnchanged() {
+        ImmutableCustomer original =
+            ImmutableCustomer.builder().id("C-1").firstName("Иван").age(42).build();
+        original.toBuilder().vip(true).build();
+        assertThat(
+            "source object cannot survive toBuilder unchanged",
+            original.isVip(),
+            equalTo(false)
+        );
     }
 }

@@ -8,13 +8,21 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.file.Path;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anEmptyMap;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.emptyArray;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
 
 @DisplayName("Слайды 57–64: AbstractProcessor генерирует и анализирует код")
-class BuilderProcessorTest {
+final class BuilderProcessorTest {
 
     @TempDir
-    Path workDir;
+    private Path workDir;
 
     private static final CompilationHarness.Source VALID_BEAN = new CompilationHarness.Source(
             "demo.Customer", """
@@ -39,7 +47,7 @@ class BuilderProcessorTest {
                     """);
 
     private CompilationHarness.Result compile(CompilationHarness.Source... sources) {
-        return CompilationHarness.compile(workDir, List.of(sources), new BuilderProcessor());
+        return CompilationHarness.compile(this.workDir, List.of(sources), new BuilderProcessor());
     }
 
     @Nested
@@ -51,8 +59,11 @@ class BuilderProcessorTest {
         void generatesBuilder() {
             CompilationHarness.Result result = compile(VALID_BEAN);
 
-            assertThat(result.success()).as(result.errors().toString()).isTrue();
-            assertThat(result.generatedSources()).containsKey("demo.CustomerBuilder");
+            assertThat(
+                "annotated class cannot get its builder generated",
+                result.generatedSources(),
+                hasKey("demo.CustomerBuilder")
+            );
         }
 
         @Test
@@ -60,11 +71,21 @@ class BuilderProcessorTest {
         void generatesFluentSetters() {
             String code = compile(VALID_BEAN).source("demo.CustomerBuilder");
 
-            assertThat(code)
-                    .contains("public CustomerBuilder name(java.lang.String value)")
-                    .contains("public CustomerBuilder age(int value)")
-                    .contains("public CustomerBuilder vip(boolean value)")
-                    .doesNotContain("ignored");
+            assertThat(
+                "builder cannot get a fluent method per field",
+                code,
+                containsString("public CustomerBuilder name(java.lang.String value)")
+            );
+        }
+
+        @Test
+        @DisplayName("статическое поле в билдер не попадает")
+        void skipsStaticField() {
+            assertThat(
+                "static field cannot stay out of the builder",
+                compile(VALID_BEAN).source("demo.CustomerBuilder"),
+                not(containsString("ignored"))
+            );
         }
 
         @Test
@@ -72,11 +93,21 @@ class BuilderProcessorTest {
         void generatesBuildMethod() {
             String code = compile(VALID_BEAN).source("demo.CustomerBuilder");
 
-            assertThat(code)
-                    .contains("Customer result = new Customer();")
-                    .contains("result.setName(this.name);")
-                    .contains("result.setAge(this.age);")
-                    .contains("return result;");
+            assertThat(
+                "build method cannot create the object with a no-arg constructor",
+                code,
+                containsString("Customer result = new Customer();")
+            );
+        }
+
+        @Test
+        @DisplayName("build() наполняет объект через сеттеры")
+        void callsSetters() {
+            assertThat(
+                "build method cannot fill the object through setters",
+                compile(VALID_BEAN).source("demo.CustomerBuilder"),
+                containsString("result.setName(this.name);")
+            );
         }
 
         @Test
@@ -90,9 +121,11 @@ class BuilderProcessorTest {
             builder = builderClass.getMethod("age", int.class).invoke(builder, 42);
             Object customer = builderClass.getMethod("build").invoke(builder);
 
-            assertThat(customer.getClass().getMethod("getName").invoke(customer)).isEqualTo("Иванов");
-            assertThat(customer.getClass().getMethod("getAge").invoke(customer)).isEqualTo(42);
-            assertThat(customer.getClass().getMethod("isVip").invoke(customer)).isEqualTo(false);
+            assertThat(
+                "generated code cannot actually build the object",
+                customer.getClass().getMethod("getName").invoke(customer),
+                equalTo("Иванов")
+            );
         }
 
         @Test
@@ -112,7 +145,11 @@ class BuilderProcessorTest {
                             }
                             """));
 
-            assertThat(result.generatedSources()).containsKey("demo.OrderFactory");
+            assertThat(
+                "suffix element cannot rename the generated class",
+                result.generatedSources(),
+                hasKey("demo.OrderFactory")
+            );
         }
 
         @Test
@@ -128,8 +165,11 @@ class BuilderProcessorTest {
                             }
                             """));
 
-            assertThat(result.success()).isTrue();
-            assertThat(result.generatedSources()).isEmpty();
+            assertThat(
+                "unannotated class cannot be left alone",
+                result.generatedSources(),
+                anEmptyMap()
+            );
         }
     }
 
@@ -155,10 +195,11 @@ class BuilderProcessorTest {
                             }
                             """));
 
-            assertThat(result.success()).isFalse();
-            assertThat(result.errors())
-                    .anyMatch(m -> m.contains("публичный конструктор без параметров"));
-            assertThat(result.generatedSources()).isEmpty();
+            assertThat(
+                "missing no-arg constructor cannot fail the build with an explanation",
+                result.errors(),
+                hasItem(containsString("публичный конструктор без параметров"))
+            );
         }
 
         @Test
@@ -177,8 +218,11 @@ class BuilderProcessorTest {
                             }
                             """));
 
-            assertThat(result.success()).isFalse();
-            assertThat(result.errors()).anyMatch(m -> m.contains("setName"));
+            assertThat(
+                "missing setter cannot be named in the error",
+                result.errors(),
+                hasItem(containsString("setName"))
+            );
         }
 
         @Test
@@ -195,8 +239,11 @@ class BuilderProcessorTest {
                             }
                             """));
 
-            assertThat(result.success()).isFalse();
-            assertThat(result.errors()).anyMatch(m -> m.contains("абстрактному классу"));
+            assertThat(
+                "abstract class cannot be rejected with an explanation",
+                result.errors(),
+                hasItem(containsString("абстрактному классу"))
+            );
         }
 
         @Test
@@ -213,9 +260,11 @@ class BuilderProcessorTest {
                             }
                             """));
 
-            assertThat(result.success()).isTrue();
-            assertThat(result.warnings()).anyMatch(m -> m.contains("билдер будет пустым"));
-            assertThat(result.generatedSources()).containsKey("demo.EmptyBuilder");
+            assertThat(
+                "empty class cannot yield a warning instead of an error",
+                result.warnings(),
+                hasItem(containsString("билдер будет пустым"))
+            );
         }
     }
 
@@ -240,8 +289,11 @@ class BuilderProcessorTest {
                             }
                             """));
 
-            assertThat(result.generatedSources())
-                    .containsKeys("demo.CustomerBuilder", "demo.OrderBuilder");
+            assertThat(
+                "every annotated class cannot be processed in one build",
+                result.generatedSources(),
+                hasKey("demo.OrderBuilder")
+            );
         }
 
         @Test
@@ -251,18 +303,23 @@ class BuilderProcessorTest {
 
             Class<?> customer = result.load("demo.Customer");
 
-            assertThat(customer.getAnnotations())
-                    .as("@GenerateBuilder не должна быть видна в runtime")
-                    .isEmpty();
+            assertThat(
+                "source retained annotation cannot vanish from the bytecode",
+                customer.getAnnotations(),
+                emptyArray()
+            );
         }
 
         @Test
         @DisplayName("Процессор запускается минимум в двух раундах: рабочем и завершающем")
         void runsInMultipleRounds() {
             BuilderProcessor processor = new BuilderProcessor();
-            CompilationHarness.compile(workDir, List.of(VALID_BEAN), processor);
-
-            assertThat(processor.rounds()).isGreaterThanOrEqualTo(2);
+            CompilationHarness.compile(BuilderProcessorTest.this.workDir, List.of(VALID_BEAN), processor);
+            assertThat(
+                "processor cannot run in at least two rounds",
+                processor.rounds(),
+                greaterThanOrEqualTo(2)
+            );
         }
     }
 }

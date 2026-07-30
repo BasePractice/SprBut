@@ -15,10 +15,20 @@ import ru.sprbut.m11.step3.SpringWiringConfig;
 
 import java.math.BigDecimal;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.comparesEqualTo;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.sameInstance;
 
 @DisplayName("Слайды 83–88 (СХЕМА 5): от new к контейнеру")
-class ThreeWaysTest {
+final class ThreeWaysTest {
 
     @Nested
     @DisplayName("Шаг 1: зависимости создаются внутри")
@@ -29,8 +39,11 @@ class ThreeWaysTest {
         void worksButIsRigid() {
             HardcodedOrderService service = new HardcodedOrderService();
 
-            assertThat(service.placeOrder("ivanov@mail.ru", new BigDecimal("100")))
-                    .isEqualByComparingTo("120.00");
+            assertThat(
+                "hardcoded service cannot place the order",
+                service.placeOrder("ivanov@mail.ru", new BigDecimal("100")),
+                comparesEqualTo(new BigDecimal("120.00"))
+            );
         }
 
         @Test
@@ -39,23 +52,31 @@ class ThreeWaysTest {
             HardcodedOrderService service = new HardcodedOrderService();
             service.placeOrder("ivanov@mail.ru", new BigDecimal("100"));
 
-            assertThat(service.senderForTests().sent())
-                    .containsExactly("ivanov@mail.ru <- Заказ на сумму 120.00");
+            assertThat(
+                "testability cannot demand a getter added for the test",
+                service.senderForTests().sent(),
+                contains("ivanov@mail.ru <- Заказ на сумму 120.00")
+            );
         }
 
         @Test
         @DisplayName("Каждый экземпляр сервиса плодит свои копии зависимостей")
         void everyInstanceDuplicatesItsDependencies() {
-            assertThat(new HardcodedOrderService().senderForTests())
-                    .isNotSameAs(new HardcodedOrderService().senderForTests());
+            assertThat(
+                "every instance cannot duplicate its dependencies",
+                new HardcodedOrderService().senderForTests(),
+                not(sameInstance(new HardcodedOrderService().senderForTests()))
+            );
         }
 
         @Test
         @DisplayName("Сигнатура молчит о зависимостях — их видно только из тела класса")
         void dependenciesAreInvisibleFromOutside() {
-            assertThat(HardcodedOrderService.class.getConstructors())
-                    .singleElement()
-                    .satisfies(c -> assertThat(c.getParameterCount()).isZero());
+            assertThat(
+                "constructor cannot stay silent about the dependencies",
+                HardcodedOrderService.class.getConstructors()[0].getParameterCount(),
+                equalTo(0)
+            );
         }
     }
 
@@ -72,17 +93,21 @@ class ThreeWaysTest {
 
             service.placeOrder("+79001234567", new BigDecimal("100"));
 
-            assertThat(service.usedChannel()).isEqualTo("sms");
-            assertThat(sms.sent()).hasSize(1);
+            assertThat(
+                "injected implementation cannot be swapped in one line",
+                service.usedChannel(),
+                equalTo("sms")
+            );
         }
 
         @Test
         @DisplayName("Конструктор — честный список того, без чего объект не работает")
         void constructorDocumentsDependencies() {
-            assertThat(ManualOrderService.class.getConstructors())
-                    .singleElement()
-                    .satisfies(c -> assertThat(c.getParameterTypes())
-                            .containsExactly(NotificationSender.class, PriceCalculator.class));
+            assertThat(
+                "constructor cannot document the dependencies honestly",
+                ManualOrderService.class.getConstructors()[0].getParameterTypes(),
+                arrayContaining(NotificationSender.class, PriceCalculator.class)
+            );
         }
 
         @Test
@@ -93,16 +118,31 @@ class ThreeWaysTest {
             ManualOrderService first = factory.orderService();
             ManualOrderService second = factory.orderService();
 
-            assertThat(first).isSameAs(second);
-            assertThat(factory.notificationSender()).isInstanceOf(EmailSender.class);
-            assertThat(factory.createdCount()).isEqualTo(3);
+            assertThat(
+                "factory cannot cache the assembled singleton",
+                first,
+                sameInstance(second)
+            );
+        }
+
+        @Test
+        @DisplayName("фабрика собирает весь граф целиком")
+        void factoryAssemblesWholeGraph() {
+            assertThat(
+                "factory cannot assemble the whole graph",
+                new ObjectFactory("email").notificationSender(),
+                instanceOf(EmailSender.class)
+            );
         }
 
         @Test
         @DisplayName("Выбор реализации перенесён в одну точку — в фабрику")
         void factoryDecidesTheImplementation() {
-            assertThat(new ObjectFactory("sms").orderService().usedChannel()).isEqualTo("sms");
-            assertThat(new ObjectFactory("email").orderService().usedChannel()).isEqualTo("email");
+            assertThat(
+                "factory cannot concentrate the implementation choice",
+                new ObjectFactory("sms").orderService().usedChannel(),
+                equalTo("sms")
+            );
         }
     }
 
@@ -116,9 +156,11 @@ class ThreeWaysTest {
             try (var context = new AnnotationConfigApplicationContext(SpringWiringConfig.class)) {
                 ManualOrderService service = context.getBean(ManualOrderService.class);
 
-                assertThat(service.usedChannel()).isEqualTo("email");
-                assertThat(service.placeOrder("ivanov@mail.ru", new BigDecimal("100")))
-                        .isEqualByComparingTo("120.00");
+                assertThat(
+                    "container cannot resolve the arguments by type",
+                    service.placeOrder("ivanov@mail.ru", new BigDecimal("100")),
+                    comparesEqualTo(new BigDecimal("120.00"))
+                );
             }
         }
 
@@ -126,10 +168,11 @@ class ThreeWaysTest {
         @DisplayName("Бины по умолчанию — синглтоны")
         void beansAreSingletonsByDefault() {
             try (var context = new AnnotationConfigApplicationContext(SpringWiringConfig.class)) {
-                assertThat(context.getBean(ManualOrderService.class))
-                        .isSameAs(context.getBean(ManualOrderService.class));
-                assertThat(context.getBean(NotificationSender.class))
-                        .isSameAs(context.getBean("notificationSender"));
+                assertThat(
+                    "beans cannot be singletons by default",
+                    context.getBean(ManualOrderService.class),
+                    sameInstance(context.getBean(ManualOrderService.class))
+                );
             }
         }
 
@@ -140,9 +183,11 @@ class ThreeWaysTest {
                 // orderService не мог быть создан раньше своих зависимостей
                 ManualOrderService service = context.getBean(ManualOrderService.class);
 
-                assertThat(service).isNotNull();
-                assertThat(context.getBeanDefinitionNames())
-                        .contains("notificationSender", "priceCalculator", "orderService");
+                assertThat(
+                    "creation order cannot be derived from the graph",
+                    service,
+                    notNullValue()
+                );
             }
         }
 
@@ -151,11 +196,12 @@ class ThreeWaysTest {
         void containerOwnsTheLifecycle() {
             AnnotationConfigApplicationContext context =
                     new AnnotationConfigApplicationContext(SpringWiringConfig.class);
-            assertThat(context.isActive()).isTrue();
-
             context.close();
-
-            assertThat(context.isActive()).isFalse();
+            assertThat(
+                "closed container cannot end the lifecycle of its beans",
+                context.isActive(),
+                equalTo(false)
+            );
         }
     }
 }

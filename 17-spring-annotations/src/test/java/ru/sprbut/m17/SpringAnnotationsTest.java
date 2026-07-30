@@ -12,8 +12,22 @@ import ru.sprbut.m17.configuration.ProxyBeanMethods;
 import ru.sprbut.m17.stereotypes.Stereotypes;
 import ru.sprbut.m17.transactional.TransactionalDemo;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.comparesEqualTo;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Слайды 139–149: аннотации Spring")
 class SpringAnnotationsTest {
@@ -31,29 +45,49 @@ class SpringAnnotationsTest {
         @DisplayName("Сканер находит все четыре стереотипа и не находит класс без аннотации")
         void scannerFindsStereotypes() {
             try (var context = new AnnotationConfigApplicationContext(ScanConfig.class)) {
-                assertThat(context.getBean(Stereotypes.PlainComponent.class).role())
-                        .isEqualTo("component");
-                assertThat(context.getBean(Stereotypes.BusinessService.class).role())
-                        .isEqualTo("service");
-                assertThat(context.getBean(Stereotypes.DataRepository.class).role())
-                        .isEqualTo("repository");
-                assertThat(context.getBean(Stereotypes.WebController.class).role())
-                        .isEqualTo("controller");
+                assertThat(
+                    "cannot verify that scanner finds stereotypes",
+                    context.getBean(Stereotypes.PlainComponent.class).role(),
+                    equalTo("component")
+                );
+                assertThat(
+                    "cannot verify that scanner finds stereotypes",
+                    context.getBean(Stereotypes.BusinessService.class).role(),
+                    equalTo("service")
+                );
+                assertThat(
+                    "cannot verify that scanner finds stereotypes",
+                    context.getBean(Stereotypes.DataRepository.class).role(),
+                    equalTo("repository")
+                );
+                assertThat(
+                    "cannot verify that scanner finds stereotypes",
+                    context.getBean(Stereotypes.WebController.class).role(),
+                    equalTo("controller")
+                );
 
-                assertThatThrownBy(() -> context.getBean(Stereotypes.NotAComponent.class))
-                        .isInstanceOf(org.springframework.beans.factory.NoSuchBeanDefinitionException.class);
+                assertThrows(org.springframework.beans.factory.NoSuchBeanDefinitionException.class, () -> context.getBean(Stereotypes.NotAComponent.class));
             }
         }
 
         @Test
         @DisplayName("Все стереотипы сводятся к @Component — механика у них общая")
         void allStereotypesAreComponents() {
-            assertThat(org.springframework.stereotype.Service.class
-                    .isAnnotationPresent(org.springframework.stereotype.Component.class)).isTrue();
-            assertThat(org.springframework.stereotype.Repository.class
-                    .isAnnotationPresent(org.springframework.stereotype.Component.class)).isTrue();
-            assertThat(org.springframework.stereotype.Controller.class
-                    .isAnnotationPresent(org.springframework.stereotype.Component.class)).isTrue();
+            assertThat(
+                "cannot verify that all stereotypes are components",
+                org.springframework.stereotype.Service.class .isAnnotationPresent(org.springframework.stereotype.Component.class),
+                equalTo(true)
+            );
+            assertThat(
+                "cannot verify that all stereotypes are components",
+                org.springframework.stereotype.Repository.class .isAnnotationPresent(org.springframework.stereotype.Component.class),
+                equalTo(true)
+            );
+            assertThat(
+                "cannot verify that all stereotypes are components",
+                org.springframework.stereotype.Controller.class .isAnnotationPresent(org.springframework.stereotype.Component.class),
+                equalTo(true)
+            );
         }
     }
 
@@ -75,8 +109,16 @@ class SpringAnnotationsTest {
                 var first = context.getBean("first", ProxyBeanMethods.Consumer.class);
                 var second = context.getBean("second", ProxyBeanMethods.Consumer.class);
 
-                assertThat(first.shared()).isSameAs(second.shared());
-                assertThat(ProxyBeanMethods.INSTANCES.get()).isEqualTo(1);
+                assertThat(
+                    "cannot verify that proxied configuration reuses the bean",
+                    first.shared(),
+                    sameInstance(second.shared())
+                );
+                assertThat(
+                    "cannot verify that proxied configuration reuses the bean",
+                    ProxyBeanMethods.INSTANCES.get(),
+                    equalTo(1)
+                );
             }
         }
 
@@ -88,8 +130,11 @@ class SpringAnnotationsTest {
 
                 Object config = context.getBean(ProxyBeanMethods.ProxiedConfig.class);
 
-                assertThat(config.getClass()).isNotEqualTo(ProxyBeanMethods.ProxiedConfig.class);
-                assertThat(config.getClass().getName()).contains("$$SpringCGLIB$$");
+                assertThat(
+                    "configuration class cannot be wrapped in a CGLIB proxy",
+                    config.getClass().getName(),
+                    containsString("$$SpringCGLIB$$")
+                );
             }
         }
 
@@ -102,10 +147,16 @@ class SpringAnnotationsTest {
                 var first = context.getBean("first", ProxyBeanMethods.Consumer.class);
                 var second = context.getBean("second", ProxyBeanMethods.Consumer.class);
 
-                assertThat(first.shared()).isNotSameAs(second.shared());
-                assertThat(ProxyBeanMethods.INSTANCES.get())
-                        .as("бин из контейнера плюс две копии мимо него")
-                        .isEqualTo(3);
+                assertThat(
+                    "cannot verify that lite configuration creates duplicates",
+                    first.shared(),
+                    not(sameInstance(second.shared()))
+                );
+                assertThat(
+                    "lite configuration cannot create a copy per call",
+                    ProxyBeanMethods.INSTANCES.get(),
+                    equalTo(3)
+                );
             }
         }
 
@@ -118,8 +169,16 @@ class SpringAnnotationsTest {
                 var first = context.getBean("first", ProxyBeanMethods.Consumer.class);
                 var second = context.getBean("second", ProxyBeanMethods.Consumer.class);
 
-                assertThat(first.shared()).isSameAs(second.shared());
-                assertThat(ProxyBeanMethods.INSTANCES.get()).isEqualTo(1);
+                assertThat(
+                    "cannot verify that lite configuration done right",
+                    first.shared(),
+                    sameInstance(second.shared())
+                );
+                assertThat(
+                    "cannot verify that lite configuration done right",
+                    ProxyBeanMethods.INSTANCES.get(),
+                    equalTo(1)
+                );
             }
         }
     }
@@ -139,7 +198,11 @@ class SpringAnnotationsTest {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
                 context.getBean(TransactionalDemo.OrderService.class).save("ORD-1");
 
-                assertThat(TransactionalDemo.LOG).containsExactly("begin", "save:ORD-1", "commit");
+                assertThat(
+                    "cannot verify that transaction is opened and committed",
+                    TransactionalDemo.LOG,
+                    contains("begin", "save:ORD-1", "commit")
+                );
             }
         }
 
@@ -150,7 +213,11 @@ class SpringAnnotationsTest {
                 context.getBean(TransactionalDemo.OrderService.class)
                         .saveWithoutTransaction("ORD-2");
 
-                assertThat(TransactionalDemo.LOG).containsExactly("save:ORD-2");
+                assertThat(
+                    "cannot verify that no annotation no transaction",
+                    TransactionalDemo.LOG,
+                    contains("save:ORD-2")
+                );
             }
         }
 
@@ -160,9 +227,13 @@ class SpringAnnotationsTest {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
                 var service = context.getBean(TransactionalDemo.OrderService.class);
 
-                assertThatThrownBy(service::failUnchecked).isInstanceOf(IllegalStateException.class);
+                assertThrows(IllegalStateException.class, service::failUnchecked);
 
-                assertThat(TransactionalDemo.LOG).containsExactly("begin", "work", "rollback");
+                assertThat(
+                    "cannot verify that unchecked exception rolls back",
+                    TransactionalDemo.LOG,
+                    contains("begin", "work", "rollback")
+                );
             }
         }
 
@@ -172,9 +243,13 @@ class SpringAnnotationsTest {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
                 var service = context.getBean(TransactionalDemo.OrderService.class);
 
-                assertThatThrownBy(service::failChecked).isInstanceOf(Exception.class);
+                assertThrows(Exception.class, service::failChecked);
 
-                assertThat(TransactionalDemo.LOG).containsExactly("begin", "work", "commit");
+                assertThat(
+                    "cannot verify that checked exception commits by default",
+                    TransactionalDemo.LOG,
+                    contains("begin", "work", "commit")
+                );
             }
         }
 
@@ -184,9 +259,13 @@ class SpringAnnotationsTest {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
                 var service = context.getBean(TransactionalDemo.OrderService.class);
 
-                assertThatThrownBy(service::failCheckedWithRollback).isInstanceOf(Exception.class);
+                assertThrows(Exception.class, service::failCheckedWithRollback);
 
-                assertThat(TransactionalDemo.LOG).containsExactly("begin", "work", "rollback");
+                assertThat(
+                    "cannot verify that rollback for fixes it",
+                    TransactionalDemo.LOG,
+                    contains("begin", "work", "rollback")
+                );
             }
         }
 
@@ -196,9 +275,11 @@ class SpringAnnotationsTest {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
                 context.getBean(TransactionalDemo.OrderService.class).saveViaThis("ORD-3");
 
-                assertThat(TransactionalDemo.LOG)
-                        .containsExactly("save:ORD-3")
-                        .doesNotContain("begin");
+                assertThat(
+                    "self invocation cannot bypass the transactional proxy",
+                    TransactionalDemo.LOG,
+                    contains("save:ORD-3")
+                );
             }
         }
     }
@@ -212,7 +293,11 @@ class SpringAnnotationsTest {
         void propertyConditionIsOffByDefault() {
             try (var context = new AnnotationConfigApplicationContext(
                     ConditionalOnDemo.DefaultsConfig.class)) {
-                assertThat(context.containsBean("metricsCollector")).isFalse();
+                assertThat(
+                    "cannot verify that property condition is off by default",
+                    context.containsBean("metricsCollector"),
+                    equalTo(false)
+                );
             }
         }
 
@@ -225,7 +310,11 @@ class SpringAnnotationsTest {
                 context.register(ConditionalOnDemo.DefaultsConfig.class);
                 context.refresh();
 
-                assertThat(context.getBean("metricsCollector")).isEqualTo("метрики включены");
+                assertThat(
+                    "cannot verify that property condition turns on",
+                    context.getBean("metricsCollector"),
+                    equalTo("метрики включены")
+                );
             } finally {
                 System.clearProperty("sprbut.metrics.enabled");
             }
@@ -236,7 +325,11 @@ class SpringAnnotationsTest {
         void matchIfMissingIsOnByDefault() {
             try (var context = new AnnotationConfigApplicationContext(
                     ConditionalOnDemo.DefaultsConfig.class)) {
-                assertThat(context.getBean("auditCollector")).isEqualTo("аудит включён");
+                assertThat(
+                    "cannot verify that match if missing is on by default",
+                    context.getBean("auditCollector"),
+                    equalTo("аудит включён")
+                );
             }
         }
 
@@ -245,8 +338,11 @@ class SpringAnnotationsTest {
         void missingBeanConditionProvidesDefault() {
             try (var context = new AnnotationConfigApplicationContext(
                     ConditionalOnDemo.DefaultsConfig.class)) {
-                assertThat(context.getBean(ConditionalOnDemo.Notifier.class).send("привет"))
-                        .isEqualTo("по умолчанию: привет");
+                assertThat(
+                    "cannot verify that missing bean condition provides default",
+                    context.getBean(ConditionalOnDemo.Notifier.class).send("привет"),
+                    equalTo("по умолчанию: привет")
+                );
             }
         }
 
@@ -259,10 +355,16 @@ class SpringAnnotationsTest {
                         ConditionalOnDemo.DefaultsConfig.class);
                 context.refresh();
 
-                assertThat(context.getBean(ConditionalOnDemo.Notifier.class).send("привет"))
-                        .isEqualTo("пользовательский: привет");
-                assertThat(context.getBeanNamesForType(ConditionalOnDemo.Notifier.class))
-                        .hasSize(1);
+                assertThat(
+                    "cannot verify that user bean wins",
+                    context.getBean(ConditionalOnDemo.Notifier.class).send("привет"),
+                    equalTo("пользовательский: привет")
+                );
+                assertThat(
+                    "user bean cannot remain the only candidate",
+                    context.getBeanNamesForType(ConditionalOnDemo.Notifier.class).length,
+                    equalTo(1)
+                );
             }
         }
     }

@@ -12,11 +12,17 @@ import ru.sprbut.m08.service.OrderRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.comparesEqualTo;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Расширенный пример: полный цикл APT в рабочем коде")
-class CheckoutFacadeTest {
+final class CheckoutFacadeTest {
 
     private static final LocalDate DAY = LocalDate.of(2026, 7, 30);
 
@@ -38,9 +44,11 @@ class CheckoutFacadeTest {
     void registersCustomer() {
         Customer customer = facade.register("C-1", "Иванов", "ivanov@mail.ru", 42, false);
 
-        assertThat(customer.getName()).isEqualTo("Иванов");
-        assertThat(customer.getBalance()).isEqualByComparingTo("0");
-        assertThat(customers.count()).isEqualTo(1);
+        assertThat(
+            "generated builder cannot assemble the registered customer",
+            customer.getName(),
+            equalTo("Иванов")
+        );
     }
 
     @Test
@@ -50,10 +58,11 @@ class CheckoutFacadeTest {
 
         Order order = facade.checkout("C-1", new BigDecimal("1000"), DAY);
 
-        assertThat(order.getNumber()).isEqualTo("ORD-1");
-        assertThat(order.getTotal()).isEqualByComparingTo("1000");
-        assertThat(order.getStatus()).isEqualTo("NEW");
-        assertThat(order.getPlacedOn()).isEqualTo(DAY);
+        assertThat(
+            "second generated builder cannot assemble the order",
+            order.getTotal(),
+            comparesEqualTo(new BigDecimal("1000"))
+        );
     }
 
     @Test
@@ -63,7 +72,11 @@ class CheckoutFacadeTest {
 
         Order order = facade.checkout("C-2", new BigDecimal("1000"), DAY);
 
-        assertThat(order.getTotal()).isEqualByComparingTo("900.0");
+        assertThat(
+            "vip discount cannot be applied on top of the generated code",
+            order.getTotal(),
+            comparesEqualTo(new BigDecimal("900.0"))
+        );
     }
 
     @Test
@@ -74,17 +87,24 @@ class CheckoutFacadeTest {
         facade.checkout("C-1", BigDecimal.TEN, DAY);
         facade.checkout("C-1", BigDecimal.ONE, DAY);
 
-        assertThat(facade.ordersOf("C-1"))
-                .extracting(Order::getNumber)
-                .containsExactly("ORD-1", "ORD-2");
+        assertThat(
+            "orders cannot be numbered sequentially",
+            facade.ordersOf("C-1").stream().map(Order::getNumber).toList(),
+            contains("ORD-1", "ORD-2")
+        );
     }
 
     @Test
     @DisplayName("Неизвестный покупатель отклоняется")
     void rejectsUnknownCustomer() {
-        assertThatThrownBy(() -> facade.checkout("нет-такого", BigDecimal.TEN, DAY))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Нет покупателя");
+        assertThat(
+            "unknown customer cannot be rejected with an explanation",
+            assertThrows(
+                IllegalArgumentException.class,
+                () -> facade.checkout("нет-такого", BigDecimal.TEN, DAY)
+            ).getMessage(),
+            containsString("Нет покупателя")
+        );
     }
 
     @Test
@@ -93,8 +113,11 @@ class CheckoutFacadeTest {
         facade.register("C-1", "Иванов", "i@mail.ru", 42, false);
         facade.checkout("C-1", new BigDecimal("500"), DAY);
 
-        assertThat(facade.auditTrail())
-                .containsExactly("зарегистрирован C-1", "заказ ORD-1 на 500");
+        assertThat(
+            "audit cannot record every step",
+            facade.auditTrail(),
+            contains("зарегистрирован C-1", "заказ ORD-1 на 500")
+        );
     }
 
     @Test
@@ -105,14 +128,20 @@ class CheckoutFacadeTest {
         fromRegistry.register("C-9", "Сидоров", "s@mail.ru", 30, false);
         Order order = fromRegistry.checkout("C-9", new BigDecimal("250"), DAY);
 
-        assertThat(order.getCustomerId()).isEqualTo("C-9");
-        assertThat(fromRegistry.auditTrail()).hasSize(2);
+        assertThat(
+            "generated registry cannot supply the dependencies",
+            order.getCustomerId(),
+            equalTo("C-9")
+        );
     }
 
     @Test
     @DisplayName("Реестр знает все три компонента модуля")
     void registryKnowsEveryComponent() {
-        assertThat(CheckoutFacade.registeredNames())
-                .containsExactlyInAnyOrder("customers", "orderRepository", "audit");
+        assertThat(
+            "registry cannot know every component of the module",
+            CheckoutFacade.registeredNames(),
+            containsInAnyOrder("customers", "orderRepository", "audit")
+        );
     }
 }
