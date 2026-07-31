@@ -9,6 +9,7 @@ import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.context.event.ApplicationStartingEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.lang.NonNull;
 
 /**
  * Слайды 158–172 (СХЕМА 11): «run() → события → ApplicationReadyEvent».
@@ -40,7 +41,7 @@ public final class StartupListeners {
     /** Самое раннее событие: нет ни Environment, ни контекста. */
     public static class Starting implements ApplicationListener<ApplicationStartingEvent> {
         @Override
-        public void onApplicationEvent(ApplicationStartingEvent event) {
+        public void onApplicationEvent(@NonNull ApplicationStartingEvent event) {
             StartupLog.record("1-ApplicationStartingEvent");
         }
     }
@@ -49,7 +50,7 @@ public final class StartupListeners {
     public static class EnvironmentPrepared
             implements ApplicationListener<ApplicationEnvironmentPreparedEvent> {
         @Override
-        public void onApplicationEvent(ApplicationEnvironmentPreparedEvent event) {
+        public void onApplicationEvent(@NonNull ApplicationEnvironmentPreparedEvent event) {
             StartupLog.record("2-ApplicationEnvironmentPreparedEvent");
             StartupLog.record("2-env-has-property:"
                     + event.getEnvironment().containsProperty("sprbut.startup.marker"));
@@ -60,7 +61,7 @@ public final class StartupListeners {
     public static class ContextInitialized
             implements ApplicationListener<ApplicationContextInitializedEvent> {
         @Override
-        public void onApplicationEvent(ApplicationContextInitializedEvent event) {
+        public void onApplicationEvent(@NonNull ApplicationContextInitializedEvent event) {
             StartupLog.record("4-ApplicationContextInitializedEvent");
         }
     }
@@ -68,7 +69,7 @@ public final class StartupListeners {
     /** Определения бинов загружены — последний шанс их изменить. */
     public static class Prepared implements ApplicationListener<ApplicationPreparedEvent> {
         @Override
-        public void onApplicationEvent(ApplicationPreparedEvent event) {
+        public void onApplicationEvent(@NonNull ApplicationPreparedEvent event) {
             StartupLog.record("5-ApplicationPreparedEvent");
         }
     }
@@ -76,7 +77,7 @@ public final class StartupListeners {
     /** refresh() завершён: все синглтоны созданы. */
     public static class Refreshed implements ApplicationListener<ContextRefreshedEvent> {
         @Override
-        public void onApplicationEvent(ContextRefreshedEvent event) {
+        public void onApplicationEvent(@NonNull ContextRefreshedEvent event) {
             StartupLog.record("7-ContextRefreshedEvent");
         }
     }
@@ -84,7 +85,7 @@ public final class StartupListeners {
     /** Контекст поднят, но раннеры ещё не выполнялись. */
     public static class Started implements ApplicationListener<ApplicationStartedEvent> {
         @Override
-        public void onApplicationEvent(ApplicationStartedEvent event) {
+        public void onApplicationEvent(@NonNull ApplicationStartedEvent event) {
             StartupLog.record("8-ApplicationStartedEvent");
         }
     }
@@ -92,7 +93,7 @@ public final class StartupListeners {
     /** Всё готово, включая раннеры. Финал последовательности. */
     public static class Ready implements ApplicationListener<ApplicationReadyEvent> {
         @Override
-        public void onApplicationEvent(ApplicationReadyEvent event) {
+        public void onApplicationEvent(@NonNull ApplicationReadyEvent event) {
             StartupLog.record("10-ApplicationReadyEvent");
         }
     }
@@ -100,7 +101,7 @@ public final class StartupListeners {
     /** Запуск не удался — единственное событие, которое отменяет остальные. */
     public static class Failed implements ApplicationListener<ApplicationFailedEvent> {
         @Override
-        public void onApplicationEvent(ApplicationFailedEvent event) {
+        public void onApplicationEvent(@NonNull ApplicationFailedEvent event) {
             StartupLog.record("x-ApplicationFailedEvent:"
                     + event.getException().getClass().getSimpleName());
         }

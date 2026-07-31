@@ -30,8 +30,7 @@ public final class StartupTimeline {
         this.log = log;
     }
 
-    /** Точка расширения: что уже готово и что здесь принято делать. */
-    /** Канонический порядок точек расширения при запуске Spring Boot. */
+    /** Канонический порядок точек расширения при запуске: что уже готово и что здесь принято делать. */
     public List<HookPoint> whereToHook() {
         return List.of(
                 new HookPoint(1, "ApplicationStartingEvent",
