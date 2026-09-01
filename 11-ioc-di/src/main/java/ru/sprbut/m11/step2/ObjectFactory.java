@@ -29,6 +29,7 @@ import ru.sprbut.m11.domain.SmsSender;
  *
  * @since 1.0
  */
+@SuppressWarnings("PMD.ConstructorShouldDoInitialization")
 public class ObjectFactory {
 
     /**
@@ -51,66 +52,60 @@ public class ObjectFactory {
 
     /**
      * Синглтон: создаём один раз, дальше отдаём тот же экземпляр.
-     * @return Синглтон: создаём один раз, дальше отдаём тот же экземпляр
+     * @return Отправитель уведомлений
      */
     public NotificationSender notificationSender() {
-        return (NotificationSender) this.singleton("sender",
-                () -> "sms".equals(
-                    this.channel
-                ) ? new SmsSender() : new EmailSender());
+        return (NotificationSender) this.singleton("sender", this::sender);
     }
 
     /**
-     * Цена.
-     * @return Цена
+     * Калькулятор цены.
+     * @return Калькулятор цены
      */
     public PriceCalculator priceCalculator() {
-        return (PriceCalculator) this.singleton("calculator",
-                () -> new PriceCalculator(
-                    new BigDecimal(
-                        "0.20"
-                    )
-                ));
+        return (PriceCalculator) this.singleton(
+            "calculator", () -> new PriceCalculator(new BigDecimal("0.20"))
+        );
     }
 
     /**
      * Сборка графа: сначала зависимости, потом сам объект.
-     * @return Сборка графа: сначала зависимости, потом сам объект
+     * @return Сервис заказов со всеми зависимостями
      */
     public ManualOrderService orderService() {
-        return (ManualOrderService) this.singleton("orderService",
-                () -> new ManualOrderService(
-                    this.notificationSender(), this.priceCalculator()
-                ));
+        return (ManualOrderService) this.singleton(
+            "orderService",
+            () -> new ManualOrderService(this.notificationSender(), this.priceCalculator())
+        );
     }
 
     /**
-     * Количество.
-     * @return Количество
+     * Сколько объектов уже создано.
+     * @return Число созданных объектов
      */
     public int createdCount() {
         return this.singletons.size();
     }
 
-    /**
-     * Ленивое создание с кэшированием.
-     *
-     * <p>Написано через get/put, а не {@code computeIfAbsent}: фабрика зависимости
-     * вызывает фабрику другого бина, то есть трогает ту же карту рекурсивно,
-     * а {@code computeIfAbsent} такого не допускает — будет
-     * {@code ConcurrentModificationException}. Контейнеру приходится решать
-     * ровно эту задачу, только на графе произвольной глубины.</p>
-     * @param name Имя
-     * @param factory Фабрика
-     * @return Ленивое создание с кэшированием
-     */
-    private Object singleton(final String name, final Supplier<Object> factory) {
-        final Object existing = this.singletons.get(name);
-        if (existing != null) {
-            return existing;
+    // ленивое создание с кэшированием написано через get/put, а не computeIfAbsent:
+    // фабрика зависимости трогает ту же карту рекурсивно, а computeIfAbsent
+    // такого не допускает
+    private NotificationSender sender() {
+        final NotificationSender sender;
+        if ("sms".equals(this.channel)) {
+            sender = new SmsSender();
+        } else {
+            sender = new EmailSender();
         }
-        final Object created = factory.get();
-        this.singletons.put(name, created);
-        return created;
+        return sender;
+    }
+
+    private Object singleton(final String name, final Supplier<Object> factory) {
+        Object bean = this.singletons.get(name);
+        if (bean == null) {
+            bean = factory.get();
+            this.singletons.put(name, bean);
+        }
+        return bean;
     }
 }

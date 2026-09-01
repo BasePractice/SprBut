@@ -4,6 +4,10 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
+// подопытные компоненты собраны в одном файле: так виден весь граф
+// зависимостей, который разбирает мини-контейнер
+// @checkstyle ProhibitStaticNestedClassesCheck disable
+// @checkstyle ConstructorsOrderCheck disable
 package ru.sprbut.m11.extended;
 
 import java.util.ArrayList;
@@ -14,19 +18,26 @@ import java.util.List;
  * и все три патологии, из-за которых контейнер отказывается стартовать.
  * @since 1.0
  */
+// класс — витрина вложенных компонентов, у него самого состояния нет,
+// но и утилитой он не является: контейнер получает именно вложенные типы
+@SuppressWarnings({"PMD.ConstructorShouldDoInitialization", "PMD.InstantiableUtilityClass"})
 public final class Components {
 
-    private Components() {
+    /**
+     * Открытый конструктор: класс существует ради вложенных компонентов.
+     */
+    public Components() {
+        // состояния у набора нет
     }
 
-    // --- Нормальный граф: repository ← service ← facade ----------------------
+    // --- Нормальный граф: repository берётся из service берётся из facade ----------------------
 
     /**
      * Репозиторий.
      * @since 1.0
      */
     @MiniComponent
-    public static class Repository {
+    public static final class Repository {
 
         /**
          * Строки.
@@ -62,7 +73,7 @@ public final class Components {
      * @since 1.0
      */
     @MiniComponent
-    public static class Clock {
+    public static final class Clock {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -86,12 +97,13 @@ public final class Components {
      * @since 1.0
      */
     @MiniComponent("orders")
-    public static class OrderService {
+    public static final class OrderService {
 
         /**
          * Репозиторий.
          */
         private final Repository repository;
+
         /**
          * Часы.
          */
@@ -132,7 +144,7 @@ public final class Components {
      * @since 1.0
      */
     @MiniComponent
-    public static class OrderFacade {
+    public static final class OrderFacade {
 
         /**
          * Сервис.
@@ -171,7 +183,7 @@ public final class Components {
      * Не помечен {@code @MiniComponent} — контейнер о нём не знает.
      * @since 1.0
      */
-    public static class UnmanagedDependency {
+    public static final class UnmanagedDependency {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -186,7 +198,7 @@ public final class Components {
      * @since 1.0
      */
     @MiniComponent
-    public static class NeedsUnmanaged {
+    public static final class NeedsUnmanaged {
 
         /**
          * Основной конструктор.
@@ -203,6 +215,7 @@ public final class Components {
      * Значение {@code Payment}.
      * @since 1.0
      */
+    @SuppressWarnings("PMD.ImplicitFunctionalInterface")
     public interface Payment {
 
         /**
@@ -217,7 +230,7 @@ public final class Components {
      * @since 1.0
      */
     @MiniComponent("cardPayment")
-    public static class CardPayment implements Payment {
+    public static final class CardPayment implements Payment {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -237,7 +250,7 @@ public final class Components {
      * @since 1.0
      */
     @MiniComponent("cashPayment")
-    public static class CashPayment implements Payment {
+    public static final class CashPayment implements Payment {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -259,7 +272,7 @@ public final class Components {
      * @since 1.0
      */
     @MiniComponent
-    public static class AlphaService {
+    public static final class AlphaService {
 
         /**
          * Основной конструктор.
@@ -275,7 +288,7 @@ public final class Components {
      * @since 1.0
      */
     @MiniComponent
-    public static class BetaService {
+    public static final class BetaService {
 
         /**
          * Основной конструктор.
@@ -293,7 +306,7 @@ public final class Components {
      * @since 1.0
      */
     @MiniComponent
-    public static class TwoConstructors {
+    public static final class TwoConstructors {
 
         /**
          * Основной конструктор.

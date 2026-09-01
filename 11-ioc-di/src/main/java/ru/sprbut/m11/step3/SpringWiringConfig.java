@@ -7,13 +7,13 @@
 // @checkstyle NonStaticMethodCheck disable
 package ru.sprbut.m11.step3;
 
+import java.math.BigDecimal;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.sprbut.m11.domain.EmailSender;
 import ru.sprbut.m11.domain.NotificationSender;
 import ru.sprbut.m11.domain.PriceCalculator;
 import ru.sprbut.m11.step2.ManualOrderService;
-import java.math.BigDecimal;
 
 /**
  * Слайд 87: «пример — управление DI Spring».
@@ -67,10 +67,12 @@ public class SpringWiringConfig {
      * по типу и передаст их сюда. Ни одного {@code new} для зависимостей.
      * @param sender Отправитель
      * @param calculator Калькулятор
-     * @return Аргументы метода — это точки внедрения. Контейнер найдёт подходящие бины по типу и передаст их сюда. Ни одного {@code new} для зависимостей
+     * @return Сервис, собранный контейнером из найденных по типу бинов
      */
     @Bean
-    public ManualOrderService orderService(final NotificationSender sender, final PriceCalculator calculator) {
+    public ManualOrderService orderService(
+        final NotificationSender sender, final PriceCalculator calculator
+    ) {
         return new ManualOrderService(sender, calculator);
     }
 }

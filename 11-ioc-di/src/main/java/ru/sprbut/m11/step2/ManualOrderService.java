@@ -3,12 +3,14 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// netAmount — сумма без налога, имя из предметной области
+// @checkstyle ParameterNameCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m11.step2;
 
+import java.math.BigDecimal;
 import ru.sprbut.m11.domain.NotificationSender;
 import ru.sprbut.m11.domain.PriceCalculator;
-import java.math.BigDecimal;
 
 /**
  * Слайд 86: «пример — ручное управление».
@@ -34,6 +36,7 @@ public class ManualOrderService {
      * Отправитель.
      */
     private final NotificationSender sender;
+
     /**
      * Калькулятор.
      */
@@ -57,7 +60,7 @@ public class ManualOrderService {
      */
     public BigDecimal placeOrder(final String customer, final BigDecimal netAmount) {
         final BigDecimal total = this.calculator.withVat(netAmount);
-        this.sender.send(customer, "Заказ на сумму " + total);
+        this.sender.send(customer, String.format("Заказ на сумму %s", total));
         return total;
     }
 

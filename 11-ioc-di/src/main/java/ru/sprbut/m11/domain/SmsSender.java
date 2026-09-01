@@ -13,7 +13,8 @@ import java.util.List;
  * Альтернативная реализация — нужна, чтобы было что подменять.
  * @since 1.0
  */
-public class SmsSender implements NotificationSender {
+@SuppressWarnings("PMD.ConstructorShouldDoInitialization")
+public final class SmsSender implements NotificationSender {
 
     /**
      * Отправленные сообщения.
@@ -29,7 +30,7 @@ public class SmsSender implements NotificationSender {
 
     @Override
     public void send(final String recipient, final String message) {
-        this.sent.add("SMS " + recipient + ": " + message);
+        this.sent.add(String.format("SMS %s: %s", recipient, message));
     }
 
     @Override

@@ -11,7 +11,6 @@ package ru.sprbut.m11.domain;
  * его реализацию можно подменить — контейнером, фабрикой или руками в тесте.
  * @since 1.0
  */
-@SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface NotificationSender {
 
     /**

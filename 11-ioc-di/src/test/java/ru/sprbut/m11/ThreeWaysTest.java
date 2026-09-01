@@ -5,6 +5,9 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m11;
 
+import java.math.BigDecimal;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -17,9 +20,6 @@ import ru.sprbut.m11.step1.HardcodedOrderService;
 import ru.sprbut.m11.step2.ManualOrderService;
 import ru.sprbut.m11.step2.ObjectFactory;
 import ru.sprbut.m11.step3.SpringWiringConfig;
-import java.math.BigDecimal;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 
 /**
  * Слайды 83–88 (СХЕМА 5): от new к контейнеру.
@@ -39,10 +39,9 @@ final class ThreeWaysTest {
         @Test
         @DisplayName("Работает, но реализацию подменить нечем")
         void worksButIsRigid() {
-            final HardcodedOrderService service = new HardcodedOrderService();
             MatcherAssert.assertThat(
                 "hardcoded service cannot place the order",
-                service.placeOrder("ivanov@mail.ru", new BigDecimal("100")),
+                new HardcodedOrderService().placeOrder("ivanov@mail.ru", new BigDecimal("100")),
                 Matchers.comparesEqualTo(new BigDecimal("120.00"))
             );
         }
@@ -91,13 +90,9 @@ final class ThreeWaysTest {
         @Test
         @DisplayName("Зависимости приходят снаружи — реализация подменяется в одну строку")
         void dependenciesAreInjectable() {
-            final SmsSender sms = new SmsSender();
             final ManualOrderService service = new ManualOrderService(
-                    sms, new PriceCalculator(
-                        new BigDecimal(
-                            "0.20"
-                        )
-                    ));
+                new SmsSender(), new PriceCalculator(new BigDecimal("0.20"))
+            );
             service.placeOrder("+79001234567", new BigDecimal("100"));
             MatcherAssert.assertThat(
                 "injected implementation cannot be swapped in one line",
@@ -120,12 +115,10 @@ final class ThreeWaysTest {
         @DisplayName("Фабрика собирает граф и хранит синглтоны")
         void factoryAssemblesAndCaches() {
             final ObjectFactory factory = new ObjectFactory("email");
-            final ManualOrderService first = factory.orderService();
-            final ManualOrderService second = factory.orderService();
             MatcherAssert.assertThat(
                 "factory cannot cache the assembled singleton",
-                first,
-                Matchers.sameInstance(second)
+                factory.orderService(),
+                Matchers.sameInstance(factory.orderService())
             );
         }
 
@@ -161,12 +154,14 @@ final class ThreeWaysTest {
         @Test
         @DisplayName("Контейнер сам подбирает аргументы по типу — ни одного new для зависимостей")
         void containerResolvesArgumentsByType() {
-            try (var context = new AnnotationConfigApplicationContext(SpringWiringConfig.class)) {
-
-                final ManualOrderService service = context.getBean(ManualOrderService.class);
+            try (
+                AnnotationConfigApplicationContext context =
+                    new AnnotationConfigApplicationContext(SpringWiringConfig.class)
+            ) {
                 MatcherAssert.assertThat(
                     "container cannot resolve the arguments by type",
-                    service.placeOrder("ivanov@mail.ru", new BigDecimal("100")),
+                    context.getBean(ManualOrderService.class)
+                        .placeOrder("ivanov@mail.ru", new BigDecimal("100")),
                     Matchers.comparesEqualTo(new BigDecimal("120.00"))
                 );
             }
@@ -175,8 +170,10 @@ final class ThreeWaysTest {
         @Test
         @DisplayName("Бины по умолчанию — синглтоны")
         void beansAreSingletonsByDefault() {
-            try (var context = new AnnotationConfigApplicationContext(SpringWiringConfig.class)) {
-
+            try (
+                AnnotationConfigApplicationContext context =
+                    new AnnotationConfigApplicationContext(SpringWiringConfig.class)
+            ) {
                 MatcherAssert.assertThat(
                     "beans cannot be singletons by default",
                     context.getBean(ManualOrderService.class),
@@ -188,12 +185,13 @@ final class ThreeWaysTest {
         @Test
         @DisplayName("Порядок создания вычисляется по графу, а не задаётся руками")
         void creationOrderIsDerivedFromTheGraph() {
-            try (var context = new AnnotationConfigApplicationContext(SpringWiringConfig.class)) {
-                // orderService не мог быть создан раньше своих зависимостей
-                final ManualOrderService service = context.getBean(ManualOrderService.class);
+            try (
+                AnnotationConfigApplicationContext context =
+                    new AnnotationConfigApplicationContext(SpringWiringConfig.class)
+            ) {
                 MatcherAssert.assertThat(
                     "creation order cannot be derived from the graph",
-                    service,
+                    context.getBean(ManualOrderService.class),
                     Matchers.notNullValue()
                 );
             }
@@ -203,9 +201,7 @@ final class ThreeWaysTest {
         @DisplayName("Контейнер закрывается — и вместе с ним заканчивается жизненный цикл бинов")
         void containerOwnsTheLifecycle() {
             final AnnotationConfigApplicationContext context =
-                    new AnnotationConfigApplicationContext(
-                        SpringWiringConfig.class
-                    );
+                new AnnotationConfigApplicationContext(SpringWiringConfig.class);
             context.close();
             MatcherAssert.assertThat(
                 "closed container cannot end the lifecycle of its beans",

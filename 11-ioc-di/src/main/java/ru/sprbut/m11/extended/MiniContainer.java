@@ -4,6 +4,10 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
+// исключения контейнера живут рядом с ним: они и есть часть его контракта
+// @checkstyle ProhibitStaticNestedClassesCheck disable
+// @checkstyle ParameterNameCheck disable
+// @checkstyle MemberNameCheck disable
 package ru.sprbut.m11.extended;
 
 import java.lang.reflect.Constructor;
@@ -37,15 +41,16 @@ import java.util.Set;
  *
  * @since 1.0
  */
+@SuppressWarnings("PMD.ConstructorShouldDoInitialization")
 public class MiniContainer {
 
     /**
-     * Определения: имя → класс.
+     * Определения: имя ведёт к класс.
      */
     private final Map<String, Class<?>> definitions = new LinkedHashMap<>();
 
     /**
-     * Готовые синглтоны: имя → экземпляр.
+     * Готовые синглтоны: имя ведёт к экземпляр.
      */
     private final Map<String, Object> singletons = new LinkedHashMap<>();
 
@@ -61,7 +66,10 @@ public class MiniContainer {
 
     /**
      * Основной конструктор.
-     * @param componentClasses Значение {@code componentClasses}
+     * Регистрация определений идёт прямо здесь: контейнер и создаётся
+     * для того, чтобы знать про эти классы.
+     * @param componentClasses Классы компонентов
+     * @checkstyle ConstructorsCodeFreeCheck (6 lines)
      */
     public MiniContainer(final Class<?>... componentClasses) {
         for (final Class<?> type : componentClasses) {
@@ -75,19 +83,22 @@ public class MiniContainer {
      */
     public final void register(final Class<?> type) {
         final MiniComponent annotation = type.getAnnotation(MiniComponent.class);
-        if (
-            annotation == null
-        ) {
+        if (annotation == null) {
             throw new IllegalArgumentException(
-                type.getSimpleName()
-                    + " не помечен @MiniComponent — контейнер такими классами не управляет"
+                String.format(
+                    "%s не помечен @MiniComponent — контейнер такими классами не управляет",
+                    type.getSimpleName()
+                )
             );
         }
-        final String name = annotation.value().isBlank() ? defaultName(type) : annotation.value();
+        final String name;
+        if (annotation.value().isBlank()) {
+            name = MiniContainer.defaultName(type);
+        } else {
+            name = annotation.value();
+        }
         final Class<?> previous = this.definitions.put(name, type);
-        if (
-            previous != null
-        ) {
+        if (previous != null) {
             throw new IllegalStateException(
                 String.format("Имя бина '%s' уже занято классом %s", name, previous.getSimpleName())
             );
@@ -112,11 +123,11 @@ public class MiniContainer {
      */
     public Object getBean(final String name) {
         final Class<?> type = this.definitions.get(name);
-        if (
-            type == null
-        ) {
-            throw new NoSuchBeanException(
-                "Нет бина с именем '" + name + "'; известны: " + this.definitions.keySet()
+        if (type == null) {
+            throw new MiniContainer.NoSuchBeanException(
+                String.format(
+                    "Нет бина с именем '%s'; известны: %s", name, this.definitions.keySet()
+                )
             );
         }
         return this.instantiate(name, type);
@@ -126,131 +137,136 @@ public class MiniContainer {
      * Достать бин по типу. Подходит и точное совпадение, и реализация интерфейса —
      * ровно как в Spring.
      * @param requiredType Тип
-     * @return Достать бин по типу. Подходит и точное совпадение, и реализация интерфейса — ровно как в Spring
+     * @param <T> Тип бина
+     * @return Бин запрошенного типа
      */
-    public <T> T getBean(
-        final Class<T> requiredType
-    ) {
+    public <T> T getBean(final Class<T> requiredType) {
         final List<String> candidates = this.definitions.entrySet().stream()
-                .filter(
-                    e -> requiredType.isAssignableFrom(e.getValue())
-                )
-                .map(Map.Entry::getKey)
-                .toList();
+            .filter(entry -> requiredType.isAssignableFrom(entry.getValue()))
+            .map(Map.Entry::getKey)
+            .toList();
         if (candidates.isEmpty()) {
-            throw new NoSuchBeanException("Нет бина типа " + requiredType.getSimpleName());
+            throw new MiniContainer.NoSuchBeanException(
+                String.format("Нет бина типа %s", requiredType.getSimpleName())
+            );
         }
-        if (
-            candidates.size() > 1
-        ) {
-            throw new NoUniqueBeanException(
-                "Бинов типа "
-                    + requiredType.getSimpleName()
-                    + " несколько: "
-                    + candidates
-                    + ". Нужен квалификатор или @Primary"
+        if (candidates.size() > 1) {
+            throw new MiniContainer.NoUniqueBeanException(
+                String.format(
+                    "Бинов типа %s несколько: %s. Нужен квалификатор или @Primary",
+                    requiredType.getSimpleName(), candidates
+                )
             );
         }
         return requiredType.cast(this.getBean(candidates.get(0)));
     }
 
     /**
-     * Объект.
-     * @return Объект
+     * Имена всех известных бинов.
+     * @return Имена всех известных бинов
      */
     public Set<String> beanNames() {
         return Set.copyOf(this.definitions.keySet());
     }
 
     /**
-     * Порядок.
-     * @return Порядок
+     * Порядок создания бинов.
+     * @return Порядок создания бинов
      */
     public List<String> creationOrder() {
         return List.copyOf(this.creationOrder);
     }
 
     /**
-     * Значение: момент создания.
+     * Создан ли бин с этим именем.
      * @param name Имя
-     * @return Значение: момент создания
+     * @return Признак того, что бин уже создан
      */
     public boolean isCreated(final String name) {
         return this.singletons.containsKey(name);
-    }
-
-    // --- Создание -----------------------------------------------------------
-
-    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
-    private Object instantiate(final String name, final Class<?> type) {
-        final Object existing = this.singletons.get(name);
-        if (existing != null) {
-            return existing;
-        }
-        if (
-            !this.inCreation.add(type)
-        ) {
-            throw new CircularDependencyException(
-                "Циклическая зависимость: "
-                    + this.inCreation.stream().map(Class::getSimpleName).toList()
-                    + " → "
-                    + type.getSimpleName()
-            );
-        }
-        try {
-            final Constructor<?> constructor = selectConstructor(type);
-            // Рекурсия: сначала создаём зависимости, потом сам бин.
-            // Порядок создания вычисляется отсюда сам собой.
-            final Object[] args = Arrays.stream(
-                constructor.getParameterTypes()
-            )
-                    .map(
-                        this::getBean
-                    )
-                    .toArray();
-            constructor.setAccessible(true);
-            final Object bean = constructor.newInstance(args);
-            this.singletons.put(name, bean);
-            this.creationOrder.add(name);
-            return bean;
-        } catch (final InstantiationException | IllegalAccessException e) {
-            throw new IllegalStateException("Не удалось создать " + type.getSimpleName(), e);
-        } catch (final InvocationTargetException e) {
-            final Throwable cause = e.getCause();
-            throw cause instanceof RuntimeException re
-                    ? re
-                    : new IllegalStateException("Конструктор " + type.getSimpleName() + " бросил исключение", cause);
-        } finally {
-            this.inCreation.remove(type);
-        }
     }
 
     /**
      * Правило выбора конструктора — то же, что в Spring: если конструктор один,
      * он и используется, никаких аннотаций не нужно.
      * @param type Тип
-     * @return Правило выбора конструктора — то же, что в Spring: если конструктор один, он и используется, никаких аннотаций не нужно
+     * @return Конструктор, которым контейнер создаст бин
      */
     static Constructor<?> selectConstructor(final Class<?> type) {
         final Constructor<?>[] constructors = type.getDeclaredConstructors();
+        final Constructor<?> chosen;
         if (constructors.length == 1) {
-            return constructors[0];
-        }
-        return Arrays.stream(
-            constructors
-        )
-                .filter(
-                    c -> c.getParameterCount() == 0
-                )
+            chosen = constructors[0];
+        } else {
+            chosen = Arrays.stream(constructors)
+                .filter(candidate -> candidate.getParameterCount() == 0)
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("У " + type.getSimpleName()
-                        + " несколько конструкторов и нет конструктора без параметров — "
-                        + "контейнер не знает, какой выбрать"));
+                .orElseThrow(
+                    () -> new IllegalStateException(
+                        String.format(
+                            "У %s несколько конструкторов и нет конструктора без параметров",
+                            type.getSimpleName()
+                        )
+                    )
+                );
+        }
+        return chosen;
     }
 
     static String defaultName(final Class<?> type) {
-        final String simpleName = type.getSimpleName();
-        return Character.toLowerCase(simpleName.charAt(0)) + simpleName.substring(1);
+        final String simple = type.getSimpleName();
+        return String.format(
+            "%s%s", Character.toLowerCase(simple.charAt(0)), simple.substring(1)
+        );
+    }
+
+    // рекурсия: сначала создаются зависимости, потом сам бин,
+    // поэтому порядок создания вычисляется сам собой
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
+    private Object created(final String name, final Class<?> type) {
+        if (!this.inCreation.add(type)) {
+            throw new MiniContainer.CircularDependencyException(
+                String.format(
+                    "Циклическая зависимость: %s ведёт к %s",
+                    this.inCreation.stream().map(Class::getSimpleName).toList(),
+                    type.getSimpleName()
+                )
+            );
+        }
+        try {
+            final Constructor<?> constructor = MiniContainer.selectConstructor(type);
+            final Object[] args = Arrays.stream(constructor.getParameterTypes())
+                .map(this::getBean)
+                .toArray();
+            constructor.setAccessible(true);
+            final Object bean = constructor.newInstance(args);
+            this.singletons.put(name, bean);
+            this.creationOrder.add(name);
+            return bean;
+        } catch (final InstantiationException | IllegalAccessException denied) {
+            throw new IllegalStateException(
+                String.format("Не удалось создать %s", type.getSimpleName()), denied
+            );
+        } catch (final InvocationTargetException wrapped) {
+            throw new IllegalStateException(
+                String.format("Конструктор %s бросил исключение", type.getSimpleName()), wrapped
+            );
+        } finally {
+            this.inCreation.remove(type);
+        }
+    }
+
+    // --- Создание -----------------------------------------------------------
+
+    private Object instantiate(final String name, final Class<?> type) {
+        final Object existing = this.singletons.get(name);
+        final Object bean;
+        if (existing == null) {
+            bean = this.created(name, type);
+        } else {
+            bean = existing;
+        }
+        return bean;
     }
 
     // --- Ошибки, повторяющие поведение Spring -------------------------------

@@ -21,10 +21,11 @@ final class MiniContainerTest {
 
     private MiniContainer healthyContainer() {
         return new MiniContainer(
-                Components.OrderFacade.class,
-                Components.OrderService.class,
-                Components.Repository.class,
-                Components.Clock.class);
+            Components.OrderFacade.class,
+            Components.OrderService.class,
+            Components.Repository.class,
+            Components.Clock.class
+        );
     }
 
     /**
@@ -38,10 +39,11 @@ final class MiniContainerTest {
         @Test
         @DisplayName("Зависимости подбираются по типу и внедряются через конструктор")
         void injectsByType() {
-            final Components.OrderFacade facade = MiniContainerTest.this.healthyContainer().getBean(Components.OrderFacade.class);
             MatcherAssert.assertThat(
                 "container cannot wire the graph by type",
-                facade.checkout("книга"),
+                MiniContainerTest.this.healthyContainer()
+                    .getBean(Components.OrderFacade.class)
+                    .checkout("книга"),
                 Matchers.equalTo("2026-07-30 книга")
             );
         }
@@ -72,10 +74,9 @@ final class MiniContainerTest {
         @Test
         @DisplayName("Пока бин не запрошен, он не создан — ленивость по умолчанию")
         void beansAreCreatedOnDemand() {
-            final MiniContainer container = MiniContainerTest.this.healthyContainer();
             MatcherAssert.assertThat(
                 "unrequested bean cannot stay uncreated",
-                container.isCreated("repository"),
+                MiniContainerTest.this.healthyContainer().isCreated("repository"),
                 Matchers.equalTo(false)
             );
         }
@@ -95,10 +96,9 @@ final class MiniContainerTest {
         @Test
         @DisplayName("refresh() создаёт все бины сразу — как Spring поступает с синглтонами")
         void refreshCreatesEverything() {
-            final MiniContainer container = MiniContainerTest.this.healthyContainer().refresh();
             MatcherAssert.assertThat(
                 "refresh cannot create every singleton at once",
-                container.beanNames(),
+                MiniContainerTest.this.healthyContainer().refresh().beanNames(),
                 Matchers.containsInAnyOrder("orderFacade", "orders", "repository", "clock")
             );
         }
@@ -106,10 +106,9 @@ final class MiniContainerTest {
         @Test
         @DisplayName("Имя бина берётся из аннотации, иначе — из имени класса")
         void resolvesBeanNames() {
-            final MiniContainer container = MiniContainerTest.this.healthyContainer();
             MatcherAssert.assertThat(
                 "annotation cannot define the bean name",
-                container.beanNames(),
+                MiniContainerTest.this.healthyContainer().beanNames(),
                 Matchers.hasItem("orders")
             );
         }
@@ -127,10 +126,11 @@ final class MiniContainerTest {
         @Test
         @DisplayName("Поиск по интерфейсу находит реализацию")
         void findsByInterface() {
-            final MiniContainer container = new MiniContainer(Components.CardPayment.class);
             MatcherAssert.assertThat(
                 "interface lookup cannot find the implementation",
-                container.getBean(Components.Payment.class).kind(),
+                new MiniContainer(Components.CardPayment.class)
+                    .getBean(Components.Payment.class)
+                    .kind(),
                 Matchers.equalTo("card")
             );
         }
@@ -227,7 +227,9 @@ final class MiniContainerTest {
                 "duplicate bean name cannot be caught at registration",
                 Assertions.assertThrows(
                     IllegalStateException.class,
-                    () -> new MiniContainer(Components.Repository.class, Components.Repository.class)
+                    () -> new MiniContainer(
+                        Components.Repository.class, Components.Repository.class
+                    )
                 ).getMessage(),
                 Matchers.containsString("уже занято")
             );

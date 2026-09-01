@@ -3,12 +3,14 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// netAmount — сумма без налога, имя из предметной области
+// @checkstyle ParameterNameCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m11.step1;
 
+import java.math.BigDecimal;
 import ru.sprbut.m11.domain.EmailSender;
 import ru.sprbut.m11.domain.PriceCalculator;
-import java.math.BigDecimal;
 
 /**
  * Слайд 86: «пример — без зависимостей».
@@ -26,7 +28,9 @@ import java.math.BigDecimal;
  *
  * @since 1.0
  */
+@SuppressWarnings("PMD.ConstructorShouldDoInitialization")
 public class HardcodedOrderService {
+
     // Зависимости создаются внутри. Снаружи на них никак не повлиять.
     /**
      * Отправитель.
@@ -53,14 +57,14 @@ public class HardcodedOrderService {
      */
     public BigDecimal placeOrder(final String customer, final BigDecimal netAmount) {
         final BigDecimal total = this.calculator.withVat(netAmount);
-        this.sender.send(customer, "Заказ на сумму " + total);
+        this.sender.send(customer, String.format("Заказ на сумму %s", total));
         return total;
     }
 
     /**
      * Единственный способ хоть что-то проверить в тесте — добавить геттер
      * в продакшн-код специально ради теста. Это уже симптом.
-     * @return Единственный способ хоть что-то проверить в тесте — добавить геттер в продакшн-код специально ради теста. Это уже симптом
+     * @return Отправитель, который иначе никак не достать снаружи
      */
     public EmailSender senderForTests() {
         return this.sender;

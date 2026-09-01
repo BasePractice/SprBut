@@ -13,7 +13,8 @@ import java.util.List;
  * Реализация «по умолчанию». Отправленное копится в списке — так его видно в тестах.
  * @since 1.0
  */
-public class EmailSender implements NotificationSender {
+@SuppressWarnings("PMD.ConstructorShouldDoInitialization")
+public final class EmailSender implements NotificationSender {
 
     /**
      * Отправленные сообщения.
@@ -29,7 +30,7 @@ public class EmailSender implements NotificationSender {
 
     @Override
     public void send(final String recipient, final String message) {
-        this.sent.add(recipient + " <- " + message);
+        this.sent.add(String.format("%s <- %s", recipient, message));
     }
 
     @Override
