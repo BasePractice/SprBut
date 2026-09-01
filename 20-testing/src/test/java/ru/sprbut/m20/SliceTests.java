@@ -233,11 +233,15 @@ final class SliceTests {
             BDDMockito.given(this.catalog.available()).willReturn(
                     List.of(
                         new Product(
-                            "SKU-1", "Кофемолка", new BigDecimal("4990.00")
+                            "SKU-1", "Кофемолка", new BigDecimal(
+                                "4990.00"
+                            )
                         )
                     ));
             this.mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/products")
+                MockMvcRequestBuilders.get(
+                    "/api/products"
+                )
             )
                     .andExpect(
                         MockMvcResultMatchers.status().isOk()
@@ -250,13 +254,17 @@ final class SliceTests {
         @DisplayName("Отсутствующий товар превращается в 404 обработчиком исключений")
         void missingProductBecomes404() throws Exception {
             BDDMockito.willThrow(
-                new CatalogService.ProductNotFoundException("SKU-X")
+                new CatalogService.ProductNotFoundException(
+                    "SKU-X"
+                )
             )
                     .given(
                         this.catalog
                     ).bySku("SKU-X");
             this.mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/products/SKU-X")
+                MockMvcRequestBuilders.get(
+                    "/api/products/SKU-X"
+                )
             )
                     .andExpect(
                         MockMvcResultMatchers.status().isNotFound()
@@ -414,14 +422,18 @@ final class SliceTests {
             final CatalogService catalog = Mockito.mock(CatalogService.class);
             BDDMockito.given(
                 catalog.available()
-            ).willReturn(List.of());
+            ).willReturn(
+                List.of()
+            );
             final MockMvc standalone = MockMvcBuilders
                     .standaloneSetup(
                         new ProductController(catalog)
                     )
                     .build();
             standalone.perform(
-                MockMvcRequestBuilders.get("/api/products")
+                MockMvcRequestBuilders.get(
+                    "/api/products"
+                )
             )
                     .andExpect(
                         MockMvcResultMatchers.status().isOk()

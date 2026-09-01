@@ -28,11 +28,11 @@ import org.hamcrest.Matchers;
 @DisplayName("Слайды 83–88 (СХЕМА 5): от new к контейнеру")
 final class ThreeWaysTest {
 
+    /**
+     * Шаг 1: зависимости создаются внутри.
+     * @since 1.0
+     */
     @Nested
-/**
- * Шаг 1: зависимости создаются внутри.
- * @since 1.0
- */
     @DisplayName("Шаг 1: зависимости создаются внутри")
     final class Hardcoded {
 
@@ -80,11 +80,11 @@ final class ThreeWaysTest {
         }
     }
 
+    /**
+     * Шаг 2: ручное управление.
+     * @since 1.0
+     */
     @Nested
-/**
- * Шаг 2: ручное управление.
- * @since 1.0
- */
     @DisplayName("Шаг 2: ручное управление")
     final class Manual {
 
@@ -150,11 +150,11 @@ final class ThreeWaysTest {
         }
     }
 
+    /**
+     * Шаг 3: управление DI Spring.
+     * @since 1.0
+     */
     @Nested
-/**
- * Шаг 3: управление DI Spring.
- * @since 1.0
- */
     @DisplayName("Шаг 3: управление DI Spring")
     final class SpringManaged {
 

@@ -109,7 +109,9 @@ public final class LifecycleTimeline {
             if (
                 steps.get(
                     index
-                ).number() < steps.get(index - 1).number()
+                ).number() < steps.get(
+                    index - 1
+                ).number()
             ) {
                 found.add(new Violation(
                     "порядок шагов",

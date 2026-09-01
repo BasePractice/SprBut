@@ -32,11 +32,11 @@ import ru.sprbut.m17.transactional.TransactionalDemo;
 @DisplayName("Слайды 139–149: аннотации Spring")
 final class SpringAnnotationsTest {
 
+    /**
+     * Слайды 140–144: стереотипы.
+     * @since 1.0
+     */
     @Nested
-/**
- * Слайды 140–144: стереотипы.
- * @since 1.0
- */
     @DisplayName("Слайды 140–144: стереотипы")
     final class StereotypeScanning {
 
@@ -95,11 +95,11 @@ final class SpringAnnotationsTest {
         }
     }
 
+    /**
+     * Слайд 143: @Configuration и proxyBeanMethods.
+     * @since 1.0
+     */
     @Nested
-/**
- * Слайд 143: @Configuration и proxyBeanMethods.
- * @since 1.0
- */
     @DisplayName("Слайд 143: @Configuration и proxyBeanMethods")
     final class ConfigurationProxy {
 
@@ -195,11 +195,11 @@ final class SpringAnnotationsTest {
         }
     }
 
+    /**
+     * Слайд 147: @Transactional через AOP-прокси.
+     * @since 1.0
+     */
     @Nested
-/**
- * Слайд 147: @Transactional через AOP-прокси.
- * @since 1.0
- */
     @DisplayName("Слайд 147: @Transactional через AOP-прокси")
     final class Transactions {
 
@@ -301,11 +301,11 @@ final class SpringAnnotationsTest {
         }
     }
 
+    /**
+     * Слайды 148–149: @ConditionalOnProperty и @ConditionalOnMissingBean.
+     * @since 1.0
+     */
     @Nested
-/**
- * Слайды 148–149: @ConditionalOnProperty и @ConditionalOnMissingBean.
- * @since 1.0
- */
     @DisplayName("Слайды 148–149: @ConditionalOnProperty и @ConditionalOnMissingBean")
     final class Conditionals {
 

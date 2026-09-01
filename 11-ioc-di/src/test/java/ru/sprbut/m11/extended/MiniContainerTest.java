@@ -27,18 +27,18 @@ final class MiniContainerTest {
                 Components.Clock.class);
     }
 
+    /**
+     * Контейнер собирает граф.
+     * @since 1.0
+     */
     @Nested
-/**
- * Контейнер собирает граф.
- * @since 1.0
- */
     @DisplayName("Контейнер собирает граф")
     final class Wiring {
 
         @Test
         @DisplayName("Зависимости подбираются по типу и внедряются через конструктор")
         void injectsByType() {
-            final Components.OrderFacade facade = healthyContainer().getBean(Components.OrderFacade.class);
+            final Components.OrderFacade facade = MiniContainerTest.this.healthyContainer().getBean(Components.OrderFacade.class);
             MatcherAssert.assertThat(
                 "container cannot wire the graph by type",
                 facade.checkout("книга"),
@@ -49,7 +49,7 @@ final class MiniContainerTest {
         @Test
         @DisplayName("Бины — синглтоны: один и тот же экземпляр везде")
         void beansAreSingletons() {
-            final MiniContainer container = healthyContainer();
+            final MiniContainer container = MiniContainerTest.this.healthyContainer();
             MatcherAssert.assertThat(
                 "container cannot keep beans singleton",
                 container.getBean(Components.Repository.class),
@@ -60,7 +60,7 @@ final class MiniContainerTest {
         @Test
         @DisplayName("Порядок создания вычисляется из графа: сначала зависимости")
         void creationOrderFollowsTheGraph() {
-            final MiniContainer container = healthyContainer();
+            final MiniContainer container = MiniContainerTest.this.healthyContainer();
             container.getBean(Components.OrderFacade.class);
             MatcherAssert.assertThat(
                 "creation order cannot follow the dependency graph",
@@ -72,7 +72,7 @@ final class MiniContainerTest {
         @Test
         @DisplayName("Пока бин не запрошен, он не создан — ленивость по умолчанию")
         void beansAreCreatedOnDemand() {
-            final MiniContainer container = healthyContainer();
+            final MiniContainer container = MiniContainerTest.this.healthyContainer();
             MatcherAssert.assertThat(
                 "unrequested bean cannot stay uncreated",
                 container.isCreated("repository"),
@@ -83,7 +83,7 @@ final class MiniContainerTest {
         @Test
         @DisplayName("после запроса бин создан")
         void createsOnRequest() {
-            final MiniContainer container = healthyContainer();
+            final MiniContainer container = MiniContainerTest.this.healthyContainer();
             container.getBean(Components.Repository.class);
             MatcherAssert.assertThat(
                 "requested bean cannot be created",
@@ -95,7 +95,7 @@ final class MiniContainerTest {
         @Test
         @DisplayName("refresh() создаёт все бины сразу — как Spring поступает с синглтонами")
         void refreshCreatesEverything() {
-            final MiniContainer container = healthyContainer().refresh();
+            final MiniContainer container = MiniContainerTest.this.healthyContainer().refresh();
             MatcherAssert.assertThat(
                 "refresh cannot create every singleton at once",
                 container.beanNames(),
@@ -106,7 +106,7 @@ final class MiniContainerTest {
         @Test
         @DisplayName("Имя бина берётся из аннотации, иначе — из имени класса")
         void resolvesBeanNames() {
-            final MiniContainer container = healthyContainer();
+            final MiniContainer container = MiniContainerTest.this.healthyContainer();
             MatcherAssert.assertThat(
                 "annotation cannot define the bean name",
                 container.beanNames(),
@@ -119,7 +119,7 @@ final class MiniContainerTest {
         void findsBeanByName() {
             MatcherAssert.assertThat(
                 "named bean cannot be found by its name",
-                healthyContainer().getBean("orders"),
+                MiniContainerTest.this.healthyContainer().getBean("orders"),
                 Matchers.instanceOf(Components.OrderService.class)
             );
         }
@@ -136,11 +136,11 @@ final class MiniContainerTest {
         }
     }
 
+    /**
+     * Ошибки, которые повторяет настоящий Spring.
+     * @since 1.0
+     */
     @Nested
-/**
- * Ошибки, которые повторяет настоящий Spring.
- * @since 1.0
- */
     @DisplayName("Ошибки, которые повторяет настоящий Spring")
     final class Failures {
 
@@ -240,18 +240,18 @@ final class MiniContainerTest {
                 "unknown bean name cannot be reported with the known ones",
                 Assertions.assertThrows(
                     MiniContainer.NoSuchBeanException.class,
-                    () -> healthyContainer().getBean("нет-такого")
+                    () -> MiniContainerTest.this.healthyContainer().getBean("нет-такого")
                 ).getMessage(),
                 Matchers.containsString("известны")
             );
         }
     }
 
+    /**
+     * Единственный конструктор — правило Spring.
+     * @since 1.0
+     */
     @Nested
-/**
- * Единственный конструктор — правило Spring.
- * @since 1.0
- */
     @DisplayName("Единственный конструктор — правило Spring")
     final class ConstructorSelection {
 

@@ -51,11 +51,11 @@ final class InjectionStylesTest {
         this.context.close();
     }
 
+    /**
+     * Все три способа работают одинаково.
+     * @since 1.0
+     */
     @Nested
-/**
- * Все три способа работают одинаково.
- * @since 1.0
- */
     @DisplayName("Все три способа работают одинаково")
     final class Equivalence {
 
@@ -65,27 +65,27 @@ final class InjectionStylesTest {
             final BigDecimal net = new BigDecimal("100");
             MatcherAssert.assertThat(
                 "cannot verify that results are identical",
-                context.getBean(ConstructorInjected.class).total(net, true),
+                InjectionStylesTest.this.context.getBean(ConstructorInjected.class).total(net, true),
                 Matchers.comparesEqualTo(new BigDecimal("108.00"))
             );
             MatcherAssert.assertThat(
                 "cannot verify that results are identical",
-                context.getBean(SetterInjected.class).total(net, true),
+                InjectionStylesTest.this.context.getBean(SetterInjected.class).total(net, true),
                 Matchers.comparesEqualTo(new BigDecimal("108.00"))
             );
             MatcherAssert.assertThat(
                 "cannot verify that results are identical",
-                context.getBean(FieldInjected.class).total(net, true),
+                InjectionStylesTest.this.context.getBean(FieldInjected.class).total(net, true),
                 Matchers.comparesEqualTo(new BigDecimal("108.00"))
             );
         }
     }
 
+    /**
+     * Слайд 92: почему конструктор предпочтителен.
+     * @since 1.0
+     */
     @Nested
-/**
- * Слайд 92: почему конструктор предпочтителен.
- * @since 1.0
- */
     @DisplayName("Слайд 92: почему конструктор предпочтителен")
     final class ConstructorWins {
 
@@ -132,17 +132,17 @@ final class InjectionStylesTest {
             );
             MatcherAssert.assertThat(
                 "cannot verify that autowired is optional on single constructor",
-                context.getBean(ConstructorInjected.class),
+                InjectionStylesTest.this.context.getBean(ConstructorInjected.class),
                 Matchers.notNullValue()
             );
         }
     }
 
+    /**
+     * Слайд 93: внедрение в поле мешает тестам без контейнера.
+     * @since 1.0
+     */
     @Nested
-/**
- * Слайд 93: внедрение в поле мешает тестам без контейнера.
- * @since 1.0
- */
     @DisplayName("Слайд 93: внедрение в поле мешает тестам без контейнера")
     final class FieldInjectionProblems {
 
@@ -191,11 +191,11 @@ final class InjectionStylesTest {
         }
     }
 
+    /**
+     * Сеттер: единственный уместный случай — необязательная зависимость.
+     * @since 1.0
+     */
     @Nested
-/**
- * Сеттер: единственный уместный случай — необязательная зависимость.
- * @since 1.0
- */
     @DisplayName("Сеттер: единственный уместный случай — необязательная зависимость")
     final class SetterInjection {
 
@@ -224,7 +224,7 @@ final class InjectionStylesTest {
         void optionalDependencyIsInjectedWhenPresent() {
             MatcherAssert.assertThat(
                 "cannot verify that optional dependency is injected when present",
-                context.getBean(SetterInjected.class).hasDiscountService(),
+                InjectionStylesTest.this.context.getBean(SetterInjected.class).hasDiscountService(),
                 Matchers.equalTo(true)
             );
         }
@@ -243,18 +243,18 @@ final class InjectionStylesTest {
         }
     }
 
+    /**
+     * Слайд 95: Service Locator — антипаттерн.
+     * @since 1.0
+     */
     @Nested
-/**
- * Слайд 95: Service Locator — антипаттерн.
- * @since 1.0
- */
     @DisplayName("Слайд 95: Service Locator — антипаттерн")
     final class ServiceLocator {
 
         @Test
         @DisplayName("Работает, но зависимость достаётся вручную из контейнера")
         void itWorksButHidesDependencies() {
-            final ServiceLocatorDemo demo = context.getBean(ServiceLocatorDemo.class);
+            final ServiceLocatorDemo demo = InjectionStylesTest.this.context.getBean(ServiceLocatorDemo.class);
             MatcherAssert.assertThat(
                 "cannot verify that it works but hides dependencies",
                 demo.total(new BigDecimal("100")),
@@ -282,24 +282,24 @@ final class InjectionStylesTest {
         @Test
         @DisplayName("Ошибка «нет бина» вылезает при вызове метода, а не при старте")
         void errorsSurfaceLate() {
-            final ServiceLocatorDemo demo = context.getBean(ServiceLocatorDemo.class);
+            final ServiceLocatorDemo demo = InjectionStylesTest.this.context.getBean(ServiceLocatorDemo.class);
             // контекст поднялся успешно, хотя такого бина нет
             Assertions.assertThrows(NoSuchBeanDefinitionException.class, () -> demo.lookup("несуществующийБин"));
         }
     }
 
+    /**
+     * Слайд 96: jakarta-аннотации.
+     * @since 1.0
+     */
     @Nested
-/**
- * Слайд 96: jakarta-аннотации.
- * @since 1.0
- */
     @DisplayName("Слайд 96: jakarta-аннотации")
     final class Jakarta {
 
         @Test
         @DisplayName("@Inject работает как @Autowired, @Resource — как @Resource")
         void jakartaAnnotationsAreSupported() {
-            final JakartaInjected service = context.getBean(JakartaInjected.class);
+            final JakartaInjected service = InjectionStylesTest.this.context.getBean(JakartaInjected.class);
             MatcherAssert.assertThat(
                 "cannot verify that jakarta annotations are supported",
                 service.total(new BigDecimal("100"), true),
@@ -312,12 +312,12 @@ final class InjectionStylesTest {
         void namedSetsTheBeanName() {
             MatcherAssert.assertThat(
                 "cannot verify that named sets the bean name",
-                context.containsBean("jakartaService"),
+                InjectionStylesTest.this.context.containsBean("jakartaService"),
                 Matchers.equalTo(true)
             );
             MatcherAssert.assertThat(
                 "cannot verify that named sets the bean name",
-                context.getBean("jakartaService"),
+                InjectionStylesTest.this.context.getBean("jakartaService"),
                 Matchers.instanceOf(JakartaInjected.class)
             );
         }

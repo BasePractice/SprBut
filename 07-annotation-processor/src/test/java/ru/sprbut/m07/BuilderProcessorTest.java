@@ -61,18 +61,18 @@ final class BuilderProcessorTest {
         return CompilationHarness.compile(this.workDir, List.of(sources), new BuilderProcessor());
     }
 
+    /**
+     * Генерация исходного кода.
+     * @since 1.0
+     */
     @Nested
-/**
- * Генерация исходного кода.
- * @since 1.0
- */
     @DisplayName("Генерация исходного кода")
     final class Generation {
 
         @Test
         @DisplayName("Для помеченного класса рядом появляется CustomerBuilder")
         void generatesBuilder() {
-            final CompilationHarness.Result result = compile(VALID_BEAN);
+            final CompilationHarness.Result result = BuilderProcessorTest.this.compile(VALID_BEAN);
             MatcherAssert.assertThat(
                 "annotated class cannot get its builder generated",
                 result.generatedSources(),
@@ -83,7 +83,7 @@ final class BuilderProcessorTest {
         @Test
         @DisplayName("У билдера есть fluent-метод на каждое нестатическое поле")
         void generatesFluentSetters() {
-            final String code = compile(VALID_BEAN).source("demo.CustomerBuilder");
+            final String code = BuilderProcessorTest.this.compile(VALID_BEAN).source("demo.CustomerBuilder");
             MatcherAssert.assertThat(
                 "builder cannot get a fluent method per field",
                 code,
@@ -96,7 +96,7 @@ final class BuilderProcessorTest {
         void skipsStaticField() {
             MatcherAssert.assertThat(
                 "static field cannot stay out of the builder",
-                compile(VALID_BEAN).source("demo.CustomerBuilder"),
+                BuilderProcessorTest.this.compile(VALID_BEAN).source("demo.CustomerBuilder"),
                 Matchers.not(Matchers.containsString("ignored"))
             );
         }
@@ -104,7 +104,7 @@ final class BuilderProcessorTest {
         @Test
         @DisplayName("build() создаёт объект конструктором без параметров и зовёт сеттеры")
         void generatesBuildMethod() {
-            final String code = compile(VALID_BEAN).source("demo.CustomerBuilder");
+            final String code = BuilderProcessorTest.this.compile(VALID_BEAN).source("demo.CustomerBuilder");
             MatcherAssert.assertThat(
                 "build method cannot create the object with a no-arg constructor",
                 code,
@@ -117,7 +117,7 @@ final class BuilderProcessorTest {
         void callsSetters() {
             MatcherAssert.assertThat(
                 "build method cannot fill the object through setters",
-                compile(VALID_BEAN).source("demo.CustomerBuilder"),
+                BuilderProcessorTest.this.compile(VALID_BEAN).source("demo.CustomerBuilder"),
                 Matchers.containsString("result.setName(this.name);")
             );
         }
@@ -125,7 +125,7 @@ final class BuilderProcessorTest {
         @Test
         @DisplayName("Сгенерированный код компилируется и реально работает")
         void generatedCodeActuallyRuns() throws Exception {
-            final CompilationHarness.Result result = compile(VALID_BEAN);
+            final CompilationHarness.Result result = BuilderProcessorTest.this.compile(VALID_BEAN);
             final Class<?> builderClass = result.load("demo.CustomerBuilder");
             Object builder = builderClass.getMethod("create").invoke(null);
             builder = builderClass.getMethod("name", String.class).invoke(builder, "Иванов");
@@ -143,7 +143,7 @@ final class BuilderProcessorTest {
             "Суффикс имени берётся из элемента аннотации"
         )
         void respectsSuffixElement() {
-            final CompilationHarness.Result result = compile(new CompilationHarness.Source(
+            final CompilationHarness.Result result = BuilderProcessorTest.this.compile(new CompilationHarness.Source(
                     "demo.Order", """
                             package demo;
                             import ru.sprbut.m07.api.GenerateBuilder;
@@ -167,7 +167,7 @@ final class BuilderProcessorTest {
             "Класс без аннотации не трогается вовсе"
         )
         void ignoresUnannotatedClasses() {
-            final CompilationHarness.Result result = compile(new CompilationHarness.Source(
+            final CompilationHarness.Result result = BuilderProcessorTest.this.compile(new CompilationHarness.Source(
                     "demo.Plain", """
                             package demo;
                             public class Plain {
@@ -185,11 +185,11 @@ final class BuilderProcessorTest {
         }
     }
 
+    /**
+     * Анализ исходного кода.
+     * @since 1.0
+     */
     @Nested
-/**
- * Анализ исходного кода.
- * @since 1.0
- */
     @DisplayName("Анализ исходного кода")
     final class Analysis {
 
@@ -198,7 +198,7 @@ final class BuilderProcessorTest {
             "Без конструктора без параметров сборка падает с внятной ошибкой"
         )
         void requiresNoArgConstructor() {
-            final CompilationHarness.Result result = compile(new CompilationHarness.Source(
+            final CompilationHarness.Result result = BuilderProcessorTest.this.compile(new CompilationHarness.Source(
                     "demo.NoDefaultCtor", """
                             package demo;
                             import ru.sprbut.m07.api.GenerateBuilder;
@@ -223,7 +223,7 @@ final class BuilderProcessorTest {
             "Поле без сеттера — ошибка с точным указанием, чего не хватает"
         )
         void requiresSetterForEveryField() {
-            final CompilationHarness.Result result = compile(new CompilationHarness.Source(
+            final CompilationHarness.Result result = BuilderProcessorTest.this.compile(new CompilationHarness.Source(
                     "demo.NoSetter", """
                             package demo;
                             import ru.sprbut.m07.api.GenerateBuilder;
@@ -246,7 +246,7 @@ final class BuilderProcessorTest {
             "Абстрактный класс отклоняется"
         )
         void rejectsAbstractClasses() {
-            final CompilationHarness.Result result = compile(new CompilationHarness.Source(
+            final CompilationHarness.Result result = BuilderProcessorTest.this.compile(new CompilationHarness.Source(
                     "demo.Abstract", """
                             package demo;
                             import ru.sprbut.m07.api.GenerateBuilder;
@@ -266,7 +266,7 @@ final class BuilderProcessorTest {
             "Класс без свойств — предупреждение, но сборка проходит"
         )
         void warnsOnEmptyClass() {
-            final CompilationHarness.Result result = compile(new CompilationHarness.Source(
+            final CompilationHarness.Result result = BuilderProcessorTest.this.compile(new CompilationHarness.Source(
                     "demo.Empty", """
                             package demo;
                             import ru.sprbut.m07.api.GenerateBuilder;
@@ -282,11 +282,11 @@ final class BuilderProcessorTest {
         }
     }
 
+    /**
+     * Как процессор видит код.
+     * @since 1.0
+     */
     @Nested
-/**
- * Как процессор видит код.
- * @since 1.0
- */
     @DisplayName("Как процессор видит код")
     final class ProcessingModel {
 
@@ -317,7 +317,7 @@ final class BuilderProcessorTest {
         @Test
         @DisplayName("Аннотация с retention SOURCE в байткод не попадает")
         void sourceRetentionLeavesNoTrace() {
-            final CompilationHarness.Result result = compile(VALID_BEAN);
+            final CompilationHarness.Result result = BuilderProcessorTest.this.compile(VALID_BEAN);
             final Class<?> customer = result.load("demo.Customer");
             MatcherAssert.assertThat(
                 "source retained annotation cannot vanish from the bytecode",

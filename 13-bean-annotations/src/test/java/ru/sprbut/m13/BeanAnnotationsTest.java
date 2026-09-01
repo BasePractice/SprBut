@@ -26,11 +26,11 @@ import ru.sprbut.m13.scopes.ScopeConfig;
 @DisplayName("Слайды 99–110: аннотации бина")
 final class BeanAnnotationsTest {
 
+    /**
+     * Слайд 101: @Scope.
+     * @since 1.0
+     */
     @Nested
-/**
- * Слайд 101: @Scope.
- * @since 1.0
- */
     @DisplayName("Слайд 101: @Scope")
     final class Scopes {
 
@@ -108,11 +108,11 @@ final class BeanAnnotationsTest {
         }
     }
 
+    /**
+     * Слайды 102–103: @Qualifier и @Primary.
+     * @since 1.0
+     */
     @Nested
-/**
- * Слайды 102–103: @Qualifier и @Primary.
- * @since 1.0
- */
     @DisplayName("Слайды 102–103: @Qualifier и @Primary")
     final class Qualifiers {
 
@@ -175,11 +175,11 @@ final class BeanAnnotationsTest {
         }
     }
 
+    /**
+     * Слайды 104–106: @Conditional, @Profile, @Lazy, @DependsOn.
+     * @since 1.0
+     */
     @Nested
-/**
- * Слайды 104–106: @Conditional, @Profile, @Lazy, @DependsOn.
- * @since 1.0
- */
     @DisplayName("Слайды 104–106: @Conditional, @Profile, @Lazy, @DependsOn")
     final class Conditions {
 
@@ -289,11 +289,11 @@ final class BeanAnnotationsTest {
         }
     }
 
+    /**
+     * Слайд 108: @Component vs @Bean.
+     * @since 1.0
+     */
     @Nested
-/**
- * Слайд 108: @Component vs @Bean.
- * @since 1.0
- */
     @DisplayName("Слайд 108: @Component vs @Bean")
     final class ComponentOrBean {
 

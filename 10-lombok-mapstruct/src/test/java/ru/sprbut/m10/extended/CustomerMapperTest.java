@@ -40,18 +40,18 @@ final class CustomerMapperTest {
                 ), true, "служебное");
     }
 
+    /**
+     * Маппинг работает.
+     * @since 1.0
+     */
     @Nested
-/**
- * Маппинг работает.
- * @since 1.0
- */
     @DisplayName("Маппинг работает")
     final class Mapping {
 
         @Test
         @DisplayName("Одноимённые свойства копируются напрямую")
         void copiesMatchingProperties() {
-            final CustomerDto dto = mapper.toDto(entity());
+            final CustomerDto dto = CustomerMapperTest.this.mapper.toDto(CustomerMapperTest.this.entity());
             MatcherAssert.assertThat(
                 "generated mapper cannot copy the identifier",
                 dto.getId(),
@@ -64,7 +64,7 @@ final class CustomerMapperTest {
         void expressionCombinesFields() {
             MatcherAssert.assertThat(
                 "spring managed mapper cannot work the same way",
-                mapper.toDto(entity()).getFullName(),
+                CustomerMapperTest.this.mapper.toDto(CustomerMapperTest.this.entity()).getFullName(),
                 Matchers.equalTo("Иван Иванов")
             );
         }
@@ -72,7 +72,7 @@ final class CustomerMapperTest {
         @Test
         @DisplayName("qualifiedByName вызывает именованный метод преобразования")
         void namedMethodsConvertValues() {
-            final CustomerDto dto = mapper.toDto(entity());
+            final CustomerDto dto = CustomerMapperTest.this.mapper.toDto(CustomerMapperTest.this.entity());
             MatcherAssert.assertThat(
                 "named method cannot convert the status",
                 dto.getStatus(),
@@ -83,11 +83,11 @@ final class CustomerMapperTest {
         @Test
         @DisplayName("Не-VIP получает другой статус")
         void nonVipGetsStandardStatus() {
-            final CustomerEntity plain = entity();
+            final CustomerEntity plain = CustomerMapperTest.this.entity();
             plain.setVip(false);
             MatcherAssert.assertThat(
                 "conditional mapping cannot pick the default status",
-                mapper.toDto(plain).getStatus(),
+                CustomerMapperTest.this.mapper.toDto(plain).getStatus(),
                 Matchers.equalTo("STANDARD")
             );
         }
@@ -95,11 +95,11 @@ final class CustomerMapperTest {
         @Test
         @DisplayName("@AfterMapping подставляет значение по умолчанию вместо null")
         void afterMappingNormalizesNulls() {
-            final CustomerEntity noBalance = entity();
+            final CustomerEntity noBalance = CustomerMapperTest.this.entity();
             noBalance.setBalance(null);
             MatcherAssert.assertThat(
                 "missing value cannot fall back to the default",
-                mapper.toDto(noBalance).getBalance(),
+                CustomerMapperTest.this.mapper.toDto(noBalance).getBalance(),
                 Matchers.comparesEqualTo(new BigDecimal("0"))
             );
         }
@@ -107,10 +107,10 @@ final class CustomerMapperTest {
         @Test
         @DisplayName("Маппинг списка генерируется автоматически из одиночного метода")
         void mapsCollections() {
-            final CustomerEntity second = entity();
+            final CustomerEntity second = CustomerMapperTest.this.entity();
             second.setId("C-2");
             second.setVip(false);
-            final List<CustomerDto> dtos = mapper.toDtos(List.of(entity(), second));
+            final List<CustomerDto> dtos = CustomerMapperTest.this.mapper.toDtos(List.of(CustomerMapperTest.this.entity(), second));
             MatcherAssert.assertThat(
                 "collection mapping cannot keep the order",
                 dtos.stream().map(CustomerDto::getId).toList(),
@@ -123,7 +123,7 @@ final class CustomerMapperTest {
         void handlesNull() {
             MatcherAssert.assertThat(
                 "null input cannot yield null output",
-                mapper.toDto(null),
+                CustomerMapperTest.this.mapper.toDto(null),
                 Matchers.nullValue()
             );
         }
@@ -133,17 +133,17 @@ final class CustomerMapperTest {
         void internalFieldDoesNotLeak() {
             MatcherAssert.assertThat(
                 "ignored field cannot stay out of the dto",
-                mapper.toDto(entity()).toString(),
+                CustomerMapperTest.this.mapper.toDto(CustomerMapperTest.this.entity()).toString(),
                 Matchers.not(Matchers.containsString("служебное"))
             );
         }
     }
 
+    /**
+     * Что именно сгенерировано.
+     * @since 1.0
+     */
     @Nested
-/**
- * Что именно сгенерировано.
- * @since 1.0
- */
     @DisplayName("Что именно сгенерировано")
     final class Generated {
 
@@ -152,12 +152,12 @@ final class CustomerMapperTest {
         void implementationIsGenerated() {
             MatcherAssert.assertThat(
                 "generated class cannot follow the naming rule",
-                mapper.getClass().getName(),
+                CustomerMapperTest.this.mapper.getClass().getName(),
                 Matchers.containsString("ru.sprbut.m10.extended.CustomerMapperImpl")
             );
             MatcherAssert.assertThat(
                 "generated implementation cannot implement the mapper interface",
-                mapper,
+                CustomerMapperTest.this.mapper,
                 Matchers.instanceOf(CustomerMapper.class)
             );
         }
@@ -167,12 +167,12 @@ final class CustomerMapperTest {
         void generatedClassIsNotAProxy() {
             MatcherAssert.assertThat(
                 "generated mapper cannot avoid being a proxy",
-                Proxy.isProxyClass(mapper.getClass()),
+                Proxy.isProxyClass(CustomerMapperTest.this.mapper.getClass()),
                 Matchers.equalTo(false)
             );
             MatcherAssert.assertThat(
                 "generated mapper cannot stay stateless",
-                mapper.getClass().getDeclaredFields(),
+                CustomerMapperTest.this.mapper.getClass().getDeclaredFields(),
                 Matchers.emptyArray()
             );
         }
@@ -203,7 +203,7 @@ final class CustomerMapperTest {
             // Тот факт, что модуль скомпилировался, — и есть доказательство порядка.
             MatcherAssert.assertThat(
                 "spring managed mapper cannot work the same way",
-                mapper.toDto(entity()).getFullName(),
+                CustomerMapperTest.this.mapper.toDto(CustomerMapperTest.this.entity()).getFullName(),
                 Matchers.equalTo("Иван Иванов")
             );
         }

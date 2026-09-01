@@ -63,11 +63,11 @@ final class RegistryProcessorTest {
         return CompilationHarness.compile(RegistryProcessorTest.this.workDir, sources, new RegistryProcessor(), options);
     }
 
+    /**
+     * Генерация реестра.
+     * @since 1.0
+     */
     @Nested
-/**
- * Генерация реестра.
- * @since 1.0
- */
     @DisplayName("Генерация реестра")
     final class Generation {
 
@@ -173,11 +173,11 @@ final class RegistryProcessorTest {
         }
     }
 
+    /**
+     * Сгенерированный реестр работает.
+     * @since 1.0
+     */
     @Nested
-/**
- * Сгенерированный реестр работает.
- * @since 1.0
- */
     @DisplayName("Сгенерированный реестр работает")
     final class Behaviour {
 
@@ -198,7 +198,9 @@ final class RegistryProcessorTest {
         @DisplayName("names() отдаёт все зарегистрированные имена")
         void listsRegisteredNames() throws Exception {
             final Class<?> registry = compile(
-                List.of(REPO, SERVICE)
+                List.of(
+                    REPO, SERVICE
+                )
             )
                     .load(
                         "ru.sprbut.generated.GeneratedRegistry"
@@ -227,11 +229,11 @@ final class RegistryProcessorTest {
         }
     }
 
+    /**
+     * Раунды обработки и валидация.
+     * @since 1.0
+     */
     @Nested
-/**
- * Раунды обработки и валидация.
- * @since 1.0
- */
     @DisplayName("Раунды обработки и валидация")
     final class RoundsAndValidation {
 

@@ -32,11 +32,11 @@ import ru.sprbut.m15.modules.SpringModuleMap;
 @DisplayName("Слайды 119–126 (СХЕМЫ 8 и 9): модули Spring и AOP")
 final class SpringModulesAndAopTest {
 
+    /**
+     * СХЕМА 8 (слайд 120): карта модулей.
+     * @since 1.0
+     */
     @Nested
-/**
- * СХЕМА 8 (слайд 120): карта модулей.
- * @since 1.0
- */
     @DisplayName("СХЕМА 8 (слайд 120): карта модулей")
     final class ModuleMap {
 
@@ -109,11 +109,11 @@ final class SpringModulesAndAopTest {
         }
     }
 
+    /**
+     * СХЕМА 9 (слайд 126): прокси вокруг бина.
+     * @since 1.0
+     */
     @Nested
-/**
- * СХЕМА 9 (слайд 126): прокси вокруг бина.
- * @since 1.0
- */
     @DisplayName("СХЕМА 9 (слайд 126): прокси вокруг бина")
     final class Proxies {
 

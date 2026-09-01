@@ -161,14 +161,20 @@ public final class ConditionReport {
         entries.forEach((source, entry) -> {
             sb.append(
                 "  "
-            ).append(entry.matched() ? "ПРИМЕНЕНА" : "ПРОПУЩЕНА")
+            ).append(
+                entry.matched() ? "ПРИМЕНЕНА" : "ПРОПУЩЕНА"
+            )
                     .append(
                         ": "
                     ).append(source).append('\n');
             entry.reasons().forEach(
                 reason -> sb.append(
                     "      "
-                ).append(reason).append('\n')
+                ).append(
+                    reason
+                ).append(
+                    '\n'
+                )
             );
         });
         return sb.toString();

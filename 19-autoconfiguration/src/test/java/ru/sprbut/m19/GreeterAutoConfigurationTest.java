@@ -39,11 +39,11 @@ final class GreeterAutoConfigurationTest {
                 AutoConfigurations.of(GreeterAutoConfiguration.class)
             );
 
+    /**
+     * Бин появляется сам.
+     * @since 1.0
+     */
     @Nested
-/**
- * Бин появляется сам.
- * @since 1.0
- */
     @DisplayName("Бин появляется сам")
     final class WorksOutOfTheBox {
 
@@ -52,12 +52,14 @@ final class GreeterAutoConfigurationTest {
             "Без единой строки конфигурации в контексте есть готовый Greeter"
         )
         void greeterAppearsWithoutConfiguration() {
-            runner.run(context -> {
+            GreeterAutoConfigurationTest.this.runner.run(context -> {
                 Assertions.assertThat(context).hasSingleBean(Greeter.class);
                 Assertions.assertThat(
                     context.getBean(
                         Greeter.class
-                    ).greet("Мир")
+                    ).greet(
+                        "Мир"
+                    )
                 )
                         .isEqualTo(
                             "Привет, Мир!"
@@ -68,7 +70,7 @@ final class GreeterAutoConfigurationTest {
         @Test
         @DisplayName("Настройки читаются из свойств с префиксом стартера")
         void propertiesAreBound() {
-            runner.withPropertyValues(
+            GreeterAutoConfigurationTest.this.runner.withPropertyValues(
                             "sprbut.greeter.template=Здравствуйте, {name}",
                             "sprbut.greeter.shout=true")
                     .run(context -> Assertions.assertThat(context.getBean(Greeter.class).greet("Иван"))
@@ -80,22 +82,22 @@ final class GreeterAutoConfigurationTest {
         @Test
         @DisplayName("@EnableConfigurationProperties регистрирует класс настроек")
         void propertiesBeanIsRegistered() {
-            runner.run(context -> Assertions.assertThat(context).hasSingleBean(GreeterProperties.class));
+            GreeterAutoConfigurationTest.this.runner.run(context -> Assertions.assertThat(context).hasSingleBean(GreeterProperties.class));
         }
     }
 
+    /**
+     * Слайд 176: условия.
+     * @since 1.0
+     */
     @Nested
-/**
- * Слайд 176: условия.
- * @since 1.0
- */
     @DisplayName("Слайд 176: условия")
     final class Conditions {
 
         @Test
         @DisplayName("@ConditionalOnProperty: выключатель отключает весь стартер")
         void canBeTurnedOff() {
-            runner.withPropertyValues(
+            GreeterAutoConfigurationTest.this.runner.withPropertyValues(
                 "sprbut.greeter.enabled=false"
             )
                     .run(
@@ -106,7 +108,7 @@ final class GreeterAutoConfigurationTest {
         @Test
         @DisplayName("matchIfMissing = true: без свойства стартер включён")
         void enabledByDefault() {
-            runner.run(context -> Assertions.assertThat(context).hasSingleBean(Greeter.class));
+            GreeterAutoConfigurationTest.this.runner.run(context -> Assertions.assertThat(context).hasSingleBean(Greeter.class));
         }
 
         @Test
@@ -114,8 +116,10 @@ final class GreeterAutoConfigurationTest {
             "@ConditionalOnClass: без нужного класса автоконфигурация не применяется"
         )
         void requiresTheLibraryOnClasspath() {
-            runner.withClassLoader(
-                new FilteredClassLoader(Greeter.class)
+            GreeterAutoConfigurationTest.this.runner.withClassLoader(
+                new FilteredClassLoader(
+                    Greeter.class
+                )
             )
                     .run(
                         context -> Assertions.assertThat(context).doesNotHaveBean("greeter")
@@ -123,11 +127,11 @@ final class GreeterAutoConfigurationTest {
         }
     }
 
+    /**
+     * Слайд 177: свой бин переопределяет автоконфигурацию.
+     * @since 1.0
+     */
     @Nested
-/**
- * Слайд 177: свой бин переопределяет автоконфигурацию.
- * @since 1.0
- */
     @DisplayName("Слайд 177: свой бин переопределяет автоконфигурацию")
     final class UserBeanWins {
 
@@ -136,7 +140,7 @@ final class GreeterAutoConfigurationTest {
             "@ConditionalOnMissingBean уступает пользовательскому бину"
         )
         void autoConfigurationBacksOff() {
-            runner.withUserConfiguration(UserConfig.class).run(context -> {
+            GreeterAutoConfigurationTest.this.runner.withUserConfiguration(UserConfig.class).run(context -> {
 
                 Assertions.assertThat(context).hasSingleBean(Greeter.class);
                 Assertions.assertThat(context.getBean(Greeter.class).flavour()).isEqualTo("пользовательский");
@@ -151,7 +155,7 @@ final class GreeterAutoConfigurationTest {
         @Test
         @DisplayName("Настройки при этом всё равно биндятся — стартер не отключился целиком")
         void propertiesStillBind() {
-            runner.withUserConfiguration(
+            GreeterAutoConfigurationTest.this.runner.withUserConfiguration(
                 UserConfig.class
             )
                     .withPropertyValues(
@@ -183,11 +187,11 @@ final class GreeterAutoConfigurationTest {
         }
     }
 
+    /**
+     * Слайд 175: регистрация через AutoConfiguration.imports.
+     * @since 1.0
+     */
     @Nested
-/**
- * Слайд 175: регистрация через AutoConfiguration.imports.
- * @since 1.0
- */
     @DisplayName("Слайд 175: регистрация через AutoConfiguration.imports")
     final class Registration {
 
@@ -201,7 +205,9 @@ final class GreeterAutoConfigurationTest {
                 url
             ).isNotNull();
             Assertions.assertThat(
-                new String(url.openStream().readAllBytes(), StandardCharsets.UTF_8)
+                new String(
+                    url.openStream().readAllBytes(), StandardCharsets.UTF_8
+                )
             )
                     .contains(
                         "ru.sprbut.m19.autoconfigure.GreeterAutoConfiguration"
@@ -219,7 +225,9 @@ final class GreeterAutoConfigurationTest {
                 annotation
             ).isNotNull();
             Assertions.assertThat(
-                GreeterAutoConfiguration.class.isAnnotationPresent(ConditionalOnClass.class)
+                GreeterAutoConfiguration.class.isAnnotationPresent(
+                    ConditionalOnClass.class
+                )
             )
                     .isTrue();
         }

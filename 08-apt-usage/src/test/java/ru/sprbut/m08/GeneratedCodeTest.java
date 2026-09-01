@@ -32,11 +32,11 @@ import ru.sprbut.m08.service.OrderRepository;
 @DisplayName("Слайды 66–70: сгенерированный код — обычный код")
 final class GeneratedCodeTest {
 
+    /**
+     * Билдеры, сгенерированные @GenerateBuilder.
+     * @since 1.0
+     */
     @Nested
-/**
- * Билдеры, сгенерированные @GenerateBuilder.
- * @since 1.0
- */
     @DisplayName("Билдеры, сгенерированные @GenerateBuilder")
     final class Builders {
 
@@ -137,11 +137,11 @@ final class GeneratedCodeTest {
         }
     }
 
+    /**
+     * Реестр, сгенерированный JavaPoet.
+     * @since 1.0
+     */
     @Nested
-/**
- * Реестр, сгенерированный JavaPoet.
- * @since 1.0
- */
     @DisplayName("Реестр, сгенерированный JavaPoet")
     final class Registry {
 
@@ -220,11 +220,11 @@ final class GeneratedCodeTest {
         }
     }
 
+    /**
+     * Аннотации с retention SOURCE.
+     * @since 1.0
+     */
     @Nested
-/**
- * Аннотации с retention SOURCE.
- * @since 1.0
- */
     @DisplayName("Аннотации с retention SOURCE")
     final class SourceRetention {
 
