@@ -89,7 +89,7 @@ public class MiniContainer {
             previous != null
         ) {
             throw new IllegalStateException(
-                "Имя бина '" + name + "' уже занято классом " + previous.getSimpleName()
+                String.format("Имя бина '%s' уже занято классом %s", name, previous.getSimpleName())
             );
         }
     }

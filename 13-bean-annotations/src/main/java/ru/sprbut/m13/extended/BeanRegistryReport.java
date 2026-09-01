@@ -108,7 +108,7 @@ public final class BeanRegistryReport {
                 + " → NoSuchBeanDefinitionException";
         }
         if (candidates.size() == 1) {
-            return "единственный кандидат: " + candidates.get(0);
+            return String.format("единственный кандидат: %s", candidates.get(0));
         }
         final List<String> primary = this.entries().stream()
             .filter(Entry::primary)

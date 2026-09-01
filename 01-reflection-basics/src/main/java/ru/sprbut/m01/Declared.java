@@ -47,7 +47,7 @@ public final class Declared {
             }
         }
         throw new IllegalArgumentException(
-            "Поле '" + name + "' не найдено в " + this.type.getName()
+            String.format("Поле '%s' не найдено в %s", name, this.type.getName())
         );
     }
 
@@ -66,7 +66,7 @@ public final class Declared {
             }
         }
         throw new IllegalArgumentException(
-            "Метод '" + name + "' не найден в " + this.type.getName()
+            String.format("Метод '%s' не найден в %s", name, this.type.getName())
         );
     }
 }

@@ -54,7 +54,7 @@ public final class Argument {
         final Function<String, Object> rule = Convertible.RULES.get(this.target);
         if (rule == null) {
             throw new IllegalArgumentException(
-                "Нет конвертера для типа " + this.target.getSimpleName()
+                String.format("Нет конвертера для типа %s", this.target.getSimpleName())
             );
         }
         try {

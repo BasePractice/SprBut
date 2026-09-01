@@ -37,6 +37,6 @@ public interface Greeter {
      * @return Двойное приветствие — реализовано через вызов соседнего метода
      */
     default String greetTwice(final String name) {
-        return this.greet(name) + " " + this.greet(name);
+        return String.format("%s %s", this.greet(name), this.greet(name));
     }
 }

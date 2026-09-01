@@ -113,7 +113,7 @@ public final class Components {
          * @return Размещение
          */
         public String place(final String item) {
-            final String row = this.clock.now() + " " + item;
+            final String row = String.format("%s %s", this.clock.now(), item);
             this.repository.save(row);
             return row;
         }

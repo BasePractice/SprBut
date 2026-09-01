@@ -60,7 +60,7 @@ public final class CircularBeans {
          * @return Описание
          */
         public String describe() {
-            return "alpha+" + this.beta.name();
+            return String.format("alpha+%s", this.beta.name());
         }
     }
 
@@ -199,7 +199,7 @@ public final class CircularBeans {
          * @return Описание
          */
         public String describe() {
-            return "gamma+" + this.delta.name();
+            return String.format("gamma+%s", this.delta.name());
         }
     }
 
@@ -328,7 +328,7 @@ public final class CircularBeans {
          * @return Описание
          */
         public String describe() {
-            return "epsilon: " + this.rules.rule();
+            return String.format("epsilon: %s", this.rules.rule());
         }
     }
 
@@ -356,7 +356,7 @@ public final class CircularBeans {
          * @return Описание
          */
         public String describe() {
-            return "zeta: " + this.rules.rule();
+            return String.format("zeta: %s", this.rules.rule());
         }
     }
 

@@ -58,7 +58,7 @@ public final class Described {
             return this.array();
         }
         if (this.value instanceof Annotation nested) {
-            return "@" + nested.annotationType().getSimpleName();
+            return String.format("@%s", nested.annotationType().getSimpleName());
         }
         return this.value;
     }

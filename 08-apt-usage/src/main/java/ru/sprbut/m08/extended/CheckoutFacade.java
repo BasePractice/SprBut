@@ -129,7 +129,7 @@ public final class CheckoutFacade {
                 : total;
         final Order order = OrderMaker.create()
                 .number(
-                    "ORD-" + (this.orders.count() + 1)
+                    String.format("ORD-%s", (this.orders.count() + 1))
                 )
                 .customerId(customerId)
                 .total(finalTotal)

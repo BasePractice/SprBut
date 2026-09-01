@@ -152,7 +152,7 @@ public class BuilderProcessor extends AbstractProcessor {
                 continue;
             }
             final String name = field.getSimpleName().toString();
-            final String setter = "set" + capitalize(name);
+            final String setter = String.format("set%s", capitalize(name));
             if (!this.hasSetter(type, setter)) {
                 this.error(field, "Нет сеттера " + setter + "(...) — билдер не сможет задать это поле");
                 valid = false;

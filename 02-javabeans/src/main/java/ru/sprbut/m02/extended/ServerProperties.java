@@ -191,7 +191,7 @@ public class ServerProperties implements Serializable {
 
     @Override
     public String toString() {
-        return "ServerProperties" + new BeanMap(this).text();
+        return String.format("ServerProperties%s", new BeanMap(this).text());
     }
 
     /**

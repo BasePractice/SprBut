@@ -143,7 +143,7 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
      * @return Работа
      */
     public String work() {
-        return "работаю с " + this.dependency.name();
+        return String.format("работаю с %s", this.dependency.name());
     }
 
     /**

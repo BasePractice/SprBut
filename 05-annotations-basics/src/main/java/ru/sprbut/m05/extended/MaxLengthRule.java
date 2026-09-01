@@ -34,7 +34,9 @@ public final class MaxLengthRule implements Rule {
         ) {
             return List.of(new Violation(
                 field.getName(),
-                "длина " + length + " превышает максимум " + limit.value(),
+                String.format(
+                    "длина %s превышает максимум %s", length, limit.value()
+                ),
                 value
             ));
         }

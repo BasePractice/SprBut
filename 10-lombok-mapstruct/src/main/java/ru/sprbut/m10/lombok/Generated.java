@@ -97,7 +97,9 @@ public final class Generated {
                 )
             )
             .orElseThrow(() -> new IllegalArgumentException(
-                "Нет метода '" + method + "' в " + this.type.getSimpleName()
+                String.format(
+                    "Нет метода '%s' в %s", method, this.type.getSimpleName()
+                )
             ));
     }
 

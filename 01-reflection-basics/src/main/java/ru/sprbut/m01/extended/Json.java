@@ -56,7 +56,7 @@ public final class Json {
     }
 
     private static String pair(final String key, final Object nested) {
-        return '"' + new Escaped(key).text() + "\":" + new Json(nested).text();
+        return String.format("%s%s\":%s", '"', new Escaped(key).text(), new Json(nested).text());
     }
 
     /**
