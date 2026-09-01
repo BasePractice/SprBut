@@ -18,6 +18,9 @@ import java.util.List;
  *
  * @since 1.0
  */
+// журнал целиком синхронизирован намеренно: у него три коротких
+// метода, и блочная блокировка здесь ничего не добавила бы
+@SuppressWarnings("PMD.AvoidSynchronizedAtMethodLevel")
 public final class Journal {
 
     /**
@@ -45,7 +48,6 @@ public final class Journal {
      * @param entry Значение {@code entry}
      */
     public synchronized void record(final String entry) {
-
         this.entries.add(entry);
     }
 

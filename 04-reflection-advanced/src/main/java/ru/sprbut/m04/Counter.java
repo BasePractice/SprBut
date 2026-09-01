@@ -11,7 +11,11 @@ package ru.sprbut.m04;
  * {@code volatile}-поле для атомарных операций и обычное поле-строка.
  * @since 1.0
  */
-@SuppressWarnings("unused")
+// поле-строка меняется только через VarHandle: с точки зрения обычного
+// кода оно выглядит неизменяемым, но именно на нём и показывают хэндлы
+@SuppressWarnings({
+    "unused", "PMD.ConstructorShouldDoInitialization", "PMD.ImmutableField"
+})
 public class Counter {
 
     /**

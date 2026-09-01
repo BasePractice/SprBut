@@ -44,31 +44,34 @@ public final class TargetMethod {
 
     /**
      * Метод реализации; если его нет — метод интерфейса как есть.
-     * @return Метод реализации; если его нет — метод интерфейса как есть
+     * @return Метод реализации либо метод интерфейса как есть
      */
     public Method method() {
+        Method found;
         try {
-            return this.target.getClass()
+            found = this.target.getClass()
                 .getMethod(this.declared.getName(), this.declared.getParameterTypes());
         } catch (final NoSuchMethodException absent) {
-            return this.declared;
+            found = this.declared;
         }
+        return found;
     }
 
     /**
      * Хэндл для быстрого вызова: доступ проверяется один раз, при создании,
      * а не на каждом вызове, как у {@code Method.invoke}.
-     * @return Хэндл для быстрого вызова: доступ проверяется один раз, при создании, а не на каждом вызове, как у {@code Method.invoke}
+     * @return Хэндл для быстрого вызова
      */
     @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     public MethodHandle handle() {
         try {
-            final Method implementation = this.method();
-            implementation.setAccessible(true);
-            return MethodHandles.lookup().unreflect(implementation);
+            final Method impl = this.method();
+            impl.setAccessible(true);
+            return MethodHandles.lookup().unreflect(impl);
         } catch (final ReflectiveOperationException denied) {
             throw new IllegalStateException(
-                String.format("Не удалось получить хэндл для %s", this.declared.getName(), denied)
+                String.format("Не удалось получить хэндл для %s", this.declared.getName()),
+                denied
             );
         }
     }

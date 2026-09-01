@@ -46,52 +46,56 @@ public final class GenericType {
     /**
      * Параметры типа. Для {@code Map<String, List<Integer>>} — оба, вторым
      * останется вложенный {@code List<Integer>} целиком.
-     * @return Параметры типа. Для {@code Map<String, List<Integer>>} — оба, вторым останется вложенный {@code List<Integer>} целиком
+     * @return Параметры типа, каждый целиком
      */
     public List<String> arguments() {
+        final List<String> found;
         if (this.type instanceof ParameterizedType parameterized) {
-            return Arrays.stream(parameterized.getActualTypeArguments())
+            found = Arrays.stream(parameterized.getActualTypeArguments())
                 .map(Type::getTypeName)
                 .toList();
+        } else {
+            found = List.of();
         }
-        return List.of();
+        return found;
     }
 
     /**
      * Разновидность узла в дереве типов — ключ к разбору произвольной сигнатуры.
-     * @return Разновидность узла в дереве типов — ключ к разбору произвольной сигнатуры
+     * @return Разновидность узла в дереве типов
      */
     public String kind() {
+        final String kind;
         if (this.type instanceof ParameterizedType) {
-            return "ParameterizedType";
+            kind = "ParameterizedType";
+        } else if (this.type instanceof WildcardType) {
+            kind = "WildcardType";
+        } else if (this.type instanceof TypeVariable<?>) {
+            kind = "TypeVariable";
+        } else if (this.type instanceof GenericArrayType) {
+            kind = "GenericArrayType";
+        } else if (this.type instanceof Class<?>) {
+            kind = "Class";
+        } else {
+            kind = this.type.getClass().getSimpleName();
         }
-        if (this.type instanceof WildcardType) {
-            return "WildcardType";
-        }
-        if (this.type instanceof TypeVariable<?>) {
-            return "TypeVariable";
-        }
-        if (this.type instanceof GenericArrayType) {
-            return "GenericArrayType";
-        }
-        if (this.type instanceof Class<?>) {
-            return "Class";
-        }
-        return this.type.getClass().getSimpleName();
+        return kind;
     }
 
     /**
      * Верхняя граница: для {@code ? extends Number} — {@code Number},
      * для переменной типа — её объявленные границы.
-     * @return Верхняя граница: для {@code ? extends Number} — {@code Number}, для переменной типа — её объявленные границы
+     * @return Верхняя граница типа
      */
     public List<String> bounds() {
+        final List<String> found;
         if (this.type instanceof WildcardType wildcard) {
-            return Arrays.stream(wildcard.getUpperBounds()).map(Type::getTypeName).toList();
+            found = Arrays.stream(wildcard.getUpperBounds()).map(Type::getTypeName).toList();
+        } else if (this.type instanceof TypeVariable<?> variable) {
+            found = Arrays.stream(variable.getBounds()).map(Type::getTypeName).toList();
+        } else {
+            found = List.of();
         }
-        if (this.type instanceof TypeVariable<?> variable) {
-            return Arrays.stream(variable.getBounds()).map(Type::getTypeName).toList();
-        }
-        return List.of();
+        return found;
     }
 }

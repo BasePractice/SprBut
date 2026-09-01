@@ -32,10 +32,9 @@ final class LoadedClassTest {
     @Test
     @DisplayName("getClass() отдаёт фактический тип, а не объявленный")
     void readsActualType() {
-        final Object declared = "текст";
         MatcherAssert.assertThat(
             "getClass cannot report the actual type",
-            declared.getClass(),
+            "текст".getClass(),
             Matchers.sameInstance(String.class)
         );
     }
@@ -61,6 +60,7 @@ final class LoadedClassTest {
 
     @Test
     @DisplayName("загрузка без инициализации даёт тот же Class")
+    @SuppressWarnings("PMD.UseProperClassLoader")
     void loadsWithoutInitialization() throws ClassNotFoundException {
         MatcherAssert.assertThat(
             "dormant loading cannot yield the same class",
@@ -101,6 +101,7 @@ final class LoadedClassTest {
 
     @Test
     @DisplayName("у классов из java.base загрузчик равен null — это bootstrap")
+    @SuppressWarnings("PMD.UseProperClassLoader")
     void reportsBootstrapLoader() {
         MatcherAssert.assertThat(
             "bootstrap loaded class cannot report a null loader",

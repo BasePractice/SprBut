@@ -58,7 +58,7 @@ public final class ModuleAccess {
     /**
      * Имя модуля-владельца. Код, запущенный с classpath, попадает
      * в безымянный модуль, и здесь будет {@code null}.
-     * @return Имя модуля-владельца. Код, запущенный с classpath, попадает в безымянный модуль, и здесь будет {@code null}
+     * @return Имя модуля-владельца или {@code null} для безымянного модуля
      */
     public String moduleName() {
         return this.type.getModule().getName();

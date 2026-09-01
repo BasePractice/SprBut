@@ -18,7 +18,8 @@ public record AccessAttempt(boolean succeeded, String failure, String message) {
     /**
      * Успешная попытка.
      */
-    public static AccessAttempt ok() {
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static AccessAttempt granted() {
         return new AccessAttempt(true, null, null);
     }
 }

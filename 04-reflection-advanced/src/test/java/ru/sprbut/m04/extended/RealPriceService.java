@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @since 1.0
  */
+@SuppressWarnings("PMD.ConstructorShouldDoInitialization")
 public final class RealPriceService implements PriceService {
 
     /**

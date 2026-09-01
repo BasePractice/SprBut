@@ -37,7 +37,7 @@ public final class StubProxy<T> {
      * Заглушка, отвечающая значениями по умолчанию.
      * @return Заглушка, отвечающая значениями по умолчанию
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "PMD.UseProperClassLoader"})
     public T proxy() {
         return (T) Proxy.newProxyInstance(
             this.contract.getClassLoader(),

@@ -38,7 +38,7 @@ final class LoggingProxyTest {
         MatcherAssert.assertThat(
             "every call cannot reach the single handler",
             log,
-            Matchers.contains("→ greet", "← greet = Привет, Мир")
+            Matchers.contains("вход greet", "выход greet = Привет, Мир")
         );
     }
 
@@ -50,7 +50,7 @@ final class LoggingProxyTest {
         MatcherAssert.assertThat(
             "inner call cannot bypass the proxy",
             log,
-            Matchers.not(Matchers.hasItem("→ greet"))
+            Matchers.not(Matchers.hasItem("вход greet"))
         );
     }
 
@@ -62,7 +62,7 @@ final class LoggingProxyTest {
         MatcherAssert.assertThat(
             "default method cannot be intercepted",
             log,
-            Matchers.hasItem("→ greetTwice")
+            Matchers.hasItem("вход greetTwice")
         );
     }
 

@@ -29,20 +29,29 @@ public final class Service {
     private final int retries;
 
     /**
-     * Основной конструктор.
-     * @param @Injected("appName" Имя
+     * Основной конструктор: часть параметров помечена для внедрения,
+     * часть — намеренно нет, именно это и разбирает рефлексия.
+     * @param name Имя
+     * @param retries Число повторов
+     * @param debug Признак отладки, ничем не помеченный
      */
-    public Service(final @Injected("appName") String name, final @Injected int retries, final boolean debug) {
+    public Service(
+        @Injected("appName") final String name,
+        @Injected final int retries,
+        final boolean debug
+    ) {
         this.name = name;
         this.retries = retries;
     }
 
     /**
      * Настройка через метод — вторая разновидность точки внедрения.
-     * @param lines Значение {@code lines}
+     * Тело роли не играет: параметры разбираются рефлексией.
+     * @param millis Таймаут
+     * @param label Метка
      */
     // @checkstyle NonStaticMethodCheck (3 lines)
-    public void configure(final @Injected("timeout") long millis, final String label) {
+    public void configure(@Injected("timeout") final long millis, final String label) {
         // параметры разбираются рефлексией, тело здесь роли не играет
     }
 }

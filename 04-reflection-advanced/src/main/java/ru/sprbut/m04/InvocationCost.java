@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// invokeExact у MethodHandle объявлен как throws Throwable — это контракт
+// java.lang.invoke, обойти его нельзя
+// @checkstyle IllegalThrowsCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m04;
 
@@ -51,7 +54,7 @@ public final class InvocationCost {
      */
     public int direct() {
         int sum = 0;
-        for (int step = 0; step < this.iterations; step++) {
+        for (int step = 0; step < this.iterations; step += 1) {
             sum = this.target.add(sum, 1);
         }
         return sum;
@@ -60,11 +63,12 @@ public final class InvocationCost {
     /**
      * Худший вариант: поиск метода на каждой итерации. Так писать нельзя,
      * но именно так выглядит наивный код «на рефлексии».
-     * @return Худший вариант: поиск метода на каждой итерации. Так писать нельзя, но именно так выглядит наивный код «на рефлексии»
+     * @return Сумма, посчитанная с поиском метода на каждой итерации
+     * @throws ReflectiveOperationException Если метода нет
      */
     public int searching() throws ReflectiveOperationException {
         int sum = 0;
-        for (int step = 0; step < this.iterations; step++) {
+        for (int step = 0; step < this.iterations; step += 1) {
             final Method found = Target.class.getDeclaredMethod("add", int.class, int.class);
             sum = (int) found.invoke(this.target, sum, 1);
         }
@@ -73,12 +77,13 @@ public final class InvocationCost {
 
     /**
      * Метод найден один раз и переиспользуется — минимально приемлемый вариант.
-     * @return Метод найден один раз и переиспользуется — минимально приемлемый вариант
+     * @return Сумма, посчитанная одним найденным методом
+     * @throws ReflectiveOperationException Если метода нет
      */
     public int cached() throws ReflectiveOperationException {
         final Method found = Target.class.getDeclaredMethod("add", int.class, int.class);
         int sum = 0;
-        for (int step = 0; step < this.iterations; step++) {
+        for (int step = 0; step < this.iterations; step += 1) {
             sum = (int) found.invoke(this.target, sum, 1);
         }
         return sum;
@@ -87,14 +92,15 @@ public final class InvocationCost {
     /**
      * Через {@link MethodHandle}: доступ проверен при создании, и JIT способен
      * встроить такой вызов почти как прямой.
-     * @return Через {@link MethodHandle}: доступ проверен при создании, и JIT способен встроить такой вызов почти как прямой
+     * @return Сумма, посчитанная через {@link MethodHandle}
+     * @throws Throwable Любая ошибка вызова, как её объявляет invokeExact
      */
     public int handle() throws Throwable {
         final MethodHandle found = new Handles(Target.class).virtual(
             "add", int.class, int.class, int.class
         );
         int sum = 0;
-        for (int step = 0; step < this.iterations; step++) {
+        for (int step = 0; step < this.iterations; step += 1) {
             sum = (int) found.invokeExact(this.target, sum, 1);
         }
         return sum;

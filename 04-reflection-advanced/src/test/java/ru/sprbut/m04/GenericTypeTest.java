@@ -6,7 +6,6 @@
 package ru.sprbut.m04;
 
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.List;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -63,11 +62,12 @@ final class GenericTypeTest {
     @Test
     @DisplayName("wildcard — отдельный род узла")
     void classifiesWildcard() throws NoSuchFieldException {
-        final Type argument = ((ParameterizedType) Holder.class.getField("covariant").getGenericType())
-            .getActualTypeArguments()[0];
         MatcherAssert.assertThat(
             "wildcard cannot be classified as its own kind",
-            new GenericType(argument).kind(),
+            new GenericType(
+                ((ParameterizedType) Holder.class.getField("covariant").getGenericType())
+                    .getActualTypeArguments()[0]
+            ).kind(),
             Matchers.equalTo("WildcardType")
         );
     }
@@ -95,11 +95,12 @@ final class GenericTypeTest {
     @Test
     @DisplayName("верхняя граница wildcard читается напрямую")
     void readsWildcardBound() throws NoSuchFieldException {
-        final Type argument = ((ParameterizedType) Holder.class.getField("covariant").getGenericType())
-            .getActualTypeArguments()[0];
         MatcherAssert.assertThat(
             "wildcard upper bound cannot be read",
-            new GenericType(argument).bounds(),
+            new GenericType(
+                ((ParameterizedType) Holder.class.getField("covariant").getGenericType())
+                    .getActualTypeArguments()[0]
+            ).bounds(),
             Matchers.contains("java.lang.Number")
         );
     }

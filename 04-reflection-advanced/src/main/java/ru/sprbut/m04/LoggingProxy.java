@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Слайд 35 и СХЕМА 2: «Proxy и InvocationHandler — основа Spring AOP».
  *
- * <p>Схема вызова: <b>вызов → Proxy → InvocationHandler → цель</b>.
+ * <p>Схема вызова: <b>вызов, Proxy, InvocationHandler, цель</b>.
  * {@link Proxy#newProxyInstance} генерирует класс в runtime, и каждый вызов
  * любого его метода попадает в один-единственный обработчик. Оттуда решается,
  * что делать: вызвать цель, подменить результат, залогировать, открыть транзакцию.</p>
@@ -62,19 +62,21 @@ public final class LoggingProxy<T> {
      * Прокси, пишущий в журнал вход и выход каждого вызова.
      * @return Прокси, пишущий в журнал вход и выход каждого вызова
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "PMD.UseProperClassLoader"})
     public T proxy() {
         return (T) Proxy.newProxyInstance(
             this.contract.getClassLoader(),
             new Class<?>[]{this.contract},
             (proxy, method, args) -> {
-                this.log.add("→ " + method.getName());
+                this.log.add(String.format("вход %s", method.getName()));
                 try {
                     final Object result = method.invoke(this.target, args);
-                    this.log.add("← " + method.getName() + " = " + result);
+                    this.log.add(String.format("выход %s = %s", method.getName(), result));
                     return result;
                 } catch (final InvocationTargetException wrapped) {
-                    this.log.add("✗ " + method.getName() + " : " + wrapped.getCause());
+                    this.log.add(
+                        String.format("отказ %s : %s", method.getName(), wrapped.getCause())
+                    );
                     throw wrapped.getCause();
                 }
             }

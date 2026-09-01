@@ -41,7 +41,11 @@ public final class Parameters {
      */
     public List<String> descriptions() {
         return Arrays.stream(this.executable.getParameters())
-            .map(parameter -> parameter.getType().getSimpleName() + " " + parameter.getName())
+            .map(
+                parameter -> String.format(
+                    "%s %s", parameter.getType().getSimpleName(), parameter.getName()
+                )
+            )
             .toList();
     }
 
@@ -49,7 +53,7 @@ public final class Parameters {
      * Сохранены ли настоящие имена параметров. Без флага {@code -parameters}
      * здесь будут {@code arg0}, {@code arg1}, и квалификаторы по имени
      * перестают работать.
-     * @return Сохранены ли настоящие имена параметров. Без флага {@code -parameters} здесь будут {@code arg0}, {@code arg1}, и квалификаторы по имени перестают работать
+     * @return Признак того, что настоящие имена параметров сохранены
      */
     public boolean named() {
         return Arrays.stream(this.executable.getParameters())
@@ -59,7 +63,7 @@ public final class Parameters {
     /**
      * Точки внедрения — параметры, помеченные {@link Injected}. Имя из аннотации
      * служит квалификатором; если оно пустое, подбор идёт по имени параметра.
-     * @return Точки внедрения — параметры, помеченные {@link Injected}. Имя из аннотации служит квалификатором; если оно пустое, подбор идёт по имени параметра
+     * @return Точки внедрения — параметры, помеченные {@link Injected}
      */
     public List<String> injectionPoints() {
         return Arrays.stream(this.executable.getParameters())
@@ -71,7 +75,7 @@ public final class Parameters {
     /**
      * Синтетические параметры компилятор добавляет сам — например, ссылку
      * на внешний объект во внутреннем классе.
-     * @return Синтетические параметры компилятор добавляет сам — например, ссылку на внешний объект во внутреннем классе
+     * @return Синтетические параметры, добавленные компилятором
      */
     public List<String> synthetic() {
         return Arrays.stream(this.executable.getParameters())
@@ -83,6 +87,12 @@ public final class Parameters {
     // @checkstyle NonStaticMethodCheck (3 lines)
     private String qualifier(final Parameter parameter) {
         final String named = parameter.getAnnotation(Injected.class).value();
-        return named.isBlank() ? parameter.getName() : named;
+        final String qualifier;
+        if (named.isBlank()) {
+            qualifier = parameter.getName();
+        } else {
+            qualifier = named;
+        }
+        return qualifier;
     }
 }

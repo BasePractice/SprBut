@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// образец для разбора обобщений рефлексией: поля намеренно публичные
+// и названы по виду типа, который они иллюстрируют
+// @checkstyle VisibilityModifierCheck disable
+// @checkstyle MemberNameCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m04;
 

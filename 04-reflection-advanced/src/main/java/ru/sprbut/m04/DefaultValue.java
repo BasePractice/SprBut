@@ -35,30 +35,22 @@ public final class DefaultValue {
      * @return Значение по умолчанию
      */
     public Object value() {
+        final Object value;
         if (!this.type.isPrimitive() || this.type == void.class) {
-
-            return null;
+            value = null;
+        } else if (this.type == boolean.class) {
+            value = false;
+        } else if (this.type == char.class) {
+            value = '\0';
+        } else if (this.type == long.class) {
+            value = 0L;
+        } else if (this.type == double.class) {
+            value = 0.0d;
+        } else if (this.type == float.class) {
+            value = 0.0f;
+        } else {
+            value = 0;
         }
-        if (this.type == boolean.class) {
-
-            return false;
-        }
-        if (this.type == char.class) {
-
-            return '\0';
-        }
-        if (this.type == long.class) {
-
-            return 0L;
-        }
-        if (this.type == double.class) {
-
-            return 0.0d;
-        }
-        if (this.type == float.class) {
-
-            return 0.0f;
-        }
-        return 0;
+        return value;
     }
 }

@@ -60,12 +60,14 @@ public final class Aspected<T> {
      * Прокси, читающий аннотации методов и применяющий аспекты.
      * @return Прокси, читающий аннотации методов и применяющий аспекты
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "PMD.UseProperClassLoader"})
     public T proxy() {
         if (!this.contract.isInterface()) {
             throw new IllegalArgumentException(
-                this.contract.getSimpleName()
-                    + " не интерфейс: JDK-прокси умеет проксировать только интерфейсы"
+                String.format(
+                    "%s не интерфейс: JDK-прокси умеет проксировать только интерфейсы",
+                    this.contract.getSimpleName()
+                )
             );
         }
         return (T) Proxy.newProxyInstance(

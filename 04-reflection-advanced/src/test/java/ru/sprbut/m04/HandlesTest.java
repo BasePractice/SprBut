@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// invokeExact у MethodHandle объявлен как throws Throwable — это контракт
+// java.lang.invoke, обойти его нельзя
+// @checkstyle IllegalThrowsCheck disable
 package ru.sprbut.m04;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.invoke.VarHandle;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -22,10 +24,11 @@ final class HandlesTest {
     @Test
     @DisplayName("хэндл публичного метода вызывается напрямую")
     void invokesVirtualHandle() throws Throwable {
-        final MethodHandle handle = new Handles(Counter.class).virtual("increment", int.class, int.class);
         MatcherAssert.assertThat(
             "virtual handle cannot invoke the method",
-            (int) handle.invokeExact(new Counter(), 5),
+            (int) new Handles(Counter.class)
+                .virtual("increment", int.class, int.class)
+                .invokeExact(new Counter(), 5),
             Matchers.equalTo(5)
         );
     }
@@ -33,11 +36,11 @@ final class HandlesTest {
     @Test
     @DisplayName("приватный метод доступен через privateLookupIn — аналог setAccessible")
     void invokesPrivateHandle() throws Throwable {
-        final MethodHandle handle = new Handles(Counter.class)
-            .hidden("describe", String.class, String.class);
         MatcherAssert.assertThat(
             "private lookup cannot reach the hidden method",
-            (String) handle.invokeExact(new Counter(), "тест"),
+            (String) new Handles(Counter.class)
+                .hidden("describe", String.class, String.class)
+                .invokeExact(new Counter(), "тест"),
             Matchers.equalTo("тест: счётчик=0")
         );
     }
@@ -55,10 +58,9 @@ final class HandlesTest {
     @Test
     @DisplayName("VarHandle читает поле")
     void readsFieldHandle() throws Throwable {
-        final VarHandle handle = new Handles(Counter.class).field("label", String.class);
         MatcherAssert.assertThat(
             "var handle cannot read the field",
-            handle.get(new Counter()),
+            new Handles(Counter.class).field("label", String.class).get(new Counter()),
             Matchers.equalTo("счётчик")
         );
     }
@@ -92,12 +94,12 @@ final class HandlesTest {
     @Test
     @DisplayName("хэндл связывается с получателем и становится композируемым")
     void bindsReceiver() throws Throwable {
-        final MethodHandle bound = new Handles(Counter.class)
-            .virtual("increment", int.class, int.class)
-            .bindTo(new Counter());
         MatcherAssert.assertThat(
             "handle cannot be bound to its receiver",
-            (int) bound.invoke(4),
+            (int) new Handles(Counter.class)
+                .virtual("increment", int.class, int.class)
+                .bindTo(new Counter())
+                .invoke(4),
             Matchers.equalTo(4)
         );
     }

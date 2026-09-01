@@ -23,19 +23,31 @@ import java.lang.reflect.Type;
  * @param <T> Параметр типа
  * @since 1.0
  */
+// приём захвата типа держится на анонимном подклассе: абстрактных методов
+// у него нет и быть не должно, вся работа делается в конструкторе
+@SuppressWarnings({
+    "PMD.AbstractClassWithoutAbstractMethod",
+    "PMD.ConstructorOnlyInitializesOrCallOtherConstructors"
+})
 public abstract class TypeToken<T> {
 
     /**
-     * Значение {@code captured}.
+     * Пойманный параметр типа.
      */
     private final Type captured;
 
+    /**
+     * Конструктор ловит параметр типа из объявления подкласса.
+     * @checkstyle ConstructorsCodeFreeCheck (12 lines)
+     */
     protected TypeToken() {
-        final Type superclass = getClass().getGenericSuperclass();
+        final Type superclass = this.getClass().getGenericSuperclass();
         if (!(superclass instanceof ParameterizedType parameterized)) {
             throw new IllegalStateException(
-                "Тип не параметризован: " + superclass
-                    + " — вероятно, забыты фигурные скобки подкласса"
+                String.format(
+                    "Тип не параметризован: %s, вероятно, забыты фигурные скобки подкласса",
+                    superclass
+                )
             );
         }
         this.captured = parameterized.getActualTypeArguments()[0];

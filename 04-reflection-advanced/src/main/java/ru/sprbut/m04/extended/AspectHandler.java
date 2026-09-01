@@ -3,6 +3,13 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// контракт InvocationHandler: invoke объявляет throws Throwable и обязан
+// пропускать через себя любое исключение цели, поэтому и весь внутренний
+// конвейер обработки объявлен так же
+// @checkstyle IllegalThrowsCheck disable
+// @checkstyle IllegalCatchCheck disable
+// массив аргументов приходит от InvocationHandler и передаётся дальше
+// как есть: varargs здесь превратил бы один вызов в упаковку в новый массив
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m04.extended;
 
@@ -62,88 +69,134 @@ public final class AspectHandler implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+    public Object invoke(final Object proxy, final Method method, final Object[] args)
+        throws Throwable {
+        final Object result;
         if (method.getDeclaringClass() == Object.class) {
-
-            return method.invoke(this.target, args);
+            result = method.invoke(this.target, args);
+        } else {
+            result = this.aspected(method, args);
         }
-        final Method implementation = new TargetMethod(this.target, method).method();
-        final Stubbed stubbed = implementation.getAnnotation(Stubbed.class);
-        if (stubbed != null) {
-            this.journal.record("stub " + method.getName());
-            return stubbed.value();
-        }
-        if (implementation.isAnnotationPresent(Cached.class)) {
-
-            return this.cached(method, implementation, args);
-        }
-        return this.timed(method, implementation, args);
+        return result;
     }
 
-    private Object cached(final Method method, final Method implementation, final Object[] args) throws Throwable {
-        final String key = method.getName() + Arrays.toString(args);
-        final Object stored = this.results.get(key);
-        if (stored != null) {
-            this.journal.record("cache-hit " + method.getName());
-            return stored;
-        }
-        final Object computed = this.timed(method, implementation, args);
-        if (computed != null) {
-            this.results.put(key, computed);
-        }
-        this.journal.record("cache-miss " + method.getName());
-        return computed;
-    }
-
-    private Object timed(final Method method, final Method implementation, final Object[] args) throws Throwable {
-        final boolean measured = implementation.isAnnotationPresent(Timed.class);
-        final long started = measured ? System.nanoTime() : 0L;
-        try {
-            final Retry retry = implementation.getAnnotation(Retry.class);
-            if (retry == null) {
-                return this.call(method, args);
+    // разбор аннотаций цели: заглушка, кэш или измерение времени
+    @SuppressWarnings("PMD.UseVarargs")
+    private Object aspected(final Method method, final Object[] args) throws Throwable {
+        final Method impl = new TargetMethod(this.target, method).method();
+        final Stubbed stubbed = impl.getAnnotation(Stubbed.class);
+        final Object result;
+        if (stubbed == null) {
+            if (impl.isAnnotationPresent(Cached.class)) {
+                result = this.cached(method, impl, args);
+            } else {
+                result = this.timed(method, impl, args);
             }
-            return this.repeated(method, args, retry.attempts());
+        } else {
+            this.journal.record(String.format("stub %s", method.getName()));
+            result = stubbed.value();
+        }
+        return result;
+    }
+
+    @SuppressWarnings("PMD.UseVarargs")
+    private Object cached(final Method method, final Method impl, final Object[] args)
+        throws Throwable {
+        final String key = String.format("%s%s", method.getName(), Arrays.toString(args));
+        final Object stored = this.results.get(key);
+        final Object result;
+        if (stored == null) {
+            result = this.timed(method, impl, args);
+            if (result != null) {
+                this.results.put(key, result);
+            }
+            this.journal.record(String.format("cache-miss %s", method.getName()));
+        } else {
+            this.journal.record(String.format("cache-hit %s", method.getName()));
+            result = stored;
+        }
+        return result;
+    }
+
+    @SuppressWarnings("PMD.UseVarargs")
+    private Object timed(final Method method, final Method impl, final Object[] args)
+        throws Throwable {
+        final boolean measured = impl.isAnnotationPresent(Timed.class);
+        final long started;
+        if (measured) {
+            started = System.nanoTime();
+        } else {
+            started = 0L;
+        }
+        final Object result;
+        try {
+            final Retry retry = impl.getAnnotation(Retry.class);
+            if (retry == null) {
+                result = this.call(method, args);
+            } else {
+                result = this.repeated(method, args, retry.attempts());
+            }
         } finally {
             if (measured) {
                 this.journal.record(
-                    String.format("timed %s %sns", method.getName(), (System.nanoTime() - started))
+                    String.format("timed %s %sns", method.getName(), System.nanoTime() - started)
                 );
             }
         }
+        return result;
     }
 
-    private Object repeated(final Method method, final Object[] args, final int attempts) throws Throwable {
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
+    private Object repeated(final Method method, final Object[] args, final int attempts)
+        throws Throwable {
         Throwable last = null;
-        for (int attempt = 1; attempt <= attempts; attempt++) {
+        Object result = null;
+        int attempt = 0;
+        while (result == null && attempt < attempts) {
+            attempt += 1;
             try {
-                final Object result = this.call(method, args);
+                result = this.call(method, args);
                 if (attempt > 1) {
-                    this.journal.record("retry-success " + method.getName() + " попытка " + attempt);
+                    this.journal.record(
+                        String.format("retry-success %s попытка %d", method.getName(), attempt)
+                    );
                 }
-                return result;
             } catch (final Throwable failure) {
                 last = failure;
-                this.journal.record("retry-fail " + method.getName() + " попытка " + attempt);
+                this.journal.record(
+                    String.format("retry-fail %s попытка %d", method.getName(), attempt)
+                );
             }
         }
-        this.journal.record("retry-exhausted " + method.getName());
-        throw last;
+        if (result == null) {
+            this.journal.record(String.format("retry-exhausted %s", method.getName()));
+            throw last;
+        }
+        return result;
     }
 
+    @SuppressWarnings("PMD.UseVarargs")
     private Object call(final Method method, final Object[] args) throws Throwable {
         final MethodHandle handle = this.handles.computeIfAbsent(
             method, each -> new TargetMethod(this.target, each).handle()
         );
-        final Object[] withReceiver = new Object[(args == null ? 0 : args.length) + 1];
-        withReceiver[0] = this.target;
-        if (args != null) {
-            System.arraycopy(args, 0, withReceiver, 1, args.length);
+        final int count;
+        if (args == null) {
+            count = 0;
+        } else {
+            count = args.length;
         }
+        final Object[] passed = new Object[count + 1];
+        passed[0] = this.target;
+        if (args != null) {
+            System.arraycopy(args, 0, passed, 1, args.length);
+        }
+        final Object result;
         try {
-            return handle.invokeWithArguments(withReceiver);
+            result = handle.invokeWithArguments(passed);
         } catch (final InvocationTargetException wrapped) {
             throw wrapped.getCause();
         }
+        return result;
     }
 }

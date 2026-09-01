@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// смысл примера — поймать любой отказ доступа: тип исключения заранее
+// не известен, InaccessibleObjectException приходит из другого модуля
+// @checkstyle IllegalCatchCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m04;
 
@@ -47,16 +50,20 @@ public final class DeepAccess {
      * Результат попытки: успех либо имя и текст исключения.
      * @return Результат попытки: успех либо имя и текст исключения
      */
-    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
+    @SuppressWarnings({"PMD.AvoidAccessibilityAlteration", "PMD.AvoidCatchingGenericException"})
     public AccessAttempt attempt() {
+        AccessAttempt result;
         try {
             final Field found = this.type.getDeclaredField(this.field);
             found.setAccessible(true);
-            return AccessAttempt.ok();
+            result = AccessAttempt.granted();
         } catch (final NoSuchFieldException absent) {
-            return new AccessAttempt(false, "NoSuchFieldException", absent.getMessage());
+            result = new AccessAttempt(false, "NoSuchFieldException", absent.getMessage());
         } catch (final RuntimeException denied) {
-            return new AccessAttempt(false, denied.getClass().getSimpleName(), denied.getMessage());
+            result = new AccessAttempt(
+                false, denied.getClass().getSimpleName(), denied.getMessage()
+            );
         }
+        return result;
     }
 }

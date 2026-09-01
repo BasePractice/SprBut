@@ -106,8 +106,7 @@ final class ParametersTest {
     @Test
     @DisplayName("элемент примитивного массива читается без приведения к Object[]")
     void readsPrimitiveElement() {
-        final Object array = new ReflectiveArray(int.class).single(2);
-        final ArrayValue value = new ArrayValue(array);
+        final ArrayValue value = new ArrayValue(new ReflectiveArray(int.class).single(2));
         value.assign(0, 7);
         MatcherAssert.assertThat(
             "primitive array element cannot be read without a cast",

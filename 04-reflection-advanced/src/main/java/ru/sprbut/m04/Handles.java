@@ -46,10 +46,12 @@ public final class Handles {
      * @param name Имя
      * @param returns Возвращаемое значение
      * @param parameters Типы параметров
-     * @return Хэндл публичного метода. {@link MethodType} описывает сигнатуру целиком и проверяется строго — ошибиться в типе параметра здесь нельзя
+     * @return Хэндл публичного метода
+     * @throws ReflectiveOperationException Если метода с такой сигнатурой нет
      */
-    public MethodHandle virtual(final String name, final Class<?> returns, final Class<?>... parameters)
-        throws ReflectiveOperationException {
+    public MethodHandle virtual(
+        final String name, final Class<?> returns, final Class<?>... parameters
+    ) throws ReflectiveOperationException {
         return MethodHandles.lookup()
             .findVirtual(this.owner, name, MethodType.methodType(returns, parameters));
     }
@@ -60,9 +62,11 @@ public final class Handles {
      * @param returns Возвращаемое значение
      * @param parameters Типы параметров
      * @return Хэндл приватного метода чужого класса
+     * @throws ReflectiveOperationException Если метода с такой сигнатурой нет
      */
-    public MethodHandle hidden(final String name, final Class<?> returns, final Class<?>... parameters)
-        throws ReflectiveOperationException {
+    public MethodHandle hidden(
+        final String name, final Class<?> returns, final Class<?>... parameters
+    ) throws ReflectiveOperationException {
         return MethodHandles.privateLookupIn(this.owner, MethodHandles.lookup())
             .findVirtual(this.owner, name, MethodType.methodType(returns, parameters));
     }
@@ -70,9 +74,11 @@ public final class Handles {
     /**
      * Хэндл конструктора: внутри он зовётся {@code <init>} и возвращает {@code void}.
      * @param parameters Типы параметров
-     * @return Хэндл конструктора: внутри он зовётся {@code <init>} и возвращает {@code void}
+     * @return Хэндл конструктора
+     * @throws ReflectiveOperationException Если конструктора с такой сигнатурой нет
      */
-    public MethodHandle constructor(final Class<?>... parameters) throws ReflectiveOperationException {
+    public MethodHandle constructor(final Class<?>... parameters)
+        throws ReflectiveOperationException {
         return MethodHandles.lookup()
             .findConstructor(this.owner, MethodType.methodType(void.class, parameters));
     }
@@ -82,9 +88,11 @@ public final class Handles {
      * {@code compareAndSet} и {@code getAndAdd}, которых у {@code Field} нет.
      * @param name Имя
      * @param type Тип
-     * @return {@link VarHandle} — то же для полей, но с атомарными операциями: {@code compareAndSet} и {@code getAndAdd}, которых у {@code Field} нет
+     * @return Хэндл поля с атомарными операциями
+     * @throws ReflectiveOperationException Если поля с таким именем и типом нет
      */
-    public VarHandle field(final String name, final Class<?> type) throws ReflectiveOperationException {
+    public VarHandle field(final String name, final Class<?> type)
+        throws ReflectiveOperationException {
         return MethodHandles.privateLookupIn(this.owner, MethodHandles.lookup())
             .findVarHandle(this.owner, name, type);
     }

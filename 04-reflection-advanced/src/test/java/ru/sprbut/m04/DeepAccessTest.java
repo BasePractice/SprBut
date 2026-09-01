@@ -103,8 +103,10 @@ final class DeepAccessTest {
     private static final class Ours {
 
         /**
-         * Секрет.
+         * Секрет: поле существует только затем, чтобы до него достучались
+         * рефлексией, из самого класса оно не читается.
+         * @checkstyle ConstantUsageCheck (3 lines)
          */
-        private String secret = "доступно";
+        private final String secret = "доступно";
     }
 }

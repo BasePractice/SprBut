@@ -14,7 +14,6 @@ package ru.sprbut.m04;
  *
  * @since 1.0
  */
-@SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface Greeter {
 
     /**

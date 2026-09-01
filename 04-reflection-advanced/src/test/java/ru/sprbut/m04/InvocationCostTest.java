@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// invokeExact у MethodHandle объявлен как throws Throwable — это контракт
+// java.lang.invoke, обойти его нельзя
+// @checkstyle IllegalThrowsCheck disable
 package ru.sprbut.m04;
 
 import org.hamcrest.MatcherAssert;
