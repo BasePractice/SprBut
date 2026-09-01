@@ -49,7 +49,6 @@ final class GeneratedCodeTest {
                     .vip(true)
                     .balance(new BigDecimal("100.50"))
                     .build();
-
             MatcherAssert.assertThat(
                 "generated builder cannot assemble the object",
                 customer.getBalance(),
@@ -61,7 +60,6 @@ final class GeneratedCodeTest {
         @DisplayName("Незаданные поля остаются со значениями по умолчанию Java")
         void unsetFieldsKeepJavaDefaults() {
             final Customer customer = CustomerBuilder.create().id("C-2").build();
-
             MatcherAssert.assertThat(
                 "unset field cannot keep the Java default",
                 customer.getName(),
@@ -73,7 +71,6 @@ final class GeneratedCodeTest {
         @DisplayName("Методы билдера возвращают сам билдер — вызовы цепляются")
         void buildersAreFluent() {
             final CustomerBuilder builder = CustomerBuilder.create();
-
             MatcherAssert.assertThat(
                 "builder method cannot return the builder itself",
                 builder.id("C-3"),
@@ -91,7 +88,6 @@ final class GeneratedCodeTest {
                     .placedOn(LocalDate.of(2026, 7, 30))
                     .status("NEW")
                     .build();
-
             MatcherAssert.assertThat(
                 "suffix element cannot rename the generated builder",
                 OrderMaker.class.getSimpleName(),
@@ -207,7 +203,6 @@ final class GeneratedCodeTest {
         void createsWithoutReflection() {
             // В сгенерированном коде лежит Xxx::new, а не Class.forName(...).newInstance()
             final Object created = ModuleRegistry.create("customers");
-
             MatcherAssert.assertThat(
                 "generated factory cannot create the object without reflection",
                 ((CustomerRepository) created).count(),

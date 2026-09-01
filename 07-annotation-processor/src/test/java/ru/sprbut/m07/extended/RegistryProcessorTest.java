@@ -76,7 +76,6 @@ final class RegistryProcessorTest {
         @DisplayName("Все помеченные классы собираются в один сгенерированный файл")
         void collectsEverythingIntoOneFile() {
             final CompilationHarness.Result result = compile(List.of(REPO, SERVICE));
-
             MatcherAssert.assertThat(
                 "every annotated class cannot land in one generated file",
                 result.generatedSources(),
@@ -98,7 +97,6 @@ final class RegistryProcessorTest {
         @DisplayName("JavaPoet сам расставляет импорты и форматирование")
         void javaPoetHandlesImports() {
             final String code = compile(List.of(REPO)).source("ru.sprbut.generated.GeneratedRegistry");
-
             MatcherAssert.assertThat(
                 "JavaPoet cannot add the needed import",
                 code,
@@ -120,7 +118,6 @@ final class RegistryProcessorTest {
         @DisplayName("Имя по умолчанию — имя класса с маленькой буквы, явное — из value")
         void resolvesNames() {
             final String code = compile(List.of(REPO, SERVICE)).source("ru.sprbut.generated.GeneratedRegistry");
-
             MatcherAssert.assertThat(
                 "explicit name cannot replace the default one",
                 code,
@@ -134,7 +131,6 @@ final class RegistryProcessorTest {
             final CompilationHarness.Result result = compile(List.of(REPO),
                     "-A" + RegistryProcessor.PACKAGE_OPTION + "=demo.gen",
                     "-A" + RegistryProcessor.CLASS_OPTION + "=Beans");
-
             MatcherAssert.assertThat(
                 "processor options cannot change the generated class name",
                 result.generatedSources(),
@@ -150,7 +146,6 @@ final class RegistryProcessorTest {
                     List.of(new CompilationHarness.Source(
                             "demo.Plain", "package demo; public class Plain {}")),
                     processor);
-
             MatcherAssert.assertThat(
                 "processor cannot stay idle without its annotations",
                 processor.rounds(),
@@ -186,9 +181,7 @@ final class RegistryProcessorTest {
         @DisplayName("create() создаёт объект через конструктор, а не через Class.forName")
         void createsInstancesWithoutReflection() throws Exception {
             final CompilationHarness.Result result = compile(List.of(REPO, SERVICE));
-
             final Class<?> registry = result.load("ru.sprbut.generated.GeneratedRegistry");
-
             final Object created = registry.getMethod("create", String.class).invoke(null, "users");
             MatcherAssert.assertThat(
                 "generated registry cannot create the object without reflection",
@@ -202,10 +195,8 @@ final class RegistryProcessorTest {
         void listsRegisteredNames() throws Exception {
             final Class<?> registry = compile(List.of(REPO, SERVICE))
                     .load("ru.sprbut.generated.GeneratedRegistry");
-
             @SuppressWarnings("unchecked")
             final Set<String> names = (Set<String>) registry.getMethod("names").invoke(null);
-
             MatcherAssert.assertThat(
                 "registry cannot list every registered name",
                 names,
@@ -217,7 +208,6 @@ final class RegistryProcessorTest {
         @DisplayName("Неизвестное имя даёт понятную ошибку")
         void unknownNameFails() throws Exception {
             final Class<?> registry = compile(List.of(REPO)).load("ru.sprbut.generated.GeneratedRegistry");
-
             MatcherAssert.assertThat(
                 "unknown name cannot be reported clearly",
                 Assertions.assertThrows(
@@ -241,10 +231,8 @@ final class RegistryProcessorTest {
         @DisplayName("Процессор работает в нескольких раундах, но реестр пишет ровно один раз")
         void writesExactlyOnceAcrossRounds() {
             final RegistryProcessor processor = new RegistryProcessor();
-
             final CompilationHarness.Result result =
                     CompilationHarness.compile(RegistryProcessorTest.this.workDir, List.of(REPO, SERVICE), processor);
-
             MatcherAssert.assertThat(
                 "processor cannot run in a working round and a final one",
                 processor.rounds(),
@@ -268,7 +256,6 @@ final class RegistryProcessorTest {
         @DisplayName("Реестр пишется в рабочем раунде, а не в последнем — иначе его нельзя импортировать")
         void writesEarlyEnoughToBeImportable() {
             final CompilationHarness.Result result = compile(List.of(REPO));
-
             // javac предупреждает про файлы последнего раунда; их нельзя
             // использовать из обычного кода. Этого предупреждения быть не должно.
             MatcherAssert.assertThat(
@@ -292,7 +279,6 @@ final class RegistryProcessorTest {
                             import ru.sprbut.m07.api.Registered;
                             @Registered("dup") public class B {}
                             """)));
-
             MatcherAssert.assertThat(
                 "duplicate name cannot fail the build instead of overwriting silently",
                 result.errors().stream().anyMatch(m -> m.contains("уже занято")),
@@ -309,7 +295,6 @@ final class RegistryProcessorTest {
                             import ru.sprbut.m07.api.Registered;
                             @Registered public abstract class Abs {}
                             """)));
-
             MatcherAssert.assertThat(
                 "abstract class cannot be rejected by the registry processor",
                 abstractResult.errors().stream().anyMatch(m -> m.contains("нечем создать")),
@@ -335,7 +320,6 @@ final class RegistryProcessorTest {
                 ctorResult.errors().stream().anyMatch(m -> m.contains("конструктор без параметров")),
                 Matchers.equalTo(true)
             );
-
         }
     }
 }

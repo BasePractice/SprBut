@@ -85,13 +85,11 @@ class RetryAspectTest {
         @DisplayName("Аспект повторяет вызов до успеха")
         void retriesUntilSuccess() {
             payments.failFirst(2);
-
             MatcherAssert.assertThat(
                 "cannot verify that retries until success",
                 payments.charge("ORD-2"),
                 Matchers.equalTo("оплачен ORD-2")
             );
-
             MatcherAssert.assertThat(
                 "cannot verify that retries until success",
                 payments.executions(),
@@ -108,13 +106,11 @@ class RetryAspectTest {
         @DisplayName("Исчерпав попытки, аспект пробрасывает последнее исключение")
         void rethrowsAfterExhaustion() {
             payments.failFirst(99);
-
             MatcherAssert.assertThat(
                 "cannot verify that rethrows after exhaustion",
                 Assertions.assertThrows(IllegalStateException.class, () -> payments.charge("ORD-3")).getMessage(),
                 Matchers.containsString("сбой платежа №3")
             );
-
             MatcherAssert.assertThat(
                 "cannot verify that rethrows after exhaustion",
                 aspect.log(),
@@ -132,10 +128,8 @@ class RetryAspectTest {
         void pointcutIsAnnotationDriven() {
             payments.failFirst(1);
             executor.failFirst(1);
-
             payments.charge("ORD-4");
             executor.execute("ORD-5");
-
             MatcherAssert.assertThat(
                 "cannot verify that pointcut is annotation driven",
                 aspect.attemptsOf("charge"),
@@ -161,13 +155,11 @@ class RetryAspectTest {
         @DisplayName("Вызов через this минует прокси — ретрая нет, ошибка вылетает сразу")
         void thisCallBypassesTheProxy() {
             payments.failFirst(1);
-
             MatcherAssert.assertThat(
                 "cannot verify that this call bypasses the proxy",
                 Assertions.assertThrows(IllegalStateException.class, () -> payments.chargeViaThis("ORD-6")).getMessage(),
                 Matchers.containsString("сбой платежа №1")
             );
-
             MatcherAssert.assertThat(
                 "cannot verify that this call bypasses the proxy",
                 payments.executions(),
@@ -184,13 +176,11 @@ class RetryAspectTest {
         @DisplayName("Обход 1: самовнедрение через ObjectProvider — ретрай работает")
         void selfInjectionRestoresTheAspect() {
             payments.failFirst(1);
-
             MatcherAssert.assertThat(
                 "cannot verify that self injection restores the aspect",
                 payments.chargeViaSelf("ORD-7"),
                 Matchers.equalTo("оплачен ORD-7")
             );
-
             MatcherAssert.assertThat(
                 "cannot verify that self injection restores the aspect",
                 payments.executions(),
@@ -207,13 +197,11 @@ class RetryAspectTest {
         @DisplayName("Обход 2: AopContext.currentProxy — работает, но требует exposeProxy")
         void aopContextRestoresTheAspect() {
             payments.failFirst(1);
-
             MatcherAssert.assertThat(
                 "cannot verify that aop context restores the aspect",
                 payments.chargeViaAopContext("ORD-8"),
                 Matchers.equalTo("оплачен ORD-8")
             );
-
             MatcherAssert.assertThat(
                 "cannot verify that aop context restores the aspect",
                 aspect.attemptsOf("charge"),
@@ -225,13 +213,11 @@ class RetryAspectTest {
         @DisplayName("Правильное решение: вынести метод в отдельный бин")
         void separateBeanIsTheCleanSolution() {
             executor.failFirst(2);
-
             MatcherAssert.assertThat(
                 "cannot verify that separate bean is the clean solution",
                 payments.chargeViaSeparateBean("ORD-9"),
                 Matchers.equalTo("оплачен ORD-9")
             );
-
             MatcherAssert.assertThat(
                 "cannot verify that separate bean is the clean solution",
                 executor.executions(),
@@ -249,7 +235,6 @@ class RetryAspectTest {
         void aopContextNeedsExposeProxy() {
             try (var plain = new AnnotationConfigApplicationContext(PlainConfig.class)) {
                 final PaymentService service = plain.getBean(PaymentService.class);
-
                 MatcherAssert.assertThat(
                     "cannot verify that aop context needs expose proxy",
                     Assertions.assertThrows(IllegalStateException.class, () -> service.chargeViaAopContext("ORD-10")).getMessage(),
@@ -258,7 +243,9 @@ class RetryAspectTest {
             }
         }
 
-        /** Та же конфигурация, но без {@code exposeProxy} и без сканирования пакета. */
+        /**
+         * Та же конфигурация, но без {@code exposeProxy} и без сканирования пакета.
+         */
         @Configuration
         @EnableAspectJAutoProxy
         @Import({PaymentService.class, ChargeExecutor.class, RetryAspect.class})
@@ -299,7 +286,6 @@ class RetryAspectTest {
         void stateIsReachableOnlyThroughMethods() {
             payments.failFirst(1);
             payments.charge("ORD-11");
-
             // executions() — метод, вызов делегируется настоящему бину
             MatcherAssert.assertThat(
                 "cannot verify that state is reachable only through methods",

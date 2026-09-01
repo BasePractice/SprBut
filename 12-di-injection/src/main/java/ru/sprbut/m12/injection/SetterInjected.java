@@ -52,7 +52,10 @@ public class SetterInjected {
         this.taxService = taxService;
     }
 
-    /** Необязательная зависимость: без неё объект тоже работоспособен. */
+    /**
+     * Необязательная зависимость: без неё объект тоже работоспособен.
+     * @param discountService Сервис
+     */
     @Autowired(required = false)
     public void setDiscountService(final DiscountService discountService) {
         this.discountService = discountService;

@@ -45,7 +45,6 @@ final class CustomerMapperTest {
         @DisplayName("Одноимённые свойства копируются напрямую")
         void copiesMatchingProperties() {
             final CustomerDto dto = mapper.toDto(entity());
-
             MatcherAssert.assertThat(
                 "generated mapper cannot copy the identifier",
                 dto.getId(),
@@ -67,7 +66,6 @@ final class CustomerMapperTest {
         @DisplayName("qualifiedByName вызывает именованный метод преобразования")
         void namedMethodsConvertValues() {
             final CustomerDto dto = mapper.toDto(entity());
-
             MatcherAssert.assertThat(
                 "named method cannot convert the status",
                 dto.getStatus(),
@@ -80,7 +78,6 @@ final class CustomerMapperTest {
         void nonVipGetsStandardStatus() {
             final CustomerEntity plain = entity();
             plain.setVip(false);
-
             MatcherAssert.assertThat(
                 "conditional mapping cannot pick the default status",
                 mapper.toDto(plain).getStatus(),
@@ -93,7 +90,6 @@ final class CustomerMapperTest {
         void afterMappingNormalizesNulls() {
             final CustomerEntity noBalance = entity();
             noBalance.setBalance(null);
-
             MatcherAssert.assertThat(
                 "missing value cannot fall back to the default",
                 mapper.toDto(noBalance).getBalance(),
@@ -107,9 +103,7 @@ final class CustomerMapperTest {
             final CustomerEntity second = entity();
             second.setId("C-2");
             second.setVip(false);
-
             final List<CustomerDto> dtos = mapper.toDtos(List.of(entity(), second));
-
             MatcherAssert.assertThat(
                 "collection mapping cannot keep the order",
                 dtos.stream().map(CustomerDto::getId).toList(),
@@ -181,7 +175,6 @@ final class CustomerMapperTest {
         void mappersFactoryCreatesNewInstances() {
             final CustomerMapper first = org.mapstruct.factory.Mappers.getMapper(CustomerMapper.class);
             final CustomerMapper second = org.mapstruct.factory.Mappers.getMapper(CustomerMapper.class);
-
             MatcherAssert.assertThat(
                 "spring managed mapper cannot differ from the standalone one",
                 first,
@@ -192,7 +185,6 @@ final class CustomerMapperTest {
                 first.getClass(),
                 Matchers.equalTo(CustomerMapper.INSTANCE.getClass())
             );
-
             // Именно поэтому в Spring-проектах используют componentModel = "spring":
             // тогда маппер становится бином, и его жизненным циклом управляет контейнер
         }

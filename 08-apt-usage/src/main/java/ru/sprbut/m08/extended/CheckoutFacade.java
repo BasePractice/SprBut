@@ -66,7 +66,11 @@ public final class CheckoutFacade {
         this.audit = (AuditLog) ModuleRegistry.create("audit");
     }
 
-    /** Вариант с явным внедрением — для тестов, где нужны свои экземпляры. */
+    /**
+     * Вариант с явным внедрением — для тестов, где нужны свои экземпляры.
+     * @param audit Аудит
+     * @param customers Клиенты
+     */
     public CheckoutFacade(final CustomerRepository customers, final OrderRepository orders, final AuditLog audit) {
         this.customers = customers;
         this.orders = orders;
@@ -80,6 +84,7 @@ public final class CheckoutFacade {
      * @param email Адрес почты
      * @param id Идентификатор
      * @param name Имя
+     * @param vip Признак привилегированного клиента
      * @return Регистрирует покупателя. Объект собирается сгенерированным билдером — ни одного вызова сеттера в этом коде нет
      */
     public Customer register(final String id, final String name, final String email, final int age, final boolean vip) {
@@ -107,11 +112,9 @@ public final class CheckoutFacade {
     public Order checkout(final String customerId, final BigDecimal total, final LocalDate date) {
         final Customer customer = this.customers.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("Нет покупателя " + customerId));
-
         final BigDecimal finalTotal = customer.isVip()
                 ? total.multiply(new BigDecimal("0.9"))
                 : total;
-
         final Order order = OrderMaker.create()
                 .number("ORD-" + (this.orders.count() + 1))
                 .customerId(customerId)
@@ -119,7 +122,6 @@ public final class CheckoutFacade {
                 .placedOn(date)
                 .status("NEW")
                 .build();
-
         this.orders.save(order);
         this.audit.record("заказ " + order.getNumber() + " на " + finalTotal);
         return order;
@@ -142,7 +144,10 @@ public final class CheckoutFacade {
         return this.audit.entries();
     }
 
-    /** Что вообще есть в сгенерированном реестре. */
+    /**
+     * Что вообще есть в сгенерированном реестре.
+     * @return Что вообще есть в сгенерированном реестре
+     */
     public static java.util.Set<String> registeredNames() {
         return ModuleRegistry.names();
     }

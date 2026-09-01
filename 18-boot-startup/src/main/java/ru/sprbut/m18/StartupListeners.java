@@ -45,7 +45,9 @@ public final class StartupListeners {
     private StartupListeners() {
     }
 
-    /** Самое раннее событие: нет ни Environment, ни контекста. */
+    /**
+     * Самое раннее событие: нет ни Environment, ни контекста.
+     */
     public static class Starting implements ApplicationListener<ApplicationStartingEvent> {
 
         /**
@@ -61,7 +63,9 @@ public final class StartupListeners {
         }
     }
 
-    /** Environment готов — можно добавить свой источник настроек. */
+    /**
+     * Environment готов — можно добавить свой источник настроек.
+     */
     public static class EnvironmentPrepared
             implements ApplicationListener<ApplicationEnvironmentPreparedEvent> {
 
@@ -80,7 +84,9 @@ public final class StartupListeners {
         }
     }
 
-    /** Контекст создан, инициализаторы отработали, бинов ещё нет. */
+    /**
+     * Контекст создан, инициализаторы отработали, бинов ещё нет.
+     */
     public static class ContextInitialized
             implements ApplicationListener<ApplicationContextInitializedEvent> {
 
@@ -97,7 +103,9 @@ public final class StartupListeners {
         }
     }
 
-    /** Определения бинов загружены — последний шанс их изменить. */
+    /**
+     * Определения бинов загружены — последний шанс их изменить.
+     */
     public static class Prepared implements ApplicationListener<ApplicationPreparedEvent> {
 
         /**
@@ -113,7 +121,9 @@ public final class StartupListeners {
         }
     }
 
-    /** refresh() завершён: все синглтоны созданы. */
+    /**
+     * refresh() завершён: все синглтоны созданы.
+     */
     public static class Refreshed implements ApplicationListener<ContextRefreshedEvent> {
 
         /**
@@ -129,7 +139,9 @@ public final class StartupListeners {
         }
     }
 
-    /** Контекст поднят, но раннеры ещё не выполнялись. */
+    /**
+     * Контекст поднят, но раннеры ещё не выполнялись.
+     */
     public static class Started implements ApplicationListener<ApplicationStartedEvent> {
 
         /**
@@ -145,7 +157,9 @@ public final class StartupListeners {
         }
     }
 
-    /** Всё готово, включая раннеры. Финал последовательности. */
+    /**
+     * Всё готово, включая раннеры. Финал последовательности.
+     */
     public static class Ready implements ApplicationListener<ApplicationReadyEvent> {
 
         /**
@@ -161,7 +175,9 @@ public final class StartupListeners {
         }
     }
 
-    /** Запуск не удался — единственное событие, которое отменяет остальные. */
+    /**
+     * Запуск не удался — единственное событие, которое отменяет остальные.
+     */
     public static class Failed implements ApplicationListener<ApplicationFailedEvent> {
 
         /**

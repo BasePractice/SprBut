@@ -9,7 +9,9 @@ package ru.sprbut.m11.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Альтернативная реализация — нужна, чтобы было что подменять. */
+/**
+ * Альтернативная реализация — нужна, чтобы было что подменять.
+ */
 public class SmsSender implements NotificationSender {
 
     /**

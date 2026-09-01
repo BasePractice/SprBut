@@ -43,7 +43,9 @@ public final class StartupHooks {
     private StartupHooks() {
     }
 
-    /** Шаг 3: контекст создан, бинов нет. */
+    /**
+     * Шаг 3: контекст создан, бинов нет.
+     */
     public static class MarkerInitializer
             implements ApplicationContextInitializer<GenericApplicationContext> {
 
@@ -86,7 +88,9 @@ public final class StartupHooks {
         }
     }
 
-    /** Шаг 9а: раннер с разобранными аргументами. */
+    /**
+     * Шаг 9а: раннер с разобранными аргументами.
+     */
     @Order(1)
     public static class FirstRunner implements ApplicationRunner {
 
@@ -103,7 +107,9 @@ public final class StartupHooks {
         }
     }
 
-    /** Шаг 9б: раннер с сырым массивом аргументов. */
+    /**
+     * Шаг 9б: раннер с сырым массивом аргументов.
+     */
     @Order(2)
     public static class SecondRunner implements CommandLineRunner {
 

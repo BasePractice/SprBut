@@ -23,24 +23,8 @@ import java.util.Map;
  */
 public record SpringModuleMap(String name, Layer layer, String responsibility, List<String> dependsOn) {
 
-    /** Слой на карте: основание, ядро, надстройки. */
     /**
-     * Значение {@code WEB}.
-     */
-    /**
-     * Значение {@code PLATFORM}.
-     */
-    /**
-     * Значение {@code INFRASTRUCTURE}.
-     */
-    /**
-     * Значение {@code FOUNDATION}.
-     */
-    /**
-     * Значение {@code DATA}.
-     */
-    /**
-     * Значение {@code CORE}.
+     * Слой на карте: основание, ядро, надстройки.
      */
     public enum Layer { FOUNDATION, CORE, DATA, WEB, INFRASTRUCTURE, PLATFORM }
 
@@ -156,7 +140,9 @@ public record SpringModuleMap(String name, Layer layer, String responsibility, L
                 SpringModuleMap::name, m -> m, (a, b) -> a, java.util.LinkedHashMap::new));
     }
 
-    /** Модули, ни от чего не зависящие, — основание карты. */
+    /**
+     * Модули, ни от чего не зависящие, — основание карты.
+     */
     public static List<String> foundation() {
         return all().stream()
                 .filter(m -> m.dependsOn().isEmpty())
@@ -164,7 +150,9 @@ public record SpringModuleMap(String name, Layer layer, String responsibility, L
                 .toList();
     }
 
-    /** Полный транзитивный набор зависимостей модуля. */
+    /**
+     * Полный транзитивный набор зависимостей модуля.
+     */
     public static java.util.Set<String> transitiveDependencies(final String moduleName) {
         final java.util.Set<String> result = new java.util.LinkedHashSet<>();
         collect(moduleName, result);
@@ -180,7 +168,9 @@ public record SpringModuleMap(String name, Layer layer, String responsibility, L
         module.dependsOn().forEach(dependency -> collect(dependency, sink));
     }
 
-    /** Кто использует AOP — то есть у кого поведение реализовано через прокси. */
+    /**
+     * Кто использует AOP — то есть у кого поведение реализовано через прокси.
+     */
     public static List<String> builtOnAop() {
         return all().stream()
                 .filter(m -> m.name().equals("spring-aop")

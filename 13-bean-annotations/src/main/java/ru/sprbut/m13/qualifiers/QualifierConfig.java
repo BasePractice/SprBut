@@ -98,19 +98,31 @@ public class QualifierConfig {
         return new NamedGateway("sbp");
     }
 
-    /** Без уточнений сработает {@code @Primary}. */
+    /**
+     * Без уточнений сработает {@code @Primary}.
+     * @param gateway Шлюз
+     * @return Без уточнений сработает {@code @Primary}
+     */
     @Bean
     public PrimaryConsumer primaryConsumer(final PaymentGateway gateway) {
         return new PrimaryConsumer(gateway);
     }
 
-    /** {@code @Qualifier} по имени бина перебивает {@code @Primary}. */
+    /**
+     * {@code @Qualifier} по имени бина перебивает {@code @Primary}.
+     * @param gateway Шлюз
+     * @return {@code @Qualifier} по имени бина перебивает {@code @Primary}
+     */
     @Bean
     public QualifiedConsumer qualifiedConsumer(final @Qualifier("cashGateway") PaymentGateway gateway) {
         return new QualifiedConsumer(gateway);
     }
 
-    /** {@code @Qualifier} по значению аннотации, а не по имени бина. */
+    /**
+     * {@code @Qualifier} по значению аннотации, а не по имени бина.
+     * @param gateway Шлюз
+     * @return {@code @Qualifier} по значению аннотации, а не по имени бина
+     */
     @Bean
     public TaggedConsumer taggedConsumer(final @Qualifier("fast") PaymentGateway gateway) {
         return new TaggedConsumer(gateway);

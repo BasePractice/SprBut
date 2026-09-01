@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m06.extended;
 
 import java.lang.annotation.Annotation;
@@ -30,9 +31,15 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface AliasFor {
 
-    /** Мета-аннотация, элемент которой переопределяется. */
+    /**
+     * Мета-аннотация, элемент которой переопределяется.
+     * @return Мета-аннотация, элемент которой переопределяется
+     */
     Class<? extends Annotation> annotation();
 
-    /** Имя переопределяемого элемента. По умолчанию — имя текущего элемента. */
+    /**
+     * Имя переопределяемого элемента. По умолчанию — имя текущего элемента.
+     * @return Имя переопределяемого элемента. По умолчанию — имя текущего элемента
+     */
     String attribute() default "";
 }

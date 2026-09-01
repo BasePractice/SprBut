@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-/** Вторая зависимость — чтобы у сервиса их было больше одной. */
+/**
+ * Вторая зависимость — чтобы у сервиса их было больше одной.
+ */
 @Component
 public class DiscountService {
 

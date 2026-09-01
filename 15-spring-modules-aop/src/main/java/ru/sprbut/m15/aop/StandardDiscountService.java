@@ -8,7 +8,9 @@ package ru.sprbut.m15.aop;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 
-/** Реализация {@link DiscountService}. Именно её Spring обернёт JDK-прокси. */
+/**
+ * Реализация {@link DiscountService}. Именно её Spring обернёт JDK-прокси.
+ */
 @Service
 public class StandardDiscountService implements DiscountService {
 

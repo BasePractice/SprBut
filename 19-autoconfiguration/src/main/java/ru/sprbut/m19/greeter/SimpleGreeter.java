@@ -6,7 +6,9 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m19.greeter;
 
-/** Реализация по умолчанию, которую поставляет автоконфигурация. */
+/**
+ * Реализация по умолчанию, которую поставляет автоконфигурация.
+ */
 public class SimpleGreeter implements Greeter {
 
     /**

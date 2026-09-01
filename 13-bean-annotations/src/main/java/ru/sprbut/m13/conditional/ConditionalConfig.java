@@ -45,7 +45,9 @@ public class ConditionalConfig {
         // нечего инициализировать
     }
 
-    /** Порядок фактического создания бинов — заполняется конструкторами. */
+    /**
+     * Порядок фактического создания бинов — заполняется конструкторами.
+     */
     public static final List<String> CREATED = new ArrayList<>();
 
     /**
@@ -68,7 +70,9 @@ public class ConditionalConfig {
         }
     }
 
-    /** Своё условие: бин создаётся, только если задано системное свойство. */
+    /**
+     * Своё условие: бин создаётся, только если задано системное свойство.
+     */
     public static class OnPropertyCondition implements Condition {
 
         /**
@@ -114,7 +118,10 @@ public class ConditionalConfig {
         return new Marker("notDevBean");
     }
 
-    /** Создаётся не при старте, а при первом {@code getBean}. */
+    /**
+     * Создаётся не при старте, а при первом {@code getBean}.
+     * @return Создаётся не при старте, а при первом {@code getBean}
+     */
     @Bean
     @Lazy
     public Marker lazyBean() {

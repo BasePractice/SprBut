@@ -86,7 +86,9 @@ public class RegistryProcessor extends AbstractProcessor {
      */
     private static final String DEFAULT_CLASS = "GeneratedRegistry";
 
-    /** Накопленные за все раунды записи: имя → класс. */
+    /**
+     * Накопленные за все раунды записи: имя → класс.
+     */
     private final Map<String, ClassName> registry = new LinkedHashMap<>();
 
     /**
@@ -104,7 +106,6 @@ public class RegistryProcessor extends AbstractProcessor {
         if (roundEnv.processingOver()) {
             return false;
         }
-
         for (Element element : roundEnv.getElementsAnnotatedWith(Registered.class)) {
             if (element.getKind() != ElementKind.CLASS) {
                 this.error(element, "@Registered применим только к классам");
@@ -125,7 +126,6 @@ public class RegistryProcessor extends AbstractProcessor {
                 this.error(element, "Имя '" + name + "' уже занято классом " + previous);
             }
         }
-
         // Реестр пишем ровно один раз — в первом же раунде, где нашлись записи.
         //
         // Соблазн отложить запись до processingOver() (вдруг в поздних раундах
@@ -173,12 +173,10 @@ public class RegistryProcessor extends AbstractProcessor {
     private void writeRegistry() {
         final String packageName = this.option(PACKAGE_OPTION, DEFAULT_PACKAGE);
         final String className = this.option(CLASS_OPTION, DEFAULT_CLASS);
-
         final TypeName supplierOfObject = ParameterizedTypeName.get(
                 ClassName.get(Supplier.class), ClassName.get(Object.class));
         final TypeName mapType = ParameterizedTypeName.get(
                 ClassName.get(Map.class), ClassName.get(String.class), supplierOfObject);
-
         final CodeBlock.Builder initializer = CodeBlock.builder().add("$T.of(", Map.class);
         boolean first = true;
         for (Map.Entry<String, ClassName> entry : this.registry.entrySet()) {
@@ -190,18 +188,15 @@ public class RegistryProcessor extends AbstractProcessor {
             initializer.add("$S, $T::new", entry.getKey(), entry.getValue());
         }
         initializer.add(")");
-
         final FieldSpec beans = FieldSpec.builder(mapType, "FACTORIES",
                         Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .initializer(initializer.build())
                 .build();
-
         final MethodSpec names = MethodSpec.methodBuilder("names")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(ParameterizedTypeName.get(java.util.Set.class, String.class))
                 .addStatement("return FACTORIES.keySet()")
                 .build();
-
         final MethodSpec create = MethodSpec.methodBuilder("create")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(String.class, "name")
@@ -213,13 +208,11 @@ public class RegistryProcessor extends AbstractProcessor {
                 .endControlFlow()
                 .addStatement("return factory.get()")
                 .build();
-
         final MethodSpec size = MethodSpec.methodBuilder("size")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(int.class)
                 .addStatement("return FACTORIES.size()")
                 .build();
-
         final TypeSpec registryType = TypeSpec.classBuilder(className)
                 .addJavadoc("Сгенерирован $L. Правки будут потеряны при следующей сборке.\n",
                         RegistryProcessor.class.getSimpleName())
@@ -230,7 +223,6 @@ public class RegistryProcessor extends AbstractProcessor {
                 .addMethod(create)
                 .addMethod(size)
                 .build();
-
         try {
             JavaFile.builder(packageName, registryType)
                     .skipJavaLangImports(true)

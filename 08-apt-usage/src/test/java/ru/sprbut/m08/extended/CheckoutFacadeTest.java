@@ -60,7 +60,6 @@ final class CheckoutFacadeTest {
     @DisplayName("Регистрация собирает объект сгенерированным билдером")
     void registersCustomer() {
         final Customer customer = this.facade.register("C-1", "Иванов", "ivanov@mail.ru", 42, false);
-
         MatcherAssert.assertThat(
             "generated builder cannot assemble the registered customer",
             customer.getName(),
@@ -72,9 +71,7 @@ final class CheckoutFacadeTest {
     @DisplayName("Оформление заказа использует второй сгенерированный билдер")
     void placesOrder() {
         this.facade.register("C-1", "Иванов", "ivanov@mail.ru", 42, false);
-
         final Order order = this.facade.checkout("C-1", new BigDecimal("1000"), DAY);
-
         MatcherAssert.assertThat(
             "second generated builder cannot assemble the order",
             order.getTotal(),
@@ -86,9 +83,7 @@ final class CheckoutFacadeTest {
     @DisplayName("VIP получает скидку — бизнес-логика поверх сгенерированного кода")
     void vipGetsDiscount() {
         this.facade.register("C-2", "Петров", "petrov@mail.ru", 35, true);
-
         final Order order = this.facade.checkout("C-2", new BigDecimal("1000"), DAY);
-
         MatcherAssert.assertThat(
             "vip discount cannot be applied on top of the generated code",
             order.getTotal(),
@@ -100,10 +95,8 @@ final class CheckoutFacadeTest {
     @DisplayName("Номера заказов нумеруются подряд")
     void numbersOrdersSequentially() {
         this.facade.register("C-1", "Иванов", "i@mail.ru", 42, false);
-
         this.facade.checkout("C-1", BigDecimal.TEN, DAY);
         this.facade.checkout("C-1", BigDecimal.ONE, DAY);
-
         MatcherAssert.assertThat(
             "orders cannot be numbered sequentially",
             this.facade.ordersOf("C-1").stream().map(Order::getNumber).toList(),
@@ -129,7 +122,6 @@ final class CheckoutFacadeTest {
     void auditTrailIsRecorded() {
         this.facade.register("C-1", "Иванов", "i@mail.ru", 42, false);
         this.facade.checkout("C-1", new BigDecimal("500"), DAY);
-
         MatcherAssert.assertThat(
             "audit cannot record every step",
             this.facade.auditTrail(),
@@ -141,10 +133,8 @@ final class CheckoutFacadeTest {
     @DisplayName("Конструктор без аргументов достаёт зависимости из сгенерированного реестра")
     void resolvesDependenciesFromGeneratedRegistry() {
         final CheckoutFacade fromRegistry = new CheckoutFacade();
-
         fromRegistry.register("C-9", "Сидоров", "s@mail.ru", 30, false);
         final Order order = fromRegistry.checkout("C-9", new BigDecimal("250"), DAY);
-
         MatcherAssert.assertThat(
             "generated registry cannot supply the dependencies",
             order.getCustomerId(),

@@ -28,6 +28,9 @@ public @interface Todo {
      */
     String value();
 
-    /** {@code true} — сборка падает с ошибкой, {@code false} — только предупреждение. */
+    /**
+     * {@code true} — сборка падает с ошибкой, {@code false} — только предупреждение.
+     * @return {@code true} — сборка падает с ошибкой, {@code false} — только предупреждение
+     */
     boolean blocking() default false;
 }

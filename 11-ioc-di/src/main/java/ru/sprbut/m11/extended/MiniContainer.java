@@ -39,16 +39,24 @@ import java.util.Set;
  */
 public class MiniContainer {
 
-    /** Определения: имя → класс. */
+    /**
+     * Определения: имя → класс.
+     */
     private final Map<String, Class<?>> definitions = new LinkedHashMap<>();
 
-    /** Готовые синглтоны: имя → экземпляр. */
+    /**
+     * Готовые синглтоны: имя → экземпляр.
+     */
     private final Map<String, Object> singletons = new LinkedHashMap<>();
 
-    /** Классы, которые сейчас находятся в процессе создания — детектор циклов. */
+    /**
+     * Классы, которые сейчас находятся в процессе создания — детектор циклов.
+     */
     private final Set<Class<?>> inCreation = new LinkedHashSet<>();
 
-    /** Порядок фактического создания бинов — виден в тестах. */
+    /**
+     * Порядок фактического создания бинов — виден в тестах.
+     */
     private final List<String> creationOrder = new ArrayList<>();
 
     /**
@@ -61,7 +69,10 @@ public class MiniContainer {
         }
     }
 
-    /** Регистрация определения. Экземпляр пока не создаётся — только описание. */
+    /**
+     * Регистрация определения. Экземпляр пока не создаётся — только описание.
+     * @param type Тип
+     */
     public final void register(final Class<?> type) {
         final MiniComponent annotation = type.getAnnotation(MiniComponent.class);
         if (annotation == null) {
@@ -76,7 +87,10 @@ public class MiniContainer {
         }
     }
 
-    /** Создаёт все зарегистрированные бины сразу — как делает Spring для синглтонов. */
+    /**
+     * Создаёт все зарегистрированные бины сразу — как делает Spring для синглтонов.
+     * @return Создаёт все зарегистрированные бины сразу — как делает Spring для синглтонов
+     */
     public MiniContainer refresh() {
         for (String name : List.copyOf(this.definitions.keySet())) {
             this.getBean(name);
@@ -84,7 +98,11 @@ public class MiniContainer {
         return this;
     }
 
-    /** Достать бин по имени. */
+    /**
+     * Достать бин по имени.
+     * @param name Имя
+     * @return Достать бин по имени
+     */
     public Object getBean(final String name) {
         final Class<?> type = this.definitions.get(name);
         if (type == null) {
@@ -105,7 +123,6 @@ public class MiniContainer {
                 .filter(e -> requiredType.isAssignableFrom(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
-
         if (candidates.isEmpty()) {
             throw new NoSuchBeanException("Нет бина типа " + requiredType.getSimpleName());
         }
@@ -203,7 +220,9 @@ public class MiniContainer {
 
     // --- Ошибки, повторяющие поведение Spring -------------------------------
 
-    /** Аналог {@code NoSuchBeanDefinitionException}. */
+    /**
+     * Аналог {@code NoSuchBeanDefinitionException}.
+     */
     public static class NoSuchBeanException extends RuntimeException {
         /**
          * Основной конструктор.
@@ -214,7 +233,9 @@ public class MiniContainer {
         }
     }
 
-    /** Аналог {@code NoUniqueBeanDefinitionException}. */
+    /**
+     * Аналог {@code NoUniqueBeanDefinitionException}.
+     */
     public static class NoUniqueBeanException extends RuntimeException {
         /**
          * Основной конструктор.
@@ -225,7 +246,9 @@ public class MiniContainer {
         }
     }
 
-    /** Аналог {@code BeanCurrentlyInCreationException}. */
+    /**
+     * Аналог {@code BeanCurrentlyInCreationException}.
+     */
     public static class CircularDependencyException extends RuntimeException {
         /**
          * Основной конструктор.

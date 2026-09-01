@@ -63,7 +63,10 @@ public class StartupApp {
         return application.run(args);
     }
 
-    /** Вариант запуска, который падает на создании бина — чтобы увидеть ApplicationFailedEvent. */
+    /**
+     * Вариант запуска, который падает на создании бина — чтобы увидеть ApplicationFailedEvent.
+     * @param args Аргументы
+     */
     public static void runFailing(final String... args) {
         final SpringApplication application =
                 new SpringApplication(ru.sprbut.failing.FailingConfig.class);

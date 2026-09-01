@@ -24,15 +24,6 @@ public record MechanismProfile(String name,
     /**
      * Фаза.
      */
-    /**
-     * Значение {@code RUNTIME}.
-     */
-    /**
-     * Значение {@code COMPILE_TIME}.
-     */
-    /**
-     * Значение {@code BOTH}.
-     */
     public enum Phase { COMPILE_TIME, RUNTIME, BOTH }
 
     /**
@@ -42,7 +33,9 @@ public record MechanismProfile(String name,
         springUsesItFor = List.copyOf(springUsesItFor);
     }
 
-    /** Слайд 73: «Reflection: runtime, гибко, медленно». */
+    /**
+     * Слайд 73: «Reflection: runtime, гибко, медленно».
+     */
     public static final MechanismProfile REFLECTION = new MechanismProfile(
             "reflection",
             Phase.RUNTIME,
@@ -55,7 +48,9 @@ public record MechanismProfile(String name,
                     "@EventListener: вызов методов-слушателей",
                     "разбор аннотаций при старте контекста"));
 
-    /** Слайд 74: «APT: compile-time, только генерация, быстро». */
+    /**
+     * Слайд 74: «APT: compile-time, только генерация, быстро».
+     */
     public static final MechanismProfile APT = new MechanismProfile(
             "apt",
             Phase.COMPILE_TIME,
@@ -67,7 +62,9 @@ public record MechanismProfile(String name,
                     "Spring AOT: генерация кода контекста при сборке",
                     "MapStruct и Lombok в прикладном коде"));
 
-    /** Слайд 75: «Байткод (CGLIB, ByteBuddy): и то, и другое». */
+    /**
+     * Слайд 75: «Байткод (CGLIB, ByteBuddy): и то, и другое».
+     */
     public static final MechanismProfile BYTECODE = new MechanismProfile(
             "bytecode",
             Phase.BOTH,
@@ -87,7 +84,9 @@ public record MechanismProfile(String name,
         return List.of(REFLECTION, APT, BYTECODE);
     }
 
-    /** Слайд 76: «Spring использует все три механизма». */
+    /**
+     * Слайд 76: «Spring использует все три механизма».
+     */
     public static boolean springUsesAllThree() {
         return all().stream().allMatch(p -> !p.springUsesItFor().isEmpty());
     }

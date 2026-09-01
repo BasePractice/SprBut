@@ -26,15 +26,6 @@ public class ServerProperties implements Serializable {
     /**
      * Значение {@code Mode}.
      */
-    /**
-     * Значение {@code STAGE}.
-     */
-    /**
-     * Значение {@code PROD}.
-     */
-    /**
-     * Значение {@code DEV}.
-     */
     public enum Mode { DEV, STAGE, PROD }
 
     /**
@@ -187,7 +178,10 @@ public class ServerProperties implements Serializable {
         this.validUntil = validUntil;
     }
 
-    /** Вычисляемое свойство: только чтение, биндер его не трогает. */
+    /**
+     * Вычисляемое свойство: только чтение, биндер его не трогает.
+     * @return Вычисляемое свойство: только чтение, биндер его не трогает
+     */
     public String getBaseUrl() {
         return (this.sslEnabled ? "https://" : "http://") + this.host + ":" + this.port;
     }

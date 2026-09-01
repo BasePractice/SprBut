@@ -29,13 +29,19 @@ import java.util.List;
 @Component
 public class ValueBasedConfig {
 
-    /** Ключ есть в конфигурации. */
+    /**
+     * Ключ есть в конфигурации.
+     */
     private final String host;
 
-    /** Ключа нет — сработает значение по умолчанию после двоеточия. */
+    /**
+     * Ключа нет — сработает значение по умолчанию после двоеточия.
+     */
     private final String region;
 
-    /** Тип приводится автоматически. */
+    /**
+     * Тип приводится автоматически.
+     */
     private final int port;
 
     /**
@@ -47,7 +53,9 @@ public class ValueBasedConfig {
      */
     private final List<String> origins;
 
-    /** SpEL: выражение вычисляется при создании бина. */
+    /**
+     * SpEL: выражение вычисляется при создании бина.
+     */
     private final int doublePort;
 
     /**

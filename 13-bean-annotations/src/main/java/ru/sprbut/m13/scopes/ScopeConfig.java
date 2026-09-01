@@ -41,7 +41,9 @@ public class ScopeConfig {
         // нечего инициализировать
     }
 
-    /** Считает, сколько раз вообще создавался объект каждого типа. */
+    /**
+     * Считает, сколько раз вообще создавался объект каждого типа.
+     */
     public static final AtomicInteger SINGLETON_INSTANCES = new AtomicInteger();
     /**
      * Значение {@code PROTOTYPE_INSTANCES}.

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m07.api;
 
 import java.lang.annotation.ElementType;
@@ -22,6 +23,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Registered {
 
-    /** Логическое имя в реестре. Пустое — имя класса с маленькой буквы. */
+    /**
+     * Логическое имя в реестре. Пустое — имя класса с маленькой буквы.
+     * @return Логическое имя в реестре. Пустое — имя класса с маленькой буквы
+     */
     String value() default "";
 }

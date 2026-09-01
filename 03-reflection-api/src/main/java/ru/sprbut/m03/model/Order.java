@@ -135,7 +135,11 @@ public class Order {
         return this.paid;
     }
 
-    /** Метод с varargs — в рефлексии это параметр-массив плюс флаг {@code isVarArgs}. */
+    /**
+     * Метод с varargs — в рефлексии это параметр-массив плюс флаг {@code isVarArgs}.
+     * @param amounts Значение {@code amounts}
+     * @return Метод с varargs — в рефлексии это параметр-массив плюс флаг {@code isVarArgs}
+     */
     public BigDecimal addLines(final BigDecimal... amounts) {
         BigDecimal sum = this.total == null ? BigDecimal.ZERO : this.total;
         for (BigDecimal amount : amounts) {
@@ -145,7 +149,10 @@ public class Order {
         return sum;
     }
 
-    /** Метод с объявленным checked-исключением. */
+    /**
+     * Метод с объявленным checked-исключением.
+     * @param amount Сумма
+     */
     public void pay(final BigDecimal amount) throws PaymentException {
         if (this.total == null || amount.compareTo(this.total) < 0) {
             throw new PaymentException("Недостаточная сумма: " + amount + " < " + this.total);
@@ -153,7 +160,9 @@ public class Order {
         this.paid = true;
     }
 
-    /** Синхронизированный метод — ещё один флаг в {@code Modifier}. */
+    /**
+     * Синхронизированный метод — ещё один флаг в {@code Modifier}.
+     */
     public synchronized void cancel() {
         this.paid = false;
         this.total = BigDecimal.ZERO;

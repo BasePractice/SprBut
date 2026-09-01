@@ -34,13 +34,17 @@ public class BackgroundWorker implements SmartLifecycle {
      */
     private volatile boolean running;
 
-    /** Порядок запуска среди других SmartLifecycle: меньше — раньше. */
+    /**
+     * Порядок запуска среди других SmartLifecycle: меньше — раньше.
+     */
     @Override
     public int getPhase() {
         return 0;
     }
 
-    /** {@code true} — контейнер запустит сам, при готовности контекста. */
+    /**
+     * {@code true} — контейнер запустит сам, при готовности контекста.
+     */
     @Override
     public boolean isAutoStartup() {
         return true;

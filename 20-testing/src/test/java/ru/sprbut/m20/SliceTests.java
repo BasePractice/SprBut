@@ -84,7 +84,6 @@ class SliceTests {
         @DisplayName("Сквозной сценарий работает на настоящих бинах")
         void endToEndScenarioWorks() {
             this.catalog.add("SKU-1", "Кофемолка", new BigDecimal("4990.00"));
-
             MatcherAssert.assertThat(
                 "cannot verify that end to end scenario works",
                 this.catalog.bySku("SKU-1").getName(),
@@ -106,7 +105,6 @@ class SliceTests {
         @DisplayName("Дубликат артикула отклоняется")
         void duplicateSkuIsRejected() {
             this.catalog.add("SKU-DUP", "Первый", BigDecimal.TEN);
-
             MatcherAssert.assertThat(
                 "cannot verify that duplicate sku is rejected",
                 Assertions.assertThrows(IllegalArgumentException.class, () -> this.catalog.add("SKU-DUP", "Второй", BigDecimal.ONE)).getMessage(),
@@ -152,7 +150,6 @@ class SliceTests {
         void derivedQueriesWork() {
             this.repository.save(new Product("SKU-A", "Дешёвый", new BigDecimal("100")));
             this.repository.save(new Product("SKU-B", "Дорогой", new BigDecimal("100000")));
-
             MatcherAssert.assertThat(
                 "derived query cannot find the saved product",
                 this.repository.findBySku("SKU-A").isPresent(),
@@ -193,7 +190,9 @@ class SliceTests {
         @Autowired
         ObjectMapper objectMapper;
 
-        /** Слайд 184: сервис подменяется моком, настоящий в срез не входит. */
+        /**
+         * Слайд 184: сервис подменяется моком, настоящий в срез не входит.
+         */
         @MockitoBean
         CatalogService catalog;
 
@@ -228,7 +227,6 @@ class SliceTests {
         void getReturnsList() throws Exception {
             BDDMockito.given(this.catalog.available()).willReturn(
                     List.of(new Product("SKU-1", "Кофемолка", new BigDecimal("4990.00"))));
-
             this.mockMvc.perform(MockMvcRequestBuilders.get("/api/products"))
                     .andExpect(MockMvcResultMatchers.status().isOk())
                     .andExpect(MockMvcResultMatchers.jsonPath("$[0].sku").value("SKU-1"))
@@ -240,7 +238,6 @@ class SliceTests {
         void missingProductBecomes404() throws Exception {
             BDDMockito.willThrow(new CatalogService.ProductNotFoundException("SKU-X"))
                     .given(this.catalog).bySku("SKU-X");
-
             this.mockMvc.perform(MockMvcRequestBuilders.get("/api/products/SKU-X"))
                     .andExpect(MockMvcResultMatchers.status().isNotFound())
                     .andExpect(MockMvcResultMatchers.content().string("Товар не найден: SKU-X"));
@@ -251,10 +248,8 @@ class SliceTests {
         void postReturns201() throws Exception {
             BDDMockito.given(this.catalog.add(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
                     .willReturn(new Product("SKU-2", "Чайник", new BigDecimal("2990.00")));
-
             final var request = new ProductController.CreateRequest(
                     "SKU-2", "Чайник", new BigDecimal("2990.00"));
-
             this.mockMvc.perform(MockMvcRequestBuilders.post("/api/products")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(this.objectMapper.writeValueAsString(request)))
@@ -267,7 +262,6 @@ class SliceTests {
         void duplicateBecomes400() throws Exception {
             BDDMockito.given(this.catalog.add(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
                     .willThrow(new IllegalArgumentException("Товар с артикулом SKU-2 уже есть"));
-
             this.mockMvc.perform(MockMvcRequestBuilders.post("/api/products")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"sku\":\"SKU-2\",\"name\":\"Чайник\",\"price\":1}"))
@@ -317,7 +311,6 @@ class SliceTests {
         void serialises() throws Exception {
             final var view = new ProductController.ProductView(
                     "SKU-1", "Кофемолка", new BigDecimal("4990.00"), true);
-
             MatcherAssert.assertThat(
                 "serialisation cannot produce the expected JSON",
                 this.json.write(view).getJson(),
@@ -330,7 +323,6 @@ class SliceTests {
         void deserialises() throws Exception {
             final var parsed = this.json.parseObject(
                     "{\"sku\":\"SKU-1\",\"name\":\"Кофемолка\",\"price\":4990.00,\"available\":true}");
-
             MatcherAssert.assertThat(
                 "cannot verify that deserialises",
                 parsed.sku(),
@@ -355,9 +347,7 @@ class SliceTests {
             BDDMockito.given(fakeRepository.findBySku("SKU-1"))
                     .willReturn(java.util.Optional.of(
                             new Product("SKU-1", "Кофемолка", new BigDecimal("4990.00"))));
-
             final CatalogService service = new CatalogService(fakeRepository, "EUR");
-
             MatcherAssert.assertThat(
                 "cannot verify that service is testable without spring",
                 service.priceTag(service.bySku("SKU-1")),
@@ -370,18 +360,18 @@ class SliceTests {
         void controllerIsTestableStandalone() throws Exception {
             final CatalogService catalog = org.mockito.Mockito.mock(CatalogService.class);
             BDDMockito.given(catalog.available()).willReturn(List.of());
-
             final MockMvc standalone = MockMvcBuilders
                     .standaloneSetup(new ProductController(catalog))
                     .build();
-
             standalone.perform(MockMvcRequestBuilders.get("/api/products"))
                     .andExpect(MockMvcResultMatchers.status().isOk())
                     .andExpect(MockMvcResultMatchers.content().json("[]"));
         }
     }
 
-    /** Общий предок, чтобы не тянуть WebApplicationContext в каждый тест. */
+    /**
+     * Общий предок, чтобы не тянуть WebApplicationContext в каждый тест.
+     */
     interface WebContextAware {
         WebApplicationContext context();
     }

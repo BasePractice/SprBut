@@ -9,7 +9,9 @@ package ru.sprbut.m11.domain;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Реализация «по умолчанию». Отправленное копится в списке — так его видно в тестах. */
+/**
+ * Реализация «по умолчанию». Отправленное копится в списке — так его видно в тестах.
+ */
 public class EmailSender implements NotificationSender {
 
     /**

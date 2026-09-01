@@ -42,10 +42,14 @@ import java.util.List;
 @SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface CustomerMapper {
 
-    /** Точка доступа без Spring: MapStruct умеет и просто через ServiceLoader. */
+    /**
+     * Точка доступа без Spring: MapStruct умеет и просто через ServiceLoader.
+     */
     CustomerMapper INSTANCE = Mappers.getMapper(CustomerMapper.class);
 
-    /** Дата, относительно которой считается возраст — чтобы тесты были детерминированными. */
+    /**
+     * Дата, относительно которой считается возраст — чтобы тесты были детерминированными.
+     */
     LocalDate REFERENCE_DATE = LocalDate.of(2026, 7, 30);
 
     /**
@@ -60,7 +64,11 @@ public interface CustomerMapper {
     @Mapping(target = "id", source = "id")
     CustomerDto toDto(CustomerEntity entity);
 
-    /** Маппинг коллекций MapStruct генерирует сам по одиночному методу. */
+    /**
+     * Маппинг коллекций MapStruct генерирует сам по одиночному методу.
+     * @param entities Значение {@code entities}
+     * @return Маппинг коллекций MapStruct генерирует сам по одиночному методу
+     */
     List<CustomerDto> toDtos(List<CustomerEntity> entities);
 
     /**

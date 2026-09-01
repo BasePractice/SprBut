@@ -73,7 +73,9 @@ public class BuilderProcessor extends AbstractProcessor {
      */
     private Elements elements;
 
-    /** Счётчик раундов — чтобы было видно, что их несколько (модуль 08). */
+    /**
+     * Счётчик раундов — чтобы было видно, что их несколько (модуль 08).
+     */
     private int round;
 
     @Override
@@ -91,7 +93,6 @@ public class BuilderProcessor extends AbstractProcessor {
             // Последний, «пустой» раунд: генерировать здесь уже нельзя
             return false;
         }
-
         for (Element element : roundEnv.getElementsAnnotatedWith(GenerateBuilder.class)) {
             if (element.getKind() != ElementKind.CLASS) {
                 this.error(element, "@GenerateBuilder применим только к классам");
@@ -127,7 +128,6 @@ public class BuilderProcessor extends AbstractProcessor {
      */
     private List<Property> analyze(final TypeElement type) {
         boolean valid = true;
-
         if (type.getModifiers().contains(Modifier.ABSTRACT)) {
             this.error(type, "@GenerateBuilder не применим к абстрактному классу");
             valid = false;
@@ -137,7 +137,6 @@ public class BuilderProcessor extends AbstractProcessor {
                     + "билдер создаёт объект именно им");
             valid = false;
         }
-
         final List<Property> properties = new ArrayList<>();
         for (VariableElement field : ElementFilter.fieldsIn(type.getEnclosedElements())) {
             final Set<Modifier> modifiers = field.getModifiers();
@@ -153,7 +152,6 @@ public class BuilderProcessor extends AbstractProcessor {
             }
             properties.add(new Property(name, field.asType().toString(), setter));
         }
-
         if (properties.isEmpty() && valid) {
             this.warning(type, "У класса нет свойств — сгенерированный билдер будет пустым");
         }
@@ -192,7 +190,6 @@ public class BuilderProcessor extends AbstractProcessor {
         final String suffix = type.getAnnotation(GenerateBuilder.class).suffix();
         final String builderName = simpleName + suffix;
         final String qualifiedName = packageName.isEmpty() ? builderName : packageName + "." + builderName;
-
         try {
             final JavaFileObject file = this.filer.createSourceFile(qualifiedName, type);
             try (PrintWriter out = new PrintWriter(file.openWriter())) {
@@ -251,7 +248,9 @@ public class BuilderProcessor extends AbstractProcessor {
         return Character.toUpperCase(name.charAt(0)) + name.substring(1);
     }
 
-    /** Свойство, для которого генерируется метод билдера. */
+    /**
+     * Свойство, для которого генерируется метод билдера.
+     */
     record Property(String name, String type, String setter) {
     }
 }

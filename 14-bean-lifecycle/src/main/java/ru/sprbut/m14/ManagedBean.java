@@ -55,7 +55,10 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
      */
     private boolean contextInjected;
 
-    /** Шаг 1: конструктор. Шаг 2: зависимость приходит вместе с ним. */
+    /**
+     * Шаг 1: конструктор. Шаг 2: зависимость приходит вместе с ним.
+     * @param dependency Зависимость
+     */
     public ManagedBean(final Dependency dependency) {
         this.dependency = dependency;
         LifecycleLog.record("1-constructor:managedBean");
@@ -64,7 +67,9 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
         }
     }
 
-    /** Шаг 3: *Aware-интерфейсы. Контейнер отдаёт бину сведения о себе. */
+    /**
+     * Шаг 3: *Aware-интерфейсы. Контейнер отдаёт бину сведения о себе.
+     */
     @Override
     public void setBeanName(final @NonNull String name) {
         this.beanName = name;
@@ -83,25 +88,33 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
         LifecycleLog.record("3-aware-applicationContext:managedBean");
     }
 
-    /** Шаг 5а: {@code @PostConstruct} вызывается раньше {@code afterPropertiesSet}. */
+    /**
+     * Шаг 5а: {@code @PostConstruct} вызывается раньше {@code afterPropertiesSet}.
+     */
     @PostConstruct
     public void postConstruct() {
         LifecycleLog.record("5a-postConstruct:managedBean");
     }
 
-    /** Шаг 5б: контракт {@link InitializingBean}. */
+    /**
+     * Шаг 5б: контракт {@link InitializingBean}.
+     */
     @Override
     public void afterPropertiesSet() {
         LifecycleLog.record("5b-afterPropertiesSet:managedBean");
     }
 
-    /** Шаг 8а: {@code @PreDestroy} вызывается раньше {@code destroy}. */
+    /**
+     * Шаг 8а: {@code @PreDestroy} вызывается раньше {@code destroy}.
+     */
     @PreDestroy
     public void preDestroy() {
         LifecycleLog.record("8a-preDestroy:managedBean");
     }
 
-    /** Шаг 8б: контракт {@link DisposableBean}. */
+    /**
+     * Шаг 8б: контракт {@link DisposableBean}.
+     */
     @Override
     public void destroy() {
         LifecycleLog.record("8b-destroy:managedBean");
@@ -131,7 +144,9 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
         return "работаю с " + this.dependency.name();
     }
 
-    /** Простая зависимость, чтобы шаг 2 был не гипотетическим. */
+    /**
+     * Простая зависимость, чтобы шаг 2 был не гипотетическим.
+     */
     public static class Dependency {
 
         /**

@@ -45,12 +45,17 @@ public class AuditAspect {
      */
     private final List<String> log = new ArrayList<>();
 
-    /** Именованный pointcut: выражение можно переиспользовать. */
+    /**
+     * Именованный pointcut: выражение можно переиспользовать.
+     */
     @Pointcut("execution(* ru.sprbut.m15.aop.*Service.*(..))")
     public void anyServiceMethod() {
     }
 
-    /** Advice «до вызова»: результат метода изменить нельзя, можно только наблюдать. */
+    /**
+     * Advice «до вызова»: результат метода изменить нельзя, можно только наблюдать.
+     * @param joinPoint Значение {@code joinPoint}
+     */
     @Before("anyServiceMethod()")
     public void before(final org.aspectj.lang.JoinPoint joinPoint) {
         this.log.add("before:" + joinPoint.getSignature().getName());
@@ -76,7 +81,10 @@ public class AuditAspect {
         }
     }
 
-    /** Advice «после исключения»: исключение не гасится, только наблюдается. */
+    /**
+     * Advice «после исключения»: исключение не гасится, только наблюдается.
+     * @param error Ошибка
+     */
     @AfterThrowing(pointcut = "anyServiceMethod()", throwing = "error")
     public void afterThrowing(final Throwable error) {
         this.log.add("afterThrowing:" + error.getClass().getSimpleName());

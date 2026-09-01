@@ -162,7 +162,9 @@ public final class Components {
 
     // --- Патология 1: зависимость, которой нет в контейнере ------------------
 
-    /** Не помечен {@code @MiniComponent} — контейнер о нём не знает. */
+    /**
+     * Не помечен {@code @MiniComponent} — контейнер о нём не знает.
+     */
     public static class UnmanagedDependency {
 
         /**

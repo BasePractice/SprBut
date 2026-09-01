@@ -27,19 +27,25 @@ public final class Retentions {
     private Retentions() {
     }
 
-    /** Исчезает после компиляции. */
+    /**
+     * Исчезает после компиляции.
+     */
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
     public @interface SourceLevel {
     }
 
-    /** Есть в class-файле, но невидима для рефлексии. Это политика по умолчанию. */
+    /**
+     * Есть в class-файле, но невидима для рефлексии. Это политика по умолчанию.
+     */
     @Retention(RetentionPolicy.CLASS)
     @Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
     public @interface ClassLevel {
     }
 
-    /** Единственная политика, при которой аннотацию видно через рефлексию. */
+    /**
+     * Единственная политика, при которой аннотацию видно через рефлексию.
+     */
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
     public @interface RuntimeLevel {

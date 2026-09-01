@@ -47,7 +47,10 @@ public final class StartupTimeline {
         this.log = log;
     }
 
-    /** Канонический порядок точек расширения при запуске: что уже готово и что здесь принято делать. */
+    /**
+     * Канонический порядок точек расширения при запуске: что уже готово и что здесь принято делать.
+     * @return Канонический порядок точек расширения при запуске: что уже готово и что здесь принято делать
+     */
     public List<HookPoint> whereToHook() {
         return List.of(
                 new HookPoint(1, "ApplicationStartingEvent",
@@ -91,7 +94,10 @@ public final class StartupTimeline {
         return this.whereToHook().stream().filter(point -> point.name().startsWith(name)).findFirst();
     }
 
-    /** Фактическая последовательность, восстановленная из журнала. */
+    /**
+     * Фактическая последовательность, восстановленная из журнала.
+     * @return Фактическая последовательность, восстановленная из журнала
+     */
     public List<String> actualSequence() {
         return this.log.events().stream()
                 .map(this::phaseOf)
@@ -99,7 +105,10 @@ public final class StartupTimeline {
                 .toList();
     }
 
-    /** Номера шагов в порядке их фактического выполнения. */
+    /**
+     * Номера шагов в порядке их фактического выполнения.
+     * @return Номера шагов в порядке их фактического выполнения
+     */
     public List<Integer> actualOrder() {
         return this.log.events().stream()
                 .map(this::orderOf)
@@ -108,7 +117,10 @@ public final class StartupTimeline {
                 .toList();
     }
 
-    /** Не нарушен ли порядок: номера шагов должны только возрастать. */
+    /**
+     * Не нарушен ли порядок: номера шагов должны только возрастать.
+     * @return Не нарушен ли порядок: номера шагов должны только возрастать
+     */
     public boolean isOrdered() {
         final List<Integer> order = this.actualOrder();
         for (int i = 1; i < order.size(); i++) {
@@ -119,7 +131,10 @@ public final class StartupTimeline {
         return true;
     }
 
-    /** Наглядная диаграмма — то, что стоит распечатать при разборе старта. */
+    /**
+     * Наглядная диаграмма — то, что стоит распечатать при разборе старта.
+     * @return Наглядная диаграмма — то, что стоит распечатать при разборе старта
+     */
     public String render() {
         final StringBuilder sb = new StringBuilder("SpringApplication.run()\n");
         for (String event : this.log.events()) {
@@ -129,7 +144,10 @@ public final class StartupTimeline {
         return sb.toString();
     }
 
-    /** Сколько раз встретился каждый шаг. */
+    /**
+     * Сколько раз встретился каждый шаг.
+     * @return Сколько раз встретился каждый шаг
+     */
     public Map<String, Long> counts() {
         final Map<String, Long> counts = new LinkedHashMap<>();
         this.log.events().forEach(event -> counts.merge(this.phaseOf(event), 1L, Long::sum));

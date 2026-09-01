@@ -58,7 +58,9 @@ public final class ConditionalOnDemo {
         }
     }
 
-    /** Роль «автоконфигурации»: даёт бин по умолчанию, но уступает пользовательскому. */
+    /**
+     * Роль «автоконфигурации»: даёт бин по умолчанию, но уступает пользовательскому.
+     */
     @Configuration
     public static class DefaultsConfig {
 
@@ -89,7 +91,10 @@ public final class ConditionalOnDemo {
             return "метрики включены";
         }
 
-        /** {@code matchIfMissing} — включено, пока явно не выключили. */
+        /**
+         * {@code matchIfMissing} — включено, пока явно не выключили.
+         * @return {@code matchIfMissing} — включено, пока явно не выключили
+         */
         @Bean
         @ConditionalOnProperty(name = "sprbut.audit.enabled", havingValue = "true",
                 matchIfMissing = true)
@@ -98,7 +103,9 @@ public final class ConditionalOnDemo {
         }
     }
 
-    /** Роль пользователя: свой бин, который должен победить. */
+    /**
+     * Роль пользователя: свой бин, который должен победить.
+     */
     @Configuration
     public static class UserConfig {
 

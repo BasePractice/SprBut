@@ -56,7 +56,6 @@ public class RetryAspect {
         final MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         final Retryable annotation = signature.getMethod().getAnnotation(Retryable.class);
         final int attempts = annotation == null ? 1 : annotation.attempts();
-
         Throwable last = null;
         for (int attempt = 1; attempt <= attempts; attempt++) {
             try {

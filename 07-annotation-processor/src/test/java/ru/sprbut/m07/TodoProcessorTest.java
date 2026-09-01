@@ -42,13 +42,10 @@ final class TodoProcessorTest {
             "non blocking todo cannot leave the build green",
             this.compile("""
                 package demo;
-
                 import ru.sprbut.m07.api.Todo;
-
                 public class Service {
                     @Todo("вынести в конфигурацию")
                     private int timeout = 30;
-
                     public void run() {
                     }
                 }
@@ -64,9 +61,7 @@ final class TodoProcessorTest {
             "todo text cannot reach the warning",
             this.compile("""
                 package demo;
-
                 import ru.sprbut.m07.api.Todo;
-
                 public class Service {
                     @Todo("вынести в конфигурацию")
                     private int timeout = 30;
@@ -83,9 +78,7 @@ final class TodoProcessorTest {
             "analyser cannot stay free of generated sources",
             this.compile("""
                 package demo;
-
                 import ru.sprbut.m07.api.Todo;
-
                 public class Service {
                     @Todo("вынести в конфигурацию")
                     private int timeout = 30;
@@ -102,9 +95,7 @@ final class TodoProcessorTest {
             "blocking todo cannot fail the build",
             this.compile("""
                 package demo;
-
                 import ru.sprbut.m07.api.Todo;
-
                 @Todo(value = "нельзя выпускать в прод", blocking = true)
                 public class Service {
                 }
@@ -120,9 +111,7 @@ final class TodoProcessorTest {
             "blocking todo text cannot reach the error",
             this.compile("""
                 package demo;
-
                 import ru.sprbut.m07.api.Todo;
-
                 @Todo(value = "нельзя выпускать в прод", blocking = true)
                 public class Service {
                 }
@@ -138,9 +127,7 @@ final class TodoProcessorTest {
             "diagnostic cannot point at a concrete line",
             this.compile("""
                 package demo;
-
                 import ru.sprbut.m07.api.Todo;
-
                 public class Service {
                     @Todo("починить")
                     public void broken() {
@@ -160,7 +147,6 @@ final class TodoProcessorTest {
             "clean code cannot pass without warnings",
             this.compile("""
                 package demo;
-
                 public class Service {
                     public void run() {
                     }

@@ -38,7 +38,6 @@ final class CircularDependencyTest {
     void lazyBreaksTheCycle() {
         try (var context = new AnnotationConfigApplicationContext(CircularBeans.LazyConfig.class)) {
             final CircularBeans.Alpha alpha = context.getBean(CircularBeans.Alpha.class);
-
             MatcherAssert.assertThat(
                 "lazy proxy cannot break the cycle",
                 alpha.describe(),
@@ -53,7 +52,6 @@ final class CircularDependencyTest {
         try (var context = new AnnotationConfigApplicationContext(CircularBeans.SetterCycleConfig.class)) {
             final CircularBeans.Gamma gamma = context.getBean(CircularBeans.Gamma.class);
             final CircularBeans.Delta delta = context.getBean(CircularBeans.Delta.class);
-
             MatcherAssert.assertThat(
                 "setter cycle cannot be resolved by the container",
                 gamma.describe(),
@@ -92,7 +90,6 @@ final class CircularDependencyTest {
     void lazyInjectsAProxy() {
         try (var context = new AnnotationConfigApplicationContext(CircularBeans.LazyConfig.class)) {
             final CircularBeans.Alpha alpha = context.getBean(CircularBeans.Alpha.class);
-
             // сам alpha — обычный бин, но beta внутри него подменена прокси
             MatcherAssert.assertThat(
                 "lazy proxy cannot stand in for the real object",

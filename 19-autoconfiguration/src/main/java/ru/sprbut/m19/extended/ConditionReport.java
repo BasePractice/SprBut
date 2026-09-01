@@ -51,7 +51,10 @@ public final class ConditionReport {
         return ConditionEvaluationReport.get(this.context.getBeanFactory());
     }
 
-    /** Конфигурации, условия которых выполнились. */
+    /**
+     * Конфигурации, условия которых выполнились.
+     * @return Конфигурации, условия которых выполнились
+     */
     public List<String> included() {
         return this.evaluated().getConditionAndOutcomesBySource().entrySet().stream()
                 .filter(entry -> entry.getValue().isFullMatch())
@@ -60,7 +63,10 @@ public final class ConditionReport {
                 .toList();
     }
 
-    /** Конфигурации, условия которых не выполнились. */
+    /**
+     * Конфигурации, условия которых не выполнились.
+     * @return Конфигурации, условия которых не выполнились
+     */
     public List<String> excluded() {
         return this.evaluated().getConditionAndOutcomesBySource().entrySet().stream()
                 .filter(entry -> !entry.getValue().isFullMatch())
@@ -69,7 +75,11 @@ public final class ConditionReport {
                 .toList();
     }
 
-    /** Полный отчёт по всем конфигурациям, чьё имя содержит фрагмент. */
+    /**
+     * Полный отчёт по всем конфигурациям, чьё имя содержит фрагмент.
+     * @param nameFragment Имя
+     * @return Полный отчёт по всем конфигурациям, чьё имя содержит фрагмент
+     */
     public Map<String, ConditionEntry> matching(final String nameFragment) {
         final Map<String, ConditionEntry> result = new LinkedHashMap<>();
         this.evaluated().getConditionAndOutcomesBySource().forEach((source, outcomes) -> {
@@ -84,7 +94,11 @@ public final class ConditionReport {
         return result;
     }
 
-    /** Почему конфигурация не применилась — дословная формулировка условия. */
+    /**
+     * Почему конфигурация не применилась — дословная формулировка условия.
+     * @param nameFragment Имя
+     * @return Почему конфигурация не применилась — дословная формулировка условия
+     */
     public Optional<String> whyExcluded(final String nameFragment) {
         return this.matching(nameFragment).values().stream()
                 .filter(entry -> !entry.matched())
@@ -93,7 +107,11 @@ public final class ConditionReport {
                 .findFirst();
     }
 
-    /** Почему конфигурация применилась. */
+    /**
+     * Почему конфигурация применилась.
+     * @param nameFragment Имя
+     * @return Почему конфигурация применилась
+     */
     public Optional<String> whyIncluded(final String nameFragment) {
         return this.matching(nameFragment).values().stream()
                 .filter(ConditionEntry::matched)
@@ -101,12 +119,20 @@ public final class ConditionReport {
                 .findFirst();
     }
 
-    /** Применилась ли указанная автоконфигурация. */
+    /**
+     * Применилась ли указанная автоконфигурация.
+     * @param nameFragment Имя
+     * @return Применилась ли указанная автоконфигурация
+     */
     public boolean applied(final String nameFragment) {
         return this.matching(nameFragment).values().stream().anyMatch(ConditionEntry::matched);
     }
 
-    /** Текстовый отчёт — то же, что печатает {@code --debug}, только по одной теме. */
+    /**
+     * Текстовый отчёт — то же, что печатает {@code --debug}, только по одной теме.
+     * @param nameFragment Имя
+     * @return Текстовый отчёт — то же, что печатает {@code --debug}, только по одной теме
+     */
     public String render(final String nameFragment) {
         final StringBuilder sb = new StringBuilder("Отчёт об условиях для '" + nameFragment + "':\n");
         final Map<String, ConditionEntry> entries = this.matching(nameFragment);

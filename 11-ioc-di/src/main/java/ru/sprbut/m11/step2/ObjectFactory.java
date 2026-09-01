@@ -47,7 +47,10 @@ public class ObjectFactory {
         this.channel = channel;
     }
 
-    /** Синглтон: создаём один раз, дальше отдаём тот же экземпляр. */
+    /**
+     * Синглтон: создаём один раз, дальше отдаём тот же экземпляр.
+     * @return Синглтон: создаём один раз, дальше отдаём тот же экземпляр
+     */
     public NotificationSender notificationSender() {
         return (NotificationSender) this.singleton("sender",
                 () -> "sms".equals(this.channel) ? new SmsSender() : new EmailSender());
@@ -62,7 +65,10 @@ public class ObjectFactory {
                 () -> new PriceCalculator(new BigDecimal("0.20")));
     }
 
-    /** Сборка графа: сначала зависимости, потом сам объект. */
+    /**
+     * Сборка графа: сначала зависимости, потом сам объект.
+     * @return Сборка графа: сначала зависимости, потом сам объект
+     */
     public ManualOrderService orderService() {
         return (ManualOrderService) this.singleton("orderService",
                 () -> new ManualOrderService(this.notificationSender(), this.priceCalculator()));

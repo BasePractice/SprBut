@@ -8,7 +8,9 @@ package ru.sprbut.m09.model;
 
 import java.util.Objects;
 
-/** Целевой объект маппинга. Поля {@code internalNote} здесь намеренно нет. */
+/**
+ * Целевой объект маппинга. Поля {@code internalNote} здесь намеренно нет.
+ */
 public class UserDto {
 
     /**

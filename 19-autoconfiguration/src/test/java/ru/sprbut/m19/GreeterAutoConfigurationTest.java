@@ -157,7 +157,6 @@ class GreeterAutoConfigurationTest {
         void importsFileListsTheAutoConfiguration() throws Exception {
             final var url = getClass().getClassLoader().getResource(
                     "META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports");
-
             Assertions.assertThat(url).isNotNull();
             Assertions.assertThat(new String(url.openStream().readAllBytes(),
                     java.nio.charset.StandardCharsets.UTF_8))
@@ -169,7 +168,6 @@ class GreeterAutoConfigurationTest {
         void autoConfigurationIsALiteConfiguration() {
             final var annotation = GreeterAutoConfiguration.class
                     .getAnnotation(org.springframework.boot.autoconfigure.AutoConfiguration.class);
-
             Assertions.assertThat(annotation).isNotNull();
             Assertions.assertThat(GreeterAutoConfiguration.class.isAnnotationPresent(
                     org.springframework.boot.autoconfigure.condition.ConditionalOnClass.class))

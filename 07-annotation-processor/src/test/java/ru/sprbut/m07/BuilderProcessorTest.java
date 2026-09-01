@@ -68,7 +68,6 @@ final class BuilderProcessorTest {
         @DisplayName("Для помеченного класса рядом появляется CustomerBuilder")
         void generatesBuilder() {
             final CompilationHarness.Result result = compile(VALID_BEAN);
-
             MatcherAssert.assertThat(
                 "annotated class cannot get its builder generated",
                 result.generatedSources(),
@@ -80,7 +79,6 @@ final class BuilderProcessorTest {
         @DisplayName("У билдера есть fluent-метод на каждое нестатическое поле")
         void generatesFluentSetters() {
             final String code = compile(VALID_BEAN).source("demo.CustomerBuilder");
-
             MatcherAssert.assertThat(
                 "builder cannot get a fluent method per field",
                 code,
@@ -102,7 +100,6 @@ final class BuilderProcessorTest {
         @DisplayName("build() создаёт объект конструктором без параметров и зовёт сеттеры")
         void generatesBuildMethod() {
             final String code = compile(VALID_BEAN).source("demo.CustomerBuilder");
-
             MatcherAssert.assertThat(
                 "build method cannot create the object with a no-arg constructor",
                 code,
@@ -124,13 +121,11 @@ final class BuilderProcessorTest {
         @DisplayName("Сгенерированный код компилируется и реально работает")
         void generatedCodeActuallyRuns() throws Exception {
             final CompilationHarness.Result result = compile(VALID_BEAN);
-
             final Class<?> builderClass = result.load("demo.CustomerBuilder");
             Object builder = builderClass.getMethod("create").invoke(null);
             builder = builderClass.getMethod("name", String.class).invoke(builder, "Иванов");
             builder = builderClass.getMethod("age", int.class).invoke(builder, 42);
             final Object customer = builderClass.getMethod("build").invoke(builder);
-
             MatcherAssert.assertThat(
                 "generated code cannot actually build the object",
                 customer.getClass().getMethod("getName").invoke(customer),
@@ -144,9 +139,7 @@ final class BuilderProcessorTest {
             final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.Order", """
                             package demo;
-
                             import ru.sprbut.m07.api.GenerateBuilder;
-
                             @GenerateBuilder(suffix = "Factory")
                             public class Order {
                                 private String id;
@@ -154,7 +147,6 @@ final class BuilderProcessorTest {
                                 public void setId(String id) { this.id = id; }
                             }
                             """));
-
             MatcherAssert.assertThat(
                 "suffix element cannot rename the generated class",
                 result.generatedSources(),
@@ -174,7 +166,6 @@ final class BuilderProcessorTest {
                                 public void setName(String name) { this.name = name; }
                             }
                             """));
-
             MatcherAssert.assertThat(
                 "unannotated class cannot be left alone",
                 result.generatedSources(),
@@ -197,9 +188,7 @@ final class BuilderProcessorTest {
             final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.NoDefaultCtor", """
                             package demo;
-
                             import ru.sprbut.m07.api.GenerateBuilder;
-
                             @GenerateBuilder
                             public class NoDefaultCtor {
                                 private String name;
@@ -208,7 +197,6 @@ final class BuilderProcessorTest {
                                 public void setName(String name) { this.name = name; }
                             }
                             """));
-
             MatcherAssert.assertThat(
                 "missing no-arg constructor cannot fail the build with an explanation",
                 result.errors(),
@@ -222,16 +210,13 @@ final class BuilderProcessorTest {
             final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.NoSetter", """
                             package demo;
-
                             import ru.sprbut.m07.api.GenerateBuilder;
-
                             @GenerateBuilder
                             public class NoSetter {
                                 private String name;
                                 public String getName() { return name; }
                             }
                             """));
-
             MatcherAssert.assertThat(
                 "missing setter cannot be named in the error",
                 result.errors(),
@@ -245,14 +230,11 @@ final class BuilderProcessorTest {
             final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.Abstract", """
                             package demo;
-
                             import ru.sprbut.m07.api.GenerateBuilder;
-
                             @GenerateBuilder
                             public abstract class Abstract {
                             }
                             """));
-
             MatcherAssert.assertThat(
                 "abstract class cannot be rejected with an explanation",
                 result.errors(),
@@ -266,14 +248,11 @@ final class BuilderProcessorTest {
             final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.Empty", """
                             package demo;
-
                             import ru.sprbut.m07.api.GenerateBuilder;
-
                             @GenerateBuilder
                             public class Empty {
                             }
                             """));
-
             MatcherAssert.assertThat(
                 "empty class cannot yield a warning instead of an error",
                 result.warnings(),
@@ -296,9 +275,7 @@ final class BuilderProcessorTest {
             final CompilationHarness.Result result = compile(VALID_BEAN, new CompilationHarness.Source(
                     "demo.Order", """
                             package demo;
-
                             import ru.sprbut.m07.api.GenerateBuilder;
-
                             @GenerateBuilder
                             public class Order {
                                 private String id;
@@ -306,7 +283,6 @@ final class BuilderProcessorTest {
                                 public void setId(String id) { this.id = id; }
                             }
                             """));
-
             MatcherAssert.assertThat(
                 "every annotated class cannot be processed in one build",
                 result.generatedSources(),
@@ -318,9 +294,7 @@ final class BuilderProcessorTest {
         @DisplayName("Аннотация с retention SOURCE в байткод не попадает")
         void sourceRetentionLeavesNoTrace() {
             final CompilationHarness.Result result = compile(VALID_BEAN);
-
             final Class<?> customer = result.load("demo.Customer");
-
             MatcherAssert.assertThat(
                 "source retained annotation cannot vanish from the bytecode",
                 customer.getAnnotations(),

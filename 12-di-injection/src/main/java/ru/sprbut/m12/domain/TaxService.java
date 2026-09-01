@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-/** Простая зависимость, которую будут внедрять тремя способами. */
+/**
+ * Простая зависимость, которую будут внедрять тремя способами.
+ */
 @Component
 public class TaxService {
 

@@ -34,7 +34,9 @@ public final class ComponentVsBean {
     private ComponentVsBean() {
     }
 
-    /** Свой класс — можно пометить аннотацией. */
+    /**
+     * Свой класс — можно пометить аннотацией.
+     */
     @Component
     public static class OwnService {
 
@@ -103,13 +105,19 @@ public final class ComponentVsBean {
             // нечего инициализировать
         }
 
-        /** Чужой класс регистрируется @Bean-методом — другого способа нет. */
+        /**
+         * Чужой класс регистрируется @Bean-методом — другого способа нет.
+         * @return Чужой класс регистрируется @Bean-методом — другого способа нет
+         */
         @Bean
         public ThirdPartyClient thirdPartyClient() {
             return new ThirdPartyClient("https://api.example.com", 3_000);
         }
 
-        /** Ещё более чужой: класс из JDK, который надо настроить. */
+        /**
+         * Ещё более чужой: класс из JDK, который надо настроить.
+         * @return Ещё более чужой: класс из JDK, который надо настроить
+         */
         @Bean
         public TimeZone applicationTimeZone() {
             return TimeZone.getTimeZone(ZoneId.of("Europe/Moscow"));

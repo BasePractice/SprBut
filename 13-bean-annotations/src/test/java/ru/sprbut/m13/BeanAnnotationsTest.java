@@ -60,7 +60,6 @@ class BeanAnnotationsTest {
             try (var context = new AnnotationConfigApplicationContext(ScopeConfig.class)) {
                 final ScopeConfig.PrototypeBean first = context.getBean(ScopeConfig.PrototypeBean.class);
                 final ScopeConfig.PrototypeBean second = context.getBean(ScopeConfig.PrototypeBean.class);
-
                 MatcherAssert.assertThat(
                     "cannot verify that prototype is created every time",
                     first,
@@ -79,10 +78,8 @@ class BeanAnnotationsTest {
         void prototypeInsideSingletonDegradesWithoutProxy() {
             try (var context = new AnnotationConfigApplicationContext(ScopeConfig.class)) {
                 final var holder = context.getBean(ScopeConfig.HolderWithoutProxy.class);
-
                 final int first = holder.prototypeSerial();
                 final int second = holder.prototypeSerial();
-
                 MatcherAssert.assertThat(
                     "prototype injected once cannot keep the same serial",
                     first,
@@ -96,7 +93,6 @@ class BeanAnnotationsTest {
         void proxyModeRestoresPrototypeSemantics() {
             try (var context = new AnnotationConfigApplicationContext(ScopeConfig.class)) {
                 final var holder = context.getBean(ScopeConfig.HolderWithProxy.class);
-
                 MatcherAssert.assertThat(
                     "scoped proxy cannot fetch a fresh prototype per call",
                     holder.prototypeSerial(),
@@ -155,7 +151,6 @@ class BeanAnnotationsTest {
         void collectionsInjectEverything() {
             try (var context = new AnnotationConfigApplicationContext(QualifierConfig.class)) {
                 final var registry = context.getBean(QualifierConfig.GatewayRegistry.class);
-
                 MatcherAssert.assertThat(
                     "cannot verify that collections inject everything",
                     registry.all(),
@@ -202,7 +197,6 @@ class BeanAnnotationsTest {
                 context.getEnvironment().getSystemProperties().put("sprbut.feature.enabled", "true");
                 context.register(ConditionalConfig.class);
                 context.refresh();
-
                 MatcherAssert.assertThat(
                     "cannot verify that conditional bean appears when property set",
                     context.containsBean("featureBean"),
@@ -220,7 +214,6 @@ class BeanAnnotationsTest {
                 context.getEnvironment().setActiveProfiles("dev");
                 context.register(ConditionalConfig.class);
                 context.refresh();
-
                 MatcherAssert.assertThat(
                     "cannot verify that profile selects beans",
                     context.containsBean("devOnlyBean"),
@@ -260,9 +253,7 @@ class BeanAnnotationsTest {
                     ConditionalConfig.CREATED,
                     Matchers.not(Matchers.hasItem("lazyBean"))
                 );
-
                 context.getBean("lazyBean");
-
                 MatcherAssert.assertThat(
                     "cannot verify that lazy bean is created on demand",
                     ConditionalConfig.CREATED,

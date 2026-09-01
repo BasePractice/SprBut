@@ -126,7 +126,9 @@ public final class Stereotypes {
         }
     }
 
-    /** Класс без стереотипа — сканер его не найдёт. */
+    /**
+     * Класс без стереотипа — сканер его не найдёт.
+     */
     public static class NotAComponent {
 
         /**

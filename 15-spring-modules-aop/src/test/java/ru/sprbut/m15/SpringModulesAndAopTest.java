@@ -136,7 +136,6 @@ class SpringModulesAndAopTest {
         @DisplayName("Класс не меняется — меняется то, что лежит в контейнере")
         void targetClassIsUntouched() {
             final PricingService bean = this.context.getBean(PricingService.class);
-
             MatcherAssert.assertThat(
                 "cannot verify that target class is untouched",
                 AopUtils.isAopProxy(bean),
@@ -158,7 +157,6 @@ class SpringModulesAndAopTest {
         @DisplayName("Слайд 123: нет интерфейса — CGLIB-подкласс")
         void classWithoutInterfaceGetsCglibProxy() {
             final PricingService bean = this.context.getBean(PricingService.class);
-
             MatcherAssert.assertThat(
                 "cannot verify that class without interface gets cglib proxy",
                 AopUtils.isCglibProxy(bean),
@@ -175,7 +173,6 @@ class SpringModulesAndAopTest {
         @DisplayName("Слайд 122: есть интерфейс — JDK dynamic proxy")
         void classWithInterfaceGetsJdkProxy() {
             final DiscountService bean = this.context.getBean(DiscountService.class);
-
             MatcherAssert.assertThat(
                 "cannot verify that class with interface gets jdk proxy",
                 AopUtils.isJdkDynamicProxy(bean),
@@ -192,7 +189,6 @@ class SpringModulesAndAopTest {
         @DisplayName("JDK-прокси нельзя привести к классу реализации — частая ошибка")
         void jdkProxyIsNotTheImplementationClass() {
             Assertions.assertThrows(org.springframework.beans.factory.NoSuchBeanDefinitionException.class, () -> this.context.getBean(StandardDiscountService.class));
-
             MatcherAssert.assertThat(
                 "JDK proxy cannot avoid being the implementation class",
                 this.context.getBean(DiscountService.class) instanceof StandardDiscountService,
@@ -204,7 +200,6 @@ class SpringModulesAndAopTest {
         @DisplayName("@Before и @Around срабатывают на внешнем вызове")
         void adviceRunsOnExternalCall() {
             this.context.getBean(PricingService.class).calculate(new BigDecimal("100"));
-
             // Порядок @Before и @Around внутри одного аспекта не определён,
             // а вот @Around обязан обрамлять вызов с двух сторон
             MatcherAssert.assertThat(
@@ -223,9 +218,7 @@ class SpringModulesAndAopTest {
         @DisplayName("@AfterThrowing видит исключение, но не гасит его")
         void afterThrowingObservesButDoesNotSwallow() {
             final PricingService service = this.context.getBean(PricingService.class);
-
             Assertions.assertThrows(IllegalArgumentException.class, () -> service.failing(BigDecimal.TEN));
-
             MatcherAssert.assertThat(
                 "cannot verify that after throwing observes but does not swallow",
                 this.aspect.log(),
@@ -238,9 +231,7 @@ class SpringModulesAndAopTest {
         void selfInvocationIsNotIntercepted() {
             final PricingService service = this.context.getBean(PricingService.class);
             service.reset();
-
             service.calculateTwice(new BigDecimal("100"));
-
             // тело calculate выполнилось дважды...
             MatcherAssert.assertThat(
                 "cannot verify that self invocation is not intercepted",
@@ -259,7 +250,6 @@ class SpringModulesAndAopTest {
         @DisplayName("Тот же метод, вызванный снаружи, перехватывается нормально")
         void externalCallOfTheSameMethodIsIntercepted() {
             this.context.getBean(PricingService.class).calculate(new BigDecimal("100"));
-
             MatcherAssert.assertThat(
                 "cannot verify that external call of the same method is intercepted",
                 this.aspect.log(),

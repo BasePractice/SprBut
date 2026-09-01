@@ -53,13 +53,21 @@ public class ServiceLocatorDemo implements ApplicationContextAware {
         this.context = context;
     }
 
-    /** Зависимость достаётся вручную, в момент вызова. */
+    /**
+     * Зависимость достаётся вручную, в момент вызова.
+     * @param net Сумма без налога
+     * @return Зависимость достаётся вручную, в момент вызова
+     */
     public BigDecimal total(final BigDecimal net) {
         final TaxService taxService = this.context.getBean(TaxService.class);
         return taxService.applyVat(net);
     }
 
-    /** Ошибка вылезет только здесь, а не при старте контекста. */
+    /**
+     * Ошибка вылезет только здесь, а не при старте контекста.
+     * @param beanName Объект
+     * @return Ошибка вылезет только здесь, а не при старте контекста
+     */
     public Object lookup(final String beanName) {
         return this.context.getBean(beanName);
     }

@@ -97,7 +97,9 @@ public class CatalogService {
         return product.getPrice() + " " + this.currency;
     }
 
-    /** Исключение доменного слоя — контроллер превратит его в 404. */
+    /**
+     * Исключение доменного слоя — контроллер превратит его в 404.
+     */
     public static class ProductNotFoundException extends RuntimeException {
         /**
          * Основной конструктор.

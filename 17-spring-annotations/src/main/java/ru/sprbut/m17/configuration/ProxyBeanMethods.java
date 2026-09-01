@@ -31,7 +31,9 @@ public final class ProxyBeanMethods {
     private ProxyBeanMethods() {
     }
 
-    /** Считает, сколько объектов реально создано. */
+    /**
+     * Считает, сколько объектов реально создано.
+     */
     public static final AtomicInteger INSTANCES = new AtomicInteger();
 
     /**
@@ -74,7 +76,9 @@ public final class ProxyBeanMethods {
     public record Consumer(Shared shared) {
     }
 
-    /** Полноценная конфигурация: вызовы {@code @Bean}-методов перехватываются. */
+    /**
+     * Полноценная конфигурация: вызовы {@code @Bean}-методов перехватываются.
+     */
     @Configuration
     public static class ProxiedConfig {
 
@@ -114,7 +118,9 @@ public final class ProxyBeanMethods {
         }
     }
 
-    /** «Lite»-режим: прокси нет, вызовы методов остаются обычными вызовами. */
+    /**
+     * «Lite»-режим: прокси нет, вызовы методов остаются обычными вызовами.
+     */
     @Configuration(proxyBeanMethods = false)
     public static class LiteConfig {
 
@@ -154,7 +160,9 @@ public final class ProxyBeanMethods {
         }
     }
 
-    /** Правильный вариант для lite-режима: зависимость приходит параметром. */
+    /**
+     * Правильный вариант для lite-режима: зависимость приходит параметром.
+     */
     @Configuration(proxyBeanMethods = false)
     public static class LiteConfigDone {
 

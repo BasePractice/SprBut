@@ -81,22 +81,38 @@ public class PaymentService {
         return "оплачен " + orderId;
     }
 
-    /** Вызов через {@code this} — прокси в стороне, аспект не срабатывает. */
+    /**
+     * Вызов через {@code this} — прокси в стороне, аспект не срабатывает.
+     * @param orderId Порядок
+     * @return Вызов через {@code this} — прокси в стороне, аспект не срабатывает
+     */
     public String chargeViaThis(final String orderId) {
         return this.charge(orderId);
     }
 
-    /** Обход 1: взять себя из контейнера — то есть свой же прокси. */
+    /**
+     * Обход 1: взять себя из контейнера — то есть свой же прокси.
+     * @param orderId Порядок
+     * @return Обход 1: взять себя из контейнера — то есть свой же прокси
+     */
     public String chargeViaSelf(final String orderId) {
         return this.self.getObject().charge(orderId);
     }
 
-    /** Обход 2: {@code AopContext} — требует {@code exposeProxy = true}. */
+    /**
+     * Обход 2: {@code AopContext} — требует {@code exposeProxy = true}.
+     * @param orderId Порядок
+     * @return Обход 2: {@code AopContext} — требует {@code exposeProxy = true}
+     */
     public String chargeViaAopContext(final String orderId) {
         return ((PaymentService) AopContext.currentProxy()).charge(orderId);
     }
 
-    /** Правильное решение: вызов уходит в другой бин, то есть через его прокси. */
+    /**
+     * Правильное решение: вызов уходит в другой бин, то есть через его прокси.
+     * @param orderId Порядок
+     * @return Правильное решение: вызов уходит в другой бин, то есть через его прокси
+     */
     public String chargeViaSeparateBean(final String orderId) {
         return this.executor.execute(orderId);
     }

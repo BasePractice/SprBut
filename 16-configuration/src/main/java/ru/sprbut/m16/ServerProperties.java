@@ -36,14 +36,18 @@ public record ServerProperties(
 
         boolean sslEnabled,
 
-        /** Значения вида {@code 30s}, {@code 5m}, {@code PT1H} парсятся автоматически. */
+        /**
+         * Значения вида {@code 30s}, {@code 5m}, {@code PT1H} парсятся автоматически.
+         */
         Duration timeout,
 
         List<String> allowedOrigins,
 
         Map<String, String> headers,
 
-        /** Вложенная группа настроек — обычный record внутри. */
+        /**
+         * Вложенная группа настроек — обычный record внутри.
+         */
         Retry retry) {
 
     /**

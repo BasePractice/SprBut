@@ -31,7 +31,9 @@ import java.util.Map;
  */
 public class ReflectiveMapper implements UserMapper {
 
-    /** Пары «геттер источника → сеттер цели», найденные один раз при создании. */
+    /**
+     * Пары «геттер источника → сеттер цели», найденные один раз при создании.
+     */
     private final Map<Method, Method> plan;
 
     /**
@@ -59,7 +61,10 @@ public class ReflectiveMapper implements UserMapper {
         return "reflection: правила выводятся в runtime из метаданных";
     }
 
-    /** Сколько свойств маппер нашёл сам, без единой строчки правил. */
+    /**
+     * Сколько свойств маппер нашёл сам, без единой строчки правил.
+     * @return Сколько свойств маппер нашёл сам, без единой строчки правил
+     */
     public int discoveredProperties() {
         return this.plan.size();
     }

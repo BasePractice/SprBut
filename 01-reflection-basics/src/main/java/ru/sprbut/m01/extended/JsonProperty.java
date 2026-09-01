@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m01.extended;
 
 import java.lang.annotation.ElementType;
@@ -18,6 +19,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface JsonProperty {
 
-    /** Имя ключа в JSON. Пустая строка — использовать имя поля как есть. */
+    /**
+     * Имя ключа в JSON. Пустая строка — использовать имя поля как есть.
+     * @return Имя ключа в JSON. Пустая строка — использовать имя поля как есть
+     */
     String value() default "";
 }

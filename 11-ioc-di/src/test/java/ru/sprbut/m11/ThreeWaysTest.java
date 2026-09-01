@@ -40,7 +40,6 @@ final class ThreeWaysTest {
         @DisplayName("Работает, но реализацию подменить нечем")
         void worksButIsRigid() {
             final HardcodedOrderService service = new HardcodedOrderService();
-
             MatcherAssert.assertThat(
                 "hardcoded service cannot place the order",
                 service.placeOrder("ivanov@mail.ru", new BigDecimal("100")),
@@ -53,7 +52,6 @@ final class ThreeWaysTest {
         void testabilityRequiresProductionCodeChanges() {
             final HardcodedOrderService service = new HardcodedOrderService();
             service.placeOrder("ivanov@mail.ru", new BigDecimal("100"));
-
             MatcherAssert.assertThat(
                 "testability cannot demand a getter added for the test",
                 service.senderForTests().sent(),
@@ -96,9 +94,7 @@ final class ThreeWaysTest {
             final SmsSender sms = new SmsSender();
             final ManualOrderService service = new ManualOrderService(
                     sms, new PriceCalculator(new BigDecimal("0.20")));
-
             service.placeOrder("+79001234567", new BigDecimal("100"));
-
             MatcherAssert.assertThat(
                 "injected implementation cannot be swapped in one line",
                 service.usedChannel(),
@@ -120,10 +116,8 @@ final class ThreeWaysTest {
         @DisplayName("Фабрика собирает граф и хранит синглтоны")
         void factoryAssemblesAndCaches() {
             final ObjectFactory factory = new ObjectFactory("email");
-
             final ManualOrderService first = factory.orderService();
             final ManualOrderService second = factory.orderService();
-
             MatcherAssert.assertThat(
                 "factory cannot cache the assembled singleton",
                 first,
@@ -165,7 +159,6 @@ final class ThreeWaysTest {
         void containerResolvesArgumentsByType() {
             try (var context = new AnnotationConfigApplicationContext(SpringWiringConfig.class)) {
                 final ManualOrderService service = context.getBean(ManualOrderService.class);
-
                 MatcherAssert.assertThat(
                     "container cannot resolve the arguments by type",
                     service.placeOrder("ivanov@mail.ru", new BigDecimal("100")),
@@ -192,7 +185,6 @@ final class ThreeWaysTest {
             try (var context = new AnnotationConfigApplicationContext(SpringWiringConfig.class)) {
                 // orderService не мог быть создан раньше своих зависимостей
                 final ManualOrderService service = context.getBean(ManualOrderService.class);
-
                 MatcherAssert.assertThat(
                     "creation order cannot be derived from the graph",
                     service,

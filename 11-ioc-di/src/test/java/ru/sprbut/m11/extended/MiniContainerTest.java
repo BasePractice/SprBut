@@ -39,7 +39,6 @@ final class MiniContainerTest {
         @DisplayName("Зависимости подбираются по типу и внедряются через конструктор")
         void injectsByType() {
             final Components.OrderFacade facade = healthyContainer().getBean(Components.OrderFacade.class);
-
             MatcherAssert.assertThat(
                 "container cannot wire the graph by type",
                 facade.checkout("книга"),
@@ -51,7 +50,6 @@ final class MiniContainerTest {
         @DisplayName("Бины — синглтоны: один и тот же экземпляр везде")
         void beansAreSingletons() {
             final MiniContainer container = healthyContainer();
-
             MatcherAssert.assertThat(
                 "container cannot keep beans singleton",
                 container.getBean(Components.Repository.class),
@@ -64,7 +62,6 @@ final class MiniContainerTest {
         void creationOrderFollowsTheGraph() {
             final MiniContainer container = healthyContainer();
             container.getBean(Components.OrderFacade.class);
-
             MatcherAssert.assertThat(
                 "creation order cannot follow the dependency graph",
                 container.creationOrder(),
@@ -76,7 +73,6 @@ final class MiniContainerTest {
         @DisplayName("Пока бин не запрошен, он не создан — ленивость по умолчанию")
         void beansAreCreatedOnDemand() {
             final MiniContainer container = healthyContainer();
-
             MatcherAssert.assertThat(
                 "unrequested bean cannot stay uncreated",
                 container.isCreated("repository"),
@@ -100,7 +96,6 @@ final class MiniContainerTest {
         @DisplayName("refresh() создаёт все бины сразу — как Spring поступает с синглтонами")
         void refreshCreatesEverything() {
             final MiniContainer container = healthyContainer().refresh();
-
             MatcherAssert.assertThat(
                 "refresh cannot create every singleton at once",
                 container.beanNames(),
@@ -112,7 +107,6 @@ final class MiniContainerTest {
         @DisplayName("Имя бина берётся из аннотации, иначе — из имени класса")
         void resolvesBeanNames() {
             final MiniContainer container = healthyContainer();
-
             MatcherAssert.assertThat(
                 "annotation cannot define the bean name",
                 container.beanNames(),
@@ -134,7 +128,6 @@ final class MiniContainerTest {
         @DisplayName("Поиск по интерфейсу находит реализацию")
         void findsByInterface() {
             final MiniContainer container = new MiniContainer(Components.CardPayment.class);
-
             MatcherAssert.assertThat(
                 "interface lookup cannot find the implementation",
                 container.getBean(Components.Payment.class).kind(),
@@ -155,7 +148,6 @@ final class MiniContainerTest {
         @DisplayName("Зависимости нет в контейнере — аналог NoSuchBeanDefinitionException")
         void missingDependency() {
             final MiniContainer container = new MiniContainer(Components.NeedsUnmanaged.class);
-
             MatcherAssert.assertThat(
                 "missing dependency cannot be named in the failure",
                 Assertions.assertThrows(
@@ -171,7 +163,6 @@ final class MiniContainerTest {
         void ambiguousDependency() {
             final MiniContainer container = new MiniContainer(
                     Components.CardPayment.class, Components.CashPayment.class);
-
             MatcherAssert.assertThat(
                 "ambiguous candidates cannot be listed in the failure",
                 Assertions.assertThrows(
@@ -187,7 +178,6 @@ final class MiniContainerTest {
         void circularDependency() {
             final MiniContainer container = new MiniContainer(
                     Components.AlphaService.class, Components.BetaService.class);
-
             MatcherAssert.assertThat(
                 "circular dependency cannot name both beans",
                 Assertions.assertThrows(
@@ -204,7 +194,6 @@ final class MiniContainerTest {
             final MiniContainer container = new MiniContainer(
                     Components.TwoConstructors.class, Components.Repository.class,
                     Components.Clock.class);
-
             MatcherAssert.assertThat(
                 "ambiguous constructor cannot make the container refuse to guess",
                 Assertions.assertThrows(

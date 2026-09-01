@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m07.api;
 
 import java.lang.annotation.ElementType;
@@ -23,6 +24,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface GenerateBuilder {
 
-    /** Суффикс имени генерируемого класса. */
+    /**
+     * Суффикс имени генерируемого класса.
+     * @return Суффикс имени генерируемого класса
+     */
     String suffix() default "Builder";
 }

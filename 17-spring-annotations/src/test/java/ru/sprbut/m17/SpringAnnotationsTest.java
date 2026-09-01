@@ -64,7 +64,6 @@ class SpringAnnotationsTest {
                     context.getBean(Stereotypes.WebController.class).role(),
                     Matchers.equalTo("controller")
                 );
-
                 Assertions.assertThrows(org.springframework.beans.factory.NoSuchBeanDefinitionException.class, () -> context.getBean(Stereotypes.NotAComponent.class));
             }
         }
@@ -108,10 +107,8 @@ class SpringAnnotationsTest {
         void proxiedConfigurationReusesTheBean() {
             try (var context = new AnnotationConfigApplicationContext(
                     ProxyBeanMethods.ProxiedConfig.class)) {
-
                 final var first = context.getBean("first", ProxyBeanMethods.Consumer.class);
                 final var second = context.getBean("second", ProxyBeanMethods.Consumer.class);
-
                 MatcherAssert.assertThat(
                     "cannot verify that proxied configuration reuses the bean",
                     first.shared(),
@@ -130,9 +127,7 @@ class SpringAnnotationsTest {
         void configurationClassIsProxied() {
             try (var context = new AnnotationConfigApplicationContext(
                     ProxyBeanMethods.ProxiedConfig.class)) {
-
                 final Object config = context.getBean(ProxyBeanMethods.ProxiedConfig.class);
-
                 MatcherAssert.assertThat(
                     "configuration class cannot be wrapped in a CGLIB proxy",
                     config.getClass().getName(),
@@ -146,10 +141,8 @@ class SpringAnnotationsTest {
         void liteConfigurationCreatesDuplicates() {
             try (var context = new AnnotationConfigApplicationContext(
                     ProxyBeanMethods.LiteConfig.class)) {
-
                 final var first = context.getBean("first", ProxyBeanMethods.Consumer.class);
                 final var second = context.getBean("second", ProxyBeanMethods.Consumer.class);
-
                 MatcherAssert.assertThat(
                     "cannot verify that lite configuration creates duplicates",
                     first.shared(),
@@ -168,10 +161,8 @@ class SpringAnnotationsTest {
         void liteConfigurationDoneRight() {
             try (var context = new AnnotationConfigApplicationContext(
                     ProxyBeanMethods.LiteConfigDone.class)) {
-
                 final var first = context.getBean("first", ProxyBeanMethods.Consumer.class);
                 final var second = context.getBean("second", ProxyBeanMethods.Consumer.class);
-
                 MatcherAssert.assertThat(
                     "cannot verify that lite configuration done right",
                     first.shared(),
@@ -204,7 +195,6 @@ class SpringAnnotationsTest {
         void transactionIsOpenedAndCommitted() {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
                 context.getBean(TransactionalDemo.OrderService.class).save("ORD-1");
-
                 MatcherAssert.assertThat(
                     "cannot verify that transaction is opened and committed",
                     TransactionalDemo.LOG,
@@ -219,7 +209,6 @@ class SpringAnnotationsTest {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
                 context.getBean(TransactionalDemo.OrderService.class)
                         .saveWithoutTransaction("ORD-2");
-
                 MatcherAssert.assertThat(
                     "cannot verify that no annotation no transaction",
                     TransactionalDemo.LOG,
@@ -233,9 +222,7 @@ class SpringAnnotationsTest {
         void uncheckedExceptionRollsBack() {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
                 final var service = context.getBean(TransactionalDemo.OrderService.class);
-
                 Assertions.assertThrows(IllegalStateException.class, service::failUnchecked);
-
                 MatcherAssert.assertThat(
                     "cannot verify that unchecked exception rolls back",
                     TransactionalDemo.LOG,
@@ -249,9 +236,7 @@ class SpringAnnotationsTest {
         void checkedExceptionCommitsByDefault() {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
                 final var service = context.getBean(TransactionalDemo.OrderService.class);
-
                 Assertions.assertThrows(Exception.class, service::failChecked);
-
                 MatcherAssert.assertThat(
                     "cannot verify that checked exception commits by default",
                     TransactionalDemo.LOG,
@@ -265,9 +250,7 @@ class SpringAnnotationsTest {
         void rollbackForFixesIt() {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
                 final var service = context.getBean(TransactionalDemo.OrderService.class);
-
                 Assertions.assertThrows(Exception.class, service::failCheckedWithRollback);
-
                 MatcherAssert.assertThat(
                     "cannot verify that rollback for fixes it",
                     TransactionalDemo.LOG,
@@ -281,7 +264,6 @@ class SpringAnnotationsTest {
         void selfInvocationSkipsTheTransaction() {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
                 context.getBean(TransactionalDemo.OrderService.class).saveViaThis("ORD-3");
-
                 MatcherAssert.assertThat(
                     "self invocation cannot bypass the transactional proxy",
                     TransactionalDemo.LOG,
@@ -320,7 +302,6 @@ class SpringAnnotationsTest {
                         .put("sprbut.metrics.enabled", "true");
                 context.register(ConditionalOnDemo.DefaultsConfig.class);
                 context.refresh();
-
                 MatcherAssert.assertThat(
                     "cannot verify that property condition turns on",
                     context.getBean("metricsCollector"),
@@ -365,7 +346,6 @@ class SpringAnnotationsTest {
                 context.register(ConditionalOnDemo.UserConfig.class,
                         ConditionalOnDemo.DefaultsConfig.class);
                 context.refresh();
-
                 MatcherAssert.assertThat(
                     "cannot verify that user bean wins",
                     context.getBean(ConditionalOnDemo.Notifier.class).send("привет"),

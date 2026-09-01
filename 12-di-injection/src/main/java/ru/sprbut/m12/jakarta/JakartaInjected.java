@@ -39,7 +39,9 @@ public class JakartaInjected {
      */
     private final TaxService taxService;
 
-    /** {@code @Resource} ищет по имени поля — здесь это {@code discountService}. */
+    /**
+     * {@code @Resource} ищет по имени поля — здесь это {@code discountService}.
+     */
     @Resource
     private DiscountService discountService;
 

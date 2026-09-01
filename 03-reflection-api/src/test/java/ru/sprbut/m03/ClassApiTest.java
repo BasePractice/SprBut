@@ -25,9 +25,6 @@ final class ClassApiTest {
     /**
      * Значение {@code PAID}.
      */
-    /**
-     * Значение {@code NEW}.
-     */
     private enum Status { NEW, PAID }
 
     private record Point(int x, int y) {

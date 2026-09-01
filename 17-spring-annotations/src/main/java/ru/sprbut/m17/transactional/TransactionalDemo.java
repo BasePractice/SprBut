@@ -42,7 +42,9 @@ public final class TransactionalDemo {
     private TransactionalDemo() {
     }
 
-    /** Журнал операций менеджера транзакций. */
+    /**
+     * Журнал операций менеджера транзакций.
+     */
     public static final List<String> LOG = new ArrayList<>();
 
     /**
@@ -52,7 +54,9 @@ public final class TransactionalDemo {
         LOG.clear();
     }
 
-    /** Менеджер транзакций, который вместо БД пишет в журнал. */
+    /**
+     * Менеджер транзакций, который вместо БД пишет в журнал.
+     */
     public static class LoggingTransactionManager implements PlatformTransactionManager {
 
         /**
@@ -104,34 +108,48 @@ public final class TransactionalDemo {
             return order;
         }
 
-        /** Unchecked-исключение — откат по умолчанию. */
+        /**
+         * Unchecked-исключение — откат по умолчанию.
+         */
         @Transactional
         public void failUnchecked() {
             LOG.add("work");
             throw new IllegalStateException("что-то пошло не так");
         }
 
-        /** Checked-исключение — по умолчанию транзакция <b>коммитится</b>. */
+        /**
+         * Checked-исключение — по умолчанию транзакция <b>коммитится</b>.
+         */
         @Transactional
         public void failChecked() throws Exception {
             LOG.add("work");
             throw new Exception("проверяемое исключение");
         }
 
-        /** Явное указание откатываться и на checked-исключениях. */
+        /**
+         * Явное указание откатываться и на checked-исключениях.
+         */
         @Transactional(rollbackFor = Exception.class)
         public void failCheckedWithRollback() throws Exception {
             LOG.add("work");
             throw new Exception("проверяемое исключение");
         }
 
-        /** Метод без аннотации — транзакции не будет. */
+        /**
+         * Метод без аннотации — транзакции не будет.
+         * @param order Порядок
+         * @return Метод без аннотации — транзакции не будет
+         */
         public String saveWithoutTransaction(final String order) {
             LOG.add("save:" + order);
             return order;
         }
 
-        /** Self-invocation: транзакция не откроется, прокси в стороне. */
+        /**
+         * Self-invocation: транзакция не откроется, прокси в стороне.
+         * @param order Порядок
+         * @return Self-invocation: транзакция не откроется, прокси в стороне
+         */
         public String saveViaThis(final String order) {
             return this.save(order);
         }

@@ -48,7 +48,9 @@ public class CustomerBean implements Serializable {
      */
     private boolean vip;
 
-    /** Публичный конструктор без параметров — обязательное требование соглашения. */
+    /**
+     * Публичный конструктор без параметров — обязательное требование соглашения.
+     */
     public CustomerBean() {
     }
 

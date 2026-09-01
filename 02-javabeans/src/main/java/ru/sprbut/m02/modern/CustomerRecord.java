@@ -22,7 +22,9 @@ package ru.sprbut.m02.modern;
  */
 public record CustomerRecord(String id, String firstName, String lastName, int age, boolean vip) {
 
-    /** Компактный конструктор: валидация выполняется один раз, при создании. */
+    /**
+     * Компактный конструктор: валидация выполняется один раз, при создании.
+     */
     public CustomerRecord {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("id обязателен");

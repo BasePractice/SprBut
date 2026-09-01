@@ -22,9 +22,7 @@ final class JsonTest {
 
     /**
      * Значение {@code BLOCKED}.
-     */
-    /**
-     * Значение {@code ACTIVE}.
+     * @since 1.0
      */
     private enum Status { ACTIVE, BLOCKED }
 

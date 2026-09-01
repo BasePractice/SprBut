@@ -42,7 +42,9 @@ public final class CompilationHarness {
     private CompilationHarness() {
     }
 
-    /** Исходник: полное имя класса и его текст. */
+    /**
+     * Исходник: полное имя класса и его текст.
+     */
     public record Source(String qualifiedName, String code) {
 
         Path writeTo(final Path root) {
@@ -57,7 +59,9 @@ public final class CompilationHarness {
         }
     }
 
-    /** Результат компиляции вместе со сгенерированными исходниками и диагностикой. */
+    /**
+     * Результат компиляции вместе со сгенерированными исходниками и диагностикой.
+     */
     public record Result(boolean success,
                   List<Diagnostic<? extends JavaFileObject>> diagnostics,
                   Map<String, String> generatedSources,
@@ -105,7 +109,11 @@ public final class CompilationHarness {
             return code;
         }
 
-        /** Загружает скомпилированный класс, чтобы проверить его поведение, а не текст. */
+        /**
+         * Загружает скомпилированный класс, чтобы проверить его поведение, а не текст.
+         * @param qualifiedName Имя
+         * @return Загружает скомпилированный класс, чтобы проверить его поведение, а не текст
+         */
         public Class<?> load(final String qualifiedName) {
             try {
                 final URLClassLoader loader = new URLClassLoader(
@@ -131,7 +139,6 @@ public final class CompilationHarness {
         if (compiler == null) {
             throw new IllegalStateException("Нет системного компилятора: тест требует JDK, а не JRE");
         }
-
         final Path sourceDir = workDir.resolve("src");
         final Path classesDir = workDir.resolve("classes");
         final Path generatedDir = workDir.resolve("generated");
@@ -141,20 +148,16 @@ public final class CompilationHarness {
         } catch (final IOException e) {
             throw new UncheckedIOException(e);
         }
-
         final List<Path> files = sources.stream().map(s -> s.writeTo(sourceDir)).toList();
-
         final DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
         try (StandardJavaFileManager fileManager =
                      compiler.getStandardFileManager(diagnostics, null, StandardCharsets.UTF_8)) {
-
             final List<String> allOptions = new ArrayList<>(List.of(
                     "-d", classesDir.toString(),
                     "-s", generatedDir.toString(),
                     "-classpath", System.getProperty("java.class.path"),
                     "--release", "17"));
             allOptions.addAll(List.of(options));
-
             final JavaCompiler.CompilationTask task = compiler.getTask(
                     null,
                     fileManager,
@@ -163,7 +166,6 @@ public final class CompilationHarness {
                     null,
                     fileManager.getJavaFileObjectsFromPaths(files));
             task.setProcessors(List.of(processor));
-
             final boolean success = task.call();
             return new Result(success, diagnostics.getDiagnostics(),
                     readGenerated(generatedDir), classesDir);

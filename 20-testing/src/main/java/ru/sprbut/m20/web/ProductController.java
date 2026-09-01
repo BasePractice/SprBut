@@ -92,7 +92,9 @@ public class ProductController {
         return ResponseEntity.badRequest().body(e.getMessage());
     }
 
-    /** DTO ответа — на нём показывается срез {@code @JsonTest}. */
+    /**
+     * DTO ответа — на нём показывается срез {@code @JsonTest}.
+     */
     public record ProductView(String sku, String name, BigDecimal price, boolean available) {
 
         /**
