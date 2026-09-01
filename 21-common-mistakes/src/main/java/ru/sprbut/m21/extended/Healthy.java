@@ -1,11 +1,24 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m21.extended;
 
 import ru.sprbut.m21.Diagnosis;
 
 /**
  * Диагноз здоровой конфигурации: контекст поднялся, лечить нечего.
+ * @since 1.0
  */
 public final class Healthy implements Diagnosis {
+
+    /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    public Healthy() {
+        // нечего инициализировать
+    }
 
     @Override
     public String summary() {

@@ -1,53 +1,62 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m21.missing;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+/**
+ * Слайд «Типичные ошибки»: NoSuchBeanDefinitionException.
+ * @since 1.0
+ */
 @DisplayName("Слайд «Типичные ошибки»: NoSuchBeanDefinitionException")
 final class MissingBeanConfigTest {
 
     @Test
     @DisplayName("контекст без нужного бина не поднимается")
     void dontStartWithoutGateway() {
-        assertThat(
+        MatcherAssert.assertThat(
             "context without a gateway bean cannot fail to start",
-            assertThrows(
+            Assertions.assertThrows(
                 BeanCreationException.class,
                 () -> new AnnotationConfigApplicationContext(MissingBeanConfig.class).close()
             ).getMessage(),
-            containsString("PaymentGateway")
+            Matchers.containsString("PaymentGateway")
         );
     }
 
     @Test
     @DisplayName("падение происходит на старте, а не при первом вызове метода")
     void dontDeferFailureToCallTime() {
-        assertThat(
+        MatcherAssert.assertThat(
             "missing dependency cannot surface before any method call",
-            assertThrows(
+            Assertions.assertThrows(
                 BeanCreationException.class,
                 () -> new AnnotationConfigApplicationContext(MissingBeanConfig.class).close()
             ).getBeanName(),
-            equalTo(CheckoutService.class.getName())
+            Matchers.equalTo(CheckoutService.class.getName())
         );
     }
 
     @Test
     @DisplayName("один @Bean-метод чинит конфигурацию целиком")
     void repairsContextWithSingleBean() {
-        try (AnnotationConfigApplicationContext context =
-                 new AnnotationConfigApplicationContext(RepairedBeanConfig.class)) {
-            assertThat(
+        try (
+            AnnotationConfigApplicationContext context =
+                new AnnotationConfigApplicationContext(RepairedBeanConfig.class)
+        ) {
+            MatcherAssert.assertThat(
                 "declared gateway cannot reach the checkout service",
                 context.getBean(CheckoutService.class).pay(),
-                equalTo("оплата через card")
+                Matchers.equalTo("оплата через card")
             );
         }
     }
