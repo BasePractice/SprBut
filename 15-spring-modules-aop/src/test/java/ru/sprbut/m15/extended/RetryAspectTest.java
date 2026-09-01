@@ -100,7 +100,7 @@ final class RetryAspectTest {
             MatcherAssert.assertThat(
                 "cannot verify that retries until success",
                 aspect.log(),
-                Matchers.contains( "fail:charge:попытка1", "fail:charge:попытка2", "success:charge:попытка3")
+                Matchers.contains("fail:charge:попытка1", "fail:charge:попытка2", "success:charge:попытка3")
             );
         }
 
@@ -236,6 +236,7 @@ final class RetryAspectTest {
         @DisplayName("Без exposeProxy обход через AopContext падает — флаг не бесплатный")
         void aopContextNeedsExposeProxy() {
             try (var plain = new AnnotationConfigApplicationContext(PlainConfig.class)) {
+
                 final PaymentService service = plain.getBean(PaymentService.class);
                 MatcherAssert.assertThat(
                     "cannot verify that aop context needs expose proxy",

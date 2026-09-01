@@ -39,6 +39,7 @@ import javax.tools.ToolProvider;
  * @since 1.0
  */
 public final class CompilationHarness {
+
     private CompilationHarness() {
     }
 
@@ -67,12 +68,12 @@ public final class CompilationHarness {
         final List<Path> files = sources.stream().map(s -> s.writeTo(sourceDir)).toList();
         final DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
         try (StandardJavaFileManager fileManager =
-                     compiler.getStandardFileManager(                         diagnostics, null, StandardCharsets.UTF_8
+                     compiler.getStandardFileManager(diagnostics, null, StandardCharsets.UTF_8
 )) {
             final List<String> allOptions = new ArrayList<>(List.of(
                     "-d", classesDir.toString(),
                     "-s", generatedDir.toString(),
-                    "-classpath", System.getProperty(                        "java.class.path"
+                    "-classpath", System.getProperty("java.class.path"
 ),
                     "--release", "17"));
             allOptions.addAll(List.of(options));
@@ -82,11 +83,11 @@ public final class CompilationHarness {
                     diagnostics,
                     allOptions,
                     null,
-                    fileManager.getJavaFileObjectsFromPaths(                        files
+                    fileManager.getJavaFileObjectsFromPaths(files
 ));
             task.setProcessors(List.of(processor));
             final boolean success = task.call();
-            return new Result(                success, diagnostics.getDiagnostics(), readGenerated(generatedDir), classesDir
+            return new Result(success, diagnostics.getDiagnostics(), readGenerated(generatedDir), classesDir
 );
         } catch (final IOException e) {
             throw new UncheckedIOException(e);

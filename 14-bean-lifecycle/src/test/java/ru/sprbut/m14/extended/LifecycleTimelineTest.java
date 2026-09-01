@@ -19,6 +19,7 @@ import ru.sprbut.m14.LifecycleLog;
  */
 @DisplayName("Расширенный пример: шкала жизненного цикла с проверкой инвариантов")
 final class LifecycleTimelineTest {
+
     @Test
     @DisplayName("журнал разбирается в шаги с номерами и фазами")
     void parsesLogIntoSteps() {

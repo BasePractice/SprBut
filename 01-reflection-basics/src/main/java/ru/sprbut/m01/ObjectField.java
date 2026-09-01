@@ -23,6 +23,7 @@ import java.lang.reflect.Field;
  * @since 1.0
  */
 public final class ObjectField {
+
     /**
      * Целевой объект.
      */

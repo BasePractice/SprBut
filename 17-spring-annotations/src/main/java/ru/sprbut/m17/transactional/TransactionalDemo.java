@@ -38,6 +38,7 @@ import java.util.List;
  * @since 1.0
  */
 public final class TransactionalDemo {
+
     /**
      * Журнал операций менеджера транзакций.
      */
@@ -91,6 +92,7 @@ public final class TransactionalDemo {
      */
     @Service
     public static class OrderService {
+
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
          */

@@ -53,6 +53,7 @@ public final class CopiedProperties {
         final Introspected from = new Introspected(this.source.getClass());
         for (final PropertyDescriptor into : new Introspected(this.target.getClass()).descriptors()) {
             if (into.getWriteMethod() == null || "class".equals(into.getName())) {
+
                 continue;
             }
             final PropertyDescriptor read = from.descriptor(into.getName()).orElse(null);

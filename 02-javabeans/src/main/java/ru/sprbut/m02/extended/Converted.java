@@ -106,7 +106,7 @@ public final class Converted {
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException(
                 "Свойство '" + this.property + "': '" + this.raw + "' не входит в "
-                    + Arrays.toString(                        this.target.getEnumConstants()
+                    + Arrays.toString(this.target.getEnumConstants()
 )
             ));
     }

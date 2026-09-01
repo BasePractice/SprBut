@@ -45,6 +45,7 @@ public final class Journal {
      * @param entry Значение {@code entry}
      */
     public synchronized void record(final String entry) {
+
         this.entries.add(entry);
     }
 

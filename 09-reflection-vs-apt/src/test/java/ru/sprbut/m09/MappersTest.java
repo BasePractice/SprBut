@@ -18,6 +18,7 @@ import ru.sprbut.m09.model.UserEntity;
  */
 @DisplayName("Слайды 73–75: три механизма, один результат")
 final class MappersTest {
+
     @Test
     @DisplayName("рефлексия выводит правила маппинга из метаданных, а не из кода")
     void discoversRulesItself() {

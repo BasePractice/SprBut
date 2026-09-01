@@ -21,6 +21,7 @@ import ru.sprbut.m02.classic.BeanMap;
  * @since 1.0
  */
 public class ServerProperties implements Serializable {
+
     private static final long serialVersionUID = 1L;
 
     /**

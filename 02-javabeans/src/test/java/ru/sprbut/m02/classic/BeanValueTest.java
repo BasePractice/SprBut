@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("Чтение и запись свойств по строковому имени")
 final class BeanValueTest {
+
     @Test
     @DisplayName("свойство читается по имени, без знания класса при компиляции")
     void readsByName() {

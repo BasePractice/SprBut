@@ -60,6 +60,7 @@ final class ObjectFieldTest {
     @DisplayName("поиск поля поднимается по иерархии наследования")
     void findsInheritedField() {
         final class Savings extends Account {
+
             Savings() {
                 super("S-1", "Сидоров", BigDecimal.TEN);
             }

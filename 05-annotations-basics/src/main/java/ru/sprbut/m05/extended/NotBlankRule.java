@@ -24,6 +24,7 @@ public final class NotBlankRule implements Rule {
     @Override
     public List<Violation> check(final Field field, final Object value) {
         if (!field.isAnnotationPresent(NotBlank.class)) {
+
             return List.of();
         }
         if (value == null || String.valueOf(value).isBlank()) {

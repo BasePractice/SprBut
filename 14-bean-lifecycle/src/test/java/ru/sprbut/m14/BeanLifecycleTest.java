@@ -17,6 +17,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  */
 @DisplayName("Слайд 118 (СХЕМА 7): восемь шагов жизненного цикла бина")
 final class BeanLifecycleTest {
+
     @Test
     @DisplayName("шаги проходятся в порядке, объявленном контрактом контейнера")
     void keepsDeclaredOrder() {

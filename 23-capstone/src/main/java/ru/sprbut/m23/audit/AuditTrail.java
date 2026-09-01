@@ -48,6 +48,7 @@ public final class AuditTrail {
      * @param operation Значение {@code operation}
      */
     public void record(final String operation) {
+
         this.records.add(operation);
     }
 

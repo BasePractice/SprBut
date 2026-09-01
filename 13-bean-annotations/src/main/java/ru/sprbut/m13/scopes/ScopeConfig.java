@@ -33,6 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Configuration
 public class ScopeConfig {
+
     /**
      * Считает, сколько раз вообще создавался объект каждого типа.
      */
@@ -116,6 +117,7 @@ public class ScopeConfig {
      * @since 1.0
      */
     public static class SingletonBean {
+
         /**
          * Счётчик номеров.
          */
@@ -142,6 +144,7 @@ public class ScopeConfig {
      * @since 1.0
      */
     public static class PrototypeBean {
+
         /**
          * Счётчик номеров.
          */
@@ -170,6 +173,7 @@ public class ScopeConfig {
      * @since 1.0
      */
     public static class HolderWithoutProxy {
+
         /**
          * Прототип.
          */
@@ -198,6 +202,7 @@ public class ScopeConfig {
      * @since 1.0
      */
     public static class HolderWithProxy {
+
         /**
          * Прототип.
          */
@@ -225,6 +230,7 @@ public class ScopeConfig {
      * @since 1.0
      */
     public static class ProxiedPrototypeBean {
+
         /**
          * Счётчик номеров.
          */

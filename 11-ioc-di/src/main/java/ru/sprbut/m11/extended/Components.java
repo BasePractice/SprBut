@@ -27,6 +27,7 @@ public final class Components {
      */
     @MiniComponent
     public static class Repository {
+
         /**
          * Строки.
          */
@@ -204,6 +205,7 @@ public final class Components {
      * @since 1.0
      */
     public interface Payment {
+
         /**
          * Вид.
          * @return Вид

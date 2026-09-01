@@ -78,6 +78,7 @@ public final class BeanVerdict {
             }
         }
         if (this.serializable && !Serializable.class.isAssignableFrom(this.type)) {
+
             found.add("класс не реализует Serializable");
         }
         return List.copyOf(found);

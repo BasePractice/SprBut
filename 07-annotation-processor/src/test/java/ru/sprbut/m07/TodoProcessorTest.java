@@ -20,6 +20,7 @@ import org.junit.jupiter.api.io.TempDir;
  */
 @DisplayName("Слайд 60: процессор-анализатор, который ничего не генерирует")
 final class TodoProcessorTest {
+
     /**
      * Рабочий каталог.
      */
@@ -35,6 +36,7 @@ final class TodoProcessorTest {
                 package demo;
                 import ru.sprbut.m07.api.Todo;
                 public class Service {
+
                     public void run() {
                     }
                     @Todo("вынести в конфигурацию")
@@ -54,6 +56,7 @@ final class TodoProcessorTest {
                 package demo;
                 import ru.sprbut.m07.api.Todo;
                 public class Service {
+
                     @Todo("вынести в конфигурацию")
                     private int timeout = 30;
                 }
@@ -71,6 +74,7 @@ final class TodoProcessorTest {
                 package demo;
                 import ru.sprbut.m07.api.Todo;
                 public class Service {
+
                     @Todo("вынести в конфигурацию")
                     private int timeout = 30;
                 }
@@ -120,6 +124,7 @@ final class TodoProcessorTest {
                 package demo;
                 import ru.sprbut.m07.api.Todo;
                 public class Service {
+
                     @Todo("починить")
                     public void broken() {
                     }
@@ -139,6 +144,7 @@ final class TodoProcessorTest {
             this.compile("""
                 package demo;
                 public class Service {
+
                     public void run() {
                     }
                 }

@@ -22,6 +22,7 @@ import ru.sprbut.m05.declarations.Retentions;
 @Retentions.DefaultRetention
 @SuppressWarnings("unused")
 public class TripleAnnotated {
+
     /**
      * Поле.
      */

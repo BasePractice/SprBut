@@ -18,6 +18,7 @@ import ru.sprbut.m18.StartupLog;
  */
 @DisplayName("Расширенный пример: СХЕМА 11 — восстановленная диаграмма запуска")
 final class StartupTimelineTest {
+
     @Test
     @DisplayName("фактическая последовательность восстанавливается из журнала")
     void restoresActualSequence() {

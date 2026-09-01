@@ -34,6 +34,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * @since 1.0
  */
 public final class ConditionReport {
+
     /**
      * Контекст.
      */
@@ -84,9 +85,9 @@ public final class ConditionReport {
             }
             final List<String> reasons = new ArrayList<>();
             outcomes.forEach(outcome -> reasons.add(
-                    (                        outcome.getOutcome().isMatch() ? "✓ " : "✗ "
+                    (outcome.getOutcome().isMatch() ? "✓ " : "✗ "
 ) + outcome.getOutcome().getMessage()));
-            result.put(                source, new ConditionEntry(source, outcomes.isFullMatch(), reasons)
+            result.put(source, new ConditionEntry(source, outcomes.isFullMatch(), reasons)
 );
         });
         return result;
@@ -140,7 +141,7 @@ public final class ConditionReport {
         entries.forEach((source, entry) -> {
             sb.append("  ").append(entry.matched() ? "ПРИМЕНЕНА" : "ПРОПУЩЕНА")
                     .append(": ").append(source).append('\n');
-            entry.reasons().forEach(                reason -> sb.append("      ").append(reason).append('\n')
+            entry.reasons().forEach(reason -> sb.append("      ").append(reason).append('\n')
 );
         });
         return sb.toString();

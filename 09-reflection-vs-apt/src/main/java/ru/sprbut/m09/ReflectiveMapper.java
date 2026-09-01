@@ -92,6 +92,7 @@ public class ReflectiveMapper implements UserMapper {
         final Map<Method, Method> plan = new LinkedHashMap<>();
         for (final Method getter : source.getMethods()) {
             if (getter.getParameterCount() != 0 || getter.getDeclaringClass() == Object.class) {
+
                 continue;
             }
             final String name = getter.getName();

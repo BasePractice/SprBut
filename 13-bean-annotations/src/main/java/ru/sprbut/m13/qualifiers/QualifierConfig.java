@@ -31,6 +31,7 @@ import java.util.Map;
  */
 @Configuration
 public class QualifierConfig {
+
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
      */
@@ -114,6 +115,7 @@ public class QualifierConfig {
      * @since 1.0
      */
     public interface PaymentGateway {
+
         /**
          * Значение {@code pay}.
          * @param amount Сумма
@@ -134,6 +136,7 @@ public class QualifierConfig {
      * @return Шлюз
      */
     public record NamedGateway(String name) implements PaymentGateway {
+
         @Override
         public String pay(final String amount) {
             return String.format("%s:%s", this.name, amount);

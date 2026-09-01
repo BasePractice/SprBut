@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("Слайд 31: setAccessible и JPMS")
 final class DeepAccessTest {
+
     @Test
     @DisplayName("свой класс открыт всегда — ограничения JPMS про границы модулей")
     void opensOwnClass() {

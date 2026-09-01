@@ -82,7 +82,7 @@ public class MiniContainer {
         final String name = annotation.value().isBlank() ? defaultName(type) : annotation.value();
         final Class<?> previous = this.definitions.put(name, type);
         if (previous != null) {
-            throw new IllegalStateException(                "Имя бина '" + name + "' уже занято классом " + previous.getSimpleName()
+            throw new IllegalStateException("Имя бина '" + name + "' уже занято классом " + previous.getSimpleName()
 );
         }
     }
@@ -106,7 +106,7 @@ public class MiniContainer {
     public Object getBean(final String name) {
         final Class<?> type = this.definitions.get(name);
         if (type == null) {
-            throw new NoSuchBeanException(                "Нет бина с именем '" + name + "'; известны: " + this.definitions.keySet()
+            throw new NoSuchBeanException("Нет бина с именем '" + name + "'; известны: " + this.definitions.keySet()
 );
         }
         return this.instantiate(name, type);
@@ -226,6 +226,7 @@ public class MiniContainer {
      * @since 1.0
      */
     public static class NoSuchBeanException extends RuntimeException {
+
         /**
          * Основной конструктор.
          * @param message Сообщение
@@ -240,6 +241,7 @@ public class MiniContainer {
      * @since 1.0
      */
     public static class NoUniqueBeanException extends RuntimeException {
+
         /**
          * Основной конструктор.
          * @param message Сообщение
@@ -254,6 +256,7 @@ public class MiniContainer {
      * @since 1.0
      */
     public static class CircularDependencyException extends RuntimeException {
+
         /**
          * Основной конструктор.
          * @param message Сообщение

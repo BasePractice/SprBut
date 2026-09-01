@@ -33,6 +33,7 @@ import ru.sprbut.m23.domain.TaskStatus;
  */
 @DisplayName("Сервисный слой: полный контекст с зафиксированным временем")
 final class TaskServiceTest {
+
     /**
      * Задачи.
      */

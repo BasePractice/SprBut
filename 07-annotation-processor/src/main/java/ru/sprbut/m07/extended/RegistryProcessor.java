@@ -61,6 +61,7 @@ import ru.sprbut.m07.api.Registered;
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 @SupportedOptions({RegistryProcessor.PACKAGE_OPTION, RegistryProcessor.CLASS_OPTION})
 public class RegistryProcessor extends AbstractProcessor {
+
     /**
      * Значение {@code PACKAGE_OPTION}.
      */
@@ -110,6 +111,7 @@ public class RegistryProcessor extends AbstractProcessor {
             return false;
         }
         for (final Element element : roundEnv.getElementsAnnotatedWith(Registered.class)) {
+
             if (element.getKind() != ElementKind.CLASS) {
                 this.error(element, "@Registered применим только к классам");
                 continue;
@@ -163,10 +165,10 @@ public class RegistryProcessor extends AbstractProcessor {
         final String packageName = this.option(PACKAGE_OPTION, DEFAULT_PACKAGE);
         final String className = this.option(CLASS_OPTION, DEFAULT_CLASS);
         final TypeName supplierOfObject = ParameterizedTypeName.get(
-                ClassName.get(                    Supplier.class
+                ClassName.get(Supplier.class
 ), ClassName.get(Object.class));
         final TypeName mapType = ParameterizedTypeName.get(
-                ClassName.get(                    Map.class
+                ClassName.get(Map.class
 ), ClassName.get(String.class), supplierOfObject);
         final CodeBlock.Builder initializer = CodeBlock.builder().add("$T.of(", Map.class);
         boolean first = true;
@@ -179,7 +181,7 @@ public class RegistryProcessor extends AbstractProcessor {
             initializer.add("$S, $T::new", entry.getKey(), entry.getValue());
         }
         initializer.add(")");
-        final FieldSpec beans = FieldSpec.builder(            mapType, "FACTORIES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL
+        final FieldSpec beans = FieldSpec.builder(mapType, "FACTORIES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL
 )
                 .initializer(initializer.build())
                 .build();
@@ -205,7 +207,7 @@ public class RegistryProcessor extends AbstractProcessor {
                 .addStatement("return FACTORIES.size()")
                 .build();
         final TypeSpec registryType = TypeSpec.classBuilder(className)
-                .addJavadoc(                    "Сгенерирован $L. Правки будут потеряны при следующей сборке.\n",
+                .addJavadoc("Сгенерирован $L. Правки будут потеряны при следующей сборке.\n",
                     RegistryProcessor.class.getSimpleName()
 )
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -222,7 +224,7 @@ public class RegistryProcessor extends AbstractProcessor {
                     .build()
                     .writeTo(processingEnv.getFiler());
         } catch (final IOException e) {
-            processingEnv.getMessager().printMessage(                Diagnostic.Kind.ERROR, "Не удалось записать реестр: " + e.getMessage()
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Не удалось записать реестр: " + e.getMessage()
 );
         }
     }
@@ -240,7 +242,7 @@ public class RegistryProcessor extends AbstractProcessor {
     // @checkstyle NonStaticMethodCheck (3 lines)
     private boolean hasUsableConstructor(final TypeElement type) {
         final var constructors = ElementFilter.constructorsIn(type.getEnclosedElements());
-        return constructors.isEmpty() || constructors.stream().anyMatch(            c -> c.getParameters().isEmpty() && c.getModifiers().contains(Modifier.PUBLIC)
+        return constructors.isEmpty() || constructors.stream().anyMatch(c -> c.getParameters().isEmpty() && c.getModifiers().contains(Modifier.PUBLIC)
 );
     }
 

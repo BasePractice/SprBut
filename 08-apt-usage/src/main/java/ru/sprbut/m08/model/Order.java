@@ -21,6 +21,7 @@ import java.time.LocalDate;
  */
 @GenerateBuilder(suffix = "Maker")
 public class Order {
+
     /**
      * Номер.
      */

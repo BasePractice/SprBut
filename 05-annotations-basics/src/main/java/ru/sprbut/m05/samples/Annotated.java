@@ -22,6 +22,7 @@ import ru.sprbut.m05.declarations.Marker;
 @Level("класс")
 @SuppressWarnings("unused")
 public class Annotated {
+
     /**
      * Основной конструктор.
      */

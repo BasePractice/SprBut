@@ -45,10 +45,12 @@ public final class BeanProperties {
         final List<String> names = new ArrayList<>();
         for (final Method method : this.type.getMethods()) {
             if (method.getDeclaringClass() == Object.class || method.getParameterCount() != 0) {
+
                 continue;
             }
             final String name = method.getName();
             if (name.startsWith("get") && name.length() > 3 && method.getReturnType() != void.class) {
+
                 names.add(new PropertyKey(name.substring(3)).decapitalized());
             } else if (name.startsWith("is") && name.length() > 2 && this.boolish(method)) {
                 names.add(new PropertyKey(name.substring(2)).decapitalized());

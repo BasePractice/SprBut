@@ -20,6 +20,7 @@ import org.hamcrest.Matchers;
  */
 @DisplayName("Слайды 57–64: AbstractProcessor генерирует и анализирует код")
 final class BuilderProcessorTest {
+
     /**
      * Значение {@code VALID_BEAN}.
      * @since 1.0
@@ -32,6 +33,7 @@ final class BuilderProcessorTest {
 
                     @GenerateBuilder
                     public class Customer {
+
                         private static String ignored;
 
                         private String name;
@@ -145,6 +147,7 @@ final class BuilderProcessorTest {
                             import ru.sprbut.m07.api.GenerateBuilder;
                             @GenerateBuilder(suffix = "Factory")
                             public class Order {
+
                                 private String id;
                                 public String getId() { return id; }
                                 public void setId(String id) { this.id = id; }
@@ -164,6 +167,7 @@ final class BuilderProcessorTest {
                     "demo.Plain", """
                             package demo;
                             public class Plain {
+
                                 private String name;
                                 public String getName() { return name; }
                                 public void setName(String name) { this.name = name; }
@@ -194,6 +198,7 @@ final class BuilderProcessorTest {
                             import ru.sprbut.m07.api.GenerateBuilder;
                             @GenerateBuilder
                             public class NoDefaultCtor {
+
                                 private String name;
                                 public NoDefaultCtor(String name) { this.name = name; }
                                 public String getName() { return name; }
@@ -216,6 +221,7 @@ final class BuilderProcessorTest {
                             import ru.sprbut.m07.api.GenerateBuilder;
                             @GenerateBuilder
                             public class NoSetter {
+
                                 private String name;
                                 public String getName() { return name; }
                             }
@@ -281,6 +287,7 @@ final class BuilderProcessorTest {
                             import ru.sprbut.m07.api.GenerateBuilder;
                             @GenerateBuilder
                             public class Order {
+
                                 private String id;
                                 public String getId() { return id; }
                                 public void setId(String id) { this.id = id; }

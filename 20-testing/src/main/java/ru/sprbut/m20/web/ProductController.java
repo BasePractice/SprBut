@@ -28,6 +28,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
+
     /**
      * Каталог.
      */
@@ -104,7 +105,7 @@ public class ProductController {
          * @return Источник
          */
         public static ProductView of(final Product product) {
-            return new ProductView(                product.getSku(), product.getName(), product.getPrice(), product.isAvailable()
+            return new ProductView(product.getSku(), product.getName(), product.getPrice(), product.isAvailable()
 );
         }
     }

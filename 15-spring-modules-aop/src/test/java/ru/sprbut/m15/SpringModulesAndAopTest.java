@@ -207,7 +207,7 @@ final class SpringModulesAndAopTest {
             MatcherAssert.assertThat(
                 "cannot verify that advice runs on external call",
                 this.aspect.log(),
-                Matchers.containsInAnyOrder( "before:calculate", "around-start:calculate", "around-end:calculate")
+                Matchers.containsInAnyOrder("before:calculate", "around-start:calculate", "around-end:calculate")
             );
             MatcherAssert.assertThat(
                 "around advice cannot wrap the call from both sides",

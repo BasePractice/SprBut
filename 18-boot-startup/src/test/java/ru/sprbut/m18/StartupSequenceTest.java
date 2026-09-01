@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("Слайды 156–172 (СХЕМА 11): последовательность запуска Spring Boot")
 final class StartupSequenceTest {
+
     @Test
     @DisplayName("запуск начинается с ApplicationStartingEvent")
     void startsWithStartingEvent() {

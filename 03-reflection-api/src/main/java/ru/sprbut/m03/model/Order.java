@@ -177,6 +177,7 @@ public class Order {
      * @since 1.0
      */
     public static class PaymentException extends Exception {
+
         /**
          * Основной конструктор.
          * @param message Сообщение

@@ -18,6 +18,7 @@ import java.util.List;
  */
 @Registered
 public class OrderRepository {
+
     /**
      * Заказы.
      */

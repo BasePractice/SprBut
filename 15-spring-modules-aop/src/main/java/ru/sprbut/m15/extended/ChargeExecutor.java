@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Service
 public class ChargeExecutor {
+
     /**
      * Число вызовов.
      */

@@ -18,6 +18,7 @@ import java.math.BigDecimal;
  * @since 1.0
  */
 public class Account {
+
     /**
      * Значение {@code TYPE}.
      */

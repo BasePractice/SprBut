@@ -92,7 +92,7 @@ public final class Constructors {
         return Arrays.stream(this.type.getDeclaredConstructors())
             .filter(candidate -> this.fits(candidate.getParameterTypes(), args))
             .min(Comparator.comparingInt(
-                candidate -> Modifier.isPublic(                    candidate.getModifiers()
+                candidate -> Modifier.isPublic(candidate.getModifiers()
 ) ? 0 : 1));
     }
 

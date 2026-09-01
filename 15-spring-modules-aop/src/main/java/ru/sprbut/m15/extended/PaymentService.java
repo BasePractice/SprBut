@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Service
 public class PaymentService {
+
     /**
      * Число вызовов.
      */

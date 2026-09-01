@@ -36,21 +36,27 @@ public final class DefaultValue {
      */
     public Object value() {
         if (!this.type.isPrimitive() || this.type == void.class) {
+
             return null;
         }
         if (this.type == boolean.class) {
+
             return false;
         }
         if (this.type == char.class) {
+
             return '\0';
         }
         if (this.type == long.class) {
+
             return 0L;
         }
         if (this.type == double.class) {
+
             return 0.0d;
         }
         if (this.type == float.class) {
+
             return 0.0f;
         }
         return 0;

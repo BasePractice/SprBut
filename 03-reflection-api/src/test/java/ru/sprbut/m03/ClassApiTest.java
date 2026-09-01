@@ -21,6 +21,7 @@ import ru.sprbut.m03.model.Order;
  */
 @DisplayName("СХЕМА 1: Class — центр карты Reflection API")
 final class ClassApiTest {
+
     @Test
     @DisplayName("из Class достаются поля")
     void listsFields() {

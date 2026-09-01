@@ -26,6 +26,7 @@ import java.math.BigDecimal;
  */
 @Component
 public class SetterInjected {
+
     /**
      * Сервис.
      */

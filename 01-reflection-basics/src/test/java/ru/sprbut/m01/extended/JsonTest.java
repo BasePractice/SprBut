@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("Расширенный пример: JSON-сериализатор целиком на рефлексии")
 final class JsonTest {
+
     @Test
     @DisplayName("static, transient и @JsonIgnore из выборки отбрасываются")
     void skipsExcludedFields() {
@@ -183,7 +184,7 @@ final class JsonTest {
     void writesEmptyObject() {
         MatcherAssert.assertThat(
             "field free object cannot yield an empty JSON object",
-            new Json(                new Object() { }
+            new Json(new Object() { }
 ).text(),
             Matchers.equalTo("{}")
         );
@@ -207,6 +208,7 @@ final class JsonTest {
 
     @SuppressWarnings("unused")
     private static final class Customer extends Base {
+
         /**
          * Значение {@code CONST}.
          */

@@ -51,7 +51,7 @@ final class GreeterAutoConfigurationTest {
             runner.run(context -> {
                 Assertions.assertThat(context).hasSingleBean(Greeter.class);
                 Assertions.assertThat(context.getBean(Greeter.class).greet("Мир"))
-                        .isEqualTo(                            "Привет, Мир!"
+                        .isEqualTo("Привет, Мир!"
 );
             });
         }
@@ -63,7 +63,7 @@ final class GreeterAutoConfigurationTest {
                             "sprbut.greeter.template=Здравствуйте, {name}",
                             "sprbut.greeter.shout=true")
                     .run(context -> Assertions.assertThat(context.getBean(Greeter.class).greet("Иван"))
-                            .isEqualTo(                                "ЗДРАВСТВУЙТЕ, ИВАН"
+                            .isEqualTo("ЗДРАВСТВУЙТЕ, ИВАН"
 ));
         }
 
@@ -98,7 +98,7 @@ final class GreeterAutoConfigurationTest {
         @Test
         @DisplayName("@ConditionalOnClass: без нужного класса автоконфигурация не применяется")
         void requiresTheLibraryOnClasspath() {
-            runner.withClassLoader(                new FilteredClassLoader(Greeter.class)
+            runner.withClassLoader(new FilteredClassLoader(Greeter.class)
 )
                     .run(context -> Assertions.assertThat(context).doesNotHaveBean("greeter"));
         }
@@ -111,13 +111,15 @@ final class GreeterAutoConfigurationTest {
  */
     @DisplayName("Слайд 177: свой бин переопределяет автоконфигурацию")
     final class UserBeanWins {
+
         @Test
         @DisplayName("@ConditionalOnMissingBean уступает пользовательскому бину")
         void autoConfigurationBacksOff() {
             runner.withUserConfiguration(UserConfig.class).run(context -> {
+
                 Assertions.assertThat(context).hasSingleBean(Greeter.class);
                 Assertions.assertThat(context.getBean(Greeter.class).flavour()).isEqualTo("пользовательский");
-                Assertions.assertThat(                    context.getBean(Greeter.class).greet("Мир")
+                Assertions.assertThat(context.getBean(Greeter.class).greet("Мир")
 ).isEqualTo("Здарова, Мир");
             });
         }
@@ -128,7 +130,7 @@ final class GreeterAutoConfigurationTest {
             runner.withUserConfiguration(UserConfig.class)
                     .withPropertyValues("sprbut.greeter.template=неважно")
                     .run(context -> Assertions.assertThat(context.getBean(GreeterProperties.class).getTemplate())
-                            .isEqualTo(                                "неважно"
+                            .isEqualTo("неважно"
 ));
         }
 
@@ -163,10 +165,10 @@ final class GreeterAutoConfigurationTest {
         @Test
         @DisplayName("Файл регистрации существует и содержит нашу автоконфигурацию")
         void importsFileListsTheAutoConfiguration() throws Exception {
-            final var url = getClass().getClassLoader().getResource(                "META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports"
+            final var url = getClass().getClassLoader().getResource("META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports"
 );
             Assertions.assertThat(url).isNotNull();
-            Assertions.assertThat(                new String(url.openStream().readAllBytes(), StandardCharsets.UTF_8)
+            Assertions.assertThat(new String(url.openStream().readAllBytes(), StandardCharsets.UTF_8)
 )
                     .contains("ru.sprbut.m19.autoconfigure.GreeterAutoConfiguration");
         }
@@ -177,7 +179,7 @@ final class GreeterAutoConfigurationTest {
             final var annotation = GreeterAutoConfiguration.class
                     .getAnnotation(AutoConfiguration.class);
             Assertions.assertThat(annotation).isNotNull();
-            Assertions.assertThat(                GreeterAutoConfiguration.class.isAnnotationPresent(ConditionalOnClass.class)
+            Assertions.assertThat(GreeterAutoConfiguration.class.isAnnotationPresent(ConditionalOnClass.class)
 )
                     .isTrue();
         }

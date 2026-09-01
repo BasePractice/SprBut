@@ -32,6 +32,7 @@ import java.time.Instant;
 @Entity
 @Table(name = "tasks")
 public class Task {
+
     protected Task() {
         // тело намеренно пустое
     }

@@ -20,6 +20,7 @@ import java.util.List;
  * @since 1.0
  */
 public final class StartupLog {
+
     /**
      * Значение {@code EVENTS}.
      */
@@ -38,6 +39,7 @@ public final class StartupLog {
      * @param event Событие
      */
     public static synchronized void record(final String event) {
+
         EVENTS.add(event);
     }
 

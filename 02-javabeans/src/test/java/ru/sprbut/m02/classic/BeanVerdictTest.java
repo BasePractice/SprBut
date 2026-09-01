@@ -19,6 +19,7 @@ import ru.sprbut.m02.modern.ImmutableCustomer;
  */
 @DisplayName("Слайды 12–16: проверка соглашения JavaBeans")
 final class BeanVerdictTest {
+
     @Test
     @DisplayName("классический бин выполняет все четыре пункта соглашения")
     void acceptsClassicBean() {

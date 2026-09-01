@@ -30,6 +30,7 @@ import ru.sprbut.m11.domain.SmsSender;
  * @since 1.0
  */
 public class ObjectFactory {
+
     /**
      * Синглтоны.
      */
@@ -53,7 +54,7 @@ public class ObjectFactory {
      * @return Синглтон: создаём один раз, дальше отдаём тот же экземпляр
      */
     public NotificationSender notificationSender() {
-        return (            NotificationSender
+        return (NotificationSender
 ) this.singleton("sender", () -> "sms".equals(this.channel) ? new SmsSender() : new EmailSender());
     }
 
@@ -62,7 +63,7 @@ public class ObjectFactory {
      * @return Цена
      */
     public PriceCalculator priceCalculator() {
-        return (            PriceCalculator
+        return (PriceCalculator
 ) this.singleton("calculator", () -> new PriceCalculator(new BigDecimal("0.20")));
     }
 
@@ -72,7 +73,7 @@ public class ObjectFactory {
      */
     public ManualOrderService orderService() {
         return (ManualOrderService) this.singleton("orderService",
-                () -> new ManualOrderService(                    this.notificationSender(), this.priceCalculator()
+                () -> new ManualOrderService(this.notificationSender(), this.priceCalculator()
 ));
     }
 

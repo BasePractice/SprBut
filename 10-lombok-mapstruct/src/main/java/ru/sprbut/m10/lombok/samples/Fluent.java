@@ -23,6 +23,7 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 public class Fluent {
+
     /**
      * Имя.
      */

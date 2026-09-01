@@ -18,6 +18,7 @@ import java.util.List;
  */
 @Registered("audit")
 public class AuditLog {
+
     /**
      * Записи.
      */
@@ -44,6 +45,7 @@ public class AuditLog {
      */
     @Todo("заменить на структурированное логирование")
     public void record(final String event) {
+
         this.entries.add(event);
     }
 }

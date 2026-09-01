@@ -64,6 +64,7 @@ public final class AspectHandler implements InvocationHandler {
     @Override
     public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
         if (method.getDeclaringClass() == Object.class) {
+
             return method.invoke(this.target, args);
         }
         final Method implementation = new TargetMethod(this.target, method).method();
@@ -73,6 +74,7 @@ public final class AspectHandler implements InvocationHandler {
             return stubbed.value();
         }
         if (implementation.isAnnotationPresent(Cached.class)) {
+
             return this.cached(method, implementation, args);
         }
         return this.timed(method, implementation, args);

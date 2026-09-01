@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 1.0
  */
 public final class ProxyBeanMethods {
+
     /**
      * Считает, сколько объектов реально создано.
      */
@@ -48,6 +49,7 @@ public final class ProxyBeanMethods {
      * @since 1.0
      */
     public static class Shared {
+
         /**
          * Счётчик номеров.
          */

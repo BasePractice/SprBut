@@ -39,6 +39,7 @@ public final class ConditionalOnDemo {
      * @since 1.0
      */
     public interface Notifier {
+
         /**
          * Отправка.
          * @param message Сообщение
@@ -53,6 +54,7 @@ public final class ConditionalOnDemo {
      * @return Значение {@code ConsoleNotifier}
      */
     public record ConsoleNotifier(String prefix) implements Notifier {
+
         @Override
         public String send(final String message) {
             return String.format("%s: %s", this.prefix, message);
@@ -98,7 +100,7 @@ public final class ConditionalOnDemo {
          * @return {@code matchIfMissing} — включено, пока явно не выключили
          */
         @Bean
-        @ConditionalOnProperty(            name = "sprbut.audit.enabled", havingValue = "true", matchIfMissing = true
+        @ConditionalOnProperty(name = "sprbut.audit.enabled", havingValue = "true", matchIfMissing = true
 )
         public String auditCollector() {
             return "аудит включён";

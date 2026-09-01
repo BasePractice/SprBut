@@ -17,6 +17,7 @@ import ru.sprbut.m09.model.UserEntity;
  */
 @DisplayName("Расширенный пример: СХЕМА 4 — compile-time против runtime")
 final class MappersShowcaseTest {
+
     @Test
     @DisplayName("механизм не меняет поведение — только свойства")
     void agreeOnResult() {

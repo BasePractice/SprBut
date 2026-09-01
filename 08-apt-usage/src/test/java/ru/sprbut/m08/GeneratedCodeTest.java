@@ -124,7 +124,7 @@ final class GeneratedCodeTest {
                 "static field cannot stay out of the generated builder",
                 Arrays.stream(CustomerBuilder.class.getDeclaredMethods())
                     .map(Method::getName).toList(),
-                Matchers.containsInAnyOrder(                    "create", "build", "id", "name", "email", "age", "vip", "balance"
+                Matchers.containsInAnyOrder("create", "build", "id", "name", "email", "age", "vip", "balance"
 )
             );
         }

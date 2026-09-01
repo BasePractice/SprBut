@@ -21,6 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter(AccessLevel.PROTECTED)
 public class Partial {
+
     /**
      * Значение {@code visible}.
      */

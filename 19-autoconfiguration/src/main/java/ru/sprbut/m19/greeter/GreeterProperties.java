@@ -21,6 +21,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties(prefix = "sprbut.greeter")
 public class GreeterProperties {
+
     /**
      * Шаблон приветствия; {@code {name}} подставляется.
      */

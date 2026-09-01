@@ -27,6 +27,7 @@ import java.lang.reflect.Proxy;
  * @since 1.0
  */
 public class AuditBeanPostProcessor implements BeanPostProcessor {
+
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
      */
@@ -67,6 +68,7 @@ public class AuditBeanPostProcessor implements BeanPostProcessor {
      * @since 1.0
      */
     public interface Auditable {
+
         /**
          * Описание.
          * @return Описание

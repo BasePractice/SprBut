@@ -92,6 +92,7 @@ public final class ProcessorRegistration {
     public List<String> loaded() {
         final List<String> names = new ArrayList<>();
         for (final Processor each : ServiceLoader.load(Processor.class, this.loader)) {
+
             names.add(each.getClass().getName());
         }
         names.sort(Comparator.naturalOrder());
@@ -105,6 +106,7 @@ public final class ProcessorRegistration {
      */
     public List<String> supported(final String processor) {
         for (final Processor each : ServiceLoader.load(Processor.class, this.loader)) {
+
             if (each.getClass().getName().equals(processor)) {
                 return each.getSupportedAnnotationTypes().stream().sorted().toList();
             }
@@ -114,7 +116,7 @@ public final class ProcessorRegistration {
 
     private static List<String> lines(final URL resource) throws IOException {
         try (BufferedReader reader = new BufferedReader(
-            new InputStreamReader(                resource.openStream(), StandardCharsets.UTF_8
+            new InputStreamReader(resource.openStream(), StandardCharsets.UTF_8
 )
         )) {
             return reader.lines()

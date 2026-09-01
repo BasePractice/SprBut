@@ -17,6 +17,7 @@ package ru.sprbut.m02.classic;
  * @since 1.0
  */
 public final class PropertyKey {
+
     /**
      * Исходное значение.
      */

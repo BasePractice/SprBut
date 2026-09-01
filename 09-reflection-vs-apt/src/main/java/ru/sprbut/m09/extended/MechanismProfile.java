@@ -43,7 +43,7 @@ public record MechanismProfile(String name,
             false,
             false,
             false,
-            List.of(                "@Autowired: поиск и внедрение зависимостей", "@Value: чтение конфигурации в поля",
+            List.of("@Autowired: поиск и внедрение зависимостей", "@Value: чтение конфигурации в поля",
                 "@EventListener: вызов методов-слушателей", "разбор аннотаций при старте контекста"
 ));
 
@@ -57,7 +57,7 @@ public record MechanismProfile(String name,
             true,
             true,
             true,
-            List.of(                "spring-boot-configuration-processor: метаданные @ConfigurationProperties",
+            List.of("spring-boot-configuration-processor: метаданные @ConfigurationProperties",
                 "Spring AOT: генерация кода контекста при сборке",
                 "MapStruct и Lombok в прикладном коде"
 ));
@@ -72,7 +72,7 @@ public record MechanismProfile(String name,
             true,
             false,
             false,
-            List.of(                "CGLIB-прокси для бинов без интерфейса", "@Transactional и @Cacheable через прокси",
+            List.of("CGLIB-прокси для бинов без интерфейса", "@Transactional и @Cacheable через прокси",
                 "@Configuration: перехват вызовов @Bean-методов"
 ));
 

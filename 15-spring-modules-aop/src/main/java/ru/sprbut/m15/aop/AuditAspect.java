@@ -33,6 +33,7 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 public class AuditAspect {
+
     /**
      * Журнал.
      */

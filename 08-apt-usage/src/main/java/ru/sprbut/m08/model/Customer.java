@@ -20,6 +20,7 @@ import java.math.BigDecimal;
  */
 @GenerateBuilder
 public class Customer {
+
     /**
      * Идентификатор.
      */

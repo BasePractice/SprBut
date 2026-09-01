@@ -41,6 +41,7 @@ public final class CircularBeans {
      * @since 1.0
      */
     public static class Alpha {
+
         /**
          * Бета-зависимость.
          */
@@ -68,6 +69,7 @@ public final class CircularBeans {
      * @since 1.0
      */
     public static class Beta {
+
         /**
          * Альфа-зависимость.
          */
@@ -170,6 +172,7 @@ public final class CircularBeans {
      * @since 1.0
      */
     public static class Gamma {
+
         /**
          * Дельта-зависимость.
          */
@@ -205,6 +208,7 @@ public final class CircularBeans {
      * @since 1.0
      */
     public static class Delta {
+
         /**
          * Гамма-зависимость.
          */
@@ -305,6 +309,7 @@ public final class CircularBeans {
      * @since 1.0
      */
     public static class Epsilon {
+
         /**
          * Правила.
          */
@@ -332,6 +337,7 @@ public final class CircularBeans {
      * @since 1.0
      */
     public static class Zeta {
+
         /**
          * Правила.
          */

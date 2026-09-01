@@ -20,6 +20,7 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public class Holder<T extends Comparable<T>> {
+
     /**
      * Имена.
      */

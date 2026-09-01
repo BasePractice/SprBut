@@ -37,6 +37,7 @@ import java.util.List;
  */
 @Configuration
 public class ConditionalConfig {
+
     /**
      * Порядок фактического создания бинов — заполняется конструкторами.
      */
@@ -123,6 +124,7 @@ public class ConditionalConfig {
      * @since 1.0
      */
     public static class Marker {
+
         /**
          * Основной конструктор.
          * @param name Имя

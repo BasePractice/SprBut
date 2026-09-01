@@ -32,6 +32,7 @@ import java.util.List;
 @Component
 @Order(1)
 public class RetryAspect {
+
     /**
      * Журнал.
      */

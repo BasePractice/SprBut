@@ -24,6 +24,7 @@ import ru.sprbut.m19.greeter.Greeter;
  */
 @DisplayName("Расширенный пример: отчёт об условиях (то, что печатает --debug)")
 final class ConditionReportTest {
+
     @Test
     @DisplayName("применённая автоконфигурация попадает в список включённых")
     void listsAppliedConfiguration() {
@@ -31,7 +32,7 @@ final class ConditionReportTest {
             "applied auto configuration cannot be listed as included",
             new ConditionReport((ConfigurableApplicationContext) context)
                 .included().stream().anyMatch(name -> name.contains("GreeterAutoConfiguration")),
-            Matchers.equalTo(                true
+            Matchers.equalTo(true
 )
         ));
     }
@@ -43,7 +44,7 @@ final class ConditionReportTest {
             "report cannot confirm the applied configuration",
             new ConditionReport((ConfigurableApplicationContext) context)
                 .applied("GreeterAutoConfiguration"),
-            Matchers.equalTo(                true
+            Matchers.equalTo(true
 )
         ));
     }
@@ -55,7 +56,7 @@ final class ConditionReportTest {
             "report cannot name the failed condition",
             new ConditionReport((ConfigurableApplicationContext) context)
                 .whyExcluded("GreeterAutoConfiguration").orElse(""),
-            Matchers.containsString(                "sprbut.greeter.enabled"
+            Matchers.containsString("sprbut.greeter.enabled"
 )
         ));
     }
@@ -67,7 +68,7 @@ final class ConditionReportTest {
             "auto configuration cannot yield to the user bean",
             new ConditionReport((ConfigurableApplicationContext) context)
                 .render("GreeterAutoConfiguration"),
-            Matchers.containsString(                "Greeter"
+            Matchers.containsString("Greeter"
 )
         ));
     }
@@ -80,7 +81,7 @@ final class ConditionReportTest {
             new ConditionReport((ConfigurableApplicationContext) context)
                 .matching("GreeterAutoConfiguration").keySet().stream()
                 .anyMatch(name -> name.contains("GreeterAutoConfiguration")),
-            Matchers.equalTo(                true
+            Matchers.equalTo(true
 )
         ));
     }
@@ -92,7 +93,7 @@ final class ConditionReportTest {
             "report cannot be rendered readably",
             new ConditionReport((ConfigurableApplicationContext) context)
                 .render("GreeterAutoConfiguration"),
-            Matchers.containsString(                "Отчёт об условиях"
+            Matchers.containsString("Отчёт об условиях"
 )
         ));
     }
@@ -104,7 +105,7 @@ final class ConditionReportTest {
             "unknown configuration cannot get an honest answer",
             new ConditionReport((ConfigurableApplicationContext) context)
                 .render("НетТакойКонфигурации"),
-            Matchers.containsString(                "нет подходящих конфигураций"
+            Matchers.containsString("нет подходящих конфигураций"
 )
         ));
     }
@@ -116,7 +117,7 @@ final class ConditionReportTest {
             "unknown configuration cannot avoid the applied verdict",
             new ConditionReport((ConfigurableApplicationContext) context)
                 .applied("НетТакойКонфигурации"),
-            Matchers.equalTo(                false
+            Matchers.equalTo(false
 )
         ));
     }

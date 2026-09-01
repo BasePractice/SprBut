@@ -33,6 +33,7 @@ import ru.sprbut.m23.service.Tasks;
 @RestController
 @RequestMapping("/api/tasks")
 public final class TaskController {
+
     /**
      * Задачи.
      */

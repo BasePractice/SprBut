@@ -16,6 +16,7 @@ package ru.sprbut.m05.extended;
  */
 @SuppressWarnings("unused")
 public final class User extends BaseEntity {
+
     /**
      * Невидимый элемент.
      */

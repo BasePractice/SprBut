@@ -231,7 +231,7 @@ final class SliceTests {
         @DisplayName("GET возвращает список из мока")
         void getReturnsList() throws Exception {
             BDDMockito.given(this.catalog.available()).willReturn(
-                    List.of(                        new Product("SKU-1", "Кофемолка", new BigDecimal("4990.00"))
+                    List.of(new Product("SKU-1", "Кофемолка", new BigDecimal("4990.00"))
 ));
             this.mockMvc.perform(MockMvcRequestBuilders.get("/api/products"))
                     .andExpect(MockMvcResultMatchers.status().isOk())
@@ -255,11 +255,11 @@ final class SliceTests {
             BDDMockito.given(this.catalog.add(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
                     .willReturn(new Product("SKU-2", "Чайник", new BigDecimal("2990.00")));
             final var request = new ProductController.CreateRequest(
-                    "SKU-2", "Чайник", new BigDecimal(                        "2990.00"
+                    "SKU-2", "Чайник", new BigDecimal("2990.00"
 ));
             this.mockMvc.perform(MockMvcRequestBuilders.post("/api/products")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(                                this.objectMapper.writeValueAsString(request)
+                            .content(this.objectMapper.writeValueAsString(request)
 ))
                     .andExpect(MockMvcResultMatchers.status().isCreated())
                     .andExpect(MockMvcResultMatchers.jsonPath("$.sku").value("SKU-2"));
@@ -319,7 +319,7 @@ final class SliceTests {
         @DisplayName("Сериализация даёт ожидаемый JSON")
         void serialises() throws Exception {
             final var view = new ProductController.ProductView(
-                    "SKU-1", "Кофемолка", new BigDecimal(                        "4990.00"
+                    "SKU-1", "Кофемолка", new BigDecimal("4990.00"
 ), true);
             MatcherAssert.assertThat(
                 "serialisation cannot produce the expected JSON",
@@ -356,7 +356,7 @@ final class SliceTests {
         void serviceIsTestableWithoutSpring() {
             final ProductRepository fakeRepository = Mockito.mock(ProductRepository.class);
             BDDMockito.given(fakeRepository.findBySku("SKU-1"))
-                    .willReturn(                        Optional.of(new Product("SKU-1", "Кофемолка", new BigDecimal("4990.00")))
+                    .willReturn(Optional.of(new Product("SKU-1", "Кофемолка", new BigDecimal("4990.00")))
 );
             final CatalogService service = new CatalogService(fakeRepository, "EUR");
             MatcherAssert.assertThat(
@@ -386,6 +386,7 @@ final class SliceTests {
      * @since 1.0
      */
     interface WebContextAware {
+
         WebApplicationContext context();
     }
 }

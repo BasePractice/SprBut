@@ -60,7 +60,7 @@ public final class LifecycleTimeline {
             steps.add(new Step(
                 Character.getNumericValue(left.charAt(0)),
                 left.substring(left.indexOf('-') + 1),
-                event.substring(                    colon + 1
+                event.substring(colon + 1
 )
             ));
         }
@@ -106,7 +106,7 @@ public final class LifecycleTimeline {
             if (steps.get(index).number() < steps.get(index - 1).number()) {
                 found.add(new Violation(
                     "порядок шагов",
-                    steps.get(                        index
+                    steps.get(index
 ) + " выполнен после " + steps.get(index - 1)
                 ));
             }
@@ -153,7 +153,7 @@ public final class LifecycleTimeline {
         if (first > second) {
             sink.add(new Violation(
                 String.format("%s перед %s", earlier, later),
-                String.format(                    "%s на позиции %s, %s на %s", earlier, first, later, second
+                String.format("%s на позиции %s, %s на %s", earlier, first, later, second
 )
             ));
         }

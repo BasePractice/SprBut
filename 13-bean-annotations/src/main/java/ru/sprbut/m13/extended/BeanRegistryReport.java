@@ -63,7 +63,7 @@ public final class BeanRegistryReport {
                 beans.containsSingleton(name),
                 definition.getDependsOn() == null
                     ? List.of()
-                    : Arrays.asList(                        definition.getDependsOn()
+                    : Arrays.asList(definition.getDependsOn()
 )
             ));
         }

@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 1.0
  */
 public final class RealPriceService implements PriceService {
+
     /**
      * Значение {@code prices}.
      */

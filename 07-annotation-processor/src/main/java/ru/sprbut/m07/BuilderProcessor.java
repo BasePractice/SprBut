@@ -52,6 +52,7 @@ import java.util.Set;
 @SupportedAnnotationTypes("ru.sprbut.m07.api.GenerateBuilder")
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 public class BuilderProcessor extends AbstractProcessor {
+
     /**
      * Filer для записи файлов.
      */
@@ -95,6 +96,7 @@ public class BuilderProcessor extends AbstractProcessor {
             return false;
         }
         for (final Element element : roundEnv.getElementsAnnotatedWith(GenerateBuilder.class)) {
+
             if (element.getKind() != ElementKind.CLASS) {
                 this.error(element, "@GenerateBuilder применим только к классам");
                 continue;
@@ -166,7 +168,7 @@ public class BuilderProcessor extends AbstractProcessor {
             // конструктор по умолчанию — публичный, если класс публичный
             return true;
         }
-        return constructors.stream().anyMatch(            c -> c.getParameters().isEmpty() && c.getModifiers().contains(Modifier.PUBLIC)
+        return constructors.stream().anyMatch(c -> c.getParameters().isEmpty() && c.getModifiers().contains(Modifier.PUBLIC)
 );
     }
 
@@ -175,7 +177,7 @@ public class BuilderProcessor extends AbstractProcessor {
         return ElementFilter.methodsIn(type.getEnclosedElements()).stream()
                 .anyMatch(m -> m.getSimpleName().contentEquals(setterName)
                         && m.getParameters().size() == 1
-                        && m.getModifiers().contains(                            Modifier.PUBLIC
+                        && m.getModifiers().contains(Modifier.PUBLIC
 ));
     }
 

@@ -16,6 +16,7 @@ package ru.sprbut.m06.extended;
  */
 @SuppressWarnings("unused")
 public class UserController {
+
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
      */

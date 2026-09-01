@@ -156,6 +156,7 @@ public final class ImmutableCustomer {
      * @since 1.0
      */
     public static final class Builder {
+
         /**
          * Идентификатор.
          */

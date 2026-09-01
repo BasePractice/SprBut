@@ -21,6 +21,7 @@ import org.springframework.context.SmartLifecycle;
  * @since 1.0
  */
 public class BackgroundWorker implements SmartLifecycle {
+
     /**
      * Значение {@code running}.
      */

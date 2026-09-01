@@ -13,6 +13,7 @@ package ru.sprbut.m04;
  */
 @SuppressWarnings("unused")
 public class Counter {
+
     /**
      * Значение.
      */

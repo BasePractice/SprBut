@@ -19,6 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @since 1.0
  */
 public final class Intercepted {
+
     /**
      * Значение {@code ENTRIES}.
      */

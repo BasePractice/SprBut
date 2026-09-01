@@ -19,6 +19,7 @@ import java.util.List;
  */
 @Service
 public class CatalogService {
+
     /**
      * Репозиторий.
      */
@@ -102,6 +103,7 @@ public class CatalogService {
      * @since 1.0
      */
     public static class ProductNotFoundException extends RuntimeException {
+
         /**
          * Основной конструктор.
          * @param sku Артикул

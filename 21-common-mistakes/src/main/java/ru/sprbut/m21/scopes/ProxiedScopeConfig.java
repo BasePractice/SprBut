@@ -45,6 +45,16 @@ public final class ProxiedScopeConfig {
     }
 
     /**
+     * Singleton, держащий талон.
+     * @param ticket Талон
+     * @return Проходная
+     */
+    @Bean
+    public Gate gate(final Ticket ticket) {
+        return new Gate(ticket);
+    }
+
+    /**
      * Талон в области видимости prototype.
      * @param serial Счётчик номеров
      * @return Талон
@@ -56,15 +66,5 @@ public final class ProxiedScopeConfig {
     )
     public Ticket ticket(final Serial serial) {
         return new Ticket(serial);
-    }
-
-    /**
-     * Singleton, держащий талон.
-     * @param ticket Талон
-     * @return Проходная
-     */
-    @Bean
-    public Gate gate(final Ticket ticket) {
-        return new Gate(ticket);
     }
 }

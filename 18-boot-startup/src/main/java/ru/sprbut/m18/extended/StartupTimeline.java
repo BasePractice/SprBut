@@ -54,34 +54,34 @@ public final class StartupTimeline {
     // @checkstyle NonStaticMethodCheck (3 lines)
     public List<HookPoint> whereToHook() {
         return List.of(
-                new HookPoint(                    1, "ApplicationStartingEvent", "ничего: ни Environment, ни контекста",
+                new HookPoint(1, "ApplicationStartingEvent", "ничего: ни Environment, ни контекста",
                     "инициализация логирования"
 ),
-                new HookPoint(                    2, "ApplicationEnvironmentPreparedEvent", "Environment собран, контекста нет",
+                new HookPoint(2, "ApplicationEnvironmentPreparedEvent", "Environment собран, контекста нет",
                     "добавить свой источник настроек, включить профиль"
 ),
-                new HookPoint(                    3, "ApplicationContextInitializer", "контекст создан, но пуст",
+                new HookPoint(3, "ApplicationContextInitializer", "контекст создан, но пуст",
                     "программная настройка контекста до загрузки бинов"
 ),
-                new HookPoint(                    4, "ApplicationContextInitializedEvent",
+                new HookPoint(4, "ApplicationContextInitializedEvent",
                     "инициализаторы отработали, определений бинов ещё нет", "ранняя диагностика"
 ),
-                new HookPoint(                    5, "ApplicationPreparedEvent", "определения бинов загружены, объектов нет",
+                new HookPoint(5, "ApplicationPreparedEvent", "определения бинов загружены, объектов нет",
                     "последний момент правки BeanDefinition"
 ),
-                new HookPoint(                    6, "BeanFactoryPostProcessor", "все определения бинов на руках",
+                new HookPoint(6, "BeanFactoryPostProcessor", "все определения бинов на руках",
                     "переопределить или добавить определение бина"
 ),
-                new HookPoint(                    7, "ContextRefreshedEvent", "все синглтоны созданы, контекст поднят",
+                new HookPoint(7, "ContextRefreshedEvent", "все синглтоны созданы, контекст поднят",
                     "проверки целостности, прогрев кэшей"
 ),
-                new HookPoint(                    8, "ApplicationStartedEvent", "контекст поднят, раннеры ещё не выполнялись",
+                new HookPoint(8, "ApplicationStartedEvent", "контекст поднят, раннеры ещё не выполнялись",
                     "метрики времени старта"
 ),
-                new HookPoint(                    9, "ApplicationRunner / CommandLineRunner", "приложение работоспособно",
+                new HookPoint(9, "ApplicationRunner / CommandLineRunner", "приложение работоспособно",
                     "разовые задачи при старте, миграции, загрузка справочников"
 ),
-                new HookPoint(                    10, "ApplicationReadyEvent", "готово всё, включая раннеры",
+                new HookPoint(10, "ApplicationReadyEvent", "готово всё, включая раннеры",
                     "сообщить, что приложение принимает нагрузку"
 ));
     }

@@ -21,6 +21,7 @@ package ru.sprbut.m02.modern;
  * @since 1.0
  */
 public record CustomerRecord(String id, String firstName, String lastName, int age, boolean vip) {
+
     /**
      * Изменение состояния у неизменяемого объекта — это создание нового.
      */

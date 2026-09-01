@@ -23,6 +23,7 @@ import java.util.Optional;
  */
 @Registered("customers")
 public class CustomerRepository {
+
     /**
      * Хранилище.
      */

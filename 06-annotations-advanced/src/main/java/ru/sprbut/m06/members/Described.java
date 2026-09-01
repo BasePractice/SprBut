@@ -20,6 +20,7 @@ import java.util.Arrays;
  * @since 1.0
  */
 public final class Described {
+
     /**
      * Значение.
      */

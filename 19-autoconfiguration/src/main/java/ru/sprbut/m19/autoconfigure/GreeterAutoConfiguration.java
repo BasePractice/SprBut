@@ -43,7 +43,7 @@ import ru.sprbut.m19.greeter.SimpleGreeter;
  */
 @AutoConfiguration
 @ConditionalOnClass(Greeter.class)
-@ConditionalOnProperty(    prefix = "sprbut.greeter", name = "enabled", havingValue = "true", matchIfMissing = true
+@ConditionalOnProperty(prefix = "sprbut.greeter", name = "enabled", havingValue = "true", matchIfMissing = true
 )
 @EnableConfigurationProperties(GreeterProperties.class)
 public class GreeterAutoConfiguration {

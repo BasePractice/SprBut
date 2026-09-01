@@ -35,6 +35,7 @@ import java.math.BigDecimal;
  */
 @Component
 public class ServiceLocatorDemo implements ApplicationContextAware {
+
     /**
      * Контекст.
      */

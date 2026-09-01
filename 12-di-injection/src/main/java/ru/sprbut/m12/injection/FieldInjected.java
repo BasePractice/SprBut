@@ -31,6 +31,7 @@ import java.math.BigDecimal;
  */
 @Component
 public class FieldInjected {
+
     /**
      * Сервис.
      */

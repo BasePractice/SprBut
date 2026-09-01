@@ -31,6 +31,7 @@ public class AuditService {
      */
     // @checkstyle NonStaticMethodCheck (3 lines)
     public String record(final String event) {
+
         return String.format("записано: %s", event);
     }
 

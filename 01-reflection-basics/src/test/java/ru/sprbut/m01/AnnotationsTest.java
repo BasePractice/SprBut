@@ -22,6 +22,7 @@ import ru.sprbut.m01.extended.JsonProperty;
  */
 @DisplayName("Слайд 9: чтение аннотаций через рефлексию")
 final class AnnotationsTest {
+
     @Test
     @DisplayName("isAnnotationPresent проверяет наличие аннотации")
     void detectsPresentAnnotation() {
@@ -92,6 +93,7 @@ final class AnnotationsTest {
 
     @SuppressWarnings("unused")
     private static final class Sample {
+
         /**
          * Обычный вариант.
          */

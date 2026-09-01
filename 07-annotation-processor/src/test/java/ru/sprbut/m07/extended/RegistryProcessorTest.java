@@ -24,6 +24,7 @@ import ru.sprbut.m07.CompilationHarness;
  */
 @DisplayName("Расширенный пример: compile-time реестр вместо сканирования classpath")
 final class RegistryProcessorTest {
+
     /**
      * Значение {@code REPO}.
      */
@@ -35,6 +36,7 @@ final class RegistryProcessorTest {
 
                     @Registered
                     public class UserRepository {
+
                         public String find() { return "пользователь"; }
                     }
                     """);
@@ -51,6 +53,7 @@ final class RegistryProcessorTest {
 
                     @Registered("users")
                     public class UserService {
+
                         public String describe() { return "сервис"; }
                     }
                     """);
@@ -124,7 +127,7 @@ final class RegistryProcessorTest {
         @Test
         @DisplayName("Опции процессора -A меняют пакет и имя генерируемого класса")
         void supportsProcessorOptions() {
-            final CompilationHarness.Result result = compile(                List.of(REPO), "-A" + RegistryProcessor.PACKAGE_OPTION + "=demo.gen",
+            final CompilationHarness.Result result = compile(List.of(REPO), "-A" + RegistryProcessor.PACKAGE_OPTION + "=demo.gen",
                 String.format("-A%s=Beans", RegistryProcessor.CLASS_OPTION)
 );
             MatcherAssert.assertThat(
@@ -268,12 +271,12 @@ final class RegistryProcessorTest {
                     new CompilationHarness.Source("demo.A", """
                             package demo;
                             import ru.sprbut.m07.api.Registered;
-                            @Registered(                                "dup"
+                            @Registered("dup"
 ) public class A {} """),
                     new CompilationHarness.Source("demo.B", """
                             package demo;
                             import ru.sprbut.m07.api.Registered;
-                            @Registered(                                "dup"
+                            @Registered("dup"
 ) public class B {} """)));
             MatcherAssert.assertThat(
                 "duplicate name cannot fail the build instead of overwriting silently",
@@ -307,6 +310,7 @@ final class RegistryProcessorTest {
                             package demo;
                             import ru.sprbut.m07.api.Registered;
                             @Registered public class NeedsArgs {
+
                                 public NeedsArgs(String name) {}
                             }
                             """)),

@@ -18,6 +18,7 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public class Holder<@Comparablish T> {
+
     /**
      * Аннотация стоит на самом типе поля.
      */

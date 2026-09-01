@@ -22,9 +22,10 @@ import org.hamcrest.Matchers;
  */
 @DisplayName("Слайды 129–137: конфигурация в коде и в файле")
 final class ConfigurationBindingTest {
+
     @Nested
     @SpringBootTest
-    @TestPropertySource(        properties = { "sprbut.server.host=overridden.example.com", "sprbut.server.port=9999" }
+    @TestPropertySource(properties = { "sprbut.server.host=overridden.example.com", "sprbut.server.port=9999" }
 )
 /**
  * Слайды 133–136: приоритеты источников.
