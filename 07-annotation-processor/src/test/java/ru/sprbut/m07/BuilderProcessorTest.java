@@ -22,12 +22,6 @@ import org.hamcrest.Matchers;
 final class BuilderProcessorTest {
 
     /**
-     * Рабочий каталог.
-     */
-    @TempDir
-    private Path workDir;
-
-    /**
      * Значение {@code VALID_BEAN}.
      * @since 1.0
      */
@@ -39,20 +33,30 @@ final class BuilderProcessorTest {
 
                     @GenerateBuilder
                     public class Customer {
-                        private String name;
-                        private int age;
-                        private boolean vip;
+
                         private static String ignored;
 
+                        private String name;
+
+                        private int age;
+
+                        private boolean vip;
+
                         public String getName() { return name; }
+
                         public void setName(String name) { this.name = name; }
+
                         public int getAge() { return age; }
+
                         public void setAge(int age) { this.age = age; }
+
                         public boolean isVip() { return vip; }
+
                         public void setVip(boolean vip) { this.vip = vip; }
                     }
                     """);
 
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     private CompilationHarness.Result compile(final CompilationHarness.Source... sources) {
         return CompilationHarness.compile(this.workDir, List.of(sources), new BuilderProcessor());
     }
@@ -135,7 +139,9 @@ final class BuilderProcessorTest {
         }
 
         @Test
-        @DisplayName("Суффикс имени берётся из элемента аннотации")
+        @DisplayName(
+            "Суффикс имени берётся из элемента аннотации"
+        )
         void respectsSuffixElement() {
             final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.Order", """
@@ -143,6 +149,7 @@ final class BuilderProcessorTest {
                             import ru.sprbut.m07.api.GenerateBuilder;
                             @GenerateBuilder(suffix = "Factory")
                             public class Order {
+
                                 private String id;
                                 public String getId() { return id; }
                                 public void setId(String id) { this.id = id; }
@@ -156,12 +163,15 @@ final class BuilderProcessorTest {
         }
 
         @Test
-        @DisplayName("Класс без аннотации не трогается вовсе")
+        @DisplayName(
+            "Класс без аннотации не трогается вовсе"
+        )
         void ignoresUnannotatedClasses() {
             final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.Plain", """
                             package demo;
                             public class Plain {
+
                                 private String name;
                                 public String getName() { return name; }
                                 public void setName(String name) { this.name = name; }
@@ -184,7 +194,9 @@ final class BuilderProcessorTest {
     final class Analysis {
 
         @Test
-        @DisplayName("Без конструктора без параметров сборка падает с внятной ошибкой")
+        @DisplayName(
+            "Без конструктора без параметров сборка падает с внятной ошибкой"
+        )
         void requiresNoArgConstructor() {
             final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.NoDefaultCtor", """
@@ -192,6 +204,7 @@ final class BuilderProcessorTest {
                             import ru.sprbut.m07.api.GenerateBuilder;
                             @GenerateBuilder
                             public class NoDefaultCtor {
+
                                 private String name;
                                 public NoDefaultCtor(String name) { this.name = name; }
                                 public String getName() { return name; }
@@ -206,7 +219,9 @@ final class BuilderProcessorTest {
         }
 
         @Test
-        @DisplayName("Поле без сеттера — ошибка с точным указанием, чего не хватает")
+        @DisplayName(
+            "Поле без сеттера — ошибка с точным указанием, чего не хватает"
+        )
         void requiresSetterForEveryField() {
             final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.NoSetter", """
@@ -214,6 +229,7 @@ final class BuilderProcessorTest {
                             import ru.sprbut.m07.api.GenerateBuilder;
                             @GenerateBuilder
                             public class NoSetter {
+
                                 private String name;
                                 public String getName() { return name; }
                             }
@@ -226,7 +242,9 @@ final class BuilderProcessorTest {
         }
 
         @Test
-        @DisplayName("Абстрактный класс отклоняется")
+        @DisplayName(
+            "Абстрактный класс отклоняется"
+        )
         void rejectsAbstractClasses() {
             final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.Abstract", """
@@ -244,7 +262,9 @@ final class BuilderProcessorTest {
         }
 
         @Test
-        @DisplayName("Класс без свойств — предупреждение, но сборка проходит")
+        @DisplayName(
+            "Класс без свойств — предупреждение, но сборка проходит"
+        )
         void warnsOnEmptyClass() {
             final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.Empty", """
@@ -271,7 +291,9 @@ final class BuilderProcessorTest {
     final class ProcessingModel {
 
         @Test
-        @DisplayName("Обрабатываются все помеченные классы за одну сборку")
+        @DisplayName(
+            "Обрабатываются все помеченные классы за одну сборку"
+        )
         void processesEveryAnnotatedClass() {
             final CompilationHarness.Result result = compile(VALID_BEAN, new CompilationHarness.Source(
                     "demo.Order", """
@@ -279,6 +301,7 @@ final class BuilderProcessorTest {
                             import ru.sprbut.m07.api.GenerateBuilder;
                             @GenerateBuilder
                             public class Order {
+
                                 private String id;
                                 public String getId() { return id; }
                                 public void setId(String id) { this.id = id; }
@@ -315,4 +338,11 @@ final class BuilderProcessorTest {
             );
         }
     }
+
+    /**
+     * Рабочий каталог.
+     */
+    @TempDir
+    private Path workDir;
+
 }

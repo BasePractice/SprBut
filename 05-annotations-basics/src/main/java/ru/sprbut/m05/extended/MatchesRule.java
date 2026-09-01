@@ -39,12 +39,18 @@ public final class MatchesRule implements Rule {
         final String text = String.valueOf(value);
         for (final Matches each : patterns) {
             try {
-                if (!Pattern.matches(each.regex(), text)) {
+                if (
+                    !Pattern.matches(
+                        each.regex(), text
+                    )
+                ) {
                     found.add(new Violation(
                         field.getName(), each.message() + " '" + each.regex() + "'", value
                     ));
                 }
-            } catch (final PatternSyntaxException malformed) {
+            } catch (
+                final PatternSyntaxException malformed
+            ) {
                 found.add(new Violation(
                     field.getName(), "некорректный шаблон '" + each.regex() + "'", value
                 ));

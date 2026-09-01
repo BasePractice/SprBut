@@ -56,7 +56,11 @@ public final class ChosenConstructor {
         return Arrays.stream(this.type.getDeclaredConstructors())
             .filter(candidate -> candidate.getParameterCount() == this.arity)
             .filter(this::fillable)
-            .min(Comparator.comparingInt(candidate -> new AccessRank(candidate).value()))
+            .min(
+                Comparator.comparingInt(
+                    candidate -> new AccessRank(candidate).value()
+                )
+            )
             .orElseThrow(() -> new IllegalArgumentException(
                 "У " + this.type.getSimpleName() + " нет пригодного конструктора с "
                     + this.arity + " аргументами"

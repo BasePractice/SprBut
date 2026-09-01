@@ -64,7 +64,7 @@ public class MiniContainer {
      * @param componentClasses Значение {@code componentClasses}
      */
     public MiniContainer(final Class<?>... componentClasses) {
-        for (Class<?> type : componentClasses) {
+        for (final Class<?> type : componentClasses) {
             this.register(type);
         }
     }
@@ -75,15 +75,22 @@ public class MiniContainer {
      */
     public final void register(final Class<?> type) {
         final MiniComponent annotation = type.getAnnotation(MiniComponent.class);
-        if (annotation == null) {
-            throw new IllegalArgumentException(type.getSimpleName()
-                    + " не помечен @MiniComponent — контейнер такими классами не управляет");
+        if (
+            annotation == null
+        ) {
+            throw new IllegalArgumentException(
+                type.getSimpleName()
+                    + " не помечен @MiniComponent — контейнер такими классами не управляет"
+            );
         }
         final String name = annotation.value().isBlank() ? defaultName(type) : annotation.value();
         final Class<?> previous = this.definitions.put(name, type);
-        if (previous != null) {
-            throw new IllegalStateException("Имя бина '" + name + "' уже занято классом "
-                    + previous.getSimpleName());
+        if (
+            previous != null
+        ) {
+            throw new IllegalStateException(
+                "Имя бина '" + name + "' уже занято классом " + previous.getSimpleName()
+            );
         }
     }
 
@@ -92,7 +99,7 @@ public class MiniContainer {
      * @return Создаёт все зарегистрированные бины сразу — как делает Spring для синглтонов
      */
     public MiniContainer refresh() {
-        for (String name : List.copyOf(this.definitions.keySet())) {
+        for (final String name : List.copyOf(this.definitions.keySet())) {
             this.getBean(name);
         }
         return this;
@@ -105,9 +112,12 @@ public class MiniContainer {
      */
     public Object getBean(final String name) {
         final Class<?> type = this.definitions.get(name);
-        if (type == null) {
-            throw new NoSuchBeanException("Нет бина с именем '" + name
-                    + "'; известны: " + this.definitions.keySet());
+        if (
+            type == null
+        ) {
+            throw new NoSuchBeanException(
+                "Нет бина с именем '" + name + "'; известны: " + this.definitions.keySet()
+            );
         }
         return this.instantiate(name, type);
     }
@@ -118,17 +128,28 @@ public class MiniContainer {
      * @param requiredType Тип
      * @return Достать бин по типу. Подходит и точное совпадение, и реализация интерфейса — ровно как в Spring
      */
-    public <T> T getBean(final Class<T> requiredType) {
+    public <T> T getBean(
+        final Class<T> requiredType
+    ) {
         final List<String> candidates = this.definitions.entrySet().stream()
-                .filter(e -> requiredType.isAssignableFrom(e.getValue()))
+                .filter(
+                    e -> requiredType.isAssignableFrom(e.getValue())
+                )
                 .map(Map.Entry::getKey)
                 .toList();
         if (candidates.isEmpty()) {
             throw new NoSuchBeanException("Нет бина типа " + requiredType.getSimpleName());
         }
-        if (candidates.size() > 1) {
-            throw new NoUniqueBeanException("Бинов типа " + requiredType.getSimpleName()
-                    + " несколько: " + candidates + ". Нужен квалификатор или @Primary");
+        if (
+            candidates.size() > 1
+        ) {
+            throw new NoUniqueBeanException(
+                "Бинов типа "
+                    + requiredType.getSimpleName()
+                    + " несколько: "
+                    + candidates
+                    + ". Нужен квалификатор или @Primary"
+            );
         }
         return requiredType.cast(this.getBean(candidates.get(0)));
     }
@@ -160,22 +181,32 @@ public class MiniContainer {
 
     // --- Создание -----------------------------------------------------------
 
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     private Object instantiate(final String name, final Class<?> type) {
         final Object existing = this.singletons.get(name);
         if (existing != null) {
             return existing;
         }
-        if (!this.inCreation.add(type)) {
-            throw new CircularDependencyException("Циклическая зависимость: "
+        if (
+            !this.inCreation.add(type)
+        ) {
+            throw new CircularDependencyException(
+                "Циклическая зависимость: "
                     + this.inCreation.stream().map(Class::getSimpleName).toList()
-                    + " → " + type.getSimpleName());
+                    + " → "
+                    + type.getSimpleName()
+            );
         }
         try {
             final Constructor<?> constructor = selectConstructor(type);
             // Рекурсия: сначала создаём зависимости, потом сам бин.
             // Порядок создания вычисляется отсюда сам собой.
-            final Object[] args = Arrays.stream(constructor.getParameterTypes())
-                    .map(this::getBean)
+            final Object[] args = Arrays.stream(
+                constructor.getParameterTypes()
+            )
+                    .map(
+                        this::getBean
+                    )
                     .toArray();
             constructor.setAccessible(true);
             final Object bean = constructor.newInstance(args);
@@ -205,8 +236,12 @@ public class MiniContainer {
         if (constructors.length == 1) {
             return constructors[0];
         }
-        return Arrays.stream(constructors)
-                .filter(c -> c.getParameterCount() == 0)
+        return Arrays.stream(
+            constructors
+        )
+                .filter(
+                    c -> c.getParameterCount() == 0
+                )
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("У " + type.getSimpleName()
                         + " несколько конструкторов и нет конструктора без параметров — "
@@ -225,6 +260,7 @@ public class MiniContainer {
      * @since 1.0
      */
     public static class NoSuchBeanException extends RuntimeException {
+
         /**
          * Основной конструктор.
          * @param message Сообщение
@@ -239,6 +275,7 @@ public class MiniContainer {
      * @since 1.0
      */
     public static class NoUniqueBeanException extends RuntimeException {
+
         /**
          * Основной конструктор.
          * @param message Сообщение
@@ -253,6 +290,7 @@ public class MiniContainer {
      * @since 1.0
      */
     public static class CircularDependencyException extends RuntimeException {
+
         /**
          * Основной конструктор.
          * @param message Сообщение

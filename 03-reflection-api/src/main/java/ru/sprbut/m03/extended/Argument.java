@@ -78,11 +78,15 @@ public final class Argument {
 
     private Object constant() {
         return Arrays.stream(this.target.getEnumConstants())
-            .filter(candidate -> ((Enum<?>) candidate).name().equalsIgnoreCase(this.raw))
+            .filter(
+                candidate -> ((Enum<?>) candidate).name().equalsIgnoreCase(this.raw)
+            )
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException(
                 "'" + this.raw + "' не входит в "
-                    + Arrays.toString(this.target.getEnumConstants())
+                    + Arrays.toString(
+                        this.target.getEnumConstants()
+                    )
             ));
     }
 }

@@ -131,7 +131,9 @@ public class UserDto {
             return false;
         }
         return this.age == other.age && this.active == other.active
-                && Objects.equals(this.id, other.id)
+                && Objects.equals(
+                    this.id, other.id
+                )
                 && Objects.equals(this.firstName, other.firstName)
                 && Objects.equals(this.lastName, other.lastName);
     }

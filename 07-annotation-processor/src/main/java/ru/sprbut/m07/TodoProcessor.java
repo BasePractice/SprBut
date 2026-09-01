@@ -47,10 +47,13 @@ public class TodoProcessor extends AbstractProcessor {
         }
         for (final Element element : roundEnv.getElementsAnnotatedWith(Todo.class)) {
 
-            final Todo todo = element.getAnnotation(Todo.class);
+            final Todo todo = element.getAnnotation(
+                Todo.class
+            );
             final Diagnostic.Kind kind = todo.blocking() ? Diagnostic.Kind.ERROR : Diagnostic.Kind.WARNING;
-            processingEnv.getMessager().printMessage(kind,
-                    "TODO: " + todo.value() + " (" + element.getSimpleName() + ")", element);
+            processingEnv.getMessager().printMessage(
+                kind, "TODO: " + todo.value() + " (" + element.getSimpleName() + ")", element
+            );
         }
         // false — аннотацию не поглощаем: она может быть нужна и другим процессорам
         return false;

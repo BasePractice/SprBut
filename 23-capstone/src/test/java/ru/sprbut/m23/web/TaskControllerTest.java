@@ -53,9 +53,13 @@ final class TaskControllerTest {
         BDDMockito.given(this.tasks.open(ArgumentMatchers.anyString()))
             .willReturn(new Task("проверить срез", Instant.parse("2026-07-30T10:00:00Z")));
         BDDMockito.given(this.views.view(ArgumentMatchers.any()))
-            .willReturn(TaskView.builder().id(1L).title("проверить срез").status("OPEN").build());
+            .willReturn(
+                TaskView.builder().id(1L).title("проверить срез").status("OPEN").build()
+            );
         this.http.perform(
-                MockMvcRequestBuilders.post("/api/tasks")
+                MockMvcRequestBuilders.post(
+                    "/api/tasks"
+                )
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("{\"title\":\"проверить срез\"}")
             )
@@ -66,7 +70,9 @@ final class TaskControllerTest {
     @DisplayName("пустое название отбивается проверкой, до сервиса запрос не доходит")
     void dontReachServiceOnInvalidRequest() throws Exception {
         this.http.perform(
-                MockMvcRequestBuilders.post("/api/tasks")
+                MockMvcRequestBuilders.post(
+                    "/api/tasks"
+                )
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("{\"title\":\"  \"}")
             )
@@ -77,7 +83,9 @@ final class TaskControllerTest {
     @DisplayName("сообщение о нарушении проверки попадает в тело ответа")
     void explainsValidationFailure() throws Exception {
         this.http.perform(
-                MockMvcRequestBuilders.post("/api/tasks")
+                MockMvcRequestBuilders.post(
+                    "/api/tasks"
+                )
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("{\"title\":\"\"}")
             )
@@ -97,9 +105,13 @@ final class TaskControllerTest {
     @DisplayName("исчерпанный лимит превращается в 409")
     void answersConflictOnExhaustedLimit() throws Exception {
         BDDMockito.given(this.tasks.open(ArgumentMatchers.anyString()))
-            .willThrow(new IllegalStateException("Открытых задач уже 2, лимит исчерпан"));
+            .willThrow(
+                new IllegalStateException("Открытых задач уже 2, лимит исчерпан")
+            );
         this.http.perform(
-                MockMvcRequestBuilders.post("/api/tasks")
+                MockMvcRequestBuilders.post(
+                    "/api/tasks"
+                )
                     .contentType(MediaType.APPLICATION_JSON)
                     .content("{\"title\":\"лишняя\"}")
             )

@@ -76,7 +76,9 @@ public class ReflectiveMapper implements UserMapper {
      */
     public List<String> propertyNames() {
         return this.plan.keySet().stream()
-                .map(m -> decapitalize(stripPrefix(m.getName())))
+                .map(
+                    m -> decapitalize(stripPrefix(m.getName()))
+                )
                 .sorted()
                 .toList();
     }
@@ -96,8 +98,9 @@ public class ReflectiveMapper implements UserMapper {
                 continue;
             }
             final String name = getter.getName();
-            final boolean isGetter = name.startsWith("get") && name.length() > 3
-                    && getter.getReturnType() != void.class;
+            final boolean isGetter = name.startsWith(
+                "get"
+            ) && name.length() > 3 && getter.getReturnType() != void.class;
             final boolean isBooleanGetter = name.startsWith("is") && name.length() > 2
                     && (getter.getReturnType() == boolean.class || getter.getReturnType() == Boolean.class);
             if (!isGetter && !isBooleanGetter) {

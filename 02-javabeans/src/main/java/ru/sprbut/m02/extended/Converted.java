@@ -77,6 +77,7 @@ public final class Converted {
      * Значение нужного типа.
      * @return Значение нужного типа
      */
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     public Object value() {
         if (this.target.isEnum()) {
             return this.constant();
@@ -101,11 +102,15 @@ public final class Converted {
 
     private Object constant() {
         return Arrays.stream(this.target.getEnumConstants())
-            .filter(candidate -> ((Enum<?>) candidate).name().equalsIgnoreCase(this.raw))
+            .filter(
+                candidate -> ((Enum<?>) candidate).name().equalsIgnoreCase(this.raw)
+            )
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException(
                 "Свойство '" + this.property + "': '" + this.raw + "' не входит в "
-                    + Arrays.toString(this.target.getEnumConstants())
+                    + Arrays.toString(
+                        this.target.getEnumConstants()
+                    )
             ));
     }
 }

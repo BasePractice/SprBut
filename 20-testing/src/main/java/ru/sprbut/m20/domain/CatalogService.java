@@ -36,7 +36,9 @@ public class CatalogService {
      * @param @Value("${sprbut.catalog.currency:RUB}" Значение
      */
     public CatalogService(final ProductRepository repository,
-                          @Value("${sprbut.catalog.currency:RUB}") String currency) {
+                          @Value(
+                              "${sprbut.catalog.currency:RUB}"
+                          ) String currency) {
         this.repository = repository;
         this.currency = currency;
     }
@@ -94,8 +96,12 @@ public class CatalogService {
      */
     @Transactional(readOnly = true)
     public Product bySku(final String sku) {
-        return this.repository.findBySku(sku)
-                .orElseThrow(() -> new ProductNotFoundException(sku));
+        return this.repository.findBySku(
+            sku
+        )
+                .orElseThrow(
+                    () -> new ProductNotFoundException(sku)
+                );
     }
 
     /**

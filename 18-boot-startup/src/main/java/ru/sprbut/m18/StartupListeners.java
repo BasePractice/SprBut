@@ -80,9 +80,13 @@ public final class StartupListeners {
 
         @Override
         public void onApplicationEvent(final @NonNull ApplicationEnvironmentPreparedEvent event) {
-            StartupLog.record("2-ApplicationEnvironmentPreparedEvent");
+            StartupLog.record(
+                "2-ApplicationEnvironmentPreparedEvent"
+            );
             StartupLog.record("2-env-has-property:"
-                    + event.getEnvironment().containsProperty("sprbut.startup.marker"));
+                    + event.getEnvironment().containsProperty(
+                        "sprbut.startup.marker"
+                    ));
         }
     }
 
@@ -196,9 +200,12 @@ public final class StartupListeners {
         }
 
         @Override
-        public void onApplicationEvent(final @NonNull ApplicationFailedEvent event) {
-            StartupLog.record("x-ApplicationFailedEvent:"
-                    + event.getException().getClass().getSimpleName());
+        public void onApplicationEvent(
+            final @NonNull ApplicationFailedEvent event
+        ) {
+            StartupLog.record(
+                "x-ApplicationFailedEvent:" + event.getException().getClass().getSimpleName()
+            );
         }
     }
 }

@@ -90,13 +90,18 @@ public final class Constructors {
      */
     public Optional<Constructor<?>> matching(final Object... args) {
         return Arrays.stream(this.type.getDeclaredConstructors())
-            .filter(candidate -> this.fits(candidate.getParameterTypes(), args))
+            .filter(
+                candidate -> this.fits(
+                    candidate.getParameterTypes(), args
+                )
+            )
             .min(Comparator.comparingInt(
-                candidate -> Modifier.isPublic(candidate.getModifiers()) ? 0 : 1
-            ));
+                candidate -> Modifier.isPublic(
+                    candidate.getModifiers()
+                ) ? 0 : 1));
     }
 
-    private boolean fits(final Class<?>[] parameters, final Object[] args) {
+    private static boolean fits(final Class<?>[] parameters, final Object[] args) {
         if (parameters.length != args.length) {
             return false;
         }

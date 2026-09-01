@@ -70,7 +70,9 @@ public final class ImmutableCustomer {
      */
     public Builder toBuilder() {
         return new Builder()
-                .id(this.id)
+                .id(
+                    this.id
+                )
                 .firstName(this.firstName)
                 .lastName(this.lastName)
                 .age(this.age)
@@ -135,7 +137,9 @@ public final class ImmutableCustomer {
             return false;
         }
         return this.age == other.age && this.vip == other.vip
-                && Objects.equals(this.id, other.id)
+                && Objects.equals(
+                    this.id, other.id
+                )
                 && Objects.equals(this.firstName, other.firstName)
                 && Objects.equals(this.lastName, other.lastName)
                 && Objects.equals(this.tags, other.tags);

@@ -71,7 +71,9 @@ public final class ChosenMethod {
         return candidates.stream()
             .min(
                 Comparator.comparingInt((Method each) -> each.isVarArgs() ? 1 : 0)
-                    .thenComparingInt(each -> new AccessRank(each).value())
+                    .thenComparingInt(
+                        each -> new AccessRank(each).value()
+                    )
             )
             .orElseThrow(() -> new IllegalArgumentException(
                 "У " + this.type.getSimpleName() + " нет метода '" + this.name

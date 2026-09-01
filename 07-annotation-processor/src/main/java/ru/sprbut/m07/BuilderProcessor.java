@@ -54,31 +54,31 @@ import java.util.Set;
 public class BuilderProcessor extends AbstractProcessor {
 
     /**
-     * Открытый конструктор: экземпляр создаёт контейнер.
-     */
-    public BuilderProcessor() {
-        // нечего инициализировать
-    }
-
-    /**
      * Filer для записи файлов.
      */
     private Filer filer;
+
     /**
      * Значение {@code messager}.
      */
-
     private Messager messager;
+
     /**
      * Элементы.
      */
-
     private Elements elements;
 
     /**
      * Счётчик раундов — чтобы было видно, что их несколько (модуль 08).
      */
     private int round;
+
+    /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    public BuilderProcessor() {
+        // нечего инициализировать
+    }
 
     @Override
     public synchronized void init(final ProcessingEnvironment env) {
@@ -95,7 +95,8 @@ public class BuilderProcessor extends AbstractProcessor {
             // Последний, «пустой» раунд: генерировать здесь уже нельзя
             return false;
         }
-        for (Element element : roundEnv.getElementsAnnotatedWith(GenerateBuilder.class)) {
+        for (final Element element : roundEnv.getElementsAnnotatedWith(GenerateBuilder.class)) {
+
             if (element.getKind() != ElementKind.CLASS) {
                 this.error(element, "@GenerateBuilder применим только к классам");
                 continue;
@@ -134,13 +135,18 @@ public class BuilderProcessor extends AbstractProcessor {
             this.error(type, "@GenerateBuilder не применим к абстрактному классу");
             valid = false;
         }
-        if (!this.hasPublicNoArgConstructor(type)) {
-            this.error(type, "Классу нужен публичный конструктор без параметров — "
-                    + "билдер создаёт объект именно им");
+        if (
+            !this.hasPublicNoArgConstructor(type)
+        ) {
+            this.error(
+                type,
+                "Классу нужен публичный конструктор без параметров — "
+                    + "билдер создаёт объект именно им"
+            );
             valid = false;
         }
         final List<Property> properties = new ArrayList<>();
-        for (VariableElement field : ElementFilter.fieldsIn(type.getEnclosedElements())) {
+        for (final VariableElement field : ElementFilter.fieldsIn(type.getEnclosedElements())) {
             final Set<Modifier> modifiers = field.getModifiers();
             if (modifiers.contains(Modifier.STATIC)) {
                 continue;
@@ -160,6 +166,7 @@ public class BuilderProcessor extends AbstractProcessor {
         return valid ? properties : null;
     }
 
+    // @checkstyle NonStaticMethodCheck (3 lines)
     private boolean hasPublicNoArgConstructor(final TypeElement type) {
         final List<ExecutableElement> constructors = ElementFilter.constructorsIn(type.getEnclosedElements());
         if (constructors.isEmpty()) {
@@ -167,14 +174,23 @@ public class BuilderProcessor extends AbstractProcessor {
             return true;
         }
         return constructors.stream().anyMatch(c ->
-                c.getParameters().isEmpty() && c.getModifiers().contains(Modifier.PUBLIC));
+                c.getParameters().isEmpty() && c.getModifiers().contains(
+                    Modifier.PUBLIC
+                ));
     }
 
-    private boolean hasSetter(final TypeElement type, final String setterName) {
-        return ElementFilter.methodsIn(type.getEnclosedElements()).stream()
+    // @checkstyle NonStaticMethodCheck (3 lines)
+    private boolean hasSetter(
+        final TypeElement type, final String setterName
+    ) {
+        return ElementFilter.methodsIn(
+            type.getEnclosedElements()
+        ).stream()
                 .anyMatch(m -> m.getSimpleName().contentEquals(setterName)
                         && m.getParameters().size() == 1
-                        && m.getModifiers().contains(Modifier.PUBLIC));
+                        && m.getModifiers().contains(
+                            Modifier.PUBLIC
+                        ));
     }
 
     // --- Генерация -----------------------------------------------------------
@@ -199,11 +215,14 @@ public class BuilderProcessor extends AbstractProcessor {
                     out.println("package " + packageName + ";");
                     out.println();
                 }
-                out.println("/** Сгенерирован " + BuilderProcessor.class.getSimpleName()
-                        + ". Правки будут потеряны при следующей сборке. */");
+                out.println(
+                    "/** Сгенерирован "
+                        + BuilderProcessor.class.getSimpleName()
+                        + ". Правки будут потеряны при следующей сборке. */"
+                );
                 out.println("public final class " + builderName + " {");
                 out.println();
-                for (Property property : properties) {
+                for (final Property property : properties) {
                     out.println("    private " + property.type() + " " + property.name() + ";");
                 }
                 out.println();
@@ -213,10 +232,19 @@ public class BuilderProcessor extends AbstractProcessor {
                 out.println("    public static " + builderName + " create() {");
                 out.println("        return new " + builderName + "();");
                 out.println("    }");
-                for (Property property : properties) {
+                for (
+                    final Property property : properties
+                ) {
                     out.println();
-                    out.println("    public " + builderName + " " + property.name()
-                            + "(" + property.type() + " value) {");
+                    out.println(
+                        "    public "
+                            + builderName
+                            + " "
+                            + property.name()
+                            + "("
+                            + property.type()
+                            + " value) {"
+                    );
                     out.println("        this." + property.name() + " = value;");
                     out.println("        return this;");
                     out.println("    }");
@@ -224,7 +252,7 @@ public class BuilderProcessor extends AbstractProcessor {
                 out.println();
                 out.println("    public " + simpleName + " build() {");
                 out.println("        " + simpleName + " result = new " + simpleName + "();");
-                for (Property property : properties) {
+                for (final Property property : properties) {
                     out.println("        result." + property.setter() + "(this." + property.name() + ");");
                 }
                 out.println("        return result;");

@@ -93,7 +93,11 @@ final class ThreeWaysTest {
         void dependenciesAreInjectable() {
             final SmsSender sms = new SmsSender();
             final ManualOrderService service = new ManualOrderService(
-                    sms, new PriceCalculator(new BigDecimal("0.20")));
+                    sms, new PriceCalculator(
+                        new BigDecimal(
+                            "0.20"
+                        )
+                    ));
             service.placeOrder("+79001234567", new BigDecimal("100"));
             MatcherAssert.assertThat(
                 "injected implementation cannot be swapped in one line",
@@ -158,6 +162,7 @@ final class ThreeWaysTest {
         @DisplayName("Контейнер сам подбирает аргументы по типу — ни одного new для зависимостей")
         void containerResolvesArgumentsByType() {
             try (var context = new AnnotationConfigApplicationContext(SpringWiringConfig.class)) {
+
                 final ManualOrderService service = context.getBean(ManualOrderService.class);
                 MatcherAssert.assertThat(
                     "container cannot resolve the arguments by type",
@@ -171,6 +176,7 @@ final class ThreeWaysTest {
         @DisplayName("Бины по умолчанию — синглтоны")
         void beansAreSingletonsByDefault() {
             try (var context = new AnnotationConfigApplicationContext(SpringWiringConfig.class)) {
+
                 MatcherAssert.assertThat(
                     "beans cannot be singletons by default",
                     context.getBean(ManualOrderService.class),
@@ -197,7 +203,9 @@ final class ThreeWaysTest {
         @DisplayName("Контейнер закрывается — и вместе с ним заканчивается жизненный цикл бинов")
         void containerOwnsTheLifecycle() {
             final AnnotationConfigApplicationContext context =
-                    new AnnotationConfigApplicationContext(SpringWiringConfig.class);
+                    new AnnotationConfigApplicationContext(
+                        SpringWiringConfig.class
+                    );
             context.close();
             MatcherAssert.assertThat(
                 "closed container cannot end the lifecycle of its beans",

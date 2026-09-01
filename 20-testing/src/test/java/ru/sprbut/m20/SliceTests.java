@@ -5,9 +5,18 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m20;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.BDDMockito;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -18,6 +27,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import ru.sprbut.m20.domain.CatalogService;
@@ -25,15 +36,6 @@ import ru.sprbut.m20.domain.Product;
 import ru.sprbut.m20.domain.ProductRepository;
 import ru.sprbut.m20.web.ProductController;
 import tools.jackson.databind.ObjectMapper;
-import java.math.BigDecimal;
-import java.util.List;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
-import org.mockito.ArgumentMatchers;
-import org.mockito.BDDMockito;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @DisplayName("Слайды 180–185 (СХЕМА 13): срезы поднимают разный объём контекста")
 final class SliceTests {
@@ -229,9 +231,17 @@ final class SliceTests {
         @DisplayName("GET возвращает список из мока")
         void getReturnsList() throws Exception {
             BDDMockito.given(this.catalog.available()).willReturn(
-                    List.of(new Product("SKU-1", "Кофемолка", new BigDecimal("4990.00"))));
-            this.mockMvc.perform(MockMvcRequestBuilders.get("/api/products"))
-                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    List.of(
+                        new Product(
+                            "SKU-1", "Кофемолка", new BigDecimal("4990.00")
+                        )
+                    ));
+            this.mockMvc.perform(
+                MockMvcRequestBuilders.get("/api/products")
+            )
+                    .andExpect(
+                        MockMvcResultMatchers.status().isOk()
+                    )
                     .andExpect(MockMvcResultMatchers.jsonPath("$[0].sku").value("SKU-1"))
                     .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("Кофемолка"));
         }
@@ -239,10 +249,18 @@ final class SliceTests {
         @Test
         @DisplayName("Отсутствующий товар превращается в 404 обработчиком исключений")
         void missingProductBecomes404() throws Exception {
-            BDDMockito.willThrow(new CatalogService.ProductNotFoundException("SKU-X"))
-                    .given(this.catalog).bySku("SKU-X");
-            this.mockMvc.perform(MockMvcRequestBuilders.get("/api/products/SKU-X"))
-                    .andExpect(MockMvcResultMatchers.status().isNotFound())
+            BDDMockito.willThrow(
+                new CatalogService.ProductNotFoundException("SKU-X")
+            )
+                    .given(
+                        this.catalog
+                    ).bySku("SKU-X");
+            this.mockMvc.perform(
+                MockMvcRequestBuilders.get("/api/products/SKU-X")
+            )
+                    .andExpect(
+                        MockMvcResultMatchers.status().isNotFound()
+                    )
                     .andExpect(MockMvcResultMatchers.content().string("Товар не найден: SKU-X"));
         }
 
@@ -250,12 +268,22 @@ final class SliceTests {
         @DisplayName("POST отдаёт 201 и тело созданного объекта")
         void postReturns201() throws Exception {
             BDDMockito.given(this.catalog.add(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-                    .willReturn(new Product("SKU-2", "Чайник", new BigDecimal("2990.00")));
-            final var request = new ProductController.CreateRequest(
-                    "SKU-2", "Чайник", new BigDecimal("2990.00"));
+                    .willReturn(
+                        new Product("SKU-2", "Чайник", new BigDecimal("2990.00"))
+                    );
+            final ProductController.CreateRequest request = new ProductController.CreateRequest(
+                    "SKU-2", "Чайник", new BigDecimal(
+                        "2990.00"
+                    ));
             this.mockMvc.perform(MockMvcRequestBuilders.post("/api/products")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(this.objectMapper.writeValueAsString(request)))
+                            .contentType(
+                                MediaType.APPLICATION_JSON
+                            )
+                            .content(
+                                this.objectMapper.writeValueAsString(
+                                    request
+                                )
+                            ))
                     .andExpect(MockMvcResultMatchers.status().isCreated())
                     .andExpect(MockMvcResultMatchers.jsonPath("$.sku").value("SKU-2"));
         }
@@ -264,10 +292,18 @@ final class SliceTests {
         @DisplayName("Дубликат превращается в 400")
         void duplicateBecomes400() throws Exception {
             BDDMockito.given(this.catalog.add(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-                    .willThrow(new IllegalArgumentException("Товар с артикулом SKU-2 уже есть"));
+                    .willThrow(
+                        new IllegalArgumentException(
+                            "Товар с артикулом SKU-2 уже есть"
+                        )
+                    );
             this.mockMvc.perform(MockMvcRequestBuilders.post("/api/products")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{\"sku\":\"SKU-2\",\"name\":\"Чайник\",\"price\":1}"))
+                            .contentType(
+                                MediaType.APPLICATION_JSON
+                            )
+                            .content(
+                                "{\"sku\":\"SKU-2\",\"name\":\"Чайник\",\"price\":1}"
+                            ))
                     .andExpect(MockMvcResultMatchers.status().isBadRequest());
         }
     }
@@ -313,8 +349,10 @@ final class SliceTests {
         @Test
         @DisplayName("Сериализация даёт ожидаемый JSON")
         void serialises() throws Exception {
-            final var view = new ProductController.ProductView(
-                    "SKU-1", "Кофемолка", new BigDecimal("4990.00"), true);
+            final ProductController.ProductView view = new ProductController.ProductView(
+                    "SKU-1", "Кофемолка", new BigDecimal(
+                        "4990.00"
+                    ), true);
             MatcherAssert.assertThat(
                 "serialisation cannot produce the expected JSON",
                 this.json.write(view).getJson(),
@@ -326,7 +364,8 @@ final class SliceTests {
         @DisplayName("Десериализация восстанавливает объект")
         void deserialises() throws Exception {
             final var parsed = this.json.parseObject(
-                    "{\"sku\":\"SKU-1\",\"name\":\"Кофемолка\",\"price\":4990.00,\"available\":true}");
+                "{\"sku\":\"SKU-1\",\"name\":\"Кофемолка\",\"price\":4990.00,\"available\":true}"
+            );
             MatcherAssert.assertThat(
                 "cannot verify that deserialises",
                 parsed.sku(),
@@ -335,7 +374,7 @@ final class SliceTests {
             MatcherAssert.assertThat(
                 "cannot verify that deserialises",
                 parsed.price(),
-                Matchers.comparesEqualTo(new java.math.BigDecimal("4990.00"))
+                Matchers.comparesEqualTo(new BigDecimal("4990.00"))
             );
         }
     }
@@ -344,13 +383,22 @@ final class SliceTests {
     @DisplayName("Без Spring вовсе — самый быстрый тест")
     final class PlainUnitTest {
 
+        // @checkstyle NonStaticMethodCheck (3 lines)
         @Test
         @DisplayName("Сервис тестируется обычным new, если зависимости внедрены конструктором")
         void serviceIsTestableWithoutSpring() {
-            final ProductRepository fakeRepository = org.mockito.Mockito.mock(ProductRepository.class);
-            BDDMockito.given(fakeRepository.findBySku("SKU-1"))
-                    .willReturn(java.util.Optional.of(
-                            new Product("SKU-1", "Кофемолка", new BigDecimal("4990.00"))));
+            final ProductRepository fakeRepository = Mockito.mock(ProductRepository.class);
+            BDDMockito.given(
+                fakeRepository.findBySku(
+                    "SKU-1"
+                )
+            )
+                    .willReturn(Optional.of(
+                            new Product(
+                                "SKU-1", "Кофемолка", new BigDecimal(
+                                    "4990.00"
+                                )
+                            )));
             final CatalogService service = new CatalogService(fakeRepository, "EUR");
             MatcherAssert.assertThat(
                 "cannot verify that service is testable without spring",
@@ -359,16 +407,25 @@ final class SliceTests {
             );
         }
 
+        // @checkstyle NonStaticMethodCheck (3 lines)
         @Test
         @DisplayName("Контроллер тоже: MockMvc умеет работать standalone")
         void controllerIsTestableStandalone() throws Exception {
-            final CatalogService catalog = org.mockito.Mockito.mock(CatalogService.class);
-            BDDMockito.given(catalog.available()).willReturn(List.of());
+            final CatalogService catalog = Mockito.mock(CatalogService.class);
+            BDDMockito.given(
+                catalog.available()
+            ).willReturn(List.of());
             final MockMvc standalone = MockMvcBuilders
-                    .standaloneSetup(new ProductController(catalog))
+                    .standaloneSetup(
+                        new ProductController(catalog)
+                    )
                     .build();
-            standalone.perform(MockMvcRequestBuilders.get("/api/products"))
-                    .andExpect(MockMvcResultMatchers.status().isOk())
+            standalone.perform(
+                MockMvcRequestBuilders.get("/api/products")
+            )
+                    .andExpect(
+                        MockMvcResultMatchers.status().isOk()
+                    )
                     .andExpect(MockMvcResultMatchers.content().json("[]"));
         }
     }
@@ -378,6 +435,7 @@ final class SliceTests {
      * @since 1.0
      */
     interface WebContextAware {
+
         WebApplicationContext context();
     }
 }

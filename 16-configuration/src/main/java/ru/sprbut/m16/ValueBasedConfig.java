@@ -63,7 +63,9 @@ public class ValueBasedConfig {
      * @param @Value("${sprbut.server.host}" Значение
      */
     public ValueBasedConfig(
-            @Value("${sprbut.server.host}") String host,
+            @Value(
+                "${sprbut.server.host}"
+            ) String host,
             @Value("${sprbut.server.region:eu-central}") String region,
             @Value("${sprbut.server.port}") int port,
             @Value("${sprbut.server.origins-csv}") List<String> origins,

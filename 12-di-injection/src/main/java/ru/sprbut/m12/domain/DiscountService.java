@@ -31,9 +31,13 @@ public class DiscountService {
      * @return Применение
      */
     // @checkstyle NonStaticMethodCheck (3 lines)
-    public BigDecimal apply(final BigDecimal amount, final boolean vip) {
+    public BigDecimal apply(
+        final BigDecimal amount, final boolean vip
+    ) {
         return vip
-                ? amount.multiply(new BigDecimal("0.9")).setScale(2, RoundingMode.HALF_UP)
+                ? amount.multiply(
+                    new BigDecimal("0.9")
+                ).setScale(2, RoundingMode.HALF_UP)
                 : amount;
     }
 }

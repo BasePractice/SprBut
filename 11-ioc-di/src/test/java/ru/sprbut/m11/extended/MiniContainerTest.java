@@ -162,7 +162,8 @@ final class MiniContainerTest {
         @DisplayName("Кандидатов слишком много — аналог NoUniqueBeanDefinitionException")
         void ambiguousDependency() {
             final MiniContainer container = new MiniContainer(
-                    Components.CardPayment.class, Components.CashPayment.class);
+                Components.CardPayment.class, Components.CashPayment.class
+            );
             MatcherAssert.assertThat(
                 "ambiguous candidates cannot be listed in the failure",
                 Assertions.assertThrows(
@@ -177,7 +178,8 @@ final class MiniContainerTest {
         @DisplayName("Цикл через конструкторы — аналог BeanCurrentlyInCreationException")
         void circularDependency() {
             final MiniContainer container = new MiniContainer(
-                    Components.AlphaService.class, Components.BetaService.class);
+                Components.AlphaService.class, Components.BetaService.class
+            );
             MatcherAssert.assertThat(
                 "circular dependency cannot name both beans",
                 Assertions.assertThrows(
@@ -192,8 +194,9 @@ final class MiniContainerTest {
         @DisplayName("Несколько конструкторов без явного указания — контейнер отказывается гадать")
         void ambiguousConstructor() {
             final MiniContainer container = new MiniContainer(
-                    Components.TwoConstructors.class, Components.Repository.class,
-                    Components.Clock.class);
+                Components.TwoConstructors.class, Components.Repository.class,
+                Components.Clock.class
+            );
             MatcherAssert.assertThat(
                 "ambiguous constructor cannot make the container refuse to guess",
                 Assertions.assertThrows(

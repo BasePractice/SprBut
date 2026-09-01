@@ -31,7 +31,11 @@ public final class RangeRule implements Rule {
         if (range == null || value == null) {
             return List.of();
         }
-        if (!(value instanceof Number number)) {
+        if (
+            !(
+                value instanceof Number number
+            )
+        ) {
             return List.of(new Violation(
                 field.getName(),
                 "@Range применим только к числам, а поле имеет тип "
@@ -39,10 +43,14 @@ public final class RangeRule implements Rule {
                 value
             ));
         }
-        if (number.longValue() < range.min() || number.longValue() > range.max()) {
+        if (
+            number.longValue() < range.min() || number.longValue() > range.max()
+        ) {
             return List.of(new Violation(
                 field.getName(),
-                String.format("%s [%s, %s]", range.message(), range.min(), range.max()),
+                String.format(
+                    "%s [%s, %s]", range.message(), range.min(), range.max()
+                ),
                 value
             ));
         }

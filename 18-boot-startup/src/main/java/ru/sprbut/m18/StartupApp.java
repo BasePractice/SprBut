@@ -51,7 +51,9 @@ public class StartupApp {
      */
     public static ConfigurableApplicationContext run(final String... args) {
         final SpringApplication application = new SpringApplication(StartupApp.class);
-        application.setBannerMode(Banner.Mode.OFF);
+        application.setBannerMode(
+            Banner.Mode.OFF
+        );
         application.addListeners(
                 new StartupListeners.Starting(),
                 new StartupListeners.EnvironmentPrepared(),
@@ -69,9 +71,13 @@ public class StartupApp {
      * Вариант запуска, который падает на создании бина — чтобы увидеть ApplicationFailedEvent.
      * @param args Аргументы
      */
-    public static void runFailing(final String... args) {
+    public static void runFailing(
+        final String... args
+    ) {
         final SpringApplication application =
-                new SpringApplication(FailingConfig.class);
+                new SpringApplication(
+                    FailingConfig.class
+                );
         application.setBannerMode(Banner.Mode.OFF);
         application.addListeners(new StartupListeners.Ready(), new StartupListeners.Failed());
         application.run(args);

@@ -89,9 +89,13 @@ public final class CheckoutFacade {
      * @param vip Признак привилегированного клиента
      * @return Регистрирует покупателя. Объект собирается сгенерированным билдером — ни одного вызова сеттера в этом коде нет
      */
-    public Customer register(final String id, final String name, final String email, final int age, final boolean vip) {
+    public Customer register(
+        final String id, final String name, final String email, final int age, final boolean vip
+    ) {
         final Customer customer = CustomerBuilder.create()
-                .id(id)
+                .id(
+                    id
+                )
                 .name(name)
                 .email(email)
                 .age(age)
@@ -112,13 +116,21 @@ public final class CheckoutFacade {
      * @return Оформляет заказ. Билдер называется {@code OrderMaker} — суффикс задан элементом аннотации {@code @GenerateBuilder(suffix = "Maker")}
      */
     public Order checkout(final String customerId, final BigDecimal total, final LocalDate date) {
-        final Customer customer = this.customers.findById(customerId)
-                .orElseThrow(() -> new IllegalArgumentException("Нет покупателя " + customerId));
+        final Customer customer = this.customers.findById(
+            customerId
+        )
+                .orElseThrow(
+                    () -> new IllegalArgumentException("Нет покупателя " + customerId)
+                );
         final BigDecimal finalTotal = customer.isVip()
-                ? total.multiply(new BigDecimal("0.9"))
+                ? total.multiply(
+                    new BigDecimal("0.9")
+                )
                 : total;
         final Order order = OrderMaker.create()
-                .number("ORD-" + (this.orders.count() + 1))
+                .number(
+                    "ORD-" + (this.orders.count() + 1)
+                )
                 .customerId(customerId)
                 .total(finalTotal)
                 .placedOn(date)

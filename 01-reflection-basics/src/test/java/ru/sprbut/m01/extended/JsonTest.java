@@ -184,9 +184,12 @@ final class JsonTest {
     void writesEmptyObject() {
         MatcherAssert.assertThat(
             "field free object cannot yield an empty JSON object",
-            new Json(new Object() { }
-).text(),
-            Matchers.equalTo("{}")
+            new Json(
+                new Object() { }
+            ).text(),
+            Matchers.equalTo(
+                "{}"
+            )
         );
     }
 

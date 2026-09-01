@@ -6,13 +6,7 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m07;
 
-import javax.annotation.processing.Processor;
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticCollector;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URL;
@@ -26,6 +20,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import javax.annotation.processing.Processor;
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
 
 /**
  * Стенд для запуска процессора аннотаций из теста.
@@ -40,6 +41,103 @@ import java.util.stream.Stream;
 public final class CompilationHarness {
 
     private CompilationHarness() {
+    }
+
+    /**
+     * Компилирует исходники с указанными процессорами.
+     * @param workDir    временный каталог теста
+     * @param sources    что компилировать
+     * @param processor  процессор, который нужно запустить
+     * @param options    дополнительные опции javac (например, {@code -Akey=value})
+     * @return Компилирует исходники с указанными процессорами
+     */
+    public static Result compile(final Path workDir, final List<Source> sources, final Processor processor, final String... options) {
+        final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        if (compiler == null) {
+            throw new IllegalStateException("Нет системного компилятора: тест требует JDK, а не JRE");
+        }
+        final Path sourceDir = workDir.resolve("src");
+        final Path classesDir = workDir.resolve("classes");
+        final Path generatedDir = workDir.resolve("generated");
+        try {
+            Files.createDirectories(classesDir);
+            Files.createDirectories(generatedDir);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        final List<Path> files = sources.stream().map(
+            s -> s.writeTo(sourceDir)
+        ).toList();
+        final DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+        try (StandardJavaFileManager fileManager =
+                     compiler.getStandardFileManager(
+                         diagnostics, null, StandardCharsets.UTF_8
+                     )) {
+            final List<String> allOptions = new ArrayList<>(List.of(
+                    "-d", classesDir.toString(),
+                    "-s", generatedDir.toString(),
+                    "-classpath", System.getProperty(
+                        "java.class.path"
+                    ),
+                    "--release", "17"));
+            allOptions.addAll(
+                List.of(options)
+            );
+            final JavaCompiler.CompilationTask task = compiler.getTask(
+                    null,
+                    fileManager,
+                    diagnostics,
+                    allOptions,
+                    null,
+                    fileManager.getJavaFileObjectsFromPaths(
+                        files
+                    ));
+            task.setProcessors(
+                List.of(processor)
+            );
+            final boolean success = task.call();
+            return new Result(success, diagnostics.getDiagnostics(),
+                    readGenerated(
+                        generatedDir
+                    ), classesDir);
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private static Map<String, String> readGenerated(final Path generatedDir) {
+        final Map<String, String> result = new LinkedHashMap<>();
+        try (Stream<Path> walk = Files.walk(generatedDir)) {
+            walk.filter(
+                p -> p.toString().endsWith(
+                    ".java"
+                )
+            )
+                    .sorted(
+                        Comparator.comparing(
+                            Path::toString
+                        )
+                    )
+                    .forEach(p -> {
+                        final String relative = generatedDir.relativize(p).toString();
+                        final String name = relative.substring(
+                            0, relative.length() - ".java".length()
+                        )
+                                .replace(
+                                    File.separatorChar, '.'
+                                );
+                        try {
+                            result.put(name, Files.readString(p, StandardCharsets.UTF_8));
+                        } catch (final IOException e) {
+                            throw new UncheckedIOException(
+                                e
+                            );
+                        }
+                    });
+        } catch (final IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return result;
     }
 
     /**
@@ -72,9 +170,13 @@ public final class CompilationHarness {
          * @param kind Вид
          * @return Сообщения
          */
-        public List<String> messages(final Diagnostic.Kind kind) {
+        public List<String> messages(
+            final Diagnostic.Kind kind
+        ) {
             return this.diagnostics.stream()
-                    .filter(d -> d.getKind() == kind)
+                    .filter(
+                        d -> d.getKind() == kind
+                    )
                     .map(d -> d.getMessage(null))
                     .toList();
         }
@@ -102,9 +204,15 @@ public final class CompilationHarness {
          */
         public String source(final String qualifiedName) {
             final String code = this.generatedSources.get(qualifiedName);
-            if (code == null) {
-                throw new AssertionError("Не сгенерирован " + qualifiedName
-                        + "; есть только " + this.generatedSources.keySet());
+            if (
+                code == null
+            ) {
+                throw new AssertionError(
+                    "Не сгенерирован "
+                        + qualifiedName
+                        + "; есть только "
+                        + this.generatedSources.keySet()
+                );
             }
             return code;
         }
@@ -117,81 +225,13 @@ public final class CompilationHarness {
         public Class<?> load(final String qualifiedName) {
             try {
                 final URLClassLoader loader = new URLClassLoader(
-                        new URL[]{this.classesDir.toUri().toURL()},
-                        CompilationHarness.class.getClassLoader());
+                    new URL[]{this.classesDir.toUri().toURL()},
+                    CompilationHarness.class.getClassLoader()
+                );
                 return Class.forName(qualifiedName, true, loader);
             } catch (final Exception e) {
                 throw new AssertionError("Не удалось загрузить " + qualifiedName, e);
             }
         }
-    }
-
-    /**
-     * Компилирует исходники с указанными процессорами.
-     * @param workDir    временный каталог теста
-     * @param sources    что компилировать
-     * @param processor  процессор, который нужно запустить
-     * @param options    дополнительные опции javac (например, {@code -Akey=value})
-     * @return Компилирует исходники с указанными процессорами
-     */
-    public static Result compile(final Path workDir, final List<Source> sources, final Processor processor, final String... options) {
-        final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        if (compiler == null) {
-            throw new IllegalStateException("Нет системного компилятора: тест требует JDK, а не JRE");
-        }
-        final Path sourceDir = workDir.resolve("src");
-        final Path classesDir = workDir.resolve("classes");
-        final Path generatedDir = workDir.resolve("generated");
-        try {
-            Files.createDirectories(classesDir);
-            Files.createDirectories(generatedDir);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
-        final List<Path> files = sources.stream().map(s -> s.writeTo(sourceDir)).toList();
-        final DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-        try (StandardJavaFileManager fileManager =
-                     compiler.getStandardFileManager(diagnostics, null, StandardCharsets.UTF_8)) {
-            final List<String> allOptions = new ArrayList<>(List.of(
-                    "-d", classesDir.toString(),
-                    "-s", generatedDir.toString(),
-                    "-classpath", System.getProperty("java.class.path"),
-                    "--release", "17"));
-            allOptions.addAll(List.of(options));
-            final JavaCompiler.CompilationTask task = compiler.getTask(
-                    null,
-                    fileManager,
-                    diagnostics,
-                    allOptions,
-                    null,
-                    fileManager.getJavaFileObjectsFromPaths(files));
-            task.setProcessors(List.of(processor));
-            final boolean success = task.call();
-            return new Result(success, diagnostics.getDiagnostics(),
-                    readGenerated(generatedDir), classesDir);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    private static Map<String, String> readGenerated(final Path generatedDir) {
-        final Map<String, String> result = new LinkedHashMap<>();
-        try (Stream<Path> walk = Files.walk(generatedDir)) {
-            walk.filter(p -> p.toString().endsWith(".java"))
-                    .sorted(Comparator.comparing(Path::toString))
-                    .forEach(p -> {
-                        final String relative = generatedDir.relativize(p).toString();
-                        final String name = relative.substring(0, relative.length() - ".java".length())
-                                .replace(java.io.File.separatorChar, '.');
-                        try {
-                            result.put(name, Files.readString(p, StandardCharsets.UTF_8));
-                        } catch (final IOException e) {
-                            throw new UncheckedIOException(e);
-                        }
-                    });
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
-        }
-        return result;
     }
 }

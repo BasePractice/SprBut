@@ -6,13 +6,14 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m11.step2;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 import ru.sprbut.m11.domain.EmailSender;
 import ru.sprbut.m11.domain.NotificationSender;
 import ru.sprbut.m11.domain.PriceCalculator;
 import ru.sprbut.m11.domain.SmsSender;
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Слайд 85: «Фабрика — обеспечивает создание экземпляров объектов.
@@ -34,10 +35,10 @@ public class ObjectFactory {
      * Синглтоны.
      */
     private final Map<String, Object> singletons = new HashMap<>();
+
     /**
      * Канал.
      */
-
     private final String channel;
 
     /**
@@ -54,7 +55,9 @@ public class ObjectFactory {
      */
     public NotificationSender notificationSender() {
         return (NotificationSender) this.singleton("sender",
-                () -> "sms".equals(this.channel) ? new SmsSender() : new EmailSender());
+                () -> "sms".equals(
+                    this.channel
+                ) ? new SmsSender() : new EmailSender());
     }
 
     /**
@@ -63,7 +66,11 @@ public class ObjectFactory {
      */
     public PriceCalculator priceCalculator() {
         return (PriceCalculator) this.singleton("calculator",
-                () -> new PriceCalculator(new BigDecimal("0.20")));
+                () -> new PriceCalculator(
+                    new BigDecimal(
+                        "0.20"
+                    )
+                ));
     }
 
     /**
@@ -72,7 +79,17 @@ public class ObjectFactory {
      */
     public ManualOrderService orderService() {
         return (ManualOrderService) this.singleton("orderService",
-                () -> new ManualOrderService(this.notificationSender(), this.priceCalculator()));
+                () -> new ManualOrderService(
+                    this.notificationSender(), this.priceCalculator()
+                ));
+    }
+
+    /**
+     * Количество.
+     * @return Количество
+     */
+    public int createdCount() {
+        return this.singletons.size();
     }
 
     /**
@@ -87,7 +104,7 @@ public class ObjectFactory {
      * @param name Имя
      * @return Ленивое создание с кэшированием
      */
-    private Object singleton(final String name, final java.util.function.Supplier<Object> factory) {
+    private Object singleton(final String name, final Supplier<Object> factory) {
         final Object existing = this.singletons.get(name);
         if (existing != null) {
             return existing;
@@ -95,13 +112,5 @@ public class ObjectFactory {
         final Object created = factory.get();
         this.singletons.put(name, created);
         return created;
-    }
-
-    /**
-     * Количество.
-     * @return Количество
-     */
-    public int createdCount() {
-        return this.singletons.size();
     }
 }

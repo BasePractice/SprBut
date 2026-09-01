@@ -69,7 +69,9 @@ public final class TransactionalDemo {
         }
 
         @Override
-        public TransactionStatus getTransaction(final TransactionDefinition definition)
+        public TransactionStatus getTransaction(
+            final TransactionDefinition definition
+        )
                 throws TransactionException {
             LOG.add("begin");
             return new SimpleTransactionStatus();

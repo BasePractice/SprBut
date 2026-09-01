@@ -46,9 +46,13 @@ public class OrderRepository {
      * @param customerId Идентификатор
      * @return Поиск по клиенту
      */
-    public List<Order> findByCustomer(final String customerId) {
+    public List<Order> findByCustomer(
+        final String customerId
+    ) {
         return this.orders.stream()
-                .filter(o -> customerId.equals(o.getCustomerId()))
+                .filter(
+                    o -> customerId.equals(o.getCustomerId())
+                )
                 .toList();
     }
 

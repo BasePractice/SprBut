@@ -57,7 +57,9 @@ public class AuditBeanPostProcessor implements BeanPostProcessor {
                     new Class<?>[]{Auditable.class},
                     (proxy, method, args) -> {
                         final Object result = method.invoke(auditable, args);
-                        return "describe".equals(method.getName()) ? result + " (через прокси)" : result;
+                        return "describe".equals(
+                            method.getName()
+                        ) ? result + " (через прокси)" : result;
                     });
         }
         return bean;

@@ -91,7 +91,11 @@ public final class Generated {
         return Arrays.stream(this.type.getDeclaredMethods())
             .filter(candidate -> candidate.getName().equals(method))
             .findFirst()
-            .map(candidate -> Modifier.toString(candidate.getModifiers()))
+            .map(
+                candidate -> Modifier.toString(
+                    candidate.getModifiers()
+                )
+            )
             .orElseThrow(() -> new IllegalArgumentException(
                 "Нет метода '" + method + "' в " + this.type.getSimpleName()
             ));

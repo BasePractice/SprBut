@@ -29,7 +29,9 @@ public final class MaxLengthRule implements Rule {
             return List.of();
         }
         final int length = String.valueOf(value).length();
-        if (length > limit.value()) {
+        if (
+            length > limit.value()
+        ) {
             return List.of(new Violation(
                 field.getName(),
                 "длина " + length + " превышает максимум " + limit.value(),

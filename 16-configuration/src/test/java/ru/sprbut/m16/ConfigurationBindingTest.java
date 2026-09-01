@@ -25,6 +25,53 @@ final class ConfigurationBindingTest {
 
     @Nested
     @SpringBootTest
+    @TestPropertySource(properties = {
+            "sprbut.server.host=overridden.example.com",
+            "sprbut.server.port=9999"
+    })
+
+/**
+ * Слайды 133–136: приоритеты источников.
+ * @since 1.0
+ */
+    @DisplayName("Слайды 133–136: приоритеты источников")
+    final class Priority {
+
+        /**
+         * Свойства.
+         * @since 1.0
+         */
+        @Autowired
+        ServerProperties properties;
+
+        @Test
+        @DisplayName("Более приоритетный источник перекрывает файл")
+        void higherPrioritySourceWins() {
+            MatcherAssert.assertThat(
+                "cannot verify that higher priority source wins",
+                this.properties.host(),
+                Matchers.equalTo("overridden.example.com")
+            );
+            MatcherAssert.assertThat(
+                "cannot verify that higher priority source wins",
+                this.properties.port(),
+                Matchers.equalTo(9999)
+            );
+        }
+
+        @Test
+        @DisplayName("Незатронутые ключи по-прежнему берутся из файла")
+        void untouchedKeysComeFromTheFile() {
+            MatcherAssert.assertThat(
+                "cannot verify that untouched keys come from the file",
+                this.properties.timeout(),
+                Matchers.equalTo(Duration.ofSeconds(30))
+            );
+        }
+    }
+
+    @Nested
+    @SpringBootTest
 /**
  * @ConfigurationProperties: типизированная группа настроек.
  * @since 1.0
@@ -267,51 +314,6 @@ final class ConfigurationBindingTest {
                 "cannot verify that evaluates spel",
                 this.config.doublePort(),
                 Matchers.equalTo(16_160)
-            );
-        }
-    }
-
-    @Nested
-    @SpringBootTest
-    @TestPropertySource(properties = {
-            "sprbut.server.host=overridden.example.com",
-            "sprbut.server.port=9999"
-    })
-/**
- * Слайды 133–136: приоритеты источников.
- * @since 1.0
- */
-    @DisplayName("Слайды 133–136: приоритеты источников")
-    final class Priority {
-
-        /**
-         * Свойства.
-         */
-        @Autowired
-        ServerProperties properties;
-
-        @Test
-        @DisplayName("Более приоритетный источник перекрывает файл")
-        void higherPrioritySourceWins() {
-            MatcherAssert.assertThat(
-                "cannot verify that higher priority source wins",
-                this.properties.host(),
-                Matchers.equalTo("overridden.example.com")
-            );
-            MatcherAssert.assertThat(
-                "cannot verify that higher priority source wins",
-                this.properties.port(),
-                Matchers.equalTo(9999)
-            );
-        }
-
-        @Test
-        @DisplayName("Незатронутые ключи по-прежнему берутся из файла")
-        void untouchedKeysComeFromTheFile() {
-            MatcherAssert.assertThat(
-                "cannot verify that untouched keys come from the file",
-                this.properties.timeout(),
-                Matchers.equalTo(Duration.ofSeconds(30))
             );
         }
     }

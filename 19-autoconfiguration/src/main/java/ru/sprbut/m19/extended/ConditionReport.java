@@ -6,12 +6,13 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m19.extended;
 
-import org.springframework.boot.autoconfigure.condition.ConditionEvaluationReport;
-import org.springframework.context.ConfigurableApplicationContext;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.boot.autoconfigure.condition.ConditionEvaluationReport;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * <b>Расширенный пример модуля 19.</b>
@@ -47,17 +48,15 @@ public final class ConditionReport {
         this.context = context;
     }
 
-    private ConditionEvaluationReport evaluated() {
-        return ConditionEvaluationReport.get(this.context.getBeanFactory());
-    }
-
     /**
      * Конфигурации, условия которых выполнились.
      * @return Конфигурации, условия которых выполнились
      */
     public List<String> included() {
         return this.evaluated().getConditionAndOutcomesBySource().entrySet().stream()
-                .filter(entry -> entry.getValue().isFullMatch())
+                .filter(
+                    entry -> entry.getValue().isFullMatch()
+                )
                 .map(Map.Entry::getKey)
                 .sorted()
                 .toList();
@@ -69,7 +68,9 @@ public final class ConditionReport {
      */
     public List<String> excluded() {
         return this.evaluated().getConditionAndOutcomesBySource().entrySet().stream()
-                .filter(entry -> !entry.getValue().isFullMatch())
+                .filter(
+                    entry -> !entry.getValue().isFullMatch()
+                )
                 .map(Map.Entry::getKey)
                 .sorted()
                 .toList();
@@ -80,16 +81,24 @@ public final class ConditionReport {
      * @param nameFragment Имя
      * @return Полный отчёт по всем конфигурациям, чьё имя содержит фрагмент
      */
-    public Map<String, ConditionEntry> matching(final String nameFragment) {
+    public Map<String, ConditionEntry> matching(
+        final String nameFragment
+    ) {
         final Map<String, ConditionEntry> result = new LinkedHashMap<>();
         this.evaluated().getConditionAndOutcomesBySource().forEach((source, outcomes) -> {
             if (!source.contains(nameFragment)) {
                 return;
             }
-            final List<String> reasons = new java.util.ArrayList<>();
+            final List<String> reasons = new ArrayList<>();
             outcomes.forEach(outcome -> reasons.add(
-                    (outcome.getOutcome().isMatch() ? "✓ " : "✗ ") + outcome.getOutcome().getMessage()));
-            result.put(source, new ConditionEntry(source, outcomes.isFullMatch(), reasons));
+                    (
+                        outcome.getOutcome().isMatch() ? "✓ " : "✗ "
+                    ) + outcome.getOutcome().getMessage()));
+            result.put(
+                source, new ConditionEntry(
+                    source, outcomes.isFullMatch(), reasons
+                )
+            );
         });
         return result;
     }
@@ -100,8 +109,12 @@ public final class ConditionReport {
      * @return Почему конфигурация не применилась — дословная формулировка условия
      */
     public Optional<String> whyExcluded(final String nameFragment) {
-        return this.matching(nameFragment).values().stream()
-                .filter(entry -> !entry.matched())
+        return this.matching(
+            nameFragment
+        ).values().stream()
+                .filter(
+                    entry -> !entry.matched()
+                )
                 .flatMap(entry -> entry.reasons().stream())
                 .filter(reason -> reason.startsWith("✗"))
                 .findFirst();
@@ -113,8 +126,12 @@ public final class ConditionReport {
      * @return Почему конфигурация применилась
      */
     public Optional<String> whyIncluded(final String nameFragment) {
-        return this.matching(nameFragment).values().stream()
-                .filter(ConditionEntry::matched)
+        return this.matching(
+            nameFragment
+        ).values().stream()
+                .filter(
+                    ConditionEntry::matched
+                )
                 .flatMap(entry -> entry.reasons().stream())
                 .findFirst();
     }
@@ -137,13 +154,27 @@ public final class ConditionReport {
         final StringBuilder sb = new StringBuilder("Отчёт об условиях для '" + nameFragment + "':\n");
         final Map<String, ConditionEntry> entries = this.matching(nameFragment);
         if (entries.isEmpty()) {
-            return sb.append("  (нет подходящих конфигураций)").toString();
+            return sb.append(
+                "  (нет подходящих конфигураций)"
+            ).toString();
         }
         entries.forEach((source, entry) -> {
-            sb.append("  ").append(entry.matched() ? "ПРИМЕНЕНА" : "ПРОПУЩЕНА")
-                    .append(": ").append(source).append('\n');
-            entry.reasons().forEach(reason -> sb.append("      ").append(reason).append('\n'));
+            sb.append(
+                "  "
+            ).append(entry.matched() ? "ПРИМЕНЕНА" : "ПРОПУЩЕНА")
+                    .append(
+                        ": "
+                    ).append(source).append('\n');
+            entry.reasons().forEach(
+                reason -> sb.append(
+                    "      "
+                ).append(reason).append('\n')
+            );
         });
         return sb.toString();
+    }
+
+    private ConditionEvaluationReport evaluated() {
+        return ConditionEvaluationReport.get(this.context.getBeanFactory());
     }
 }

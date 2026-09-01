@@ -63,7 +63,9 @@ public final class StartupHooks {
             // Программное добавление источника настроек — типичная задача инициализатора
             context.getEnvironment().getPropertySources().addFirst(
                     new MapPropertySource("initializer",
-                            Map.of("sprbut.startup.injected", "да")));
+                            Map.of(
+                                "sprbut.startup.injected", "да"
+                            )));
         }
     }
 
@@ -82,10 +84,13 @@ public final class StartupHooks {
         }
 
         @Override
-        public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory)
+        public void postProcessBeanFactory(
+            final ConfigurableListableBeanFactory beanFactory
+        )
                 throws BeansException {
-            StartupLog.record("6-BeanFactoryPostProcessor:определений="
-                    + beanFactory.getBeanDefinitionCount());
+            StartupLog.record(
+                "6-BeanFactoryPostProcessor:определений=" + beanFactory.getBeanDefinitionCount()
+            );
         }
     }
 
