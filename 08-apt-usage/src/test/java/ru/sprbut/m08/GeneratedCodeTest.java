@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import ru.sprbut.m08.generated.ModuleRegistry;
 import ru.sprbut.m08.model.Customer;
 import ru.sprbut.m08.model.CustomerBuilder;
-import ru.sprbut.m08.model.Order;
 import ru.sprbut.m08.model.OrderMaker;
 import ru.sprbut.m08.service.CustomerRepository;
 import ru.sprbut.m08.service.OrderRepository;
@@ -43,19 +42,17 @@ final class GeneratedCodeTest {
         @Test
         @DisplayName("CustomerBuilder существует и собирает объект")
         void builderBuildsObject() {
-            final Customer customer = CustomerBuilder.create()
-                    .id(
-                        "C-1"
-                    )
+            MatcherAssert.assertThat(
+                "generated builder cannot assemble the object",
+                CustomerBuilder.create()
+                    .id("C-1")
                     .name("Иванов")
                     .email("ivanov@mail.ru")
                     .age(42)
                     .vip(true)
                     .balance(new BigDecimal("100.50"))
-                    .build();
-            MatcherAssert.assertThat(
-                "generated builder cannot assemble the object",
-                customer.getBalance(),
+                    .build()
+                    .getBalance(),
                 Matchers.comparesEqualTo(new BigDecimal("100.50"))
             );
         }
@@ -63,10 +60,9 @@ final class GeneratedCodeTest {
         @Test
         @DisplayName("Незаданные поля остаются со значениями по умолчанию Java")
         void unsetFieldsKeepJavaDefaults() {
-            final Customer customer = CustomerBuilder.create().id("C-2").build();
             MatcherAssert.assertThat(
                 "unset field cannot keep the Java default",
-                customer.getName(),
+                CustomerBuilder.create().id("C-2").build().getName(),
                 Matchers.nullValue()
             );
         }
@@ -85,15 +81,13 @@ final class GeneratedCodeTest {
         @Test
         @DisplayName("Суффикс имени взят из @GenerateBuilder(suffix = \"Maker\")")
         void suffixComesFromAnnotation() {
-            final Order order = OrderMaker.create()
-                    .number(
-                        "ORD-1"
-                    )
-                    .customerId("C-1")
-                    .total(new BigDecimal("999"))
-                    .placedOn(LocalDate.of(2026, 7, 30))
-                    .status("NEW")
-                    .build();
+            OrderMaker.create()
+                .number("ORD-1")
+                .customerId("C-1")
+                .total(new BigDecimal("999"))
+                .placedOn(LocalDate.of(2026, 7, 30))
+                .status("NEW")
+                .build();
             MatcherAssert.assertThat(
                 "suffix element cannot rename the generated builder",
                 OrderMaker.class.getSimpleName(),
@@ -127,9 +121,8 @@ final class GeneratedCodeTest {
             MatcherAssert.assertThat(
                 "static field cannot stay out of the generated builder",
                 Arrays.stream(CustomerBuilder.class.getDeclaredMethods())
-                    .map(
-                        Method::getName
-                    ).toList(),
+                    .map(Method::getName)
+                    .toList(),
                 Matchers.containsInAnyOrder(
                     "create", "build", "id", "name", "email", "age", "vip", "balance"
                 )
@@ -208,13 +201,11 @@ final class GeneratedCodeTest {
         }
 
         @Test
-        @DisplayName("Объекты создаются конструктором, а не рефлексией — это работает в native image")
+        @DisplayName("Объекты создаются конструктором, а не рефлексией")
         void createsWithoutReflection() {
-            // В сгенерированном коде лежит Xxx::new, а не Class.forName(...).newInstance()
-            final Object created = ModuleRegistry.create("customers");
             MatcherAssert.assertThat(
                 "generated factory cannot create the object without reflection",
-                ((CustomerRepository) created).count(),
+                ((CustomerRepository) ModuleRegistry.create("customers")).count(),
                 Matchers.equalTo(0)
             );
         }
@@ -241,7 +232,6 @@ final class GeneratedCodeTest {
         @Test
         @DisplayName("Поэтому зависимость на процессор нужна только на этапе компиляции")
         void processorIsCompileTimeOnly() {
-            // scope=provided в pom.xml: в runtime-classpath приложения этих классов нет
             MatcherAssert.assertThat(
                 "processor dependency cannot stay compile time only",
                 Customer.class.getDeclaredAnnotations(),

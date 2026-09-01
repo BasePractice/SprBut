@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// customerId — имя поля сгенерированного билдера, менять его нельзя
+// @checkstyle ParameterNameCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m08.extended;
 
@@ -41,16 +43,19 @@ import ru.sprbut.m08.service.OrderRepository;
  *
  * @since 1.0
  */
+@SuppressWarnings("PMD.OnlyOneConstructorShouldDoInitialization")
 public final class CheckoutFacade {
 
     /**
      * Клиенты.
      */
     private final CustomerRepository customers;
+
     /**
      * Заказы.
      */
     private final OrderRepository orders;
+
     /**
      * Аудит.
      */
@@ -58,8 +63,12 @@ public final class CheckoutFacade {
 
     /**
      * Зависимости достаются из сгенерированного реестра по имени.
-     * Это compile-time аналог {@code applicationContext.getBean("customers")} —
-     * только список бинов известен уже на этапе сборки.
+     *
+     * <p>Это compile-time аналог {@code applicationContext.getBean("customers")} —
+     * только список бинов известен уже на этапе сборки, а значит вызовы
+     * реестра в конструкторе тут и есть предмет разговора.</p>
+     *
+     * @checkstyle ConstructorsCodeFreeCheck (8 lines)
      */
     public CheckoutFacade() {
         this.customers = (CustomerRepository) ModuleRegistry.create("customers");
@@ -72,8 +81,10 @@ public final class CheckoutFacade {
      * @param customers Клиенты
      * @param orders Заказы
      * @param audit Аудит
+     * @checkstyle ConstructorsOrderCheck (8 lines)
      */
-    public CheckoutFacade(final CustomerRepository customers, final OrderRepository orders, final AuditLog audit) {
+    public CheckoutFacade(final CustomerRepository customers, final OrderRepository orders,
+        final AuditLog audit) {
         this.customers = customers;
         this.orders = orders;
         this.audit = audit;
@@ -87,23 +98,22 @@ public final class CheckoutFacade {
      * @param email Адрес почты
      * @param age Возраст
      * @param vip Признак привилегированного клиента
-     * @return Регистрирует покупателя. Объект собирается сгенерированным билдером — ни одного вызова сеттера в этом коде нет
+     * @return Зарегистрированный покупатель
+     * @checkstyle ParameterNumberCheck (5 lines)
      */
     public Customer register(
         final String id, final String name, final String email, final int age, final boolean vip
     ) {
         final Customer customer = CustomerBuilder.create()
-                .id(
-                    id
-                )
-                .name(name)
-                .email(email)
-                .age(age)
-                .vip(vip)
-                .balance(BigDecimal.ZERO)
-                .build();
+            .id(id)
+            .name(name)
+            .email(email)
+            .age(age)
+            .vip(vip)
+            .balance(BigDecimal.ZERO)
+            .build();
         this.customers.save(customer);
-        this.audit.record("зарегистрирован " + id);
+        this.audit.record(String.format("зарегистрирован %s", id));
         return customer;
     }
 
@@ -113,31 +123,31 @@ public final class CheckoutFacade {
      * @param customerId Идентификатор
      * @param total Итоговая сумма
      * @param date Дата
-     * @return Оформляет заказ. Билдер называется {@code OrderMaker} — суффикс задан элементом аннотации {@code @GenerateBuilder(suffix = "Maker")}
+     * @return Оформленный заказ
      */
     public Order checkout(final String customerId, final BigDecimal total, final LocalDate date) {
-        final Customer customer = this.customers.findById(
-            customerId
-        )
-                .orElseThrow(
-                    () -> new IllegalArgumentException("Нет покупателя " + customerId)
-                );
-        final BigDecimal finalTotal = customer.isVip()
-                ? total.multiply(
-                    new BigDecimal("0.9")
-                )
-                : total;
+        final Customer customer = this.customers.findById(customerId).orElseThrow(
+            () -> new IllegalArgumentException(
+                String.format("Нет покупателя %s", customerId)
+            )
+        );
+        final BigDecimal charged;
+        if (customer.isVip()) {
+            charged = total.multiply(new BigDecimal("0.9"));
+        } else {
+            charged = total;
+        }
         final Order order = OrderMaker.create()
-                .number(
-                    String.format("ORD-%s", (this.orders.count() + 1))
-                )
-                .customerId(customerId)
-                .total(finalTotal)
-                .placedOn(date)
-                .status("NEW")
-                .build();
+            .number(String.format("ORD-%s", this.orders.count() + 1))
+            .customerId(customerId)
+            .total(charged)
+            .placedOn(date)
+            .status("NEW")
+            .build();
         this.orders.save(order);
-        this.audit.record("заказ " + order.getNumber() + " на " + finalTotal);
+        this.audit.record(
+            String.format("заказ %s на %s", order.getNumber(), charged)
+        );
         return order;
     }
 
@@ -160,9 +170,10 @@ public final class CheckoutFacade {
 
     /**
      * Что вообще есть в сгенерированном реестре.
-     * @return Что вообще есть в сгенерированном реестре
+     * @return Имена, объявленные в сгенерированном реестре
+     * @checkstyle NonStaticMethodCheck (4 lines)
      */
-    public static Set<String> registeredNames() {
+    public Set<String> registeredNames() {
         return ModuleRegistry.names();
     }
 }

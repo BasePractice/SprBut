@@ -3,13 +3,17 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// имена полей и сеттеры — предмет модуля: по ним процессор строит билдер
+// @checkstyle MemberNameCheck disable
+// @checkstyle ParameterNameCheck disable
+// @checkstyle HiddenFieldCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m08.model;
 
-import ru.sprbut.m07.api.GenerateBuilder;
-import ru.sprbut.m07.api.Todo;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import ru.sprbut.m07.api.GenerateBuilder;
+import ru.sprbut.m07.api.Todo;
 
 /**
  * Второй бин с генерацией билдера — плюс {@code @Todo}, чтобы в логе сборки
@@ -20,7 +24,14 @@ import java.time.LocalDate;
  * @since 1.0
  */
 @GenerateBuilder(suffix = "Maker")
+@SuppressWarnings("PMD.DataClass")
 public class Order {
+
+    /**
+     * Статус.
+     */
+    @Todo("перевести на enum статусов")
+    private String status;
 
     /**
      * Номер.
@@ -128,10 +139,4 @@ public class Order {
     public void setStatus(final String status) {
         this.status = status;
     }
-
-    /**
-     * Статус.
-     */
-    @Todo("перевести на enum статусов")
-    private String status;
 }

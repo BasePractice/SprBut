@@ -6,11 +6,11 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m08.service;
 
-import ru.sprbut.m07.api.Registered;
-import ru.sprbut.m08.model.Customer;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import ru.sprbut.m07.api.Registered;
+import ru.sprbut.m08.model.Customer;
 
 /**
  * Помечен {@code @Registered} — значит попадёт в сгенерированный
@@ -27,13 +27,13 @@ public class CustomerRepository {
     /**
      * Хранилище.
      */
-    private final Map<String, Customer> storage = new LinkedHashMap<>();
+    private final Map<String, Customer> storage;
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
      */
     public CustomerRepository() {
-        // нечего инициализировать
+        this.storage = new LinkedHashMap<>(0);
     }
 
     /**

@@ -45,7 +45,7 @@ public final class ProcessorRegistration {
      * Основной конструктор.
      */
     public ProcessorRegistration() {
-        this(ProcessorRegistration.class.getClassLoader());
+        this(Thread.currentThread().getContextClassLoader());
     }
 
     /**
@@ -59,8 +59,8 @@ public final class ProcessorRegistration {
     /**
      * Путь, по которому {@link ServiceLoader} ищет процессоры.
      * @return Путь, по которому {@link ServiceLoader} ищет процессоры
+     * @checkstyle NonStaticMethodCheck (4 lines)
      */
-    // @checkstyle NonStaticMethodCheck (3 lines)
     public String servicePath() {
         return "META-INF/services/javax.annotation.processing.Processor";
     }
@@ -68,14 +68,16 @@ public final class ProcessorRegistration {
     /**
      * Что реально написано в файлах регистрации на текущем classpath —
      * ровно это и прочитает javac при сборке.
-     * @return Что реально написано в файлах регистрации на текущем classpath — ровно это и прочитает javac при сборке
+     * @return Содержимое файлов регистрации на текущем classpath
      */
     public List<String> declared() {
         final List<String> names = new ArrayList<>(0);
         try {
-            final Enumeration<URL> resources = this.loader.getResources(this.servicePath());
+            final Enumeration<URL> resources = this.loader.getResources(
+                this.servicePath()
+            );
             while (resources.hasMoreElements()) {
-                names.addAll(this.lines(resources.nextElement()));
+                names.addAll(ProcessorRegistration.lines(resources.nextElement()));
             }
         } catch (final IOException broken) {
             throw new UncheckedIOException(broken);
@@ -87,12 +89,11 @@ public final class ProcessorRegistration {
     /**
      * Процессоры, реально загруженные {@link ServiceLoader}, — то же самое,
      * что делает javac, только вручную.
-     * @return Процессоры, реально загруженные {@link ServiceLoader}, — то же самое, что делает javac, только вручную
+     * @return Процессоры, загруженные {@link ServiceLoader}
      */
     public List<String> loaded() {
         final List<String> names = new ArrayList<>(0);
         for (final Processor each : ServiceLoader.load(Processor.class, this.loader)) {
-
             names.add(each.getClass().getName());
         }
         names.sort(Comparator.naturalOrder());
@@ -102,26 +103,30 @@ public final class ProcessorRegistration {
     /**
      * Какие аннотации объявляет процессор — по этому javac и решает, звать ли его.
      * @param processor Процессор
-     * @return Какие аннотации объявляет процессор — по этому javac и решает, звать ли его
+     * @return Аннотации, которые объявляет процессор
      */
     public List<String> supported(final String processor) {
+        List<String> supported = List.of();
         for (final Processor each : ServiceLoader.load(Processor.class, this.loader)) {
-
             if (each.getClass().getName().equals(processor)) {
-                return each.getSupportedAnnotationTypes().stream().sorted().toList();
+                supported = each.getSupportedAnnotationTypes().stream().sorted().toList();
+                break;
             }
         }
-        throw new IllegalArgumentException("Процессор не зарегистрирован: " + processor);
+        if (supported.isEmpty()) {
+            throw new IllegalArgumentException(
+                String.format("Процессор не зарегистрирован: %s", processor)
+            );
+        }
+        return supported;
     }
 
-    private static List<String> lines(
-        final URL resource
-    ) throws IOException {
-        try (BufferedReader reader = new BufferedReader(
-            new InputStreamReader(
-                resource.openStream(), StandardCharsets.UTF_8
+    private static List<String> lines(final URL resource) throws IOException {
+        try (
+            BufferedReader reader = new BufferedReader(
+                new InputStreamReader(resource.openStream(), StandardCharsets.UTF_8)
             )
-        )) {
+        ) {
             return reader.lines()
                 .map(String::trim)
                 .filter(line -> !line.isEmpty() && !line.startsWith("#"))

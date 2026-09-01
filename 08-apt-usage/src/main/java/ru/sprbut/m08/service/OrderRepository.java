@@ -3,13 +3,15 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// customerId — имя свойства модели, по нему процессор строит билдер
+// @checkstyle ParameterNameCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m08.service;
 
-import ru.sprbut.m07.api.Registered;
-import ru.sprbut.m08.model.Order;
 import java.util.ArrayList;
 import java.util.List;
+import ru.sprbut.m07.api.Registered;
+import ru.sprbut.m08.model.Order;
 
 /**
  * Второй участник реестра. Имя не задано — процессор возьмёт имя класса
@@ -22,13 +24,13 @@ public class OrderRepository {
     /**
      * Заказы.
      */
-    private final List<Order> orders = new ArrayList<>(0);
+    private final List<Order> orders;
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
      */
     public OrderRepository() {
-        // нечего инициализировать
+        this.orders = new ArrayList<>(0);
     }
 
     /**
@@ -46,14 +48,10 @@ public class OrderRepository {
      * @param customerId Идентификатор
      * @return Поиск по клиенту
      */
-    public List<Order> findByCustomer(
-        final String customerId
-    ) {
+    public List<Order> findByCustomer(final String customerId) {
         return this.orders.stream()
-                .filter(
-                    o -> customerId.equals(o.getCustomerId())
-                )
-                .toList();
+            .filter(order -> customerId.equals(order.getCustomerId()))
+            .toList();
     }
 
     /**

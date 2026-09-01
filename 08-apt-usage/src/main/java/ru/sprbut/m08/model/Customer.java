@@ -3,11 +3,13 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// имена полей и сеттеры — предмет модуля: по ним процессор строит билдер
+// @checkstyle HiddenFieldCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m08.model;
 
-import ru.sprbut.m07.api.GenerateBuilder;
 import java.math.BigDecimal;
+import ru.sprbut.m07.api.GenerateBuilder;
 
 /**
  * Обычный JavaBean, помеченный {@code @GenerateBuilder} (модуль 07).
@@ -19,6 +21,7 @@ import java.math.BigDecimal;
  * @since 1.0
  */
 @GenerateBuilder
+@SuppressWarnings({"PMD.DataClass", "PMD.TooManyMethods"})
 public class Customer {
 
     /**
@@ -155,7 +158,9 @@ public class Customer {
     }
 
     @Override
-    public String toString() {
-        return "Customer{this.id=" + this.id + ", this.name=" + this.name + ", this.vip=" + this.vip + "}";
+    public final String toString() {
+        return String.format(
+            "Customer{id=%s, name=%s, vip=%s}", this.id, this.name, this.vip
+        );
     }
 }

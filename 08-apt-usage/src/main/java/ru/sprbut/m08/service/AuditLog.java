@@ -6,10 +6,10 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m08.service;
 
-import ru.sprbut.m07.api.Registered;
-import ru.sprbut.m07.api.Todo;
 import java.util.ArrayList;
 import java.util.List;
+import ru.sprbut.m07.api.Registered;
+import ru.sprbut.m07.api.Todo;
 
 /**
  * Третий участник реестра, он же носитель {@code @Todo} — при сборке модуля
@@ -22,13 +22,13 @@ public class AuditLog {
     /**
      * Записи.
      */
-    private final List<String> entries = new ArrayList<>(0);
+    private final List<String> entries;
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
      */
     public AuditLog() {
-        // нечего инициализировать
+        this.entries = new ArrayList<>(0);
     }
 
     /**
@@ -45,7 +45,6 @@ public class AuditLog {
      */
     @Todo("заменить на структурированное логирование")
     public void record(final String event) {
-
         this.entries.add(event);
     }
 }
