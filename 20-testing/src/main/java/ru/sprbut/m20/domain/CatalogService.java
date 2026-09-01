@@ -3,14 +3,17 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// исключение домена живёт рядом с сервисом, который его бросает
+// @checkstyle ProhibitStaticNestedClassesCheck disable
+// @checkstyle ParameterNameCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m20.domain;
 
+import java.math.BigDecimal;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * Сервисный слой. В тестах контроллера он подменяется {@code @MockitoBean},
@@ -33,12 +36,11 @@ public class CatalogService {
     /**
      * Основной конструктор.
      * @param repository Репозиторий
-     * @param @Value("${sprbut.catalog.currency:RUB}" Значение
+     * @param currency Валюта из настроек
      */
-    public CatalogService(final ProductRepository repository,
-                          @Value(
-                              "${sprbut.catalog.currency:RUB}"
-                          ) String currency) {
+    public CatalogService(
+        final ProductRepository repository,
+        @Value("${sprbut.catalog.currency:RUB}") final String currency) {
         this.repository = repository;
         this.currency = currency;
     }
@@ -53,16 +55,18 @@ public class CatalogService {
     @Transactional
     public Product add(final String sku, final String name, final BigDecimal price) {
         if (this.repository.findBySku(sku).isPresent()) {
-            throw new IllegalArgumentException("Товар с артикулом " + sku + " уже есть");
+            throw new IllegalArgumentException(
+                String.format("Товар с артикулом %s уже есть", sku)
+            );
         }
         return this.repository.save(new Product(sku, name, price));
     }
 
     /**
-     * Цена.
+     * Смена цены товара.
      * @param sku Артикул
-     * @param newPrice Цена
-     * @return Цена
+     * @param newPrice Новая цена
+     * @return Товар с новой ценой
      */
     @Transactional
     public Product changePrice(final String sku, final BigDecimal newPrice) {
@@ -90,32 +94,28 @@ public class CatalogService {
     }
 
     /**
-     * Артикул.
+     * Товар по артикулу.
      * @param sku Артикул
-     * @return Артикул
+     * @return Товар по артикулу
      */
     @Transactional(readOnly = true)
     public Product bySku(final String sku) {
-        return this.repository.findBySku(
-            sku
-        )
-                .orElseThrow(
-                    () -> new ProductNotFoundException(sku)
-                );
+        return this.repository.findBySku(sku)
+            .orElseThrow(() -> new CatalogService.ProductNotFoundException(sku));
     }
 
     /**
      * Исключение доменного слоя — контроллер превратит его в 404.
      * @since 1.0
      */
-    public static class ProductNotFoundException extends RuntimeException {
+    public static final class ProductNotFoundException extends RuntimeException {
 
         /**
          * Основной конструктор.
          * @param sku Артикул
          */
         public ProductNotFoundException(final String sku) {
-            super("Товар не найден: " + sku);
+            super(String.format("Товар не найден: %s", sku));
         }
     }
 }

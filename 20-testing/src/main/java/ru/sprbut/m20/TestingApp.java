@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// класс приложения обязан быть инстанцируемым: контейнер видит в нём
+// конфигурацию, а не утилиту с одним main
+// @checkstyle HideUtilityClassConstructorCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m20;
 
@@ -14,6 +17,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @since 1.0
  */
 @SpringBootApplication
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class TestingApp {
 
     /**

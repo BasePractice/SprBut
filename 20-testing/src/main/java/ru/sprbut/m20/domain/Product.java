@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// JPA-сущность: сеттеры принимают одноимённые полям параметры
+// @checkstyle HiddenFieldCheck disable
+// @checkstyle ConstructorsOrderCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m20.domain;
 
@@ -20,7 +23,33 @@ import java.math.BigDecimal;
  */
 @Entity
 @Table(name = "products")
+@SuppressWarnings({"PMD.DataClass", "PMD.ConstructorShouldDoInitialization"})
 public class Product {
+
+    /**
+     * Идентификатор.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /**
+     * Артикул.
+     */
+    @Column(nullable = false, unique = true)
+    private String sku;
+
+    /**
+     * Имя.
+     */
+    @Column(nullable = false)
+    private String name;
+
+    /**
+     * Цена.
+     */
+    @Column(nullable = false)
+    private BigDecimal price;
 
     /**
      * Доступные элементы.
@@ -98,29 +127,4 @@ public class Product {
     public void setAvailable(final boolean available) {
         this.available = available;
     }
-
-    /**
-     * Идентификатор.
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    /**
-     * Артикул.
-     */
-    @Column(nullable = false, unique = true)
-    private String sku;
-
-    /**
-     * Имя.
-     */
-    @Column(nullable = false)
-    private String name;
-
-    /**
-     * Цена.
-     */
-    @Column(nullable = false)
-    private BigDecimal price;
 }

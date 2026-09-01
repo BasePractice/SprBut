@@ -6,11 +6,11 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m20.domain;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 /**
  * Репозиторий Spring Data: интерфейс есть, реализации нет.

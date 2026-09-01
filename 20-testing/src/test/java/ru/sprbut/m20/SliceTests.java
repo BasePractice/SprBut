@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// поля срезов внедряет контейнер — приватными qulice их видеть не даёт,
+// а имена mockMvc и objectMapper совпадают с именами бинов Spring
+// @checkstyle VisibilityModifierCheck disable
+// @checkstyle MemberNameCheck disable
 package ru.sprbut.m20;
 
 import java.math.BigDecimal;
@@ -30,16 +34,35 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import ru.sprbut.m20.domain.CatalogService;
 import ru.sprbut.m20.domain.Product;
 import ru.sprbut.m20.domain.ProductRepository;
 import ru.sprbut.m20.web.ProductController;
 import tools.jackson.databind.ObjectMapper;
 
+/**
+ * Слайды 180–185 (СХЕМА 13): срезы поднимают разный объём контекста.
+ * @since 1.0
+ */
 @DisplayName("Слайды 180–185 (СХЕМА 13): срезы поднимают разный объём контекста")
 final class SliceTests {
 
+    /**
+     * Тело запроса для среза сериализации.
+     */
+    private static final String PAYLOAD =
+        "{\"sku\":\"SKU-1\",\"name\":\"Кофемолка\",\"price\":4990.00,\"available\":true}";
+
+    private static ProductController.CreateRequest request() {
+        return new ProductController.CreateRequest(
+            "SKU-2", "Чайник", new BigDecimal("2990.00")
+        );
+    }
+
+    /**
+     * Полный контекст через {@code @SpringBootTest}.
+     * @since 1.0
+     */
     @Nested
     @SpringBootTest
     @DisplayName("@SpringBootTest — полный контекст")
@@ -53,69 +76,102 @@ final class SliceTests {
 
         /**
          * Каталог.
-         * @since 1.0
          */
         @Autowired
         CatalogService catalog;
 
         @Test
-        @DisplayName("Поднимаются все слои: web, сервис, репозиторий, JPA")
-        void everyLayerIsPresent() {
+        @DisplayName("Web-слой поднят целиком")
+        void webLayerIsPresent() {
             MatcherAssert.assertThat(
-                "cannot verify that every layer is present",
+                "full context cannot leave the controller out",
                 this.context.containsBean("productController"),
                 Matchers.equalTo(true)
             );
+        }
+
+        @Test
+        @DisplayName("Сервисный слой поднят целиком")
+        void serviceLayerIsPresent() {
             MatcherAssert.assertThat(
-                "cannot verify that every layer is present",
+                "full context cannot leave the service out",
                 this.context.getBean(CatalogService.class),
                 Matchers.notNullValue()
             );
+        }
+
+        @Test
+        @DisplayName("Слой данных поднят целиком")
+        void persistenceLayerIsPresent() {
             MatcherAssert.assertThat(
-                "cannot verify that every layer is present",
+                "full context cannot leave the repository out",
                 this.context.getBean(ProductRepository.class),
                 Matchers.notNullValue()
             );
+        }
+
+        @Test
+        @DisplayName("JPA поднята вместе с остальным")
+        void jpaIsPresent() {
             MatcherAssert.assertThat(
-                "cannot verify that every layer is present",
+                "full context cannot leave JPA out",
                 this.context.containsBean("entityManagerFactory"),
                 Matchers.equalTo(true)
             );
         }
 
         @Test
-        @DisplayName("Сквозной сценарий работает на настоящих бинах")
-        void endToEndScenarioWorks() {
+        @DisplayName("Сквозной сценарий сохраняет товар")
+        void savesProduct() {
             this.catalog.add("SKU-1", "Кофемолка", new BigDecimal("4990.00"));
             MatcherAssert.assertThat(
-                "cannot verify that end to end scenario works",
+                "end to end scenario cannot save the product",
                 this.catalog.bySku("SKU-1").getName(),
                 Matchers.equalTo("Кофемолка")
             );
+        }
+
+        @Test
+        @DisplayName("Сохранённый товар попадает в список доступных")
+        void listsSavedProduct() {
+            this.catalog.add("SKU-2", "Чайник", new BigDecimal("2990.00"));
             MatcherAssert.assertThat(
-                "cannot verify that end to end scenario works",
+                "saved product cannot reach the available list",
                 this.catalog.available().stream().map(Product::getSku).toList(),
-                Matchers.hasItems("SKU-1")
+                Matchers.hasItems("SKU-2")
             );
+        }
+
+        @Test
+        @DisplayName("Ценник собирается с валютой из настроек")
+        void buildsPriceTag() {
+            this.catalog.add("SKU-3", "Тостер", new BigDecimal("3990.00"));
             MatcherAssert.assertThat(
-                "cannot verify that end to end scenario works",
-                this.catalog.priceTag(this.catalog.bySku("SKU-1")),
-                Matchers.equalTo("4990.00 RUB")
+                "price tag cannot use the configured currency",
+                this.catalog.priceTag(this.catalog.bySku("SKU-3")),
+                Matchers.equalTo("3990.00 RUB")
             );
         }
 
         @Test
         @DisplayName("Дубликат артикула отклоняется")
-        void duplicateSkuIsRejected() {
+        void rejectsDuplicateSku() {
             this.catalog.add("SKU-DUP", "Первый", BigDecimal.TEN);
             MatcherAssert.assertThat(
-                "cannot verify that duplicate sku is rejected",
-                Assertions.assertThrows(IllegalArgumentException.class, () -> this.catalog.add("SKU-DUP", "Второй", BigDecimal.ONE)).getMessage(),
+                "duplicate sku cannot be rejected with an explanation",
+                Assertions.assertThrows(
+                    IllegalArgumentException.class,
+                    () -> this.catalog.add("SKU-DUP", "Второй", BigDecimal.ONE)
+                ).getMessage(),
                 Matchers.containsString("уже есть")
             );
         }
     }
 
+    /**
+     * Срез слоя данных через {@code @DataJpaTest}.
+     * @since 1.0
+     */
     @Nested
     @DataJpaTest
     @DisplayName("@DataJpaTest — только слой данных")
@@ -129,19 +185,23 @@ final class SliceTests {
 
         /**
          * Контекст.
-         * @since 1.0
          */
         @Autowired
         ApplicationContext context;
 
         @Test
-        @DisplayName("Репозиторий работает, web-слой не поднимается вовсе")
-        void onlyPersistenceLayerIsLoaded() {
+        @DisplayName("Репозиторий в срезе есть")
+        void repositoryIsLoaded() {
             MatcherAssert.assertThat(
-                "cannot verify that only persistence layer is loaded",
+                "data slice cannot provide the repository",
                 this.repository,
                 Matchers.notNullValue()
             );
+        }
+
+        @Test
+        @DisplayName("Web-слой в срез не входит вовсе")
+        void dontLoadWebLayer() {
             MatcherAssert.assertThat(
                 "data slice cannot leave the controllers out",
                 this.context.containsBean("productController"),
@@ -150,25 +210,34 @@ final class SliceTests {
         }
 
         @Test
-        @DisplayName("Производные запросы работают на настоящей БД в памяти")
-        void derivedQueriesWork() {
+        @DisplayName("Производный запрос находит сохранённый товар")
+        void findsSavedProduct() {
             this.repository.save(new Product("SKU-A", "Дешёвый", new BigDecimal("100")));
-            this.repository.save(new Product("SKU-B", "Дорогой", new BigDecimal("100000")));
             MatcherAssert.assertThat(
                 "derived query cannot find the saved product",
                 this.repository.findBySku("SKU-A").isPresent(),
                 Matchers.equalTo(true)
             );
+        }
+
+        @Test
+        @DisplayName("Производный запрос отбирает по цене")
+        void filtersByPrice() {
+            this.repository.save(new Product("SKU-A", "Дешёвый", new BigDecimal("100")));
+            this.repository.save(new Product("SKU-B", "Дорогой", new BigDecimal("100000")));
             MatcherAssert.assertThat(
-                "cannot verify that derived queries work",
-                this.repository.findCheaperThan(new BigDecimal("1000")).stream().map(Product::getSku).toList(),
+                "derived query cannot filter by price",
+                this.repository.findCheaperThan(new BigDecimal("1000"))
+                    .stream()
+                    .map(Product::getSku)
+                    .toList(),
                 Matchers.contains("SKU-A")
             );
         }
 
         @Test
         @DisplayName("Каждый тест среза откатывается — данные не протекают между тестами")
-        void eachTestIsRolledBack() {
+        void rollsBackEachTest() {
             MatcherAssert.assertThat(
                 "slice test cannot roll back its data",
                 this.repository.count(),
@@ -177,9 +246,14 @@ final class SliceTests {
         }
     }
 
+    /**
+     * Срез веб-слоя через {@code @WebMvcTest}.
+     * @since 1.0
+     */
     @Nested
     @WebMvcTest(ProductController.class)
     @DisplayName("@WebMvcTest — только web-слой")
+    @SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
     final class WebSlice {
 
         /**
@@ -202,26 +276,35 @@ final class SliceTests {
 
         /**
          * Контекст.
-         * @since 1.0
          */
         @Autowired
         ApplicationContext context;
 
         @Test
-        @DisplayName("Поднят только web-слой: репозитория и JPA в контексте нет")
-        void onlyWebLayerIsLoaded() {
+        @DisplayName("Контроллер в срезе есть")
+        void controllerIsLoaded() {
             MatcherAssert.assertThat(
-                "cannot verify that only web layer is loaded",
+                "web slice cannot provide the controller",
                 this.context.containsBean("productController"),
                 Matchers.equalTo(true)
             );
+        }
+
+        @Test
+        @DisplayName("Репозитория в срезе нет")
+        void dontLoadRepositories() {
             MatcherAssert.assertThat(
                 "web slice cannot leave the repositories out",
                 this.context.getBeanNamesForType(ProductRepository.class).length,
                 Matchers.equalTo(0)
             );
+        }
+
+        @Test
+        @DisplayName("JPA в срез не входит")
+        void dontLoadJpa() {
             MatcherAssert.assertThat(
-                "cannot verify that only web layer is loaded",
+                "web slice cannot leave JPA out",
                 this.context.containsBean("entityManagerFactory"),
                 Matchers.equalTo(false)
             );
@@ -229,93 +312,64 @@ final class SliceTests {
 
         @Test
         @DisplayName("GET возвращает список из мока")
-        void getReturnsList() throws Exception {
+        void listsProducts() throws Exception {
             BDDMockito.given(this.catalog.available()).willReturn(
-                    List.of(
-                        new Product(
-                            "SKU-1", "Кофемолка", new BigDecimal(
-                                "4990.00"
-                            )
-                        )
-                    ));
-            this.mockMvc.perform(
-                MockMvcRequestBuilders.get(
-                    "/api/products"
-                )
-            )
-                    .andExpect(
-                        MockMvcResultMatchers.status().isOk()
-                    )
-                    .andExpect(MockMvcResultMatchers.jsonPath("$[0].sku").value("SKU-1"))
-                    .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("Кофемолка"));
+                List.of(new Product("SKU-1", "Кофемолка", new BigDecimal("4990.00")))
+            );
+            this.mockMvc.perform(MockMvcRequestBuilders.get("/api/products"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].sku").value("SKU-1"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value("Кофемолка"));
         }
 
         @Test
         @DisplayName("Отсутствующий товар превращается в 404 обработчиком исключений")
-        void missingProductBecomes404() throws Exception {
-            BDDMockito.willThrow(
-                new CatalogService.ProductNotFoundException(
-                    "SKU-X"
-                )
-            )
-                    .given(
-                        this.catalog
-                    ).bySku("SKU-X");
-            this.mockMvc.perform(
-                MockMvcRequestBuilders.get(
-                    "/api/products/SKU-X"
-                )
-            )
-                    .andExpect(
-                        MockMvcResultMatchers.status().isNotFound()
-                    )
-                    .andExpect(MockMvcResultMatchers.content().string("Товар не найден: SKU-X"));
+        void missingProductBecomesNotFound() throws Exception {
+            BDDMockito
+                .willThrow(new CatalogService.ProductNotFoundException("SKU-X"))
+                .given(this.catalog)
+                .bySku("SKU-X");
+            this.mockMvc.perform(MockMvcRequestBuilders.get("/api/products/SKU-X"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.content().string("Товар не найден: SKU-X"));
         }
 
         @Test
         @DisplayName("POST отдаёт 201 и тело созданного объекта")
-        void postReturns201() throws Exception {
-            BDDMockito.given(this.catalog.add(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-                    .willReturn(
-                        new Product("SKU-2", "Чайник", new BigDecimal("2990.00"))
-                    );
-            final ProductController.CreateRequest request = new ProductController.CreateRequest(
-                    "SKU-2", "Чайник", new BigDecimal(
-                        "2990.00"
-                    ));
-            this.mockMvc.perform(MockMvcRequestBuilders.post("/api/products")
-                            .contentType(
-                                MediaType.APPLICATION_JSON
-                            )
-                            .content(
-                                this.objectMapper.writeValueAsString(
-                                    request
-                                )
-                            ))
-                    .andExpect(MockMvcResultMatchers.status().isCreated())
-                    .andExpect(MockMvcResultMatchers.jsonPath("$.sku").value("SKU-2"));
+        void postReturnsCreated() throws Exception {
+            BDDMockito.given(
+                this.catalog.add(
+                    ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()
+                )
+            ).willReturn(new Product("SKU-2", "Чайник", new BigDecimal("2990.00")));
+            this.mockMvc.perform(
+                MockMvcRequestBuilders.post("/api/products")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(this.objectMapper.writeValueAsString(SliceTests.request()))
+            ).andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.sku").value("SKU-2"));
         }
 
         @Test
         @DisplayName("Дубликат превращается в 400")
-        void duplicateBecomes400() throws Exception {
-            BDDMockito.given(this.catalog.add(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
-                    .willThrow(
-                        new IllegalArgumentException(
-                            "Товар с артикулом SKU-2 уже есть"
-                        )
-                    );
-            this.mockMvc.perform(MockMvcRequestBuilders.post("/api/products")
-                            .contentType(
-                                MediaType.APPLICATION_JSON
-                            )
-                            .content(
-                                "{\"sku\":\"SKU-2\",\"name\":\"Чайник\",\"price\":1}"
-                            ))
-                    .andExpect(MockMvcResultMatchers.status().isBadRequest());
+        void duplicateBecomesBadRequest() throws Exception {
+            BDDMockito.given(
+                this.catalog.add(
+                    ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()
+                )
+            ).willThrow(new IllegalArgumentException("Товар с артикулом SKU-2 уже есть"));
+            this.mockMvc.perform(
+                MockMvcRequestBuilders.post("/api/products")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"sku\":\"SKU-2\",\"name\":\"Чайник\",\"price\":1}")
+            ).andExpect(MockMvcResultMatchers.status().isBadRequest());
         }
     }
 
+    /**
+     * Срез сериализации через {@code @JsonTest}.
+     * @since 1.0
+     */
     @Nested
     @JsonTest
     @DisplayName("@JsonTest — только сериализация")
@@ -329,26 +383,35 @@ final class SliceTests {
 
         /**
          * Контекст.
-         * @since 1.0
          */
         @Autowired
         ApplicationContext context;
 
         @Test
-        @DisplayName("Поднят только Jackson: ни web, ни данных")
-        void onlyJacksonIsLoaded() {
+        @DisplayName("Контроллера в срезе нет")
+        void dontLoadController() {
             MatcherAssert.assertThat(
-                "cannot verify that only jackson is loaded",
+                "json slice cannot leave the controller out",
                 this.context.containsBean("productController"),
                 Matchers.equalTo(false)
             );
+        }
+
+        @Test
+        @DisplayName("Репозитория в срезе нет")
+        void dontLoadRepositories() {
             MatcherAssert.assertThat(
                 "json slice cannot leave the repositories out",
                 this.context.getBeanNamesForType(ProductRepository.class).length,
                 Matchers.equalTo(0)
             );
+        }
+
+        @Test
+        @DisplayName("Jackson в срезе есть")
+        void jacksonIsLoaded() {
             MatcherAssert.assertThat(
-                "cannot verify that only jackson is loaded",
+                "json slice cannot provide the object mapper",
                 this.context.getBean(ObjectMapper.class),
                 Matchers.notNullValue()
             );
@@ -357,97 +420,73 @@ final class SliceTests {
         @Test
         @DisplayName("Сериализация даёт ожидаемый JSON")
         void serialises() throws Exception {
-            final ProductController.ProductView view = new ProductController.ProductView(
-                    "SKU-1", "Кофемолка", new BigDecimal(
-                        "4990.00"
-                    ), true);
             MatcherAssert.assertThat(
                 "serialisation cannot produce the expected JSON",
-                this.json.write(view).getJson(),
+                this.json.write(
+                    new ProductController.ProductView(
+                        "SKU-1", "Кофемолка", new BigDecimal("4990.00"), true
+                    )
+                ).getJson(),
                 Matchers.containsString("Кофемолка")
             );
         }
 
         @Test
-        @DisplayName("Десериализация восстанавливает объект")
-        void deserialises() throws Exception {
-            final var parsed = this.json.parseObject(
-                "{\"sku\":\"SKU-1\",\"name\":\"Кофемолка\",\"price\":4990.00,\"available\":true}"
-            );
+        @DisplayName("Десериализация восстанавливает артикул")
+        void deserialisesSku() throws Exception {
             MatcherAssert.assertThat(
-                "cannot verify that deserialises",
-                parsed.sku(),
+                "deserialisation cannot restore the sku",
+                this.json.parseObject(SliceTests.PAYLOAD).sku(),
                 Matchers.equalTo("SKU-1")
             );
+        }
+
+        @Test
+        @DisplayName("Десериализация восстанавливает цену")
+        void deserialisesPrice() throws Exception {
             MatcherAssert.assertThat(
-                "cannot verify that deserialises",
-                parsed.price(),
+                "deserialisation cannot restore the price",
+                this.json.parseObject(SliceTests.PAYLOAD).price(),
                 Matchers.comparesEqualTo(new BigDecimal("4990.00"))
             );
         }
     }
 
+    /**
+     * Самый быстрый вариант — вообще без Spring.
+     * @since 1.0
+     */
     @Nested
     @DisplayName("Без Spring вовсе — самый быстрый тест")
+    // @checkstyle NonStaticMethodCheck disable
     final class PlainUnitTest {
 
-        // @checkstyle NonStaticMethodCheck (3 lines)
         @Test
         @DisplayName("Сервис тестируется обычным new, если зависимости внедрены конструктором")
         void serviceIsTestableWithoutSpring() {
-            final ProductRepository fakeRepository = Mockito.mock(ProductRepository.class);
-            BDDMockito.given(
-                fakeRepository.findBySku(
-                    "SKU-1"
-                )
-            )
-                    .willReturn(Optional.of(
-                            new Product(
-                                "SKU-1", "Кофемолка", new BigDecimal(
-                                    "4990.00"
-                                )
-                            )));
-            final CatalogService service = new CatalogService(fakeRepository, "EUR");
+            final ProductRepository fake = Mockito.mock(ProductRepository.class);
+            BDDMockito.given(fake.findBySku("SKU-1")).willReturn(
+                Optional.of(new Product("SKU-1", "Кофемолка", new BigDecimal("4990.00")))
+            );
+            final CatalogService service = new CatalogService(fake, "EUR");
             MatcherAssert.assertThat(
-                "cannot verify that service is testable without spring",
+                "service cannot be tested without spring",
                 service.priceTag(service.bySku("SKU-1")),
                 Matchers.equalTo("4990.00 EUR")
             );
         }
 
-        // @checkstyle NonStaticMethodCheck (3 lines)
         @Test
         @DisplayName("Контроллер тоже: MockMvc умеет работать standalone")
+        @SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
         void controllerIsTestableStandalone() throws Exception {
             final CatalogService catalog = Mockito.mock(CatalogService.class);
-            BDDMockito.given(
-                catalog.available()
-            ).willReturn(
-                List.of()
-            );
-            final MockMvc standalone = MockMvcBuilders
-                    .standaloneSetup(
-                        new ProductController(catalog)
-                    )
-                    .build();
-            standalone.perform(
-                MockMvcRequestBuilders.get(
-                    "/api/products"
-                )
-            )
-                    .andExpect(
-                        MockMvcResultMatchers.status().isOk()
-                    )
-                    .andExpect(MockMvcResultMatchers.content().json("[]"));
+            BDDMockito.given(catalog.available()).willReturn(List.of());
+            MockMvcBuilders.standaloneSetup(new ProductController(catalog))
+                .build()
+                .perform(MockMvcRequestBuilders.get("/api/products"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().json("[]"));
         }
-    }
-
-    /**
-     * Общий предок, чтобы не тянуть WebApplicationContext в каждый тест.
-     * @since 1.0
-     */
-    interface WebContextAware {
-
-        WebApplicationContext context();
     }
 }

@@ -6,6 +6,8 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m20.web;
 
+import java.math.BigDecimal;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,8 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.sprbut.m20.domain.CatalogService;
 import ru.sprbut.m20.domain.Product;
-import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * Веб-слой. На нём показывается срез {@code @WebMvcTest}: поднимается только
@@ -58,8 +58,11 @@ public class ProductController {
      */
     @PostMapping
     public ResponseEntity<ProductView> create(final @RequestBody CreateRequest request) {
-        final Product created = this.catalog.add(request.sku(), request.name(), request.price());
-        return ResponseEntity.status(HttpStatus.CREATED).body(ProductView.of(created));
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            ProductController.ProductView.of(
+                this.catalog.add(request.sku(), request.name(), request.price())
+            )
+        );
     }
 
     /**
@@ -74,39 +77,45 @@ public class ProductController {
 
     /**
      * Отсутствующий элемент.
-     * @param e Событие
-     * @return Отсутствующий элемент
+     * @param failure Исключение доменного слоя
+     * @return Ответ с кодом 404
+     * @checkstyle NonStaticMethodCheck (5 lines)
      */
-    // @checkstyle NonStaticMethodCheck (3 lines)
     @ExceptionHandler(CatalogService.ProductNotFoundException.class)
-    public ResponseEntity<String> notFound(final CatalogService.ProductNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+    public ResponseEntity<String> notFound(
+        final CatalogService.ProductNotFoundException failure) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(failure.getMessage());
     }
 
     /**
-     * Запрос.
-     * @param lines Значение {@code lines}
-     * @return Запрос
+     * Некорректный запрос.
+     * @param failure Исключение проверки
+     * @return Ответ с кодом 400
+     * @checkstyle NonStaticMethodCheck (5 lines)
      */
-    // @checkstyle NonStaticMethodCheck (3 lines)
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> badRequest(final IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
+    public ResponseEntity<String> badRequest(final IllegalArgumentException failure) {
+        return ResponseEntity.badRequest().body(failure.getMessage());
     }
 
     /**
      * DTO ответа — на нём показывается срез {@code @JsonTest}.
+     *
+     * @param sku Артикул
+     * @param name Название
+     * @param price Цена
+     * @param available Признак доступности
+     * @since 1.0
      */
     public record ProductView(String sku, String name, BigDecimal price, boolean available) {
 
         /**
-         * Источник.
+         * Представление товара.
          * @param product Товар
-         * @return Источник
+         * @return Представление товара
          */
-        public static ProductView of(
-            final Product product
-        ) {
+        @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+        public static ProductView of(final Product product) {
             return new ProductView(
                 product.getSku(), product.getName(), product.getPrice(), product.isAvailable()
             );
