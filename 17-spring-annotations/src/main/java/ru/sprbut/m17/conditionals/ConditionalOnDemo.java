@@ -5,6 +5,9 @@
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
 // @checkstyle NonStaticMethodCheck disable
+// тема раздела — условная регистрация: конфигурация умолчаний и
+// пользовательская конфигурация показаны рядом
+// @checkstyle ProhibitStaticNestedClassesCheck disable
 package ru.sprbut.m17.conditionals;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -29,6 +32,7 @@ import org.springframework.context.annotation.Configuration;
  *
  * @since 1.0
  */
+@SuppressWarnings("PMD.MissingStaticMethodInNonInstantiatableClass")
 public final class ConditionalOnDemo {
 
     private ConditionalOnDemo() {
@@ -38,6 +42,7 @@ public final class ConditionalOnDemo {
      * Значение {@code Notifier}.
      * @since 1.0
      */
+    @SuppressWarnings("PMD.ImplicitFunctionalInterface")
     public interface Notifier {
 
         /**

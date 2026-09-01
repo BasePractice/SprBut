@@ -5,11 +5,15 @@
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
 // @checkstyle NonStaticMethodCheck disable
+// тема раздела — разница между full и lite режимами @Configuration:
+// обе конфигурации и общий бин живут в одном файле ради сравнения
+// @checkstyle ProhibitStaticNestedClassesCheck disable
+// @checkstyle QualifyInnerClassCheck disable
 package ru.sprbut.m17.configuration;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Слайд 143: {@code @Configuration} — и его главная, почти всегда неочевидная
@@ -39,9 +43,9 @@ public final class ProxyBeanMethods {
     /**
      * Сброс состояния.
      */
-    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
     public static void reset() {
-        INSTANCES.set(0);
+        ProxyBeanMethods.INSTANCES.set(0);
     }
 
     /**
@@ -56,10 +60,11 @@ public final class ProxyBeanMethods {
         private final int serial;
 
         /**
-         * Основной конструктор.
+         * Основной конструктор: подсчёт создания и есть суть примера.
+         * @checkstyle ConstructorsCodeFreeCheck (4 lines)
          */
         public Shared() {
-            this.serial = INSTANCES.incrementAndGet();
+            this.serial = ProxyBeanMethods.INSTANCES.incrementAndGet();
         }
 
         /**
@@ -106,9 +111,9 @@ public final class ProxyBeanMethods {
          * Первый элемент.
          * @return Первый элемент
          */
+        // вызов shared() перехвачен прокси — вернётся бин из контейнера
         @Bean
         public Consumer first() {
-            // вызов перехвачен прокси — вернётся бин из контейнера
             return new Consumer(this.shared());
         }
 
@@ -149,9 +154,9 @@ public final class ProxyBeanMethods {
          * Первый элемент.
          * @return Первый элемент
          */
+        // обычный вызов метода — создаётся новый объект мимо контейнера
         @Bean
         public Consumer first() {
-            // обычный вызов метода — создаётся НОВЫЙ объект мимо контейнера
             return new Consumer(this.shared());
         }
 

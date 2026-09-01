@@ -49,10 +49,10 @@ public final class Expanded {
         queue.add(this.annotation);
         while (!queue.isEmpty()) {
             final Class<? extends Annotation> current = queue.poll();
-            if (this.builtin(current) || !visited.add(current)) {
+            if (Expanded.builtin(current) || !visited.add(current)) {
                 continue;
             }
-            found.add("@" + current.getSimpleName());
+            found.add(String.format("@%s", current.getSimpleName()));
             for (final Annotation meta : current.getAnnotations()) {
                 queue.add(meta.annotationType());
             }
@@ -66,7 +66,7 @@ public final class Expanded {
      */
     public List<String> parts() {
         return this.names().stream()
-            .filter(name -> !name.equals("@" + this.annotation.getSimpleName()))
+            .filter(name -> !name.equals(String.format("@%s", this.annotation.getSimpleName())))
             .sorted()
             .toList();
     }
@@ -85,10 +85,15 @@ public final class Expanded {
      */
     public String explain() {
         final List<String> parts = this.parts();
+        final String explanation;
         if (parts.isEmpty()) {
-            return String.format("@%s — базовая аннотация", this.annotation.getSimpleName());
+            explanation = String.format("@%s — базовая аннотация", this.annotation.getSimpleName());
+        } else {
+            explanation = String.format(
+                "@%s = %s", this.annotation.getSimpleName(), String.join(" + ", parts)
+            );
         }
-        return "@" + this.annotation.getSimpleName() + " = " + String.join(" + ", parts);
+        return explanation;
     }
 
     private static boolean builtin(final Class<? extends Annotation> type) {

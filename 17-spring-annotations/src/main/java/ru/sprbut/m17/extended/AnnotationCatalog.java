@@ -33,7 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
  * <pre>
  * &#64;RestController        = &#64;Controller + &#64;ResponseBody
  * &#64;Service / &#64;Repository = &#64;Component + смысл (+ поведение)
- * &#64;SpringBootApplication = &#64;Configuration + &#64;EnableAutoConfiguration + &#64;ComponentScan
+ * &#64;SpringBootApplication = &#64;Configuration + &#64;EnableAutoConfiguration
+ *                         + &#64;ComponentScan
  * </pre>
  * Каталог это доказывает, а не пересказывает.</p>
  *
@@ -61,6 +62,7 @@ public final class AnnotationCatalog {
      * Основной конструктор.
      * @param annotations Значение {@code annotations}
      */
+    // @checkstyle ConstructorsCodeFreeCheck (3 lines)
     public AnnotationCatalog(final List<Class<? extends Annotation>> annotations) {
         this.annotations = List.copyOf(annotations);
     }
@@ -72,7 +74,10 @@ public final class AnnotationCatalog {
     public Map<String, Set<String>> all() {
         final Map<String, Set<String>> catalog = new LinkedHashMap<>();
         for (final Class<? extends Annotation> annotation : this.annotations) {
-            catalog.put("@" + annotation.getSimpleName(), new Expanded(annotation).names());
+            catalog.put(
+                String.format("@%s", annotation.getSimpleName()),
+                new Expanded(annotation).names()
+            );
         }
         return Map.copyOf(catalog);
     }
@@ -85,7 +90,7 @@ public final class AnnotationCatalog {
         final List<String> found = new ArrayList<>(0);
         for (final Class<? extends Annotation> annotation : this.annotations) {
             if (new Expanded(annotation).stereotype()) {
-                found.add("@" + annotation.getSimpleName());
+                found.add(String.format("@%s", annotation.getSimpleName()));
             }
         }
         return List.copyOf(found);

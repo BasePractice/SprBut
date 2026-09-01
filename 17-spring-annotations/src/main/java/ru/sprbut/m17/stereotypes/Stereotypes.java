@@ -4,6 +4,9 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
+// тема раздела — сравнение стереотипов: пять помеченных классов должны
+// читаться одним экраном, врозь сравнивать нечего
+// @checkstyle ProhibitStaticNestedClassesCheck disable
 package ru.sprbut.m17.stereotypes;
 
 import org.springframework.stereotype.Component;
@@ -30,6 +33,7 @@ import org.springframework.stereotype.Service;
  *
  * @since 1.0
  */
+@SuppressWarnings("PMD.MissingStaticMethodInNonInstantiatableClass")
 public final class Stereotypes {
 
     private Stereotypes() {

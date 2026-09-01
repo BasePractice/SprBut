@@ -5,8 +5,14 @@
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
 // @checkstyle NonStaticMethodCheck disable
+// тема раздела — @Transactional поверх собственного менеджера транзакций:
+// менеджер, сервис и конфигурация показаны вместе
+// @checkstyle ProhibitStaticNestedClassesCheck disable
+// @checkstyle QualifyInnerClassCheck disable
 package ru.sprbut.m17.transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
@@ -17,8 +23,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.SimpleTransactionStatus;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Слайд 147: «{@code @Transactional} — через AOP-прокси».
@@ -50,16 +54,16 @@ public final class TransactionalDemo {
     /**
      * Сброс состояния.
      */
-    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
     public static void reset() {
-        LOG.clear();
+        TransactionalDemo.LOG.clear();
     }
 
     /**
      * Менеджер транзакций, который вместо БД пишет в журнал.
      * @since 1.0
      */
-    public static class LoggingTransactionManager implements PlatformTransactionManager {
+    public static final class LoggingTransactionManager implements PlatformTransactionManager {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -69,22 +73,20 @@ public final class TransactionalDemo {
         }
 
         @Override
-        public TransactionStatus getTransaction(
-            final TransactionDefinition definition
-        )
-                throws TransactionException {
-            LOG.add("begin");
+        public TransactionStatus getTransaction(final TransactionDefinition definition)
+            throws TransactionException {
+            TransactionalDemo.LOG.add("begin");
             return new SimpleTransactionStatus();
         }
 
         @Override
         public void commit(final TransactionStatus status) throws TransactionException {
-            LOG.add("commit");
+            TransactionalDemo.LOG.add("commit");
         }
 
         @Override
         public void rollback(final TransactionStatus status) throws TransactionException {
-            LOG.add("rollback");
+            TransactionalDemo.LOG.add("rollback");
         }
     }
 
@@ -109,7 +111,7 @@ public final class TransactionalDemo {
          */
         @Transactional
         public String save(final String order) {
-            LOG.add("save:" + order);
+            TransactionalDemo.LOG.add(String.format("save:%s", order));
             return order;
         }
 
@@ -118,16 +120,20 @@ public final class TransactionalDemo {
          */
         @Transactional
         public void failUnchecked() {
-            LOG.add("work");
+            TransactionalDemo.LOG.add("work");
             throw new IllegalStateException("что-то пошло не так");
         }
 
         /**
          * Checked-исключение — по умолчанию транзакция <b>коммитится</b>.
+         * Тип исключения здесь и есть предмет примера: важно именно то,
+         * что оно проверяемое, а не какое оно по смыслу.
+         * @throws Exception Всегда
          */
+        @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
         @Transactional
         public void failChecked() throws Exception {
-            LOG.add("work");
+            TransactionalDemo.LOG.add("work");
             throw new Exception("проверяемое исключение");
         }
 
@@ -137,7 +143,7 @@ public final class TransactionalDemo {
          * @return Метод без аннотации — транзакции не будет
          */
         public String saveWithoutTransaction(final String order) {
-            LOG.add("save:" + order);
+            TransactionalDemo.LOG.add(String.format("save:%s", order));
             return order;
         }
 
@@ -152,10 +158,12 @@ public final class TransactionalDemo {
 
         /**
          * Явное указание откатываться и на checked-исключениях.
+         * @throws Exception Всегда
          */
+        @SuppressWarnings("PMD.AvoidThrowingRawExceptionTypes")
         @Transactional(rollbackFor = Exception.class)
         public void failCheckedWithRollback() throws Exception {
-            LOG.add("work");
+            TransactionalDemo.LOG.add("work");
             throw new Exception("проверяемое исключение");
         }
     }
