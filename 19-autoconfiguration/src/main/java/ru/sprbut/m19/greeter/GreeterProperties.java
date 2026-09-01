@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// класс настроек биндится по JavaBeans: сеттеры и одноимённые
+// параметры — требование биндера, а не небрежность
+// @checkstyle HiddenFieldCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m19.greeter;
 
@@ -20,6 +23,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @since 1.0
  */
 @ConfigurationProperties(prefix = "sprbut.greeter")
+@SuppressWarnings({"PMD.DataClass", "PMD.ConstructorShouldDoInitialization"})
 public class GreeterProperties {
 
     /**

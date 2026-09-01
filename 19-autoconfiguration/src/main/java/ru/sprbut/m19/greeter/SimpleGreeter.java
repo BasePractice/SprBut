@@ -6,16 +6,19 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m19.greeter;
 
+import java.util.Locale;
+
 /**
  * Реализация по умолчанию, которую поставляет автоконфигурация.
  * @since 1.0
  */
-public class SimpleGreeter implements Greeter {
+public final class SimpleGreeter implements Greeter {
 
     /**
      * Шаблон.
      */
     private final String template;
+
     /**
      * Громкое сообщение.
      */
@@ -34,7 +37,13 @@ public class SimpleGreeter implements Greeter {
     @Override
     public String greet(final String name) {
         final String message = this.template.replace("{name}", name);
-        return this.shout ? message.toUpperCase() : message;
+        final String shown;
+        if (this.shout) {
+            shown = message.toUpperCase(Locale.ROOT);
+        } else {
+            shown = message;
+        }
+        return shown;
     }
 
     @Override
