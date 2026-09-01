@@ -5,14 +5,18 @@
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
 // @checkstyle NonStaticMethodCheck disable
+// тема раздела — сравнение @Component и @Bean: свой класс, чужой класс
+// и конфигурация показаны рядом, врозь пример теряет смысл
+// @checkstyle ProhibitStaticNestedClassesCheck disable
+// @checkstyle QualifyInnerClassCheck disable
 package ru.sprbut.m13.componentvsbean;
 
+import java.time.ZoneId;
+import java.util.TimeZone;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
-import java.time.ZoneId;
-import java.util.TimeZone;
 
 /**
  * Слайд 108: «{@code @Component} vs {@code @Bean}: свой класс или чужой».
@@ -29,6 +33,7 @@ import java.util.TimeZone;
  *
  * @since 1.0
  */
+@SuppressWarnings("PMD.MissingStaticMethodInNonInstantiatableClass")
 public final class ComponentVsBean {
 
     private ComponentVsBean() {
@@ -68,6 +73,7 @@ public final class ComponentVsBean {
          * Значение {@code endpoint}.
          */
         private final String endpoint;
+
         /**
          * Значение {@code timeout}.
          */

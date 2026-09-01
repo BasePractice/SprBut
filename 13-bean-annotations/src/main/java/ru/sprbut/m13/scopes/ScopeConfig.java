@@ -5,14 +5,19 @@
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
 // @checkstyle NonStaticMethodCheck disable
+// тема раздела — области видимости бинов: демонстрационные бины живут
+// вложенными в конфигурацию, которая их объявляет, иначе связь «scope —
+// объявление — поведение» рассыпается по десятку файлов
+// @checkstyle ProhibitStaticNestedClassesCheck disable
+// @checkstyle QualifyInnerClassCheck disable
 package ru.sprbut.m13.scopes;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Слайд 101: {@code @Scope (singleton, prototype, request, session)}.
@@ -37,12 +42,12 @@ public class ScopeConfig {
     /**
      * Считает, сколько раз вообще создавался объект каждого типа.
      */
-    public static final AtomicInteger SINGLETON_INSTANCES = new AtomicInteger();
+    public static final AtomicInteger SINGLETONS = new AtomicInteger();
 
     /**
-     * Значение {@code PROTOTYPE_INSTANCES}.
+     * Значение {@code PROTOTYPES}.
      */
-    public static final AtomicInteger PROTOTYPE_INSTANCES = new AtomicInteger();
+    public static final AtomicInteger PROTOTYPES = new AtomicInteger();
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -72,12 +77,12 @@ public class ScopeConfig {
     }
 
     /**
-     * Значение {@code resetCounters}.
+     * Обнуляет счётчики созданий перед очередным сценарием.
      */
-    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
     public static void resetCounters() {
-        SINGLETON_INSTANCES.set(0);
-        PROTOTYPE_INSTANCES.set(0);
+        ScopeConfig.SINGLETONS.set(0);
+        ScopeConfig.PROTOTYPES.set(0);
     }
 
     /**
@@ -103,11 +108,13 @@ public class ScopeConfig {
     /**
      * {@code proxyMode = TARGET_CLASS} — в место внедрения подставляется
      * CGLIB-прокси, который на каждый вызов метода достаёт новый бин из контейнера.
-     * @return {@code proxyMode = TARGET_CLASS} — в место внедрения подставляется CGLIB-прокси, который на каждый вызов метода достаёт новый бин из контейнера
+     * @return Прототип, который внедряется через CGLIB-прокси
      */
-    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     @Bean
-    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
+    @Scope(
+        value = ConfigurableBeanFactory.SCOPE_PROTOTYPE,
+        proxyMode = ScopedProxyMode.TARGET_CLASS
+    )
     public ProxiedPrototypeBean proxiedPrototypeBean() {
         return new ProxiedPrototypeBean();
     }
@@ -124,10 +131,11 @@ public class ScopeConfig {
         private final int serial;
 
         /**
-         * Основной конструктор.
+         * Основной конструктор: подсчёт создания и есть суть примера.
+         * @checkstyle ConstructorsCodeFreeCheck (4 lines)
          */
         public SingletonBean() {
-            this.serial = SINGLETON_INSTANCES.incrementAndGet();
+            this.serial = ScopeConfig.SINGLETONS.incrementAndGet();
         }
 
         /**
@@ -151,10 +159,11 @@ public class ScopeConfig {
         private final int serial;
 
         /**
-         * Основной конструктор.
+         * Основной конструктор: подсчёт создания и есть суть примера.
+         * @checkstyle ConstructorsCodeFreeCheck (4 lines)
          */
         public PrototypeBean() {
-            this.serial = PROTOTYPE_INSTANCES.incrementAndGet();
+            this.serial = ScopeConfig.PROTOTYPES.incrementAndGet();
         }
 
         /**
@@ -237,10 +246,11 @@ public class ScopeConfig {
         private final int serial;
 
         /**
-         * Основной конструктор.
+         * Основной конструктор: подсчёт создания и есть суть примера.
+         * @checkstyle ConstructorsCodeFreeCheck (4 lines)
          */
         public ProxiedPrototypeBean() {
-            this.serial = PROTOTYPE_INSTANCES.incrementAndGet();
+            this.serial = ScopeConfig.PROTOTYPES.incrementAndGet();
         }
 
         /**

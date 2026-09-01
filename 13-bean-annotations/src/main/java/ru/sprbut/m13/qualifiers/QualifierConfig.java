@@ -7,12 +7,12 @@
 // @checkstyle NonStaticMethodCheck disable
 package ru.sprbut.m13.qualifiers;
 
+import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Слайды 102–103: {@code @Autowired}, {@code @Qualifier}, {@code @Primary}.
@@ -74,7 +74,9 @@ public class QualifierConfig {
      * @return {@code @Qualifier} по имени бина перебивает {@code @Primary}
      */
     @Bean
-    public QualifiedConsumer qualifiedConsumer(final @Qualifier("cashGateway") PaymentGateway gateway) {
+    public QualifiedConsumer qualifiedConsumer(
+        @Qualifier("cashGateway") final PaymentGateway gateway
+    ) {
         return new QualifiedConsumer(gateway);
     }
 
@@ -90,14 +92,17 @@ public class QualifierConfig {
 
     /**
      * Особый случай: контейнер умеет внедрять <b>все</b> бины типа сразу —
-     * списком или картой «имя бина → бин». {@code @Primary} тут не участвует.
+     * списком или картой из имени бина в сам бин. {@code @Primary} тут
+     * не участвует.
      * @param all Все элементы
-     * @param byName Имя
-     * @return Особый случай: контейнер умеет внедрять <b>все</b> бины типа сразу — списком или картой «имя бина → бин». {@code @Primary} тут не участвует
+     * @param named Карта из имени бина в сам бин
+     * @return Реестр, в который контейнер сложил все шлюзы разом
      */
     @Bean
-    public GatewayRegistry gatewayRegistry(final List<PaymentGateway> all, final Map<String, PaymentGateway> byName) {
-        return new GatewayRegistry(all, byName);
+    public GatewayRegistry gatewayRegistry(
+        final List<PaymentGateway> all, final Map<String, PaymentGateway> named
+    ) {
+        return new GatewayRegistry(all, named);
     }
 
     /**

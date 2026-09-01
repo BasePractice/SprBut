@@ -5,8 +5,14 @@
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
 // @checkstyle NonStaticMethodCheck disable
+// тема раздела — условное создание бинов: маркер и условие живут рядом
+// с конфигурацией, которая их использует
+// @checkstyle ProhibitStaticNestedClassesCheck disable
+// @checkstyle QualifyInnerClassCheck disable
 package ru.sprbut.m13.conditional;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
@@ -16,8 +22,6 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.type.AnnotatedTypeMetadata;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Слайды 104–106: {@code @Primary}, {@code @Lazy}, {@code @DependsOn},
@@ -72,9 +76,9 @@ public class ConditionalConfig {
     /**
      * Сброс состояния.
      */
-    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
     public static void reset() {
-        CREATED.clear();
+        ConditionalConfig.CREATED.clear();
     }
 
     /**
@@ -110,9 +114,8 @@ public class ConditionalConfig {
     /**
      * Зависимости в коде нет, но порядок важен. {@code @DependsOn} — единственный
      * способ его выразить.
-     * @return Зависимости в коде нет, но порядок важен. {@code @DependsOn} — единственный способ его выразить
+     * @return Бин, который обязан создаваться после инициализатора схемы
      */
-    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     @Bean
     @DependsOn("schemaInitializer")
     public Marker cacheWarmer() {
@@ -126,11 +129,13 @@ public class ConditionalConfig {
     public static class Marker {
 
         /**
-         * Основной конструктор.
+         * Основной конструктор: сама отметка о создании и есть суть примера.
          * @param name Имя
+         * @checkstyle ConstructorsCodeFreeCheck (4 lines)
          */
+        @SuppressWarnings("PMD.ConstructorOnlyInitializesOrCallOtherConstructors")
         public Marker(final String name) {
-            CREATED.add(name);
+            ConditionalConfig.CREATED.add(name);
         }
     }
 
@@ -138,7 +143,7 @@ public class ConditionalConfig {
      * Своё условие: бин создаётся, только если задано системное свойство.
      * @since 1.0
      */
-    public static class OnPropertyCondition implements Condition {
+    public static final class OnPropertyCondition implements Condition {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -148,8 +153,12 @@ public class ConditionalConfig {
         }
 
         @Override
-        public boolean matches(final ConditionContext context, final AnnotatedTypeMetadata metadata) {
-            return "true".equals(context.getEnvironment().getProperty("sprbut.feature.enabled"));
+        public boolean matches(
+            final ConditionContext context, final AnnotatedTypeMetadata metadata
+        ) {
+            return "true".equals(
+                context.getEnvironment().getProperty("sprbut.feature.enabled")
+            );
         }
     }
 }

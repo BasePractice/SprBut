@@ -53,22 +53,31 @@ public final class BeanRegistryReport {
         final List<Entry> collected = new ArrayList<>(0);
         for (final String name : beans.getBeanDefinitionNames()) {
             final BeanDefinition definition = beans.getBeanDefinition(name);
-            final Class<?> type = beans.getType(
-                name
+            final Class<?> type = beans.getType(name);
+            final String simple;
+            if (type == null) {
+                simple = "?";
+            } else {
+                simple = type.getSimpleName();
+            }
+            final String[] depends = definition.getDependsOn();
+            final List<String> order;
+            if (depends == null) {
+                order = List.of();
+            } else {
+                order = Arrays.asList(depends);
+            }
+            collected.add(
+                new Entry(
+                    name,
+                    simple,
+                    definition.getScope(),
+                    definition.isPrimary(),
+                    definition.isLazyInit(),
+                    beans.containsSingleton(name),
+                    order
+                )
             );
-            collected.add(new Entry(
-                name,
-                type == null ? "?" : type.getSimpleName(),
-                definition.getScope(),
-                definition.isPrimary(),
-                definition.isLazyInit(),
-                beans.containsSingleton(name),
-                definition.getDependsOn() == null
-                    ? List.of()
-                    : Arrays.asList(
-                        definition.getDependsOn()
-                    )
-            ));
         }
         collected.sort(Comparator.comparing(Entry::name));
         return List.copyOf(collected);
@@ -98,31 +107,24 @@ public final class BeanRegistryReport {
      *
      * <p>Порядок разрешения повторяет принятый в Spring: единственный кандидат,
      * затем {@code @Primary}, затем отказ с требованием {@code @Qualifier}.</p>
+     *
      * @param type Тип
      * @return Объяснение, какой бин будет выбран и почему
      */
     public String resolution(final Class<?> type) {
         final List<String> candidates = this.candidates(type);
+        final String explanation;
         if (candidates.isEmpty()) {
-            return "нет кандидатов типа " + type.getSimpleName()
-                + " → NoSuchBeanDefinitionException";
+            explanation = String.format(
+                "нет кандидатов типа %s, будет NoSuchBeanDefinitionException",
+                type.getSimpleName()
+            );
+        } else if (candidates.size() == 1) {
+            explanation = String.format("единственный кандидат: %s", candidates.get(0));
+        } else {
+            explanation = this.byPrimary(candidates);
         }
-        if (candidates.size() == 1) {
-            return String.format("единственный кандидат: %s", candidates.get(0));
-        }
-        final List<String> primary = this.entries().stream()
-            .filter(Entry::primary)
-            .filter(entry -> candidates.contains(entry.name()))
-            .map(Entry::name)
-            .toList();
-        if (primary.size() == 1) {
-            return String.format("@Primary: %s из %s", primary.get(0), candidates);
-        }
-        if (primary.size() > 1) {
-            return "несколько @Primary " + primary + " → NoUniqueBeanDefinitionException";
-        }
-        return "кандидатов " + candidates.size() + " " + candidates
-            + ", @Primary нет → нужен @Qualifier, иначе NoUniqueBeanDefinitionException";
+        return explanation;
     }
 
     /**
@@ -132,11 +134,13 @@ public final class BeanRegistryReport {
     public Map<String, Long> scopes() {
         final Map<String, Long> summary = new LinkedHashMap<>();
         for (final Entry entry : this.application()) {
-            summary.merge(
-                entry.scope().isEmpty() ? BeanDefinition.SCOPE_SINGLETON : entry.scope(),
-                1L,
-                Long::sum
-            );
+            final String scope;
+            if (entry.scope().isEmpty()) {
+                scope = BeanDefinition.SCOPE_SINGLETON;
+            } else {
+                scope = entry.scope();
+            }
+            summary.merge(scope, 1L, Long::sum);
         }
         return Map.copyOf(summary);
     }
@@ -150,5 +154,28 @@ public final class BeanRegistryReport {
             .filter(entry -> !entry.instantiated())
             .map(Entry::name)
             .toList();
+    }
+
+    // выбор среди нескольких кандидатов — отдельный шаг того же правила
+    private String byPrimary(final List<String> candidates) {
+        final List<String> primary = this.entries().stream()
+            .filter(Entry::primary)
+            .filter(entry -> candidates.contains(entry.name()))
+            .map(Entry::name)
+            .toList();
+        final String explanation;
+        if (primary.size() == 1) {
+            explanation = String.format("@Primary: %s из %s", primary.get(0), candidates);
+        } else if (primary.isEmpty()) {
+            explanation = String.format(
+                "кандидатов %d %s, @Primary нет, нужен @Qualifier, иначе NoUniqueBeanDefinitionException",
+                candidates.size(), candidates
+            );
+        } else {
+            explanation = String.format(
+                "несколько @Primary %s, будет NoUniqueBeanDefinitionException", primary
+            );
+        }
+        return explanation;
     }
 }
