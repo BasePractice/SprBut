@@ -4,6 +4,10 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
+// контракт AspectJ: around-advice обязан объявлять throws Throwable
+// и пропускать через себя любое исключение цели
+// @checkstyle IllegalThrowsCheck disable
+// @checkstyle IllegalCatchCheck disable
 package ru.sprbut.m15.aop;
 
 import java.util.ArrayList;
@@ -32,6 +36,7 @@ import org.springframework.stereotype.Component;
  */
 @Aspect
 @Component
+@SuppressWarnings("PMD.ConstructorShouldDoInitialization")
 public class AuditAspect {
 
     /**
@@ -72,31 +77,34 @@ public class AuditAspect {
 
     /**
      * Advice «до вызова»: результат метода изменить нельзя, можно только наблюдать.
-     * @param joinPoint Значение {@code joinPoint}
+     * @param point Точка соединения
      */
     @Before("anyServiceMethod()")
-    public void before(final JoinPoint joinPoint) {
-        this.log.add("before:" + joinPoint.getSignature().getName());
+    public void before(final JoinPoint point) {
+        this.log.add(String.format("before:%s", point.getSignature().getName()));
     }
 
     /**
      * Advice «вокруг вызова» — самый мощный: решает, вызывать ли цель вообще,
      * может подменить аргументы и результат. Именно так устроены
      * {@code @Transactional} и {@code @Cacheable}.
-     * @param joinPoint Значение {@code joinPoint}
-     * @return Advice «вокруг вызова» — самый мощный: решает, вызывать ли цель вообще, может подменить аргументы и результат. Именно так устроены {@code @Transactional} и {@code @Cacheable}
+     * @param point Точка соединения
+     * @return Результат вызова цели, возможно подменённый
+     * @throws Throwable Любое исключение цели, пропущенное дальше
      */
     @Around("execution(* ru.sprbut.m15.aop.*Service.calculate(..))")
-    public Object around(final ProceedingJoinPoint joinPoint) throws Throwable {
-        this.log.add("around-start:" + joinPoint.getSignature().getName());
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
+    public Object around(final ProceedingJoinPoint point) throws Throwable {
+        this.log.add(String.format("around-start:%s", point.getSignature().getName()));
+        final Object result;
         try {
-            final Object result = joinPoint.proceed();
-            this.log.add("around-end:" + joinPoint.getSignature().getName());
-            return result;
-        } catch (final Throwable e) {
-            this.log.add("around-error:" + joinPoint.getSignature().getName());
-            throw e;
+            result = point.proceed();
+        } catch (final Throwable error) {
+            this.log.add(String.format("around-error:%s", point.getSignature().getName()));
+            throw error;
         }
+        this.log.add(String.format("around-end:%s", point.getSignature().getName()));
+        return result;
     }
 
     /**
@@ -105,6 +113,6 @@ public class AuditAspect {
      */
     @AfterThrowing(pointcut = "anyServiceMethod()", throwing = "error")
     public void afterThrowing(final Throwable error) {
-        this.log.add("afterThrowing:" + error.getClass().getSimpleName());
+        this.log.add(String.format("afterThrowing:%s", error.getClass().getSimpleName()));
     }
 }

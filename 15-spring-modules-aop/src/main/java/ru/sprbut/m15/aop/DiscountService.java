@@ -16,7 +16,6 @@ import java.math.BigDecimal;
  *
  * @since 1.0
  */
-@SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface DiscountService {
 
     /**

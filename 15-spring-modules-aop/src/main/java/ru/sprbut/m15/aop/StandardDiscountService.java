@@ -5,15 +5,15 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m15.aop;
 
-import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
+import org.springframework.stereotype.Service;
 
 /**
  * Реализация {@link DiscountService}. Именно её Spring обернёт JDK-прокси.
  * @since 1.0
  */
 @Service
-public class StandardDiscountService implements DiscountService {
+public final class StandardDiscountService implements DiscountService {
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.

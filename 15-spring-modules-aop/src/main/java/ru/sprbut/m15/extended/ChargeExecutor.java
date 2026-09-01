@@ -6,8 +6,8 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m15.extended;
 
-import org.springframework.stereotype.Service;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.springframework.stereotype.Service;
 
 /**
  * Отдельный бин с {@code @Retryable} — <b>правильный</b> способ обойти
@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 1.0
  */
 @Service
+@SuppressWarnings("PMD.ConstructorShouldDoInitialization")
 public class ChargeExecutor {
 
     /**
@@ -28,9 +29,9 @@ public class ChargeExecutor {
     private final AtomicInteger executions = new AtomicInteger();
 
     /**
-     * Значение {@code failuresBeforeSuccess}.
+     * Сколько первых вызовов должны упасть.
      */
-    private volatile int failuresBeforeSuccess;
+    private volatile int failures;
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -52,7 +53,7 @@ public class ChargeExecutor {
      * @param times Число повторов
      */
     public void failFirst(final int times) {
-        this.failuresBeforeSuccess = times;
+        this.failures = times;
     }
 
     /**
@@ -60,20 +61,20 @@ public class ChargeExecutor {
      */
     public void reset() {
         this.executions.set(0);
-        this.failuresBeforeSuccess = 0;
+        this.failures = 0;
     }
 
     /**
      * Значение {@code execute}.
-     * @param orderId Порядок
+     * @param order Номер заказа
      * @return Значение {@code execute}
      */
     @Retryable(attempts = 3)
-    public String execute(final String orderId) {
+    public String execute(final String order) {
         final int call = this.executions.incrementAndGet();
-        if (call <= this.failuresBeforeSuccess) {
-            throw new IllegalStateException("сбой платежа №" + call);
+        if (call <= this.failures) {
+            throw new IllegalStateException(String.format("сбой платежа №%d", call));
         }
-        return String.format("оплачен %s", orderId);
+        return String.format("оплачен %s", order);
     }
 }

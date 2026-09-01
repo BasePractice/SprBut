@@ -6,8 +6,8 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m15.aop;
 
-import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
+import org.springframework.stereotype.Service;
 
 /**
  * Целевой бин <b>без интерфейса</b>. Слайд 123: «CGLIB-подкласс — если интерфейса нет».
@@ -39,7 +39,7 @@ public class PricingService {
      * @return Вычисление
      */
     public BigDecimal calculate(final BigDecimal net) {
-        this.calls++;
+        this.calls += 1;
         return net.multiply(new BigDecimal("1.20"));
     }
 
@@ -47,7 +47,7 @@ public class PricingService {
      * Self-invocation: внутренний вызов идёт напрямую по ссылке {@code this},
      * минуя прокси. Аспект на {@code calculate} здесь не сработает.
      * @param net Сумма без налога
-     * @return Self-invocation: внутренний вызов идёт напрямую по ссылке {@code this}, минуя прокси. Аспект на {@code calculate} здесь не сработает
+     * @return Удвоенная цена, посчитанная внутренним вызовом мимо прокси
      */
     public BigDecimal calculateTwice(final BigDecimal net) {
         return this.calculate(net).add(this.calculate(net));
@@ -59,7 +59,7 @@ public class PricingService {
      * @return Падающий элемент
      */
     public BigDecimal failing(final BigDecimal net) {
-        throw new IllegalArgumentException("расчёт невозможен для " + net);
+        throw new IllegalArgumentException(String.format("расчёт невозможен для %s", net));
     }
 
     /**

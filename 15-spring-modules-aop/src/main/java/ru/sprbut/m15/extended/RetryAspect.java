@@ -4,16 +4,20 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
+// контракт AspectJ: around-advice обязан объявлять throws Throwable
+// и пропускать через себя любое исключение цели
+// @checkstyle IllegalThrowsCheck disable
+// @checkstyle IllegalCatchCheck disable
 package ru.sprbut.m15.extended;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <b>Расширенный пример модуля 15 (часть 1).</b>
@@ -31,6 +35,7 @@ import java.util.List;
 @Aspect
 @Component
 @Order(1)
+@SuppressWarnings("PMD.ConstructorShouldDoInitialization")
 public class RetryAspect {
 
     /**
@@ -66,32 +71,47 @@ public class RetryAspect {
      * @return Число попыток
      */
     public long attemptsOf(final String method) {
-        return this.log.stream().filter(e -> e.contains(":" + method + ":")).count();
+        final String marker = String.format(":%s:", method);
+        return this.log.stream().filter(entry -> entry.contains(marker)).count();
     }
 
     /**
      * Pointcut по аннотации, а не по имени метода: так аспект не зависит
      * от структуры пакетов.
-     * @param joinPoint Значение {@code joinPoint}
-     * @return Pointcut по аннотации, а не по имени метода: так аспект не зависит от структуры пакетов
+     * @param point Точка соединения
+     * @return Результат первой удачной попытки
+     * @throws Throwable Исключение последней попытки, если удачной не случилось
      */
     @Around("@annotation(ru.sprbut.m15.extended.Retryable)")
-    public Object retry(final ProceedingJoinPoint joinPoint) throws Throwable {
-        final MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
+    public Object retry(final ProceedingJoinPoint point) throws Throwable {
+        final MethodSignature signature = (MethodSignature) point.getSignature();
         final Retryable annotation = signature.getMethod().getAnnotation(Retryable.class);
-        final int attempts = annotation == null ? 1 : annotation.attempts();
+        final int attempts;
+        if (annotation == null) {
+            attempts = 1;
+        } else {
+            attempts = annotation.attempts();
+        }
         Throwable last = null;
-        for (int attempt = 1; attempt <= attempts; attempt++) {
+        Object result = null;
+        int attempt = 0;
+        while (result == null && attempt < attempts) {
+            attempt += 1;
             try {
-                final Object result = joinPoint.proceed();
-                this.log.add("success:" + signature.getName() + ":попытка" + attempt);
-                return result;
-            } catch (final Throwable e) {
-                last = e;
-                this.log.add("fail:" + signature.getName() + ":попытка" + attempt);
+                result = point.proceed();
+                this.log.add(
+                    String.format("success:%s:попытка%d", signature.getName(), attempt)
+                );
+            } catch (final Throwable error) {
+                last = error;
+                this.log.add(String.format("fail:%s:попытка%d", signature.getName(), attempt));
             }
         }
-        this.log.add("exhausted:" + signature.getName());
-        throw last;
+        if (result == null) {
+            this.log.add(String.format("exhausted:%s", signature.getName()));
+            throw last;
+        }
+        return result;
     }
 }

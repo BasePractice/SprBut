@@ -48,8 +48,13 @@ final class SpringModulesAndAopTest {
                 SpringModuleMap.foundation(),
                 Matchers.contains("spring-core")
             );
+        }
+
+        @Test
+        @DisplayName("у spring-core действительно нет ни одной зависимости")
+        void coreDependsOnNothing() {
             MatcherAssert.assertThat(
-                "cannot verify that core is the foundation",
+                "spring-core cannot depend on nothing",
                 SpringModuleMap.CORE.dependsOn(),
                 Matchers.empty()
             );
@@ -60,15 +65,11 @@ final class SpringModulesAndAopTest {
         void everythingDependsOnCore() {
             MatcherAssert.assertThat(
                 "every module cannot depend on spring-core",
-                SpringModuleMap.all().stream()
-                    .filter(
-                        module -> !module.name().equals(
-                            "spring-core"
-                        )
-                    )
-                    .allMatch(module ->
-                        SpringModuleMap.transitiveDependencies(module.name()).contains("spring-core")
-                    ),
+                SpringModuleMap.all()
+                    .stream()
+                    .filter(module -> !"spring-core".equals(module.name()))
+                    .map(module -> SpringModuleMap.transitiveDependencies(module.name()))
+                    .allMatch(dependencies -> dependencies.contains("spring-core")),
                 Matchers.equalTo(true)
             );
         }
@@ -81,8 +82,13 @@ final class SpringModulesAndAopTest {
                 SpringModuleMap.BOOT.layer(),
                 Matchers.equalTo(SpringModuleMap.Layer.PLATFORM)
             );
+        }
+
+        @Test
+        @DisplayName("Cloud стоит поверх Boot, а тот — поверх ядра")
+        void cloudSitsOnTopOfBoot() {
             MatcherAssert.assertThat(
-                "cannot verify that boot and cloud are on top",
+                "cloud cannot sit on top of boot",
                 SpringModuleMap.transitiveDependencies("spring-cloud"),
                 Matchers.hasItems("spring-boot", "spring-context", "spring-core")
             );
@@ -94,7 +100,9 @@ final class SpringModulesAndAopTest {
             MatcherAssert.assertThat(
                 "cannot verify that transactions and security are built on aop",
                 SpringModuleMap.builtOnAop(),
-                Matchers.hasItems("spring-aop", "spring-tx", "spring-jdbc", "spring-data", "spring-security")
+                Matchers.hasItems(
+                    "spring-aop", "spring-tx", "spring-jdbc", "spring-data", "spring-security"
+                )
             );
         }
 
@@ -104,7 +112,9 @@ final class SpringModulesAndAopTest {
             MatcherAssert.assertThat(
                 "cannot verify that transitive dependencies are complete",
                 SpringModuleMap.transitiveDependencies("spring-jdbc"),
-                Matchers.containsInAnyOrder("spring-core", "spring-beans", "spring-tx", "spring-aop")
+                Matchers.containsInAnyOrder(
+                    "spring-core", "spring-beans", "spring-tx", "spring-aop"
+                )
             );
         }
     }
@@ -121,8 +131,9 @@ final class SpringModulesAndAopTest {
          * Контекст.
          */
         private AnnotationConfigApplicationContext context;
+
         /**
-         * Значение {@code aspect}.
+         * Аспект, чей журнал проверяют все сценарии этого блока.
          */
         private AuditAspect aspect;
 
@@ -141,19 +152,28 @@ final class SpringModulesAndAopTest {
         @Test
         @DisplayName("Класс не меняется — меняется то, что лежит в контейнере")
         void targetClassIsUntouched() {
-            final PricingService bean = this.context.getBean(PricingService.class);
             MatcherAssert.assertThat(
                 "cannot verify that target class is untouched",
-                AopUtils.isAopProxy(bean),
+                AopUtils.isAopProxy(this.context.getBean(PricingService.class)),
                 Matchers.equalTo(true)
             );
+        }
+
+        @Test
+        @DisplayName("в контейнере лежит не сам класс, а прокси вокруг него")
+        void containerHoldsTheProxy() {
             MatcherAssert.assertThat(
                 "proxy class cannot differ from the target class",
-                bean.getClass(),
+                this.context.getBean(PricingService.class).getClass(),
                 Matchers.not(Matchers.equalTo(PricingService.class))
             );
+        }
+
+        @Test
+        @DisplayName("сам класс при этом остался нетронутым")
+        void targetClassKeepsItsHierarchy() {
             MatcherAssert.assertThat(
-                "cannot verify that target class is untouched",
+                "target class cannot keep its hierarchy",
                 PricingService.class.getSuperclass(),
                 Matchers.equalTo(Object.class)
             );
@@ -162,15 +182,19 @@ final class SpringModulesAndAopTest {
         @Test
         @DisplayName("Слайд 123: нет интерфейса — CGLIB-подкласс")
         void classWithoutInterfaceGetsCglibProxy() {
-            final PricingService bean = this.context.getBean(PricingService.class);
             MatcherAssert.assertThat(
                 "cannot verify that class without interface gets cglib proxy",
-                AopUtils.isCglibProxy(bean),
+                AopUtils.isCglibProxy(this.context.getBean(PricingService.class)),
                 Matchers.equalTo(true)
             );
+        }
+
+        @Test
+        @DisplayName("CGLIB-прокси наследуется от самого класса")
+        void cglibProxyExtendsTheTarget() {
             MatcherAssert.assertThat(
-                "cannot verify that class without interface gets cglib proxy",
-                bean.getClass().getSuperclass(),
+                "cglib proxy cannot extend the target class",
+                this.context.getBean(PricingService.class).getClass().getSuperclass(),
                 Matchers.equalTo(PricingService.class)
             );
         }
@@ -178,15 +202,19 @@ final class SpringModulesAndAopTest {
         @Test
         @DisplayName("Слайд 122: есть интерфейс — JDK dynamic proxy")
         void classWithInterfaceGetsJdkProxy() {
-            final DiscountService bean = this.context.getBean(DiscountService.class);
             MatcherAssert.assertThat(
                 "cannot verify that class with interface gets jdk proxy",
-                AopUtils.isJdkDynamicProxy(bean),
+                AopUtils.isJdkDynamicProxy(this.context.getBean(DiscountService.class)),
                 Matchers.equalTo(true)
             );
+        }
+
+        @Test
+        @DisplayName("и это обычный java.lang.reflect.Proxy")
+        void jdkProxyIsAReflectProxy() {
             MatcherAssert.assertThat(
-                "cannot verify that class with interface gets jdk proxy",
-                Proxy.isProxyClass(bean.getClass()),
+                "jdk proxy cannot be a reflect proxy",
+                Proxy.isProxyClass(this.context.getBean(DiscountService.class).getClass()),
                 Matchers.equalTo(true)
             );
         }
@@ -194,7 +222,15 @@ final class SpringModulesAndAopTest {
         @Test
         @DisplayName("JDK-прокси нельзя привести к классу реализации — частая ошибка")
         void jdkProxyIsNotTheImplementationClass() {
-            Assertions.assertThrows(NoSuchBeanDefinitionException.class, () -> this.context.getBean(StandardDiscountService.class));
+            Assertions.assertThrows(
+                NoSuchBeanDefinitionException.class,
+                () -> this.context.getBean(StandardDiscountService.class)
+            );
+        }
+
+        @Test
+        @DisplayName("бин по интерфейсу не является экземпляром реализации")
+        void proxyIsNotTheImplementation() {
             MatcherAssert.assertThat(
                 "JDK proxy cannot avoid being the implementation class",
                 this.context.getBean(DiscountService.class) instanceof StandardDiscountService,
@@ -206,13 +242,19 @@ final class SpringModulesAndAopTest {
         @DisplayName("@Before и @Around срабатывают на внешнем вызове")
         void adviceRunsOnExternalCall() {
             this.context.getBean(PricingService.class).calculate(new BigDecimal("100"));
-            // Порядок @Before и @Around внутри одного аспекта не определён,
-            // а вот @Around обязан обрамлять вызов с двух сторон
             MatcherAssert.assertThat(
                 "cannot verify that advice runs on external call",
                 this.aspect.log(),
-                Matchers.containsInAnyOrder("before:calculate", "around-start:calculate", "around-end:calculate")
+                Matchers.containsInAnyOrder(
+                    "before:calculate", "around-start:calculate", "around-end:calculate"
+                )
             );
+        }
+
+        @Test
+        @DisplayName("@Around обрамляет вызов с двух сторон")
+        void aroundAdviceWrapsTheCall() {
+            this.context.getBean(PricingService.class).calculate(new BigDecimal("100"));
             MatcherAssert.assertThat(
                 "around advice cannot wrap the call from both sides",
                 this.aspect.log().indexOf("around-start:calculate"),
@@ -224,7 +266,9 @@ final class SpringModulesAndAopTest {
         @DisplayName("@AfterThrowing видит исключение, но не гасит его")
         void afterThrowingObservesButDoesNotSwallow() {
             final PricingService service = this.context.getBean(PricingService.class);
-            Assertions.assertThrows(IllegalArgumentException.class, () -> service.failing(BigDecimal.TEN));
+            Assertions.assertThrows(
+                IllegalArgumentException.class, () -> service.failing(BigDecimal.TEN)
+            );
             MatcherAssert.assertThat(
                 "cannot verify that after throwing observes but does not swallow",
                 this.aspect.log(),
@@ -238,13 +282,19 @@ final class SpringModulesAndAopTest {
             final PricingService service = this.context.getBean(PricingService.class);
             service.reset();
             service.calculateTwice(new BigDecimal("100"));
-            // тело calculate выполнилось дважды...
             MatcherAssert.assertThat(
                 "cannot verify that self invocation is not intercepted",
                 service.calls(),
                 Matchers.equalTo(2)
             );
-            // ...но аспект не увидел ни одного вызова calculate
+        }
+
+        @Test
+        @DisplayName("при этом аспект не увидел ни одного внутреннего вызова")
+        void selfInvocationStaysInvisibleToTheAspect() {
+            final PricingService service = this.context.getBean(PricingService.class);
+            service.reset();
+            service.calculateTwice(new BigDecimal("100"));
             MatcherAssert.assertThat(
                 "self invocation cannot bypass the aspect",
                 this.aspect.log(),

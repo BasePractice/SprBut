@@ -6,10 +6,10 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m15.extended;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <b>Расширенный пример модуля 15 (часть 2).</b>
@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 1.0
  */
 @Service
+@SuppressWarnings("PMD.ConstructorShouldDoInitialization")
 public class PaymentService {
 
     /**
@@ -43,9 +44,9 @@ public class PaymentService {
     private final AtomicInteger executions = new AtomicInteger();
 
     /**
-     * Значение {@code failuresBeforeSuccess}.
+     * Сколько первых вызовов должны упасть.
      */
-    private volatile int failuresBeforeSuccess;
+    private volatile int failures;
 
     /**
      * Ссылка на себя.
@@ -64,46 +65,48 @@ public class PaymentService {
      * @param self Ссылка на себя
      * @param executor Исполнитель
      */
-    public PaymentService(final ObjectProvider<PaymentService> self, final ChargeExecutor executor) {
+    public PaymentService(
+        final ObjectProvider<PaymentService> self, final ChargeExecutor executor
+    ) {
         this.self = self;
         this.executor = executor;
     }
 
     /**
      * Вызов через {@code this} — прокси в стороне, аспект не срабатывает.
-     * @param orderId Порядок
+     * @param order Номер заказа
      * @return Вызов через {@code this} — прокси в стороне, аспект не срабатывает
      */
-    public String chargeViaThis(final String orderId) {
-        return this.charge(orderId);
+    public String chargeViaThis(final String order) {
+        return this.charge(order);
     }
 
     /**
      * Обход 1: взять себя из контейнера — то есть свой же прокси.
-     * @param orderId Порядок
+     * @param order Номер заказа
      * @return Обход 1: взять себя из контейнера — то есть свой же прокси
      */
-    public String chargeViaSelf(final String orderId) {
-        return this.self.getObject().charge(orderId);
+    public String chargeViaSelf(final String order) {
+        return this.self.getObject().charge(order);
     }
 
     /**
      * Обход 2: {@code AopContext} — требует {@code exposeProxy = true}.
-     * @param orderId Порядок
+     * @param order Номер заказа
      * @return Обход 2: {@code AopContext} — требует {@code exposeProxy = true}
      */
     // @checkstyle NonStaticMethodCheck (3 lines)
-    public String chargeViaAopContext(final String orderId) {
-        return ((PaymentService) AopContext.currentProxy()).charge(orderId);
+    public String chargeViaAopContext(final String order) {
+        return ((PaymentService) AopContext.currentProxy()).charge(order);
     }
 
     /**
      * Правильное решение: вызов уходит в другой бин, то есть через его прокси.
-     * @param orderId Порядок
+     * @param order Номер заказа
      * @return Правильное решение: вызов уходит в другой бин, то есть через его прокси
      */
-    public String chargeViaSeparateBean(final String orderId) {
-        return this.executor.execute(orderId);
+    public String chargeViaSeparateBean(final String order) {
+        return this.executor.execute(order);
     }
 
     /**
@@ -119,7 +122,7 @@ public class PaymentService {
      * @param times Число повторов
      */
     public void failFirst(final int times) {
-        this.failuresBeforeSuccess = times;
+        this.failures = times;
     }
 
     /**
@@ -127,20 +130,20 @@ public class PaymentService {
      */
     public void reset() {
         this.executions.set(0);
-        this.failuresBeforeSuccess = 0;
+        this.failures = 0;
     }
 
     /**
      * Списание.
-     * @param orderId Порядок
+     * @param order Номер заказа
      * @return Списание
      */
     @Retryable(attempts = 3)
-    public String charge(final String orderId) {
+    public String charge(final String order) {
         final int call = this.executions.incrementAndGet();
-        if (call <= this.failuresBeforeSuccess) {
-            throw new IllegalStateException("сбой платежа №" + call);
+        if (call <= this.failures) {
+            throw new IllegalStateException(String.format("сбой платежа №%d", call));
         }
-        return String.format("оплачен %s", orderId);
+        return String.format("оплачен %s", order);
     }
 }
