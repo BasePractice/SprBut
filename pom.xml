@@ -164,9 +164,6 @@
                         <groupId>com.qulice</groupId>
                         <artifactId>qulice-maven-plugin</artifactId>
                         <version>0.35.0</version>
-                        <configuration>
-                            <license>file:${basedir}/LICENSE</license>
-                        </configuration>
                         <executions>
                             <execution>
                                 <goals>

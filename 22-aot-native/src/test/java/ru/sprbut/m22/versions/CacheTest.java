@@ -1,26 +1,33 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m22.versions;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-
+/**
+ * Тесты жизненного цикла бина с аннотациями {@code jakarta.annotation}.
+ * @since 1.0
+ */
 @DisplayName("Слайд «Версии»: jakarta.annotation в жизненном цикле бина")
 final class CacheTest {
 
     @Test
     @DisplayName("@PostConstruct из jakarta вызывается контейнером Boot 3")
     void callsPostConstruct() {
-        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
-            context.registerBean(Cache.class);
-            context.refresh();
-            assertThat(
+        try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext()) {
+            ctx.registerBean(Cache.class);
+            ctx.refresh();
+            MatcherAssert.assertThat(
                 "jakarta PostConstruct cannot run after the bean is built",
-                context.getBean(Cache.class).events(),
-                contains("warm")
+                ctx.getBean(Cache.class).events(),
+                Matchers.contains("warm")
             );
         }
     }
@@ -28,26 +35,26 @@ final class CacheTest {
     @Test
     @DisplayName("@PreDestroy срабатывает при закрытии контекста")
     void callsPreDestroy() {
-        Cache cache;
-        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
-            context.registerBean(Cache.class);
-            context.refresh();
-            cache = context.getBean(Cache.class);
+        final Cache cache;
+        try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext()) {
+            ctx.registerBean(Cache.class);
+            ctx.refresh();
+            cache = ctx.getBean(Cache.class);
         }
-        assertThat(
+        MatcherAssert.assertThat(
             "jakarta PreDestroy cannot run when the context closes",
             cache.events(),
-            contains("warm", "flush")
+            Matchers.contains("warm", "flush")
         );
     }
 
     @Test
     @DisplayName("вне контейнера аннотации не значат ничего — это метаданные, а не поведение")
     void dontRunLifecycleWithoutContainer() {
-        assertThat(
+        MatcherAssert.assertThat(
             "annotations alone cannot trigger the lifecycle",
             new Cache().events().size(),
-            equalTo(0)
+            Matchers.equalTo(0)
         );
     }
 }
