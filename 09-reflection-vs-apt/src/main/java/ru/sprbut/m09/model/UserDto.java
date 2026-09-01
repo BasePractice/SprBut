@@ -3,6 +3,11 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// модели маппинга: имена свойств и одноимённые параметры сеттеров —
+// то, по чему маппер и находит соответствие
+// @checkstyle MemberNameCheck disable
+// @checkstyle HiddenFieldCheck disable
+// @checkstyle ParameterNameCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m09.model;
 
@@ -12,24 +17,29 @@ import java.util.Objects;
  * Целевой объект маппинга. Поля {@code internalNote} здесь намеренно нет.
  * @since 1.0
  */
-public class UserDto {
+@SuppressWarnings("PMD.DataClass")
+public final class UserDto {
 
     /**
      * Идентификатор.
      */
     private String id;
+
     /**
      * Имя.
      */
     private String firstName;
+
     /**
      * Имя.
      */
     private String lastName;
+
     /**
      * Возраст.
      */
     private int age;
+
     /**
      * Признак активности.
      */
@@ -123,19 +133,20 @@ public class UserDto {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
+    public boolean equals(final Object other) {
+        final boolean same;
+        if (this == other) {
+            same = true;
+        } else if (other instanceof UserDto dto) {
+            same = this.age == dto.age
+                && this.active == dto.active
+                && Objects.equals(this.id, dto.id)
+                && Objects.equals(this.firstName, dto.firstName)
+                && Objects.equals(this.lastName, dto.lastName);
+        } else {
+            same = false;
         }
-        if (!(o instanceof UserDto other)) {
-            return false;
-        }
-        return this.age == other.age && this.active == other.active
-                && Objects.equals(
-                    this.id, other.id
-                )
-                && Objects.equals(this.firstName, other.firstName)
-                && Objects.equals(this.lastName, other.lastName);
+        return same;
     }
 
     @Override
@@ -145,6 +156,8 @@ public class UserDto {
 
     @Override
     public String toString() {
-        return "UserDto{this.id=" + this.id + ", this.firstName=" + this.firstName + ", this.age=" + this.age + "}";
+        return String.format(
+            "UserDto{id=%s, firstName=%s, age=%s}", this.id, this.firstName, this.age
+        );
     }
 }

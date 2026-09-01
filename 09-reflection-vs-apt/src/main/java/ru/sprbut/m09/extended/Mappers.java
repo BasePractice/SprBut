@@ -43,7 +43,9 @@ public final class Mappers {
 
     /**
      * Основной конструктор.
-     * @param all Все элементы
+     * Копия списка снимается здесь: набор реализаций неизменяем.
+     * @param all Все реализации маппера
+     * @checkstyle ConstructorsCodeFreeCheck (5 lines)
      */
     public Mappers(final List<UserMapper> all) {
         this.all = List.copyOf(all);
@@ -63,7 +65,9 @@ public final class Mappers {
      * @return Дают ли все реализации одинаковый результат
      */
     public boolean agree(final UserEntity entity) {
-        final List<UserDto> results = this.all.stream().map(mapper -> mapper.toDto(entity)).toList();
+        final List<UserDto> results = this.all.stream()
+            .map(mapper -> mapper.toDto(entity))
+            .toList();
         return results.stream().allMatch(dto -> dto.equals(results.get(0)));
     }
 

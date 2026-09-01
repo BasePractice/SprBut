@@ -69,9 +69,11 @@ public final class RequiredHints {
     public List<String> accessors() {
         final List<String> needed = new ArrayList<>(0);
         for (final String property : this.reflective.propertyNames()) {
-            final String suffix = Character.toUpperCase(property.charAt(0)) + property.substring(1);
-            needed.add(UserEntity.class.getSimpleName() + "#get" + suffix);
-            needed.add(UserDto.class.getSimpleName() + "#set" + suffix);
+            final String suffix = String.format(
+                "%s%s", Character.toUpperCase(property.charAt(0)), property.substring(1)
+            );
+            needed.add(String.format("%s#get%s", UserEntity.class.getSimpleName(), suffix));
+            needed.add(String.format("%s#set%s", UserDto.class.getSimpleName(), suffix));
         }
         needed.sort(String::compareTo);
         return List.copyOf(needed);

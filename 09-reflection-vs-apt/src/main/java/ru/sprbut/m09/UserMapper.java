@@ -18,7 +18,6 @@ import ru.sprbut.m09.model.UserEntity;
  *
  * @since 1.0
  */
-@SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface UserMapper {
 
     /**

@@ -19,6 +19,7 @@ import ru.sprbut.m09.model.UserEntity;
  *
  * @since 1.0
  */
+@SuppressWarnings("PMD.ProhibitPublicStaticMethods")
 public final class CopyInterceptor {
 
     private CopyInterceptor() {
@@ -27,18 +28,20 @@ public final class CopyInterceptor {
     /**
      * Копирует поля сущности в DTO.
      * @param entity Сущность
-     * @return Копирует поля сущности в DTO
+     * @return Заполненный объект передачи данных
      */
     public static UserDto map(final @Argument(0) UserEntity entity) {
+        final UserDto dto;
         if (entity == null) {
-            return null;
+            dto = null;
+        } else {
+            dto = new UserDto();
+            dto.setId(entity.getId());
+            dto.setFirstName(entity.getFirstName());
+            dto.setLastName(entity.getLastName());
+            dto.setAge(entity.getAge());
+            dto.setActive(entity.isActive());
         }
-        final UserDto dto = new UserDto();
-        dto.setId(entity.getId());
-        dto.setFirstName(entity.getFirstName());
-        dto.setLastName(entity.getLastName());
-        dto.setAge(entity.getAge());
-        dto.setActive(entity.isActive());
         return dto;
     }
 }

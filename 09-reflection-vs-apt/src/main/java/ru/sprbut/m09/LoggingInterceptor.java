@@ -16,6 +16,7 @@ import net.bytebuddy.implementation.bind.annotation.This;
  *
  * @since 1.0
  */
+@SuppressWarnings("PMD.ProhibitPublicStaticMethods")
 public final class LoggingInterceptor {
 
     private LoggingInterceptor() {
@@ -26,6 +27,6 @@ public final class LoggingInterceptor {
      * @param self Ссылка на себя
      */
     public static void before(final @This Object self) {
-        Intercepted.add("вызов у " + self.getClass().getSimpleName());
+        Intercepted.add(String.format("вызов у %s", self.getClass().getSimpleName()));
     }
 }

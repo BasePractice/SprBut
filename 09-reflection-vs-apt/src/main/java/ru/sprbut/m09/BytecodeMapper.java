@@ -43,7 +43,7 @@ public final class BytecodeMapper {
      * Основной конструктор.
      */
     public BytecodeMapper() {
-        this(BytecodeMapper.class.getClassLoader());
+        this(Thread.currentThread().getContextClassLoader());
     }
 
     /**
@@ -59,7 +59,8 @@ public final class BytecodeMapper {
      *
      * <p>В исходниках такого класса нет вовсе — он существует только в памяти
      * этой JVM.</p>
-     * @return Маппер, класс которого собран и загружен прямо сейчас
+     *
+     * @return Маппер, собранный и загруженный прямо сейчас
      */
     public UserMapper mapper() {
         try {
@@ -84,7 +85,7 @@ public final class BytecodeMapper {
     /**
      * Подкласс конкретного класса с перехватом методов — то, что делает CGLIB,
      * когда у бина нет интерфейса.
-     * @return Подкласс конкретного класса с перехватом методов — то, что делает CGLIB, когда у бина нет интерфейса
+     * @return Подкласс с перехватом методов
      */
     public AuditService proxied() {
         new Intercepted().clear();

@@ -9,7 +9,6 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ru.sprbut.m09.model.UserDto;
 import ru.sprbut.m09.model.UserEntity;
 
 /**
@@ -144,10 +143,9 @@ final class MappersTest {
     @Test
     @DisplayName("копия совпадает с оригиналом по всем полям")
     void copiesEveryField() {
-        final UserDto dto = new GeneratedStyleMapper().toDto(entity());
         MatcherAssert.assertThat(
             "generated mapping cannot copy the boolean field",
-            dto.isActive(),
+            new GeneratedStyleMapper().toDto(entity()).isActive(),
             Matchers.equalTo(true)
         );
     }

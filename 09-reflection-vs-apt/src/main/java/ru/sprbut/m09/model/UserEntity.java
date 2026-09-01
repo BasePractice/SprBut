@@ -3,6 +3,13 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// конструктор без аргументов нужен рефлективному мапперу и стоит первым
+// @checkstyle ConstructorsOrderCheck disable
+// модели маппинга: имена свойств и одноимённые параметры сеттеров —
+// то, по чему маппер и находит соответствие
+// @checkstyle MemberNameCheck disable
+// @checkstyle HiddenFieldCheck disable
+// @checkstyle ParameterNameCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m09.model;
 
@@ -11,28 +18,34 @@ package ru.sprbut.m09.model;
  * реализован в модуле тремя способами — рефлексией, «как после APT» и байткодом.
  * @since 1.0
  */
-public class UserEntity {
+@SuppressWarnings({"PMD.DataClass", "PMD.TooManyMethods"})
+public final class UserEntity {
 
     /**
      * Идентификатор.
      */
     private String id;
+
     /**
      * Имя.
      */
     private String firstName;
+
     /**
      * Имя.
      */
     private String lastName;
+
     /**
      * Возраст.
      */
     private int age;
+
     /**
      * Признак активности.
      */
     private boolean active;
+
     /**
      * Внутренняя заметка.
      */
@@ -49,11 +62,12 @@ public class UserEntity {
      * Основной конструктор.
      * @param id Идентификатор
      * @param firstName Имя
-     * @param lastName Имя
+     * @param lastName Фамилия
      * @param age Возраст
      * @param active Признак активности
      */
-    public UserEntity(final String id, final String firstName, final String lastName, final int age, final boolean active) {
+    public UserEntity(final String id, final String firstName, final String lastName,
+        final int age, final boolean active) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;

@@ -54,7 +54,7 @@ public final class Benchmark {
         for (final UserMapper mapper : this.mappers.list()) {
             this.warmup(mapper, iterations / 10 + 1);
             final long started = System.nanoTime();
-            for (int step = 0; step < iterations; step++) {
+            for (int step = 0; step < iterations; step += 1) {
                 mapper.toDto(this.entity);
             }
             measured.put(mapper.getClass().getSimpleName(), System.nanoTime() - started);
@@ -63,7 +63,7 @@ public final class Benchmark {
     }
 
     private void warmup(final UserMapper mapper, final int rounds) {
-        for (int step = 0; step < rounds; step++) {
+        for (int step = 0; step < rounds; step += 1) {
             mapper.toDto(this.entity);
         }
     }

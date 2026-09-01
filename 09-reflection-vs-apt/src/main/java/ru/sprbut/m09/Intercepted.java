@@ -18,6 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @since 1.0
  */
+@SuppressWarnings("PMD.ProhibitPublicStaticMethods")
 public final class Intercepted {
 
     /**
@@ -34,7 +35,7 @@ public final class Intercepted {
 
     /**
      * Добавляет запись о перехваченном вызове.
-     * @param entry Значение {@code entry}
+     * @param entry Запись о вызове
      */
     @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     public static void add(final String entry) {

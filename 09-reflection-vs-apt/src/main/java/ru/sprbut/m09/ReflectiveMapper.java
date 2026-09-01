@@ -30,29 +30,37 @@ import ru.sprbut.m09.model.UserEntity;
  *
  * @since 1.0
  */
-public class ReflectiveMapper implements UserMapper {
+public final class ReflectiveMapper implements UserMapper {
 
     /**
-     * Пары «геттер источника → сеттер цели», найденные один раз при создании.
+     * Пары «геттер источника ведёт к сеттер цели», найденные один раз при создании.
      */
     private final Map<Method, Method> plan;
 
     /**
      * Основной конструктор.
+     *
+     * <p>План маппинга строится один раз при создании — в этом и смысл
+     * сравнения с генерацией кода: работа выполняется в runtime.</p>
+     *
+     * @checkstyle ConstructorsCodeFreeCheck (4 lines)
      */
     public ReflectiveMapper() {
-        this.plan = buildPlan(UserEntity.class, UserDto.class);
+        this.plan = ReflectiveMapper.buildPlan(UserEntity.class, UserDto.class);
     }
 
     @Override
     public UserDto toDto(final UserEntity entity) {
+        final UserDto dto;
         if (entity == null) {
-            return null;
-        }
-        final UserDto dto = new UserDto();
-        for (final Map.Entry<Method, Method> step : this.plan.entrySet()) {
-            final Object value = invoke(step.getKey(), entity);
-            invoke(step.getValue(), dto, value);
+            dto = null;
+        } else {
+            dto = new UserDto();
+            for (final Map.Entry<Method, Method> step : this.plan.entrySet()) {
+                ReflectiveMapper.invoke(
+                    step.getValue(), dto, ReflectiveMapper.invoke(step.getKey(), entity)
+                );
+            }
         }
         return dto;
     }
@@ -64,7 +72,7 @@ public class ReflectiveMapper implements UserMapper {
 
     /**
      * Сколько свойств маппер нашёл сам, без единой строчки правил.
-     * @return Сколько свойств маппер нашёл сам, без единой строчки правил
+     * @return Число найденных свойств
      */
     public int discoveredProperties() {
         return this.plan.size();
@@ -76,63 +84,90 @@ public class ReflectiveMapper implements UserMapper {
      */
     public List<String> propertyNames() {
         return this.plan.keySet().stream()
-                .map(
-                    m -> decapitalize(stripPrefix(m.getName()))
-                )
-                .sorted()
-                .toList();
+            .map(ReflectiveMapper::property)
+            .sorted()
+            .toList();
     }
 
-    /**
-     * Правило вывода: для каждого геттера источника ищем одноимённый сеттер цели
-     * с совместимым типом. Именно так работает {@code BeanUtils.copyProperties}.
-     * @param source Источник
-     * @param target Целевой объект
-     * @return Правило вывода: для каждого геттера источника ищем одноимённый сеттер цели с совместимым типом. Именно так работает {@code BeanUtils.copyProperties}
-     */
     private static Map<Method, Method> buildPlan(final Class<?> source, final Class<?> target) {
-        final Map<Method, Method> plan = new LinkedHashMap<>();
+        final Map<Method, Method> plan = new LinkedHashMap<>(0);
         for (final Method getter : source.getMethods()) {
-            if (getter.getParameterCount() != 0 || getter.getDeclaringClass() == Object.class) {
-
-                continue;
-            }
-            final String name = getter.getName();
-            final boolean isGetter = name.startsWith(
-                "get"
-            ) && name.length() > 3 && getter.getReturnType() != void.class;
-            final boolean isBooleanGetter = name.startsWith("is") && name.length() > 2
-                    && (getter.getReturnType() == boolean.class || getter.getReturnType() == Boolean.class);
-            if (!isGetter && !isBooleanGetter) {
-                continue;
-            }
-            final String property = stripPrefix(name);
-            try {
-                final Method setter = target.getMethod("set" + property, getter.getReturnType());
-                plan.put(getter, setter);
-            } catch (final NoSuchMethodException ignored) {
-                // у цели нет такого свойства — например, internalNote; просто пропускаем
+            if (ReflectiveMapper.reader(getter)) {
+                ReflectiveMapper.pair(getter, target, plan);
             }
         }
         return plan;
     }
 
-    private static String stripPrefix(final String methodName) {
-        return methodName.startsWith("is") ? methodName.substring(2) : methodName.substring(3);
+    private static String property(final Method getter) {
+        return ReflectiveMapper.decapitalize(
+            ReflectiveMapper.stripPrefix(getter.getName())
+        );
+    }
+
+    private static boolean reader(final Method getter) {
+        return getter.getParameterCount() == 0
+            && getter.getDeclaringClass() != Object.class
+            && ReflectiveMapper.named(getter);
+    }
+
+    private static boolean named(final Method getter) {
+        final String name = getter.getName();
+        final boolean found;
+        if (name.startsWith("get")) {
+            found = name.length() > 3 && getter.getReturnType() != void.class;
+        } else if (name.startsWith("is")) {
+            found = name.length() > 2 && ReflectiveMapper.bool(getter.getReturnType());
+        } else {
+            found = false;
+        }
+        return found;
+    }
+
+    private static boolean bool(final Class<?> type) {
+        return type == boolean.class || type == Boolean.class;
+    }
+
+    private static void pair(final Method getter, final Class<?> target,
+        final Map<Method, Method> plan) {
+        try {
+            plan.put(
+                getter,
+                target.getMethod(
+                    String.format("set%s", ReflectiveMapper.stripPrefix(getter.getName())),
+                    getter.getReturnType()
+                )
+            );
+        } catch (final NoSuchMethodException absent) {
+            plan.remove(getter);
+        }
+    }
+
+    private static String stripPrefix(final String method) {
+        final String property;
+        if (method.startsWith("is")) {
+            property = method.substring(2);
+        } else {
+            property = method.substring(3);
+        }
+        return property;
     }
 
     private static String decapitalize(final String name) {
-        return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+        return String.format(
+            "%s%s", Character.toLowerCase(name.charAt(0)), name.substring(1)
+        );
     }
 
     private static Object invoke(final Method method, final Object target, final Object... args) {
         try {
             return method.invoke(target, args);
-        } catch (final IllegalAccessException e) {
-            throw new IllegalStateException("Нет доступа к " + method.getName(), e);
-        } catch (final InvocationTargetException e) {
-            final Throwable cause = e.getCause();
-            throw cause instanceof RuntimeException re ? re : new IllegalStateException(cause);
+        } catch (final IllegalAccessException denied) {
+            throw new IllegalStateException(
+                String.format("Нет доступа к %s", method.getName()), denied
+            );
+        } catch (final InvocationTargetException wrapped) {
+            throw new IllegalStateException(wrapped.getCause().getMessage(), wrapped);
         }
     }
 }

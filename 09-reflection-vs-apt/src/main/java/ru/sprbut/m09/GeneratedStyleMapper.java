@@ -26,7 +26,7 @@ import ru.sprbut.m09.model.UserEntity;
  *
  * @since 1.0
  */
-public class GeneratedStyleMapper implements UserMapper {
+public final class GeneratedStyleMapper implements UserMapper {
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -35,18 +35,21 @@ public class GeneratedStyleMapper implements UserMapper {
         // нечего инициализировать
     }
 
+    // свойства перечислены вручную: internalNote в DTO отсутствует,
+    // и процессор увидел бы это ещё при сборке
     @Override
     public UserDto toDto(final UserEntity entity) {
+        final UserDto dto;
         if (entity == null) {
-            return null;
+            dto = null;
+        } else {
+            dto = new UserDto();
+            dto.setId(entity.getId());
+            dto.setFirstName(entity.getFirstName());
+            dto.setLastName(entity.getLastName());
+            dto.setAge(entity.getAge());
+            dto.setActive(entity.isActive());
         }
-        final UserDto dto = new UserDto();
-        dto.setId(entity.getId());
-        dto.setFirstName(entity.getFirstName());
-        dto.setLastName(entity.getLastName());
-        dto.setAge(entity.getAge());
-        dto.setActive(entity.isActive());
-        // internalNote в UserDto отсутствует — процессор увидел бы это при сборке
         return dto;
     }
 
