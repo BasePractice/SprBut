@@ -93,7 +93,7 @@ final class BeanVerdictTest {
         );
     }
 
-    @SuppressWarnings("PMD.PublicMemberInNonPublicType")
+    @SuppressWarnings({"PMD.PublicMemberInNonPublicType", "UnusedMethod", "EffectivelyPrivate"})
     private static final class NoDefaultCtor implements Serializable {
 
         /**

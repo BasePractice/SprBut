@@ -14,7 +14,8 @@ package ru.sprbut.m04;
 // поле-строка меняется только через VarHandle: с точки зрения обычного
 // кода оно выглядит неизменяемым, но именно на нём и показывают хэндлы
 @SuppressWarnings({
-    "unused", "PMD.ConstructorShouldDoInitialization", "PMD.ImmutableField"
+    "unused", "NonAtomicVolatileUpdate",
+    "PMD.ConstructorShouldDoInitialization", "PMD.ImmutableField"
 })
 public class Counter {
 

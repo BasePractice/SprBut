@@ -162,9 +162,13 @@ final class AspectedTest {
     @DisplayName("toString не перехватывается — иначе прокси стал бы неотлаживаемым")
     void dontInterceptObjectMethods() {
         final Journal journal = new Journal();
-        new Aspected<>(PriceService.class, new RealPriceService(), journal).proxy().toString();
         MatcherAssert.assertThat(
-            "Object methods cannot stay out of the journal",
+            String.format(
+                "Object methods cannot stay out of the journal, proxy said %s",
+                new Aspected<>(PriceService.class, new RealPriceService(), journal)
+                    .proxy()
+                    .toString()
+            ),
             journal.entries().size(),
             Matchers.equalTo(0)
         );

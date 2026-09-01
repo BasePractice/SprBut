@@ -4,6 +4,10 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
+// стенд компиляции: полные имена классов и каталогов — часть предметной
+// области javac, короткими именами их не заменить
+// @checkstyle LocalFinalVariableNameCheck disable
+// @checkstyle ParameterNameCheck disable
 package ru.sprbut.m07;
 
 import java.io.File;
@@ -49,148 +53,147 @@ public final class CompilationHarness {
      * @param sources что компилировать
      * @param processor процессор, который нужно запустить
      * @param options дополнительные опции javac (например, {@code -Akey=value})
-     * @return Компилирует исходники с указанными процессорами
+     * @return Результат компиляции
+     * @checkstyle ParameterNumberCheck (8 lines)
      */
-    public static Result compile(final Path workDir, final List<Source> sources, final Processor processor, final String... options) {
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static Result compile(
+        final Path workDir,
+        final List<Source> sources,
+        final Processor processor,
+        final String... options
+    ) {
         final JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         if (compiler == null) {
-            throw new IllegalStateException("Нет системного компилятора: тест требует JDK, а не JRE");
+            throw new IllegalStateException(
+                "Нет системного компилятора: тест требует JDK, а не JRE"
+            );
         }
-        final Path sourceDir = workDir.resolve("src");
         final Path classesDir = workDir.resolve("classes");
         final Path generatedDir = workDir.resolve("generated");
         try {
             Files.createDirectories(classesDir);
             Files.createDirectories(generatedDir);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
+        } catch (final IOException failure) {
+            throw new UncheckedIOException(failure);
         }
-        final List<Path> files = sources.stream().map(
-            s -> s.writeTo(sourceDir)
-        ).toList();
+        final Path sourceDir = workDir.resolve("src");
+        final List<Path> files = sources.stream()
+            .map(source -> source.writeTo(sourceDir))
+            .toList();
         final DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
-        try (StandardJavaFileManager fileManager =
-                     compiler.getStandardFileManager(
-                         diagnostics, null, StandardCharsets.UTF_8
-                     )) {
-            final List<String> allOptions = new ArrayList<>(List.of(
+        try (
+            StandardJavaFileManager manager = compiler.getStandardFileManager(
+                diagnostics, null, StandardCharsets.UTF_8
+            )
+        ) {
+            final List<String> all = new ArrayList<>(
+                List.of(
                     "-d", classesDir.toString(),
                     "-s", generatedDir.toString(),
-                    "-classpath", System.getProperty(
-                        "java.class.path"
-                    ),
-                    "--release", "17"));
-            allOptions.addAll(
-                List.of(options)
+                    "-classpath", System.getProperty("java.class.path"),
+                    "--release", "17"
+                )
             );
+            all.addAll(List.of(options));
             final JavaCompiler.CompilationTask task = compiler.getTask(
-                    null,
-                    fileManager,
-                    diagnostics,
-                    allOptions,
-                    null,
-                    fileManager.getJavaFileObjectsFromPaths(
-                        files
-                    ));
-            task.setProcessors(
-                List.of(processor)
+                null,
+                manager,
+                diagnostics,
+                all,
+                null,
+                manager.getJavaFileObjectsFromPaths(files)
             );
-            final boolean success = task.call();
-            return new Result(success, diagnostics.getDiagnostics(),
-                    readGenerated(
-                        generatedDir
-                    ), classesDir);
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
+            task.setProcessors(List.of(processor));
+            return new Result(
+                task.call(),
+                diagnostics.getDiagnostics(),
+                CompilationHarness.readGenerated(generatedDir),
+                classesDir
+            );
+        } catch (final IOException failure) {
+            throw new UncheckedIOException(failure);
         }
     }
 
     private static Map<String, String> readGenerated(final Path generatedDir) {
-        final Map<String, String> result = new LinkedHashMap<>();
+        final Map<String, String> found = new LinkedHashMap<>();
         try (Stream<Path> walk = Files.walk(generatedDir)) {
-            walk.filter(
-                p -> p.toString().endsWith(
-                    ".java"
-                )
-            )
-                    .sorted(
-                        Comparator.comparing(
-                            Path::toString
-                        )
-                    )
-                    .forEach(p -> {
-                        final String relative = generatedDir.relativize(p).toString();
-                        final String name = relative.substring(
-                            0, relative.length() - ".java".length()
-                        )
-                                .replace(
-                                    File.separatorChar, '.'
-                                );
-                        try {
-                            result.put(name, Files.readString(p, StandardCharsets.UTF_8));
-                        } catch (final IOException e) {
-                            throw new UncheckedIOException(
-                                e
-                            );
-                        }
-                    });
-        } catch (final IOException e) {
-            throw new UncheckedIOException(e);
+            walk.filter(path -> path.toString().endsWith(".java"))
+                .sorted(Comparator.comparing(Path::toString))
+                .forEach(path -> CompilationHarness.read(generatedDir, path, found));
+        } catch (final IOException failure) {
+            throw new UncheckedIOException(failure);
         }
-        return result;
+        return found;
+    }
+
+    // один сгенерированный файл: ключом становится полное имя класса
+    private static void read(final Path root, final Path file, final Map<String, String> sink) {
+        final String relative = root.relativize(file).toString();
+        try {
+            sink.put(
+                relative.substring(0, relative.length() - ".java".length())
+                    .replace(File.separatorChar, '.'),
+                Files.readString(file, StandardCharsets.UTF_8)
+            );
+        } catch (final IOException failure) {
+            throw new UncheckedIOException(failure);
+        }
     }
 
     /**
      * Исходник: полное имя класса и его текст.
-      * @param generatedSources Параметр типа
-      * @param success Параметр типа
-      * @param generatedSources Параметр типа
-      * @param success Параметр типа
-      * @param diagnostics Параметр типа
+     * @param qualifiedName Полное имя класса
+     * @param code Текст исходника
+     * @since 1.0
      */
     public record Source(String qualifiedName, String code) {
 
         Path writeTo(final Path root) {
-            final Path file = root.resolve(this.qualifiedName.replace('.', '/') + ".java");
+            final Path file = root.resolve(
+                String.format("%s.java", this.qualifiedName.replace('.', '/'))
+            );
             try {
                 Files.createDirectories(file.getParent());
                 Files.writeString(file, this.code, StandardCharsets.UTF_8);
-                return file;
-            } catch (final IOException e) {
-                throw new UncheckedIOException(e);
+            } catch (final IOException failure) {
+                throw new UncheckedIOException(failure);
             }
+            return file;
         }
     }
 
     /**
      * Результат компиляции вместе со сгенерированными исходниками и диагностикой.
-      * @param diagnostics Параметр типа
-      * @param classesDir Параметр типа
+     * @param success Успешно ли прошла компиляция
+     * @param diagnostics Диагностика компилятора
+     * @param generatedSources Сгенерированные исходники
+     * @param classesDir Каталог с классами
+     * @since 1.0
      */
-    public record Result(boolean success,
-                  List<Diagnostic<? extends JavaFileObject>> diagnostics,
-                  Map<String, String> generatedSources,
-                  Path classesDir) {
+    public record Result(
+        boolean success,
+        List<Diagnostic<? extends JavaFileObject>> diagnostics,
+        Map<String, String> generatedSources,
+        Path classesDir
+    ) {
 
         /**
          * Сообщения.
          * @param kind Вид
          * @return Сообщения
          */
-        public List<String> messages(
-            final Diagnostic.Kind kind
-        ) {
+        public List<String> messages(final Diagnostic.Kind kind) {
             return this.diagnostics.stream()
-                    .filter(
-                        d -> d.getKind() == kind
-                    )
-                    .map(d -> d.getMessage(null))
-                    .toList();
+                .filter(entry -> entry.getKind() == kind)
+                .map(entry -> entry.getMessage(null))
+                .toList();
         }
 
         /**
-         * Значение {@code errors}.
-         * @return Значение {@code errors}
+         * Сообщения об ошибках.
+         * @return Сообщения об ошибках
          */
         public List<String> errors() {
             return this.messages(Diagnostic.Kind.ERROR);
@@ -211,14 +214,12 @@ public final class CompilationHarness {
          */
         public String source(final String qualifiedName) {
             final String code = this.generatedSources.get(qualifiedName);
-            if (
-                code == null
-            ) {
+            if (code == null) {
                 throw new AssertionError(
-                    "Не сгенерирован "
-                        + qualifiedName
-                        + "; есть только "
-                        + this.generatedSources.keySet()
+                    String.format(
+                        "Не сгенерирован %s; есть только %s",
+                        qualifiedName, this.generatedSources.keySet()
+                    )
                 );
             }
             return code;
@@ -227,17 +228,23 @@ public final class CompilationHarness {
         /**
          * Загружает скомпилированный класс, чтобы проверить его поведение, а не текст.
          * @param qualifiedName Имя
-         * @return Загружает скомпилированный класс, чтобы проверить его поведение, а не текст
+         * @return Загруженный класс
          */
+        @SuppressWarnings("PMD.UseProperClassLoader")
         public Class<?> load(final String qualifiedName) {
             try {
-                final URLClassLoader loader = new URLClassLoader(
-                    new URL[]{this.classesDir.toUri().toURL()},
-                    CompilationHarness.class.getClassLoader()
+                return Class.forName(
+                    qualifiedName,
+                    true,
+                    new URLClassLoader(
+                        new URL[]{this.classesDir.toUri().toURL()},
+                        CompilationHarness.class.getClassLoader()
+                    )
                 );
-                return Class.forName(qualifiedName, true, loader);
-            } catch (final Exception e) {
-                throw new AssertionError("Не удалось загрузить " + qualifiedName, e);
+            } catch (final ReflectiveOperationException | IOException failure) {
+                throw new AssertionError(
+                    String.format("Не удалось загрузить %s", qualifiedName), failure
+                );
             }
         }
     }

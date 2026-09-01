@@ -52,11 +52,11 @@ public final class Failure implements Diagnosis {
 
     /**
      * Разбор цепочки причин до первой узнаваемой ошибки контейнера.
-     * Сравнение причины с самой собой намеренно ссылочное: цепочка
-     * {@code getCause()} у некоторых исключений замыкается на себя.
+     * Цепочка {@code getCause()} у некоторых исключений замыкается на себя,
+     * поэтому обход останавливается на первом же повторе.
      * @return Диагноз поломки
      */
-    @SuppressWarnings({"PMD.CompareObjectsWithEquals", "PMD.NullAssignment"})
+    @SuppressWarnings("PMD.NullAssignment")
     public Diagnosis diagnosis() {
         Diagnosis found = null;
         Throwable cause = this.thrown;
@@ -67,7 +67,7 @@ public final class Failure implements Diagnosis {
                 found = new CircularReference(circular);
             } else if (cause instanceof NoSuchBeanDefinitionException missing) {
                 found = new MissingBean(missing);
-            } else if (cause.getCause() == cause) {
+            } else if (cause.equals(cause.getCause())) {
                 cause = null;
             } else {
                 cause = cause.getCause();

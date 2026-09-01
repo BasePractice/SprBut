@@ -43,7 +43,7 @@ public final class Declared {
             try {
                 return current.getDeclaredField(name);
             } catch (final NoSuchFieldException absent) {
-                continue;
+                assert absent != null;
             }
         }
         throw new IllegalArgumentException(
@@ -62,7 +62,7 @@ public final class Declared {
             try {
                 return current.getDeclaredMethod(name, parameters);
             } catch (final NoSuchMethodException absent) {
-                continue;
+                assert absent != null;
             }
         }
         throw new IllegalArgumentException(

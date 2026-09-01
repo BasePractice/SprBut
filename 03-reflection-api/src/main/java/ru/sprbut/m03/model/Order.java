@@ -187,6 +187,7 @@ public class Order {
         this.total = BigDecimal.ZERO;
     }
 
+    @SuppressWarnings("UnusedMethod")
     private String internalTag() {
         return String.format("order-%s", this.id);
     }

@@ -5,7 +5,7 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m07;
 
-import ru.sprbut.m07.api.Todo;
+import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
@@ -14,7 +14,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
-import java.util.Set;
+import ru.sprbut.m07.api.Todo;
 
 /**
  * Слайд 60: «Анализ исходного кода».
@@ -40,22 +40,33 @@ public class TodoProcessor extends AbstractProcessor {
         // нечего инициализировать
     }
 
+    // false в ответе означает, что аннотацию мы не поглощаем: она может быть
+    // нужна и другим процессорам
     @Override
-    public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
-        if (roundEnv.processingOver()) {
-            return false;
+    public final boolean process(
+        final Set<? extends TypeElement> annotations, final RoundEnvironment env
+    ) {
+        if (!env.processingOver()) {
+            for (final Element element : env.getElementsAnnotatedWith(Todo.class)) {
+                this.report(element);
+            }
         }
-        for (final Element element : roundEnv.getElementsAnnotatedWith(Todo.class)) {
-
-            final Todo todo = element.getAnnotation(
-                Todo.class
-            );
-            final Diagnostic.Kind kind = todo.blocking() ? Diagnostic.Kind.ERROR : Diagnostic.Kind.WARNING;
-            processingEnv.getMessager().printMessage(
-                kind, "TODO: " + todo.value() + " (" + element.getSimpleName() + ")", element
-            );
-        }
-        // false — аннотацию не поглощаем: она может быть нужна и другим процессорам
         return false;
+    }
+
+    // одна отметка: блокирующая становится ошибкой компиляции, обычная — предупреждением
+    private void report(final Element element) {
+        final Todo todo = element.getAnnotation(Todo.class);
+        final Diagnostic.Kind kind;
+        if (todo.blocking()) {
+            kind = Diagnostic.Kind.ERROR;
+        } else {
+            kind = Diagnostic.Kind.WARNING;
+        }
+        this.processingEnv.getMessager().printMessage(
+            kind,
+            String.format("TODO: %s (%s)", todo.value(), element.getSimpleName()),
+            element
+        );
     }
 }

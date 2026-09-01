@@ -3,6 +3,11 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// проверки процессора построены на текстовых блоках с исходным кодом:
+// внутри них лежит Java-текст примера, и переносить его по правилам
+// оформления нельзя — тогда проверяется уже не тот исходник
+// @checkstyle BracketsStructureCheck disable
+// @checkstyle EmptyLinesCheck disable
 package ru.sprbut.m07;
 
 import java.nio.file.Path;
@@ -25,7 +30,7 @@ final class TodoProcessorTest {
      * Рабочий каталог.
      */
     @TempDir
-    private Path workDir;
+    private Path dir;
 
     @Test
     @DisplayName("непроходящий TODO сборку не роняет")
@@ -155,7 +160,7 @@ final class TodoProcessorTest {
 
     private CompilationHarness.Result compile(final String code) {
         return CompilationHarness.compile(
-            this.workDir,
+            this.dir,
             List.of(new CompilationHarness.Source("demo.Service", code)),
             new TodoProcessor()
         );

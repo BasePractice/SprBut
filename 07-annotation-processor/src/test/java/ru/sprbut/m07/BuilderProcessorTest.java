@@ -3,26 +3,36 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// проверки процессора построены на текстовых блоках с исходным кодом:
+// внутри них лежит Java-текст примера, и переносить его по правилам
+// оформления нельзя — тогда проверяется уже не тот исходник
+// @checkstyle BracketsStructureCheck disable
+// @checkstyle CascadeIndentationCheck disable
+// @checkstyle EmptyLinesCheck disable
+// @checkstyle LineLengthCheck disable
 package ru.sprbut.m07;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import java.nio.file.Path;
 import java.util.List;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Слайды 57–64: AbstractProcessor генерирует и анализирует код.
  * @since 1.0
  */
 @DisplayName("Слайды 57–64: AbstractProcessor генерирует и анализирует код")
+// результат компиляции — тяжёлое выражение с текстовым блоком внутри:
+// имя переменной здесь и есть то, что делает проверку читаемой
+@SuppressWarnings("PMD.UnnecessaryLocalRule")
 final class BuilderProcessorTest {
 
     /**
-     * Значение {@code VALID_BEAN}.
+     * Пример класса, подчиняющегося соглашению JavaBeans.
      * @since 1.0
      */
     private static final CompilationHarness.Source VALID_BEAN = new CompilationHarness.Source(
@@ -56,9 +66,14 @@ final class BuilderProcessorTest {
                     }
                     """);
 
-    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
+    /**
+     * Рабочий каталог.
+     */
+    @TempDir
+    private Path dir;
+
     private CompilationHarness.Result compile(final CompilationHarness.Source... sources) {
-        return CompilationHarness.compile(this.workDir, List.of(sources), new BuilderProcessor());
+        return CompilationHarness.compile(this.dir, List.of(sources), new BuilderProcessor());
     }
 
     /**
@@ -72,7 +87,7 @@ final class BuilderProcessorTest {
         @Test
         @DisplayName("Для помеченного класса рядом появляется CustomerBuilder")
         void generatesBuilder() {
-            final CompilationHarness.Result result = BuilderProcessorTest.this.compile(VALID_BEAN);
+            final CompilationHarness.Result result = BuilderProcessorTest.this.compile(BuilderProcessorTest.VALID_BEAN);
             MatcherAssert.assertThat(
                 "annotated class cannot get its builder generated",
                 result.generatedSources(),
@@ -83,7 +98,7 @@ final class BuilderProcessorTest {
         @Test
         @DisplayName("У билдера есть fluent-метод на каждое нестатическое поле")
         void generatesFluentSetters() {
-            final String code = BuilderProcessorTest.this.compile(VALID_BEAN).source("demo.CustomerBuilder");
+            final String code = BuilderProcessorTest.this.compile(BuilderProcessorTest.VALID_BEAN).source("demo.CustomerBuilder");
             MatcherAssert.assertThat(
                 "builder cannot get a fluent method per field",
                 code,
@@ -96,7 +111,7 @@ final class BuilderProcessorTest {
         void skipsStaticField() {
             MatcherAssert.assertThat(
                 "static field cannot stay out of the builder",
-                BuilderProcessorTest.this.compile(VALID_BEAN).source("demo.CustomerBuilder"),
+                BuilderProcessorTest.this.compile(BuilderProcessorTest.VALID_BEAN).source("demo.CustomerBuilder"),
                 Matchers.not(Matchers.containsString("ignored"))
             );
         }
@@ -104,7 +119,7 @@ final class BuilderProcessorTest {
         @Test
         @DisplayName("build() создаёт объект конструктором без параметров и зовёт сеттеры")
         void generatesBuildMethod() {
-            final String code = BuilderProcessorTest.this.compile(VALID_BEAN).source("demo.CustomerBuilder");
+            final String code = BuilderProcessorTest.this.compile(BuilderProcessorTest.VALID_BEAN).source("demo.CustomerBuilder");
             MatcherAssert.assertThat(
                 "build method cannot create the object with a no-arg constructor",
                 code,
@@ -117,7 +132,7 @@ final class BuilderProcessorTest {
         void callsSetters() {
             MatcherAssert.assertThat(
                 "build method cannot fill the object through setters",
-                BuilderProcessorTest.this.compile(VALID_BEAN).source("demo.CustomerBuilder"),
+                BuilderProcessorTest.this.compile(BuilderProcessorTest.VALID_BEAN).source("demo.CustomerBuilder"),
                 Matchers.containsString("result.setName(this.name);")
             );
         }
@@ -125,12 +140,12 @@ final class BuilderProcessorTest {
         @Test
         @DisplayName("Сгенерированный код компилируется и реально работает")
         void generatedCodeActuallyRuns() throws Exception {
-            final CompilationHarness.Result result = BuilderProcessorTest.this.compile(VALID_BEAN);
-            final Class<?> builderClass = result.load("demo.CustomerBuilder");
-            Object builder = builderClass.getMethod("create").invoke(null);
-            builder = builderClass.getMethod("name", String.class).invoke(builder, "Иванов");
-            builder = builderClass.getMethod("age", int.class).invoke(builder, 42);
-            final Object customer = builderClass.getMethod("build").invoke(builder);
+            final CompilationHarness.Result result = BuilderProcessorTest.this.compile(BuilderProcessorTest.VALID_BEAN);
+            final Class<?> built = result.load("demo.CustomerBuilder");
+            Object builder = built.getMethod("create").invoke(null);
+            builder = built.getMethod("name", String.class).invoke(builder, "Иванов");
+            builder = built.getMethod("age", int.class).invoke(builder, 42);
+            final Object customer = built.getMethod("build").invoke(builder);
             MatcherAssert.assertThat(
                 "generated code cannot actually build the object",
                 customer.getClass().getMethod("getName").invoke(customer),
@@ -295,7 +310,7 @@ final class BuilderProcessorTest {
             "Обрабатываются все помеченные классы за одну сборку"
         )
         void processesEveryAnnotatedClass() {
-            final CompilationHarness.Result result = compile(VALID_BEAN, new CompilationHarness.Source(
+            final CompilationHarness.Result result = compile(BuilderProcessorTest.VALID_BEAN, new CompilationHarness.Source(
                     "demo.Order", """
                             package demo;
                             import ru.sprbut.m07.api.GenerateBuilder;
@@ -317,7 +332,7 @@ final class BuilderProcessorTest {
         @Test
         @DisplayName("Аннотация с retention SOURCE в байткод не попадает")
         void sourceRetentionLeavesNoTrace() {
-            final CompilationHarness.Result result = BuilderProcessorTest.this.compile(VALID_BEAN);
+            final CompilationHarness.Result result = BuilderProcessorTest.this.compile(BuilderProcessorTest.VALID_BEAN);
             final Class<?> customer = result.load("demo.Customer");
             MatcherAssert.assertThat(
                 "source retained annotation cannot vanish from the bytecode",
@@ -330,7 +345,7 @@ final class BuilderProcessorTest {
         @DisplayName("Процессор запускается минимум в двух раундах: рабочем и завершающем")
         void runsInMultipleRounds() {
             final BuilderProcessor processor = new BuilderProcessor();
-            CompilationHarness.compile(BuilderProcessorTest.this.workDir, List.of(VALID_BEAN), processor);
+            CompilationHarness.compile(BuilderProcessorTest.this.dir, List.of(BuilderProcessorTest.VALID_BEAN), processor);
             MatcherAssert.assertThat(
                 "processor cannot run in at least two rounds",
                 processor.rounds(),
@@ -338,10 +353,4 @@ final class BuilderProcessorTest {
             );
         }
     }
-
-    /**
-     * Рабочий каталог.
-     */
-    @TempDir
-    private Path workDir;
 }

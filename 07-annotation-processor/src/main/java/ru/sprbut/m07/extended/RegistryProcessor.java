@@ -12,10 +12,10 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -27,6 +27,7 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
@@ -60,30 +61,33 @@ import ru.sprbut.m07.api.Registered;
 @SupportedAnnotationTypes("ru.sprbut.m07.api.Registered")
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 @SupportedOptions({RegistryProcessor.PACKAGE_OPTION, RegistryProcessor.CLASS_OPTION})
+@SuppressWarnings("PMD.ConstructorShouldDoInitialization")
 public class RegistryProcessor extends AbstractProcessor {
 
     /**
-     * Значение {@code PACKAGE_OPTION}.
+     * Опция сборки, задающая пакет сгенерированного реестра.
      */
     public static final String PACKAGE_OPTION = "registry.package";
 
     /**
-     * Значение {@code CLASS_OPTION}.
+     * Опция сборки, задающая имя класса реестра.
      */
     public static final String CLASS_OPTION = "registry.class";
 
     /**
-     * Значение {@code DEFAULT_PACKAGE}.
+     * Пакет реестра, если опция не задана.
+     * @checkstyle SingleUseConstantCheck (3 lines)
      */
     private static final String DEFAULT_PACKAGE = "ru.sprbut.generated";
 
     /**
-     * Значение {@code DEFAULT_CLASS}.
+     * Имя класса реестра, если опция не задана.
+     * @checkstyle SingleUseConstantCheck (3 lines)
      */
     private static final String DEFAULT_CLASS = "GeneratedRegistry";
 
     /**
-     * Накопленные за все раунды записи: имя → класс.
+     * Накопленные за все раунды записи: имени отвечает класс.
      */
     private final Map<String, ClassName> registry = new LinkedHashMap<>();
 
@@ -93,7 +97,7 @@ public class RegistryProcessor extends AbstractProcessor {
     private int rounds;
 
     /**
-     * Значение {@code written}.
+     * Признак того, что реестр уже записан.
      */
     private boolean written;
 
@@ -104,48 +108,36 @@ public class RegistryProcessor extends AbstractProcessor {
         // нечего инициализировать
     }
 
+    // Реестр пишется ровно один раз — в первом же раунде, где нашлись записи.
+    //
+    // Соблазн отложить запись до processingOver() (вдруг в поздних раундах
+    // появятся ещё классы) заканчивается ошибкой: javac предупреждает
+    // «File created in the last round will not be subject to annotation
+    // processing», и обычный код, который импортирует сгенерированный класс,
+    // не компилируется — типа для него ещё не существует.
+    //
+    // Цена решения честная: если @Registered появится на классе, который сам
+    // сгенерирован другим процессором в позднем раунде, в реестр он не попадёт.
     @Override
-    public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
-        this.rounds++;
-        if (roundEnv.processingOver()) {
-            return false;
+    @SuppressWarnings("DoNotClaimAnnotations")
+    public final boolean process(
+        final Set<? extends TypeElement> annotations, final RoundEnvironment env
+    ) {
+        this.rounds += 1;
+        final boolean claimed;
+        if (env.processingOver()) {
+            claimed = false;
+        } else {
+            for (final Element element : env.getElementsAnnotatedWith(Registered.class)) {
+                this.register(element);
+            }
+            if (!this.written && !this.registry.isEmpty()) {
+                this.writeRegistry();
+                this.written = true;
+            }
+            claimed = true;
         }
-        for (final Element element : roundEnv.getElementsAnnotatedWith(Registered.class)) {
-
-            if (element.getKind() != ElementKind.CLASS) {
-                this.error(element, "@Registered применим только к классам");
-                continue;
-            }
-            final TypeElement type = (TypeElement) element;
-            if (type.getModifiers().contains(Modifier.ABSTRACT)) {
-                this.error(element, "Абстрактный класс нельзя зарегистрировать: его нечем создать");
-                continue;
-            }
-            if (!this.hasUsableConstructor(type)) {
-                this.error(element, "Нужен публичный конструктор без параметров");
-                continue;
-            }
-            final String name = this.resolveName(type);
-            final ClassName previous = this.registry.put(name, ClassName.get(type));
-            if (previous != null) {
-                this.error(element, "Имя '" + name + "' уже занято классом " + previous);
-            }
-        }
-        // Реестр пишем ровно один раз — в первом же раунде, где нашлись записи.
-        //
-        // Соблазн отложить запись до processingOver() (вдруг в поздних раундах
-        // появятся ещё классы) заканчивается ошибкой: javac предупреждает
-        // «File created in the last round will not be subject to annotation
-        // processing», и обычный код, который импортирует сгенерированный класс,
-        // не компилируется — типа для него ещё не существует.
-        //
-        // Цена решения честная: если @Registered появится на классе, который сам
-        // сгенерирован другим процессором в позднем раунде, в реестр он не попадёт.
-        if (!this.written && !this.registry.isEmpty()) {
-            this.writeRegistry();
-            this.written = true;
-        }
-        return true;
+        return claimed;
     }
 
     /**
@@ -156,28 +148,74 @@ public class RegistryProcessor extends AbstractProcessor {
         return this.rounds;
     }
 
-    /**
-     * Генерация через JavaPoet. Библиотека сама расставит импорты и отформатирует
-     * код — при ручной сборке строк это самая трудоёмкая часть.
-     */
-    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
+    // один помеченный класс: он попадает в реестр, только если его вообще
+    // можно создать обычным new
+    private void register(final Element element) {
+        if (element.getKind() == ElementKind.CLASS) {
+            final TypeElement type = (TypeElement) element;
+            if (type.getModifiers().contains(Modifier.ABSTRACT)) {
+                this.error(
+                    element, "Абстрактный класс нельзя зарегистрировать: его нечем создать"
+                );
+            } else if (RegistryProcessor.constructible(type)) {
+                this.remember(type);
+            } else {
+                this.error(element, "Нужен публичный конструктор без параметров");
+            }
+        } else {
+            this.error(element, "@Registered применим только к классам");
+        }
+    }
+
+    // запись в реестр: занятое имя означает, что два класса спорят за одну запись
+    private void remember(final TypeElement type) {
+        final String name = RegistryProcessor.name(type);
+        final ClassName previous = this.registry.put(name, ClassName.get(type));
+        if (previous != null) {
+            this.error(
+                type, String.format("Имя '%s' уже занято классом %s", name, previous)
+            );
+        }
+    }
+
+    // генерация через JavaPoet: библиотека сама расставит импорты
+    // и отформатирует код — при ручной сборке строк это самая трудоёмкая часть
     private void writeRegistry() {
-        final String packageName = this.option(PACKAGE_OPTION, DEFAULT_PACKAGE);
-        final String className = this.option(
-            CLASS_OPTION, DEFAULT_CLASS
-        );
-        final TypeName supplierOfObject = ParameterizedTypeName.get(
-                ClassName.get(
-                    Supplier.class
-                ), ClassName.get(
-                    Object.class
-                ));
-        final TypeName mapType = ParameterizedTypeName.get(
-                ClassName.get(
-                    Map.class
-                ), ClassName.get(
-                    String.class
-                ), supplierOfObject);
+        try {
+            JavaFile.builder(
+                this.option(RegistryProcessor.PACKAGE_OPTION, RegistryProcessor.DEFAULT_PACKAGE),
+                this.generated()
+            ).skipJavaLangImports(true)
+                .indent("    ")
+                .build()
+                .writeTo(this.processingEnv.getFiler());
+        } catch (final IOException failure) {
+            this.processingEnv.getMessager().printMessage(
+                Diagnostic.Kind.ERROR,
+                String.format("Не удалось записать реестр: %s", failure.getMessage())
+            );
+        }
+    }
+
+    // описание самого класса реестра
+    private TypeSpec generated() {
+        return TypeSpec.classBuilder(
+            this.option(RegistryProcessor.CLASS_OPTION, RegistryProcessor.DEFAULT_CLASS)
+        ).addJavadoc(
+            "Сгенерирован $L. Правки будут потеряны при следующей сборке.$L",
+            RegistryProcessor.class.getSimpleName(), System.lineSeparator()
+        ).addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+            .addField(this.factories())
+            .addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build())
+            .addMethod(RegistryProcessor.names())
+            .addMethod(RegistryProcessor.create())
+            .addMethod(RegistryProcessor.size())
+            .build();
+    }
+
+    // поле-карта: ссылки на конструкторы вместо Class.forName — именно поэтому
+    // сгенерированный код работает в native image
+    private FieldSpec factories() {
         final CodeBlock.Builder initializer = CodeBlock.builder().add("$T.of(", Map.class);
         boolean first = true;
         for (final Map.Entry<String, ClassName> entry : this.registry.entrySet()) {
@@ -185,118 +223,93 @@ public class RegistryProcessor extends AbstractProcessor {
                 initializer.add(", ");
             }
             first = false;
-            // Ссылка на конструктор, а не Class.forName — работает в native image
             initializer.add("$S, $T::new", entry.getKey(), entry.getValue());
         }
-        initializer.add(
-            ")"
-        );
-        final FieldSpec beans = FieldSpec.builder(
-            mapType, "FACTORIES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL
-        )
-                .initializer(
-                    initializer.build()
+        initializer.add(")");
+        return FieldSpec.builder(
+            ParameterizedTypeName.get(
+                ClassName.get(Map.class),
+                ClassName.get(String.class),
+                ParameterizedTypeName.get(
+                    ClassName.get(Supplier.class), ClassName.get(Object.class)
                 )
-                .build();
-        final MethodSpec names = MethodSpec.methodBuilder(
-            "names"
-        )
-                .addModifiers(
-                    Modifier.PUBLIC, Modifier.STATIC
-                )
-                .returns(ParameterizedTypeName.get(Set.class, String.class))
-                .addStatement("return FACTORIES.keySet()")
-                .build();
-        final MethodSpec create = MethodSpec.methodBuilder(
-            "create"
-        )
-                .addModifiers(
-                    Modifier.PUBLIC, Modifier.STATIC
-                )
-                .addParameter(String.class, "name")
-                .returns(Object.class)
-                .addStatement("$T<$T> factory = FACTORIES.get(name)", Supplier.class, Object.class)
-                .beginControlFlow(
-                    "if (factory == null)"
-                )
-                .addStatement(
-                    "throw new $T($S + name)", IllegalArgumentException.class,
-                    "В реестре нет записи: "
-                )
-                .endControlFlow()
-                .addStatement("return factory.get()")
-                .build();
-        final MethodSpec size = MethodSpec.methodBuilder(
-            "size"
-        )
-                .addModifiers(
-                    Modifier.PUBLIC, Modifier.STATIC
-                )
-                .returns(int.class)
-                .addStatement("return FACTORIES.size()")
-                .build();
-        final TypeSpec registryType = TypeSpec.classBuilder(
-            className
-        )
-                .addJavadoc(
-                    "Сгенерирован $L. Правки будут потеряны при следующей сборке.\n",
-                    RegistryProcessor.class.getSimpleName()
-                )
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addField(beans)
-                .addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build())
-                .addMethod(names)
-                .addMethod(create)
-                .addMethod(size)
-                .build();
-        try {
-            JavaFile.builder(
-                packageName, registryType
+            ),
+            "FACTORIES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL
+        ).initializer(initializer.build()).build();
+    }
+
+    private static MethodSpec names() {
+        return MethodSpec.methodBuilder("names")
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .returns(ParameterizedTypeName.get(Set.class, String.class))
+            .addStatement("return FACTORIES.keySet()")
+            .build();
+    }
+
+    private static MethodSpec create() {
+        return MethodSpec.methodBuilder("create")
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .addParameter(String.class, "name")
+            .returns(Object.class)
+            .addStatement("$T<$T> factory = FACTORIES.get(name)", Supplier.class, Object.class)
+            .beginControlFlow("if (factory == null)")
+            .addStatement(
+                "throw new $T($S + name)",
+                IllegalArgumentException.class,
+                "В реестре нет записи: "
             )
-                    .skipJavaLangImports(
-                        true
-                    )
-                    .indent("    ")
-                    .build()
-                    .writeTo(processingEnv.getFiler());
-        } catch (
-            final IOException e
-        ) {
-            processingEnv.getMessager().printMessage(
-                Diagnostic.Kind.ERROR, "Не удалось записать реестр: " + e.getMessage()
-            );
-        }
+            .endControlFlow()
+            .addStatement("return factory.get()")
+            .build();
     }
 
-    // @checkstyle NonStaticMethodCheck (3 lines)
-    private String resolveName(final TypeElement type) {
+    private static MethodSpec size() {
+        return MethodSpec.methodBuilder("size")
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .returns(int.class)
+            .addStatement("return FACTORIES.size()")
+            .build();
+    }
+
+    // имя из аннотации, а если его нет — имя класса с маленькой буквы
+    private static String name(final TypeElement type) {
         final String explicit = type.getAnnotation(Registered.class).value();
-        if (!explicit.isBlank()) {
-            return explicit;
+        final String name;
+        if (explicit.isBlank()) {
+            final String simple = type.getSimpleName().toString();
+            name = String.format(
+                "%s%s", Character.toLowerCase(simple.charAt(0)), simple.substring(1)
+            );
+        } else {
+            name = explicit;
         }
-        final String simpleName = type.getSimpleName().toString();
-        return Character.toLowerCase(simpleName.charAt(0)) + simpleName.substring(1);
+        return name;
     }
 
-    // @checkstyle NonStaticMethodCheck (3 lines)
-    private boolean hasUsableConstructor(final TypeElement type) {
-        final var constructors = ElementFilter.constructorsIn(
-            type.getEnclosedElements()
-        );
-        return constructors.isEmpty() || constructors.stream().anyMatch(c ->
-                c.getParameters().isEmpty() && c.getModifiers().contains(
-                    Modifier.PUBLIC
-                ));
+    // конструктора нет вовсе — значит есть неявный, публичный у публичного класса
+    private static boolean constructible(final TypeElement type) {
+        final List<ExecutableElement> constructors =
+            ElementFilter.constructorsIn(type.getEnclosedElements());
+        return constructors.isEmpty()
+            || constructors.stream()
+                .anyMatch(
+                    candidate -> candidate.getParameters().isEmpty()
+                        && candidate.getModifiers().contains(Modifier.PUBLIC)
+                );
     }
 
-    // @checkstyle NonStaticMethodCheck (3 lines)
     private String option(final String key, final String fallback) {
-        final String value = processingEnv.getOptions().get(key);
-        return value == null || value.isBlank() ? fallback : value;
+        final String value = this.processingEnv.getOptions().get(key);
+        final String option;
+        if (value == null || value.isBlank()) {
+            option = fallback;
+        } else {
+            option = value;
+        }
+        return option;
     }
 
-    // @checkstyle NonStaticMethodCheck (3 lines)
     private void error(final Element element, final String message) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message, element);
+        this.processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message, element);
     }
 }

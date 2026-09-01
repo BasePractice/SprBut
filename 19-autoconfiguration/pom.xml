@@ -33,4 +33,33 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>qulice</id>
+            <activation>
+                <jdk>[21,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.qulice</groupId>
+                        <artifactId>qulice-maven-plugin</artifactId>
+                        <configuration>
+                            <!--
+                                Модуль намеренно подключает стартеры Spring Boot: смысл
+                                стартера в том и состоит, что он приносит согласованный
+                                набор зависимостей, а код пользуется ими напрямую.
+                                Требование объявлять каждую из них отдельно противоречит
+                                теме раздела, поэтому проверка зависимостей отключена.
+                            -->
+                            <excludes>
+                                <exclude>dependencies:.*</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

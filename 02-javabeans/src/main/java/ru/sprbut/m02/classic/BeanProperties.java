@@ -89,7 +89,7 @@ public final class BeanProperties {
                 try {
                     found = this.type.getMethod(String.format("%s%s", prefix, suffix));
                 } catch (final NoSuchMethodException absent) {
-                    continue;
+                    assert absent != null;
                 }
             }
         }

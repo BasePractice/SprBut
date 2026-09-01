@@ -50,7 +50,7 @@ public final class StaticField {
             return field.get(null);
         } catch (final IllegalAccessException denied) {
             throw new IllegalStateException(
-                String.format("Не удалось прочитать статическое поле %s", this.name, denied)
+                String.format("Не удалось прочитать статическое поле %s", this.name), denied
             );
         }
     }

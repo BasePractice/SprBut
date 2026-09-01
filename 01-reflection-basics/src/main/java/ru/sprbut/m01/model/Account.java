@@ -104,11 +104,13 @@ public class Account {
         return String.format("Счёт типа %s", TYPE);
     }
 
+    @SuppressWarnings("UnusedMethod")
     private BigDecimal applyFee(final BigDecimal fee) {
         this.balance = this.balance.subtract(fee);
         return this.balance;
     }
 
+    @SuppressWarnings("UnusedMethod")
     private void block(final String reason) {
         this.blocked = true;
         this.cachedLabel = reason;

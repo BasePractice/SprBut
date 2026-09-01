@@ -67,4 +67,32 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>qulice</id>
+            <activation>
+                <jdk>[21,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.qulice</groupId>
+                        <artifactId>qulice-maven-plugin</artifactId>
+                        <configuration>
+                            <!--
+                                ErrorProne компилирует исходники сам, без процессоров
+                                Lombok и MapStruct, поэтому не видит ни сгенерированных
+                                аксессоров, ни реализации маппера. Тема модуля как раз
+                                в том, что этот код дописывается на этапе компиляции.
+                            -->
+                            <excludes>
+                                <exclude>errorprone:.*</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

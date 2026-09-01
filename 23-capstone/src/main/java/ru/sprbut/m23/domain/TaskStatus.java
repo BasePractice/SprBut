@@ -31,10 +31,11 @@ public enum TaskStatus {
 
     /**
      * Можно ли перевести задачу в это состояние из текущего.
-     * @param current Значение {@code current}
+     * @param current Текущее состояние
      * @return Можно ли перевести задачу в это состояние из текущего
      */
+    @SuppressWarnings("EnumOrdinal")
     public boolean reachableFrom(final TaskStatus current) {
-        return ordinal() > current.ordinal();
+        return this.ordinal() > current.ordinal();
     }
 }

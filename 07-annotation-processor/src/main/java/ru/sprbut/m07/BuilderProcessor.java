@@ -4,9 +4,16 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
+// генератор исходного кода: строки будущего файла собираются конкатенацией —
+// в таком виде видно, какой текст окажется в сгенерированном классе
+// @checkstyle StringLiteralsConcatenationCheck disable
 package ru.sprbut.m07;
 
-import ru.sprbut.m07.api.GenerateBuilder;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -24,12 +31,7 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
-import javax.tools.JavaFileObject;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import ru.sprbut.m07.api.GenerateBuilder;
 
 /**
  * Слайды 57–64: {@code AbstractProcessor} — генерация исходного кода на этапе компиляции.
@@ -74,6 +76,11 @@ public class BuilderProcessor extends AbstractProcessor {
     private int round;
 
     /**
+     * Признак того, что разбираемый класс пригоден для генерации.
+     */
+    private boolean valid;
+
+    /**
      * Открытый конструктор: экземпляр создаёт контейнер.
      */
     public BuilderProcessor() {
@@ -81,36 +88,33 @@ public class BuilderProcessor extends AbstractProcessor {
     }
 
     @Override
-    public synchronized void init(final ProcessingEnvironment env) {
+    @SuppressWarnings("PMD.AvoidSynchronizedAtMethodLevel")
+    public final synchronized void init(final ProcessingEnvironment env) {
         super.init(env);
         this.filer = env.getFiler();
         this.messager = env.getMessager();
         this.elements = env.getElementUtils();
     }
 
+    // в последнем, «пустом» раунде генерировать уже нельзя, поэтому обработка
+    // идёт только до него; true в ответе означает «аннотации обработаны мной,
+    // другим процессорам не передавать»
     @Override
-    public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
-        this.round++;
-        if (roundEnv.processingOver()) {
-            // Последний, «пустой» раунд: генерировать здесь уже нельзя
-            return false;
-        }
-        for (final Element element : roundEnv.getElementsAnnotatedWith(GenerateBuilder.class)) {
-
-            if (element.getKind() != ElementKind.CLASS) {
-                this.error(element, "@GenerateBuilder применим только к классам");
-                continue;
+    @SuppressWarnings("DoNotClaimAnnotations")
+    public final boolean process(
+        final Set<? extends TypeElement> annotations, final RoundEnvironment env
+    ) {
+        this.round += 1;
+        final boolean claimed;
+        if (env.processingOver()) {
+            claimed = false;
+        } else {
+            for (final Element element : env.getElementsAnnotatedWith(GenerateBuilder.class)) {
+                this.handle(element);
             }
-            final TypeElement type = (TypeElement) element;
-            final List<Property> properties = this.analyze(type);
-            if (properties == null) {
-                // анализ нашёл ошибки — они уже сообщены, генерировать нечего
-                continue;
-            }
-            this.generate(type, properties);
+            claimed = true;
         }
-        // true — «аннотации обработаны мной, другим процессорам не передавать»
-        return true;
+        return claimed;
     }
 
     /**
@@ -123,97 +127,109 @@ public class BuilderProcessor extends AbstractProcessor {
 
     // --- Анализ --------------------------------------------------------------
 
-    /**
-     * Проверяет соглашение JavaBeans и собирает свойства.
-     * Возвращает {@code null}, если код непригоден — ошибки уже отправлены в Messager.
-     * @param type Тип
-     * @return Проверяет соглашение JavaBeans и собирает свойства
-     */
+    // один помеченный элемент: если это не класс или анализ нашёл ошибки,
+    // генерировать нечего — сообщения уже отправлены в Messager
+    private void handle(final Element element) {
+        if (element.getKind() == ElementKind.CLASS) {
+            final TypeElement type = (TypeElement) element;
+            final List<Property> properties = this.analyze(type);
+            if (!properties.isEmpty() || this.valid) {
+                this.generate(type, properties);
+            }
+        } else {
+            this.error(element, "@GenerateBuilder применим только к классам");
+        }
+    }
+
+    // проверка соглашения JavaBeans и сбор свойств: непригодность кода
+    // отмечается флагом, а сами ошибки уходят в Messager
     private List<Property> analyze(final TypeElement type) {
-        boolean valid = true;
+        this.valid = true;
         if (type.getModifiers().contains(Modifier.ABSTRACT)) {
             this.error(type, "@GenerateBuilder не применим к абстрактному классу");
-            valid = false;
+            this.valid = false;
         }
-        if (
-            !this.hasPublicNoArgConstructor(type)
-        ) {
+        if (!BuilderProcessor.constructible(type)) {
             this.error(
                 type,
-                "Классу нужен публичный конструктор без параметров — "
-                    + "билдер создаёт объект именно им"
+                "Классу нужен публичный конструктор без параметров, билдер создаёт объект именно им"
             );
-            valid = false;
+            this.valid = false;
         }
         final List<Property> properties = new ArrayList<>(0);
         for (final VariableElement field : ElementFilter.fieldsIn(type.getEnclosedElements())) {
-            final Set<Modifier> modifiers = field.getModifiers();
-            if (modifiers.contains(Modifier.STATIC)) {
-                continue;
+            if (!field.getModifiers().contains(Modifier.STATIC)) {
+                this.collect(type, field, properties);
             }
-            final String name = field.getSimpleName().toString();
-            final String setter = String.format("set%s", capitalize(name));
-            if (!this.hasSetter(type, setter)) {
-                this.error(field, "Нет сеттера " + setter + "(...) — билдер не сможет задать это поле");
-                valid = false;
-                continue;
-            }
-            properties.add(new Property(name, field.asType().toString(), setter));
         }
-        if (properties.isEmpty() && valid) {
+        if (properties.isEmpty() && this.valid) {
             this.warning(type, "У класса нет свойств — сгенерированный билдер будет пустым");
         }
-        return valid ? properties : null;
+        return properties;
     }
 
-    // @checkstyle NonStaticMethodCheck (3 lines)
-    private boolean hasPublicNoArgConstructor(final TypeElement type) {
-        final List<ExecutableElement> constructors = ElementFilter.constructorsIn(type.getEnclosedElements());
-        if (constructors.isEmpty()) {
-            // конструктор по умолчанию — публичный, если класс публичный
-            return true;
-        }
-        return constructors.stream().anyMatch(c ->
-                c.getParameters().isEmpty() && c.getModifiers().contains(
-                    Modifier.PUBLIC
-                ));
-    }
-
-    // @checkstyle NonStaticMethodCheck (3 lines)
-    private boolean hasSetter(
-        final TypeElement type, final String setterName
+    // одно поле: свойство попадает в билдер только если у него есть сеттер
+    private void collect(
+        final TypeElement type, final VariableElement field, final List<Property> sink
     ) {
-        return ElementFilter.methodsIn(
-            type.getEnclosedElements()
-        ).stream()
-                .anyMatch(m -> m.getSimpleName().contentEquals(setterName)
-                        && m.getParameters().size() == 1
-                        && m.getModifiers().contains(
-                            Modifier.PUBLIC
-                        ));
+        final String name = field.getSimpleName().toString();
+        final String setter = String.format("set%s", BuilderProcessor.capitalize(name));
+        if (BuilderProcessor.settable(type, setter)) {
+            sink.add(new Property(name, field.asType().toString(), setter));
+        } else {
+            this.error(
+                field,
+                String.format("Нет сеттера %s(...), билдер не сможет задать это поле", setter)
+            );
+            this.valid = false;
+        }
+    }
+
+    // конструктора нет вовсе — значит есть неявный, публичный у публичного класса
+    private static boolean constructible(final TypeElement type) {
+        final List<ExecutableElement> constructors =
+            ElementFilter.constructorsIn(type.getEnclosedElements());
+        return constructors.isEmpty()
+            || constructors.stream()
+                .anyMatch(
+                    candidate -> candidate.getParameters().isEmpty()
+                        && candidate.getModifiers().contains(Modifier.PUBLIC)
+                );
+    }
+
+    private static boolean settable(final TypeElement type, final String setter) {
+        return ElementFilter.methodsIn(type.getEnclosedElements())
+            .stream()
+            .anyMatch(
+                method -> method.getSimpleName().contentEquals(setter)
+                    && method.getParameters().size() == 1
+                    && method.getModifiers().contains(Modifier.PUBLIC)
+            );
     }
 
     // --- Генерация -----------------------------------------------------------
 
-    /**
-     * Пишет новый исходник через {@link Filer}. Важно: файл создаётся именно
-     * так, а не через {@code new FileWriter} — иначе javac не узнает о новом
-     * коде и не скомпилирует его в следующем раунде.
-     * @param type Тип
-      * @param type Параметр типа
-     * @param properties Свойства
-     */
+    // файл создаётся через Filer, а не через new FileWriter: иначе javac
+    // не узнает о новом коде и не скомпилирует его в следующем раунде
     private void generate(final TypeElement type, final List<Property> properties) {
-        final String packageName = this.elements.getPackageOf(type).getQualifiedName().toString();
-        final String simpleName = type.getSimpleName().toString();
+        final String pack = this.elements.getPackageOf(type).getQualifiedName().toString();
+        final String simple = type.getSimpleName().toString();
         final String suffix = type.getAnnotation(GenerateBuilder.class).suffix();
-        final String builderName = simpleName + suffix;
-        final String qualifiedName = packageName.isEmpty() ? builderName : packageName + "." + builderName;
+        final String builder = simple + suffix;
+        final String qualified;
+        if (pack.isEmpty()) {
+            qualified = builder;
+        } else {
+            qualified = String.format("%s.%s", pack, builder);
+        }
         try {
-            final JavaFileObject file = this.filer.createSourceFile(qualifiedName, type);
-            try (PrintWriter out = new PrintWriter(file.openWriter())) {
-                if (!packageName.isEmpty()) {
-                    out.println("package " + packageName + ";");
+            try (
+                PrintWriter out = new PrintWriter(
+                    this.filer.createSourceFile(qualified, type).openWriter()
+                )
+            ) {
+                if (!pack.isEmpty()) {
+                    out.println("package " + pack + ";");
                     out.println();
                 }
                 out.println(
@@ -221,25 +237,25 @@ public class BuilderProcessor extends AbstractProcessor {
                         + BuilderProcessor.class.getSimpleName()
                         + ". Правки будут потеряны при следующей сборке. */"
                 );
-                out.println("public final class " + builderName + " {");
+                out.println("public final class " + builder + " {");
                 out.println();
                 for (final Property property : properties) {
-                    out.println("    private " + property.type() + " " + property.name() + ";");
+                    out.println(
+                        "    private " + property.type() + " " + property.name() + ";"
+                    );
                 }
                 out.println();
-                out.println("    private " + builderName + "() {");
+                out.println("    private " + builder + "() {");
                 out.println("    }");
                 out.println();
-                out.println("    public static " + builderName + " create() {");
-                out.println("        return new " + builderName + "();");
+                out.println("    public static " + builder + " create() {");
+                out.println("        return new " + builder + "();");
                 out.println("    }");
-                for (
-                    final Property property : properties
-                ) {
+                for (final Property property : properties) {
                     out.println();
                     out.println(
                         "    public "
-                            + builderName
+                            + builder
                             + " "
                             + property.name()
                             + "("
@@ -251,17 +267,22 @@ public class BuilderProcessor extends AbstractProcessor {
                     out.println("    }");
                 }
                 out.println();
-                out.println("    public " + simpleName + " build() {");
-                out.println("        " + simpleName + " result = new " + simpleName + "();");
+                out.println("    public " + simple + " build() {");
+                out.println("        " + simple + " result = new " + simple + "();");
                 for (final Property property : properties) {
-                    out.println("        result." + property.setter() + "(this." + property.name() + ");");
+                    out.println(
+                        "        result." + property.setter() + "(this." + property.name() + ");"
+                    );
                 }
                 out.println("        return result;");
                 out.println("    }");
                 out.println("}");
             }
-        } catch (final IOException e) {
-            this.error(type, "Не удалось записать " + qualifiedName + ": " + e.getMessage());
+        } catch (final IOException failure) {
+            this.error(
+                type,
+                String.format("Не удалось записать %s: %s", qualified, failure.getMessage())
+            );
         }
     }
 
@@ -281,8 +302,10 @@ public class BuilderProcessor extends AbstractProcessor {
 
     /**
      * Свойство, для которого генерируется метод билдера.
-      * @param setter Параметр типа
-      * @param name Параметр типа
+     * @param name Имя свойства
+     * @param type Тип свойства
+     * @param setter Имя сеттера
+     * @since 1.0
      */
     record Property(String name, String type, String setter) {
     }

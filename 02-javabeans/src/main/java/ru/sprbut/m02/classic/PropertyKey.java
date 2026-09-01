@@ -43,6 +43,7 @@ public final class PropertyKey {
      * одинаково становятся {@code firstName}.
      * @return Имя свойства, собранное из частей ключа
      */
+    @SuppressWarnings("StringSplitter")
     public String camelCase() {
         final String name;
         if (this.raw.indexOf('-') < 0 && this.raw.indexOf('_') < 0) {

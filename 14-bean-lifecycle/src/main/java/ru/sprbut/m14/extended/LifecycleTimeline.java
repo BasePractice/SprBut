@@ -59,7 +59,7 @@ public final class LifecycleTimeline {
             final String left = event.substring(0, colon);
             steps.add(
                 new Step(
-                    Character.getNumericValue(left.charAt(0)),
+                    Character.digit(left.charAt(0), 10),
                     left.substring(left.indexOf('-') + 1),
                     event.substring(colon + 1)
                 )
