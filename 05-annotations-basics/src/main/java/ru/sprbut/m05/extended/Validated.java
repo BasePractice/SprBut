@@ -52,8 +52,13 @@ public final class Validated {
 
     /**
      * Основной конструктор.
+     *
+     * <p>Копия списка правил снимается прямо здесь: объект обязан быть неизменяемым,
+     * а вызов в конструкторе — единственный способ это обеспечить.</p>
+     *
      * @param target Целевой объект
      * @param rules Правила
+     * @checkstyle ConstructorsCodeFreeCheck (5 lines)
      */
     public Validated(final Object target, final List<Rule> rules) {
         this.target = target;
@@ -77,7 +82,7 @@ public final class Validated {
      */
     @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     public Verdict verdict() {
-        final List<Violation> found = new ArrayList<>();
+        final List<Violation> found = new ArrayList<>(0);
         for (final Field field : new ConstrainedFields(this.target.getClass()).list()) {
             field.setAccessible(true);
             final Object value = this.read(field);
@@ -92,7 +97,9 @@ public final class Validated {
         try {
             return field.get(this.target);
         } catch (final IllegalAccessException denied) {
-            throw new IllegalStateException("Поле " + field.getName() + " недоступно", denied);
+            throw new IllegalStateException(
+                String.format("Поле %s недоступно", field.getName()), denied
+            );
         }
     }
 }

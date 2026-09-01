@@ -20,7 +20,7 @@ public class Child extends Parent {
     }
 
     @Override
-    public String action() {
+    public final String action() {
         return "child";
     }
 }

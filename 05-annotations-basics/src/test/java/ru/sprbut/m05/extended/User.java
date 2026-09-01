@@ -18,6 +18,26 @@ package ru.sprbut.m05.extended;
 public final class User extends BaseEntity {
 
     /**
+     * Логин.
+     */
+    @NotBlank
+    @MaxLength(10)
+    private final String login;
+
+    /**
+     * Возраст.
+     */
+    @Range(min = 18, max = 120, message = "возраст вне диапазона")
+    private final int age;
+
+    /**
+     * Адрес почты.
+     */
+    @Matches(regex = ".*@.*", message = "не похоже на почту")
+    @Matches(regex = ".*\\.[a-z]+", message = "нет доменной зоны")
+    private final String email;
+
+    /**
      * Невидимый элемент.
      */
     @InvisibleNotNull
@@ -47,8 +67,10 @@ public final class User extends BaseEntity {
      * @param email Адрес почты
      * @param invisible Невидимый элемент
      * @param free Значение {@code free}
+     * @checkstyle ParameterNumberCheck (8 lines)
      */
-    public User(final String id, final String login, final int age, final String email, final String invisible, final String free) {
+    public User(final String id, final String login, final int age,
+        final String email, final String invisible, final String free) {
         super(id);
         this.login = login;
         this.age = age;
@@ -56,24 +78,4 @@ public final class User extends BaseEntity {
         this.invisible = invisible;
         this.free = free;
     }
-
-    /**
-     * Логин.
-     */
-    @NotBlank
-    @MaxLength(10)
-    private final String login;
-
-    /**
-     * Возраст.
-     */
-    @Range(min = 18, max = 120, message = "возраст вне диапазона")
-    private final int age;
-
-    /**
-     * Адрес почты.
-     */
-    @Matches(regex = ".*@.*", message = "не похоже на почту")
-    @Matches(regex = ".*\\.[a-z]+", message = "нет доменной зоны")
-    private final String email;
 }

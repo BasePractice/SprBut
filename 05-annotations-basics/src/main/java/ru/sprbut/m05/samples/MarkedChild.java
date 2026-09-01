@@ -18,5 +18,4 @@ public class MarkedChild extends MarkedParent {
     public MarkedChild() {
         // нечего инициализировать
     }
-
 }

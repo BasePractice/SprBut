@@ -45,10 +45,13 @@ public final class AnnotationTargets {
      */
     public List<ElementType> allowed() {
         final Target target = this.annotation.getAnnotation(Target.class);
+        final List<ElementType> allowed;
         if (target == null) {
-            return List.of();
+            allowed = List.of();
+        } else {
+            allowed = Arrays.asList(target.value());
         }
-        return Arrays.asList(target.value());
+        return allowed;
     }
 
     /**

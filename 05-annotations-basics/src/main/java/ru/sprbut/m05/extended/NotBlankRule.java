@@ -23,13 +23,13 @@ public final class NotBlankRule implements Rule {
 
     @Override
     public List<Violation> check(final Field field, final Object value) {
-        if (!field.isAnnotationPresent(NotBlank.class)) {
-
-            return List.of();
+        final List<Violation> found;
+        if (!field.isAnnotationPresent(NotBlank.class)
+            || value != null && !String.valueOf(value).isBlank()) {
+            found = List.of();
+        } else {
+            found = List.of(new Violation(field.getName(), "значение обязательно", value));
         }
-        if (value == null || String.valueOf(value).isBlank()) {
-            return List.of(new Violation(field.getName(), "значение обязательно", value));
-        }
-        return List.of();
+        return found;
     }
 }

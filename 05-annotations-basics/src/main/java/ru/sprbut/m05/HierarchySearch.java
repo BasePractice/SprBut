@@ -7,6 +7,8 @@
 package ru.sprbut.m05;
 
 import java.lang.annotation.Annotation;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -18,7 +20,7 @@ import java.util.Optional;
  * Отсюда и {@code AnnotatedElementUtils} в Spring — та же работа, только
  * с кэшированием и поддержкой композиций.</p>
  *
-  * @param <A> Параметр типа
+ * @param <A> Тип аннотации
  * @since 1.0
  */
 public final class HierarchySearch<A extends Annotation> {
@@ -48,15 +50,13 @@ public final class HierarchySearch<A extends Annotation> {
      * @return Аннотация класса, найденная подъёмом до {@code Object}
      */
     public Optional<A> onClass() {
-        for (Class<?> current = this.type;
-             current != null && current != Object.class;
-             current = current.getSuperclass()) {
-            final A found = current.getDeclaredAnnotation(this.annotation);
-            if (found != null) {
-                return Optional.of(found);
-            }
+        Optional<A> found = Optional.empty();
+        Class<?> current = this.type;
+        while (found.isEmpty() && current != null && current != Object.class) {
+            found = Optional.ofNullable(current.getDeclaredAnnotation(this.annotation));
+            current = current.getSuperclass();
         }
-        return Optional.empty();
+        return found;
     }
 
     /**
@@ -67,28 +67,29 @@ public final class HierarchySearch<A extends Annotation> {
      * @return Аннотация метода: сначала сам класс, затем родители, затем интерфейсы
      */
     public Optional<A> onMethod(final String method, final Class<?>... parameters) {
-        for (Class<?> current = this.type; current != null; current = current.getSuperclass()) {
-            final Optional<A> found = this.declaredOn(current, method, parameters);
-            if (found.isPresent()) {
-                return found;
-            }
+        Optional<A> found = Optional.empty();
+        Class<?> current = this.type;
+        while (found.isEmpty() && current != null) {
+            found = this.declaredOn(current, method, parameters);
+            current = current.getSuperclass();
         }
-        for (final Class<?> contract : this.type.getInterfaces()) {
-            final Optional<A> found = this.declaredOn(contract, method, parameters);
-            if (found.isPresent()) {
-                return found;
-            }
+        final Iterator<Class<?>> contracts = List.of(this.type.getInterfaces()).iterator();
+        while (found.isEmpty() && contracts.hasNext()) {
+            found = this.declaredOn(contracts.next(), method, parameters);
         }
-        return Optional.empty();
+        return found;
     }
 
-    private Optional<A> declaredOn(final Class<?> owner, final String method, final Class<?>... parameters) {
+    private Optional<A> declaredOn(final Class<?> owner, final String method,
+        final Class<?>... parameters) {
+        Optional<A> found;
         try {
-            return Optional.ofNullable(
+            found = Optional.ofNullable(
                 owner.getDeclaredMethod(method, parameters).getDeclaredAnnotation(this.annotation)
             );
         } catch (final NoSuchMethodException absent) {
-            return Optional.empty();
+            found = Optional.empty();
         }
+        return found;
     }
 }

@@ -25,12 +25,17 @@ public final class ConstraintsViolated extends RuntimeException {
 
     /**
      * Основной конструктор.
+     * Исключение обязано собрать текст из вердикта — обойтись без вызовов
+     * в конструкторе тут нельзя, сообщение и есть его смысл.
      * @param verdict Вердикт
+     * @checkstyle ConstructorsCodeFreeCheck (8 lines)
      */
     public ConstraintsViolated(final Verdict verdict) {
         super(
-            "Нарушений: " + verdict.violations().size()
-                + " — " + String.join("; ", verdict.messages())
+            String.format(
+                "Нарушений: %s — %s",
+                verdict.violations().size(), String.join("; ", verdict.messages())
+            )
         );
         this.verdict = verdict;
     }

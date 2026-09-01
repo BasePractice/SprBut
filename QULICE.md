@@ -20,7 +20,7 @@ mvn -pl 05-annotations-basics -DskipTests package com.qulice:qulice-maven-plugin
 | 02-javabeans | 868 | 154 | механический проход |
 | 03-reflection-api | 717 | 118 | механический проход |
 | 04-reflection-advanced | 915 | 175 | механический проход |
-| 05-annotations-basics | 607 | 67 | механический проход |
+| 05-annotations-basics | 607 | **0** | **готов** |
 | 06-annotations-advanced | 672 | 71 | механический проход |
 | 07-annotation-processor | 986 | 375 | механический проход |
 | 08-apt-usage | 542 | 105 | механический проход |
@@ -45,5 +45,7 @@ mvn -pl 05-annotations-basics -DskipTests package com.qulice:qulice-maven-plugin
 Модули берутся от самых чистых к самым запущенным. Каждый доводится
 до нуля отдельным коммитом, после чего строка таблицы обновляется.
 
-Очередь: 05 → 06 → 10 → 01 → 23 → 08 → 14 → 18 → 19 → 16 → 03 → 09 →
+Очередь: ~~05~~ → **06** → 10 → 01 → 23 → 08 → 14 → 18 → 19 → 16 → 03 → 09 →
 20 → 11 → 13 → 12 → 17 → 15 → 02 → 04 → 07.
+
+Остановились на: модуль 06 не начат.

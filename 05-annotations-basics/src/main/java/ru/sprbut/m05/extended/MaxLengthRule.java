@@ -25,21 +25,30 @@ public final class MaxLengthRule implements Rule {
     @Override
     public List<Violation> check(final Field field, final Object value) {
         final MaxLength limit = field.getAnnotation(MaxLength.class);
+        final List<Violation> found;
         if (limit == null || value == null) {
-            return List.of();
+            found = List.of();
+        } else {
+            found = MaxLengthRule.oversized(field, value, limit);
         }
+        return found;
+    }
+
+    private static List<Violation> oversized(final Field field, final Object value,
+        final MaxLength limit) {
         final int length = String.valueOf(value).length();
-        if (
-            length > limit.value()
-        ) {
-            return List.of(new Violation(
-                field.getName(),
-                String.format(
-                    "длина %s превышает максимум %s", length, limit.value()
-                ),
-                value
-            ));
+        final List<Violation> found;
+        if (length > limit.value()) {
+            found = List.of(
+                new Violation(
+                    field.getName(),
+                    String.format("длина %s превышает максимум %s", length, limit.value()),
+                    value
+                )
+            );
+        } else {
+            found = List.of();
         }
-        return List.of();
+        return found;
     }
 }

@@ -20,5 +20,4 @@ public class MarkedParent {
     public MarkedParent() {
         // нечего инициализировать
     }
-
 }

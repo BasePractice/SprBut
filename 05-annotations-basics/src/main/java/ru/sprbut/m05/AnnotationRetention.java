@@ -43,7 +43,13 @@ public final class AnnotationRetention {
      */
     public RetentionPolicy policy() {
         final Retention retention = this.annotation.getAnnotation(Retention.class);
-        return retention == null ? RetentionPolicy.CLASS : retention.value();
+        final RetentionPolicy policy;
+        if (retention == null) {
+            policy = RetentionPolicy.CLASS;
+        } else {
+            policy = retention.value();
+        }
+        return policy;
     }
 
     /**

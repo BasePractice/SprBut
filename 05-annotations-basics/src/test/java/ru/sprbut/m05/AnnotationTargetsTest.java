@@ -46,7 +46,7 @@ final class AnnotationTargetsTest {
     }
 
     @Test
-    @DisplayName("@Target — ограничение компилятора: в runtime аннотация есть там, где её разрешили поставить")
+    @DisplayName("@Target — ограничение компилятора: в runtime аннотация есть где разрешили")
     void appliesAtCompileTime() {
         MatcherAssert.assertThat(
             "annotation cannot appear where the target allows it",

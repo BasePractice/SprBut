@@ -24,7 +24,11 @@ import java.lang.annotation.Target;
  */
 public final class Retentions {
 
-    private Retentions() {
+    /**
+     * Открытый конструктор: класс существует ради вложенных объявлений.
+     */
+    public Retentions() {
+        // объявления аннотаций живут в теле класса, состояния у него нет
     }
 
     /**

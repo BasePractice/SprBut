@@ -19,7 +19,7 @@ public class ContractImpl implements AuditedContract {
     }
 
     @Override
-    public String action() {
+    public final String action() {
         return "impl";
     }
 }

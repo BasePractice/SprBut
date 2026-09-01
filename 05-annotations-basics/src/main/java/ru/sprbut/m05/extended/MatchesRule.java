@@ -32,30 +32,40 @@ public final class MatchesRule implements Rule {
     @Override
     public List<Violation> check(final Field field, final Object value) {
         final Matches[] patterns = field.getAnnotationsByType(Matches.class);
-        if (patterns.length == 0 || value == null) {
-            return List.of();
-        }
-        final List<Violation> found = new ArrayList<>();
-        final String text = String.valueOf(value);
-        for (final Matches each : patterns) {
-            try {
-                if (
-                    !Pattern.matches(
-                        each.regex(), text
-                    )
-                ) {
-                    found.add(new Violation(
-                        field.getName(), each.message() + " '" + each.regex() + "'", value
-                    ));
-                }
-            } catch (
-                final PatternSyntaxException malformed
-            ) {
-                found.add(new Violation(
-                    field.getName(), "некорректный шаблон '" + each.regex() + "'", value
-                ));
+        final List<Violation> found = new ArrayList<>(patterns.length);
+        if (patterns.length > 0 && value != null) {
+            final String text = String.valueOf(value);
+            for (final Matches each : patterns) {
+                found.addAll(MatchesRule.mismatch(field, value, each, text));
             }
         }
         return List.copyOf(found);
+    }
+
+    private static List<Violation> mismatch(final Field field, final Object value,
+        final Matches each, final String text) {
+        List<Violation> found;
+        try {
+            if (Pattern.matches(each.regex(), text)) {
+                found = List.of();
+            } else {
+                found = List.of(
+                    new Violation(
+                        field.getName(),
+                        String.format("%s '%s'", each.message(), each.regex()),
+                        value
+                    )
+                );
+            }
+        } catch (final PatternSyntaxException malformed) {
+            found = List.of(
+                new Violation(
+                    field.getName(),
+                    String.format("некорректный шаблон '%s'", each.regex()),
+                    value
+                )
+            );
+        }
+        return found;
     }
 }

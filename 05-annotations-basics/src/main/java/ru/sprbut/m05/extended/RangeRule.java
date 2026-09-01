@@ -28,32 +28,40 @@ public final class RangeRule implements Rule {
     @Override
     public List<Violation> check(final Field field, final Object value) {
         final Range range = field.getAnnotation(Range.class);
+        final List<Violation> found;
         if (range == null || value == null) {
-            return List.of();
+            found = List.of();
+        } else if (value instanceof Number number) {
+            found = RangeRule.outside(field, number, range);
+        } else {
+            found = List.of(
+                new Violation(
+                    field.getName(),
+                    String.format(
+                        "@Range применим только к числам, а поле имеет тип %s",
+                        field.getType().getSimpleName()
+                    ),
+                    value
+                )
+            );
         }
-        if (
-            !(
-                value instanceof Number number
-            )
-        ) {
-            return List.of(new Violation(
-                field.getName(),
-                "@Range применим только к числам, а поле имеет тип "
-                    + field.getType().getSimpleName(),
-                value
-            ));
+        return found;
+    }
+
+    private static List<Violation> outside(final Field field, final Number number,
+        final Range range) {
+        final List<Violation> found;
+        if (number.longValue() < range.min() || number.longValue() > range.max()) {
+            found = List.of(
+                new Violation(
+                    field.getName(),
+                    String.format("%s [%s, %s]", range.message(), range.min(), range.max()),
+                    number
+                )
+            );
+        } else {
+            found = List.of();
         }
-        if (
-            number.longValue() < range.min() || number.longValue() > range.max()
-        ) {
-            return List.of(new Violation(
-                field.getName(),
-                String.format(
-                    "%s [%s, %s]", range.message(), range.min(), range.max()
-                ),
-                value
-            ));
-        }
-        return List.of();
+        return found;
     }
 }

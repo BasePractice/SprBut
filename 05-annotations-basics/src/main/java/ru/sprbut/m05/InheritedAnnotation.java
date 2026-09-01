@@ -20,7 +20,7 @@ import java.util.Optional;
  * а обходит иерархию сам ({@code AnnotatedElementUtils}). Как выглядит такой
  * обход — в {@link HierarchySearch} и в модуле 06.</p>
  *
-  * @param <A> Параметр типа
+ * @param <A> Тип аннотации
  * @since 1.0
  */
 public final class InheritedAnnotation<A extends Annotation> {

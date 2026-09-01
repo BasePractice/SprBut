@@ -40,15 +40,15 @@ public final class ConstrainedFields {
      * @return Поля класса и всех его предков, кроме статических и синтетических
      */
     public List<Field> list() {
-        final List<Field> found = new ArrayList<>();
-        for (Class<?> current = this.type;
-             current != null && current != Object.class;
-             current = current.getSuperclass()) {
+        final List<Field> found = new ArrayList<>(0);
+        Class<?> current = this.type;
+        while (current != null && current != Object.class) {
             for (final Field field : current.getDeclaredFields()) {
                 if (!field.isSynthetic() && !Modifier.isStatic(field.getModifiers())) {
                     found.add(field);
                 }
             }
+            current = current.getSuperclass();
         }
         return List.copyOf(found);
     }
