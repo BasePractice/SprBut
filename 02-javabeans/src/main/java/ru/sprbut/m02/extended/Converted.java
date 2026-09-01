@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m02.extended;
 
 import java.math.BigDecimal;
@@ -9,17 +15,22 @@ import java.util.function.Function;
 
 /**
  * Строка из конфигурации, приведённая к типу свойства.
- * <p>
- * Конфигурация всегда приходит текстом — из файла, окружения или командной
+ *
+ * <p>Конфигурация всегда приходит текстом — из файла, окружения или командной
  * строки. Превращение текста в {@code int}, {@code BigDecimal} или enum —
  * отдельная работа, которую в Spring делает {@code ConversionService};
- * здесь она сжата до таблицы конвертеров.
- * <p>
- * Отказ немедленный и с контекстом: молча подставить {@code null} или ноль —
- * худшее, что может сделать биндер конфигурации.
+ * здесь она сжата до таблицы конвертеров.</p>
+ *
+ * <p>Отказ немедленный и с контекстом: молча подставить {@code null} или ноль —
+ * худшее, что может сделать биндер конфигурации.</p>
+ *
+ * @since 1.0
  */
 public final class Converted {
 
+    /**
+     * Значение {@code RULES}.
+     */
     private static final Map<Class<?>, Function<String, Object>> RULES = Map.ofEntries(
         Map.entry(String.class, raw -> raw),
         Map.entry(int.class, Integer::parseInt),
@@ -35,13 +46,28 @@ public final class Converted {
         Map.entry(UUID.class, UUID::fromString)
     );
 
+    /**
+     * Исходное значение.
+     */
     private final String raw;
 
+    /**
+     * Целевой объект.
+     */
     private final Class<?> target;
 
+    /**
+     * Имя свойства.
+     */
     private final String property;
 
-    public Converted(String raw, Class<?> target, String property) {
+    /**
+     * Основной конструктор.
+     * @param raw Исходное значение
+     * @param target Целевой объект
+     * @param property Имя свойства
+     */
+    public Converted(final String raw, final Class<?> target, final String property) {
         this.raw = raw;
         this.target = target;
         this.property = property;
@@ -49,12 +75,13 @@ public final class Converted {
 
     /**
      * Значение нужного типа.
+     * @return Значение нужного типа
      */
     public Object value() {
         if (this.target.isEnum()) {
-            return constant();
+            return this.constant();
         }
-        Function<String, Object> rule = RULES.get(this.target);
+        final Function<String, Object> rule = RULES.get(this.target);
         if (rule == null) {
             throw new IllegalArgumentException(
                 "Свойство '" + this.property + "': нет конвертера для типа "
@@ -63,7 +90,7 @@ public final class Converted {
         }
         try {
             return rule.apply(this.raw);
-        } catch (RuntimeException malformed) {
+        } catch (final RuntimeException malformed) {
             throw new IllegalArgumentException(
                 "Свойство '" + this.property + "': значение '" + this.raw
                     + "' не приводится к " + this.target.getSimpleName(),

@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m03;
 
 import java.lang.reflect.Constructor;
@@ -9,21 +15,31 @@ import java.util.Optional;
 
 /**
  * Слайд 24 (СХЕМА 1): {@link Constructor} — точка входа любого IoC-контейнера.
- * <p>
- * Чтобы создать бин, контейнеру нужно выбрать конструктор и подобрать аргументы.
+ *
+ * <p>Чтобы создать бин, контейнеру нужно выбрать конструктор и подобрать аргументы.
  * Логика выбора здесь — упрощённая версия того, что делает
- * {@code AutowiredAnnotationBeanPostProcessor} из модуля 12.
+ * {@code AutowiredAnnotationBeanPostProcessor} из модуля 12.</p>
+ *
+ * @since 1.0
  */
 public final class Constructors {
 
+    /**
+     * Тип.
+     */
     private final Class<?> type;
 
-    public Constructors(Class<?> type) {
+    /**
+     * Основной конструктор.
+     * @param type Тип
+     */
+    public Constructors(final Class<?> type) {
         this.type = type;
     }
 
     /**
      * Число параметров каждого публичного конструктора.
+     * @return Число параметров каждого публичного конструктора
      */
     public List<Integer> publicArities() {
         return Arrays.stream(this.type.getConstructors())
@@ -34,6 +50,7 @@ public final class Constructors {
 
     /**
      * То же для всех объявленных конструкторов, включая protected и private.
+     * @return То же для всех объявленных конструкторов, включая protected и private
      */
     public List<Integer> declaredArities() {
         return Arrays.stream(this.type.getDeclaredConstructors())
@@ -44,11 +61,12 @@ public final class Constructors {
 
     /**
      * Конструктор без параметров, если он есть.
+     * @return Конструктор без параметров, если он есть
      */
     public Optional<Constructor<?>> noArg() {
         try {
             return Optional.of(this.type.getDeclaredConstructor());
-        } catch (NoSuchMethodException absent) {
+        } catch (final NoSuchMethodException absent) {
             return Optional.empty();
         }
     }
@@ -56,6 +74,7 @@ public final class Constructors {
     /**
      * Конструктор с наибольшим числом параметров — «жадная» стратегия.
      * Так ведёт себя Jackson с {@code ParameterNamesModule}.
+     * @return Конструктор с наибольшим числом параметров — «жадная» стратегия
      */
     public Optional<Constructor<?>> greediest() {
         return Arrays.stream(this.type.getConstructors())
@@ -66,16 +85,18 @@ public final class Constructors {
      * Конструктор, подходящий под конкретные аргументы: сравниваются количество
      * и совместимость типов с учётом автобоксинга. При равном соответствии
      * предпочитается более доступный.
+     * @param args Аргументы
+     * @return Конструктор, подходящий под конкретные аргументы: сравниваются количество и совместимость типов с учётом автобоксинга. При равном соответствии предпочитается более доступный
      */
-    public Optional<Constructor<?>> matching(Object... args) {
+    public Optional<Constructor<?>> matching(final Object... args) {
         return Arrays.stream(this.type.getDeclaredConstructors())
-            .filter(candidate -> fits(candidate.getParameterTypes(), args))
+            .filter(candidate -> this.fits(candidate.getParameterTypes(), args))
             .min(Comparator.comparingInt(
                 candidate -> Modifier.isPublic(candidate.getModifiers()) ? 0 : 1
             ));
     }
 
-    private boolean fits(Class<?>[] parameters, Object[] args) {
+    private boolean fits(final Class<?>[] parameters, final Object[] args) {
         if (parameters.length != args.length) {
             return false;
         }

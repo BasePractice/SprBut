@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m06.extended;
 
 import java.lang.annotation.Annotation;
@@ -17,64 +23,80 @@ import ru.sprbut.m06.Builtin;
 
 /**
  * <b>Расширенный пример модуля 06.</b>
- * <p>
- * Сканер «слитых» аннотаций — рабочая мини-версия
+ *
+ * <p>Сканер «слитых» аннотаций — рабочая мини-версия
  * {@code AnnotatedElementUtils.findMergedAnnotation} из Spring. Он делает то,
  * чего <b>не делает сам язык</b>:
  * <ul>
- *   <li>находит аннотацию через произвольно длинную цепочку мета-аннотаций
- *       ({@code @GetJson} → {@code @GetMapping} → {@code @RequestMapping});</li>
- *   <li>сливает значения: заданное в композитной аннотации переопределяет
- *       значение мета-аннотации, а незаданное берётся из {@code default};</li>
- *   <li>уважает {@link AliasFor} — явное указание, какой элемент какой переопределяет.</li>
+ * <li>находит аннотацию через произвольно длинную цепочку мета-аннотаций
+ * ({@code @GetJson} → {@code @GetMapping} → {@code @RequestMapping});</li>
+ * <li>сливает значения: заданное в композитной аннотации переопределяет
+ * значение мета-аннотации, а незаданное берётся из {@code default};</li>
+ * <li>уважает {@link AliasFor} — явное указание, какой элемент какой переопределяет.</li>
  * </ul>
  * Обход идёт <b>в ширину</b>, а не в глубину: ближайшее к элементу объявление
  * должно выигрывать у дальнего, иначе значение из мета-аннотации затирало бы
- * то, что человек написал руками.
- * <p>
- * Это и есть ответ на вопрос «почему {@code @RestController} ведёт себя как
+ * то, что человек написал руками.</p>
+ *
+ * <p>Это и есть ответ на вопрос «почему {@code @RestController} ведёт себя как
  * {@code @Controller}»: не потому, что так устроена Java, а потому,
- * что так написан читающий код.
+ * что так написан читающий код.</p>
+ *
+ * @since 1.0
  */
 public final class MergedAnnotation<A extends Annotation> {
 
+    /**
+     * Элемент.
+     */
     private final AnnotatedElement element;
 
+    /**
+     * Целевой объект.
+     */
     private final Class<A> target;
 
-    public MergedAnnotation(AnnotatedElement element, Class<A> target) {
+    /**
+     * Основной конструктор.
+     * @param element Элемент
+     * @param target Целевой объект
+     */
+    public MergedAnnotation(final AnnotatedElement element, final Class<A> target) {
         this.element = element;
         this.target = target;
     }
 
     /**
      * Найденная аннотация со слитыми значениями.
+     * @return Найденная аннотация со слитыми значениями
      */
     public Optional<Merged> find() {
-        return search(this.element.getAnnotations());
+        return this.search(this.element.getAnnotations());
     }
 
     /**
      * Поиск среди набора аннотаций — общая часть для элемента и для иерархии.
+     * @param roots Значение {@code roots}
+     * @return Поиск среди набора аннотаций — общая часть для элемента и для иерархии
      */
-    Optional<Merged> search(Annotation[] roots) {
-        Deque<Step> queue = new ArrayDeque<>();
-        Set<Class<? extends Annotation>> visited = new HashSet<>();
+    Optional<Merged> search(final Annotation[] roots) {
+        final Deque<Step> queue = new ArrayDeque<>();
+        final Set<Class<? extends Annotation>> visited = new HashSet<>();
         for (Annotation each : roots) {
             if (!new Builtin(each.annotationType()).yes()) {
                 queue.add(new Step(each, List.of()));
             }
         }
         while (!queue.isEmpty()) {
-            Step step = queue.poll();
-            Class<? extends Annotation> type = step.annotation().annotationType();
+            final Step step = queue.poll();
+            final Class<? extends Annotation> type = step.annotation().annotationType();
             if (!visited.add(type)) {
                 continue;
             }
-            List<Annotation> path = new ArrayList<>(step.path());
+            final List<Annotation> path = new ArrayList<>(step.path());
             path.add(step.annotation());
             if (type.equals(this.target)) {
-                return Optional.of(merged(path));
+                return Optional.of(this.merged(path));
             }
             for (Annotation meta : type.getAnnotations()) {
                 if (!new Builtin(meta.annotationType()).yes()) {
@@ -89,12 +111,14 @@ public final class MergedAnnotation<A extends Annotation> {
      * Слияние значений вдоль пути: базой служат значения самой целевой
      * аннотации, поверх ложатся переопределения композитных — от дальней
      * к ближайшей, чтобы ближайшая выиграла.
+     * @param path Путь
+     * @return Слияние значений вдоль пути: базой служат значения самой целевой аннотации, поверх ложатся переопределения композитных — от дальней к ближайшей, чтобы ближайшая выиграла
      */
-    private Merged merged(List<Annotation> path) {
-        Map<String, Object> attributes =
+    private Merged merged(final List<Annotation> path) {
+        final Map<String, Object> attributes =
             new LinkedHashMap<>(new RawAttributes(path.get(path.size() - 1)).map());
         for (int index = path.size() - 2; index >= 0; index--) {
-            override(path.get(index), attributes);
+            this.override(path.get(index), attributes);
         }
         return new Merged(
             this.target,
@@ -105,19 +129,21 @@ public final class MergedAnnotation<A extends Annotation> {
 
     /**
      * Переопределения, которые композитная аннотация вносит в целевую.
-     * <p>
-     * Два правила, оба как в Spring: элемент с {@link AliasFor} переопределяет
+     *
+     * <p>Два правила, оба как в Spring: элемент с {@link AliasFor} переопределяет
      * названный там элемент; одноимённый элемент переопределяет одноимённый,
      * но только если его значение отличается от {@code default} — иначе
-     * «незаданный» элемент затирал бы осмысленное значение.
+     * «незаданный» элемент затирал бы осмысленное значение.</p>
+     * @param attributes Значение {@code attributes}
+     * @param source Источник
      */
-    private void override(Annotation source, Map<String, Object> attributes) {
-        RawAttributes raw = new RawAttributes(source);
+    private void override(final Annotation source, final Map<String, Object> attributes) {
+        final RawAttributes raw = new RawAttributes(source);
         for (Method element : source.annotationType().getDeclaredMethods()) {
-            Object value = raw.value(element);
-            AliasFor alias = element.getAnnotation(AliasFor.class);
+            final Object value = raw.value(element);
+            final AliasFor alias = element.getAnnotation(AliasFor.class);
             if (alias != null && alias.annotation().equals(this.target)) {
-                attributes.put(aliased(alias, element, attributes), value);
+                attributes.put(this.aliased(alias, element, attributes), value);
                 continue;
             }
             if (attributes.containsKey(element.getName())
@@ -127,8 +153,8 @@ public final class MergedAnnotation<A extends Annotation> {
         }
     }
 
-    private String aliased(AliasFor alias, Method element, Map<String, Object> attributes) {
-        String name = alias.attribute().isBlank() ? element.getName() : alias.attribute();
+    private String aliased(final AliasFor alias, final Method element, final Map<String, Object> attributes) {
+        final String name = alias.attribute().isBlank() ? element.getName() : alias.attribute();
         if (!attributes.containsKey(name)) {
             throw new IllegalStateException(
                 "@AliasFor указывает на несуществующий элемент '" + name

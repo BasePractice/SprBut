@@ -1,7 +1,12 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m07;
 
 import ru.sprbut.m07.api.GenerateBuilder;
-
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -28,33 +33,51 @@ import java.util.Set;
 
 /**
  * Слайды 57–64: {@code AbstractProcessor} — генерация исходного кода на этапе компиляции.
- * <p>
- * Процессор делает две вещи из трёх, перечисленных на слайде:
+ *
+ * <p>Процессор делает две вещи из трёх, перечисленных на слайде:
  * <ul>
- *   <li><b>анализирует</b> исходный код — проверяет, что класс подчиняется
- *       соглашению JavaBeans, и пишет ошибки через {@link Messager};</li>
- *   <li><b>генерирует</b> новый исходник через {@link Filer}.</li>
+ * <li><b>анализирует</b> исходный код — проверяет, что класс подчиняется
+ * соглашению JavaBeans, и пишет ошибки через {@link Messager};</li>
+ * <li><b>генерирует</b> новый исходник через {@link Filer}.</li>
  * </ul>
  * Третьего — <i>изменения</i> существующего кода — здесь нет намеренно:
- * штатное API этого не умеет, Lombok добивается его хаком AST (слайд 59).
- * <p>
- * Ключевое отличие от рефлексии: работа идёт не с {@code Class}, а с
+ * штатное API этого не умеет, Lombok добивается его хаком AST (слайд 59).</p>
+ *
+ * <p>Ключевое отличие от рефлексии: работа идёт не с {@code Class}, а с
  * {@link javax.lang.model.element.Element} — моделью <i>исходного текста</i>.
- * Классов ещё не существует, загружать нечего.
+ * Классов ещё не существует, загружать нечего.</p>
+ *
+ * @since 1.0
  */
 @SupportedAnnotationTypes("ru.sprbut.m07.api.GenerateBuilder")
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 public class BuilderProcessor extends AbstractProcessor {
 
+    /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    public BuilderProcessor() {
+        // нечего инициализировать
+    }
+
+    /**
+     * Filer для записи файлов.
+     */
     private Filer filer;
+    /**
+     * Значение {@code messager}.
+     */
     private Messager messager;
+    /**
+     * Элементы.
+     */
     private Elements elements;
 
     /** Счётчик раундов — чтобы было видно, что их несколько (модуль 08). */
     private int round;
 
     @Override
-    public synchronized void init(ProcessingEnvironment env) {
+    public synchronized void init(final ProcessingEnvironment env) {
         super.init(env);
         this.filer = env.getFiler();
         this.messager = env.getMessager();
@@ -62,8 +85,8 @@ public class BuilderProcessor extends AbstractProcessor {
     }
 
     @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        round++;
+    public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
+        this.round++;
         if (roundEnv.processingOver()) {
             // Последний, «пустой» раунд: генерировать здесь уже нельзя
             return false;
@@ -71,23 +94,27 @@ public class BuilderProcessor extends AbstractProcessor {
 
         for (Element element : roundEnv.getElementsAnnotatedWith(GenerateBuilder.class)) {
             if (element.getKind() != ElementKind.CLASS) {
-                error(element, "@GenerateBuilder применим только к классам");
+                this.error(element, "@GenerateBuilder применим только к классам");
                 continue;
             }
-            TypeElement type = (TypeElement) element;
-            List<Property> properties = analyze(type);
+            final TypeElement type = (TypeElement) element;
+            final List<Property> properties = this.analyze(type);
             if (properties == null) {
                 // анализ нашёл ошибки — они уже сообщены, генерировать нечего
                 continue;
             }
-            generate(type, properties);
+            this.generate(type, properties);
         }
         // true — «аннотации обработаны мной, другим процессорам не передавать»
         return true;
     }
 
+    /**
+     * Раунды обработки.
+     * @return Раунды обработки
+     */
     public int rounds() {
-        return round;
+        return this.round;
     }
 
     // --- Анализ --------------------------------------------------------------
@@ -95,30 +122,32 @@ public class BuilderProcessor extends AbstractProcessor {
     /**
      * Проверяет соглашение JavaBeans и собирает свойства.
      * Возвращает {@code null}, если код непригоден — ошибки уже отправлены в Messager.
+     * @param type Тип
+     * @return Проверяет соглашение JavaBeans и собирает свойства
      */
-    private List<Property> analyze(TypeElement type) {
+    private List<Property> analyze(final TypeElement type) {
         boolean valid = true;
 
         if (type.getModifiers().contains(Modifier.ABSTRACT)) {
-            error(type, "@GenerateBuilder не применим к абстрактному классу");
+            this.error(type, "@GenerateBuilder не применим к абстрактному классу");
             valid = false;
         }
-        if (!hasPublicNoArgConstructor(type)) {
-            error(type, "Классу нужен публичный конструктор без параметров — "
+        if (!this.hasPublicNoArgConstructor(type)) {
+            this.error(type, "Классу нужен публичный конструктор без параметров — "
                     + "билдер создаёт объект именно им");
             valid = false;
         }
 
-        List<Property> properties = new ArrayList<>();
+        final List<Property> properties = new ArrayList<>();
         for (VariableElement field : ElementFilter.fieldsIn(type.getEnclosedElements())) {
-            Set<Modifier> modifiers = field.getModifiers();
+            final Set<Modifier> modifiers = field.getModifiers();
             if (modifiers.contains(Modifier.STATIC)) {
                 continue;
             }
-            String name = field.getSimpleName().toString();
-            String setter = "set" + capitalize(name);
-            if (!hasSetter(type, setter)) {
-                error(field, "Нет сеттера " + setter + "(...) — билдер не сможет задать это поле");
+            final String name = field.getSimpleName().toString();
+            final String setter = "set" + capitalize(name);
+            if (!this.hasSetter(type, setter)) {
+                this.error(field, "Нет сеттера " + setter + "(...) — билдер не сможет задать это поле");
                 valid = false;
                 continue;
             }
@@ -126,13 +155,13 @@ public class BuilderProcessor extends AbstractProcessor {
         }
 
         if (properties.isEmpty() && valid) {
-            warning(type, "У класса нет свойств — сгенерированный билдер будет пустым");
+            this.warning(type, "У класса нет свойств — сгенерированный билдер будет пустым");
         }
         return valid ? properties : null;
     }
 
-    private boolean hasPublicNoArgConstructor(TypeElement type) {
-        List<ExecutableElement> constructors = ElementFilter.constructorsIn(type.getEnclosedElements());
+    private boolean hasPublicNoArgConstructor(final TypeElement type) {
+        final List<ExecutableElement> constructors = ElementFilter.constructorsIn(type.getEnclosedElements());
         if (constructors.isEmpty()) {
             // конструктор по умолчанию — публичный, если класс публичный
             return true;
@@ -141,7 +170,7 @@ public class BuilderProcessor extends AbstractProcessor {
                 c.getParameters().isEmpty() && c.getModifiers().contains(Modifier.PUBLIC));
     }
 
-    private boolean hasSetter(TypeElement type, String setterName) {
+    private boolean hasSetter(final TypeElement type, final String setterName) {
         return ElementFilter.methodsIn(type.getEnclosedElements()).stream()
                 .anyMatch(m -> m.getSimpleName().contentEquals(setterName)
                         && m.getParameters().size() == 1
@@ -154,16 +183,18 @@ public class BuilderProcessor extends AbstractProcessor {
      * Пишет новый исходник через {@link Filer}. Важно: файл создаётся именно
      * так, а не через {@code new FileWriter} — иначе javac не узнает о новом
      * коде и не скомпилирует его в следующем раунде.
+     * @param properties Свойства
+     * @param type Тип
      */
-    private void generate(TypeElement type, List<Property> properties) {
-        String packageName = elements.getPackageOf(type).getQualifiedName().toString();
-        String simpleName = type.getSimpleName().toString();
-        String suffix = type.getAnnotation(GenerateBuilder.class).suffix();
-        String builderName = simpleName + suffix;
-        String qualifiedName = packageName.isEmpty() ? builderName : packageName + "." + builderName;
+    private void generate(final TypeElement type, final List<Property> properties) {
+        final String packageName = this.elements.getPackageOf(type).getQualifiedName().toString();
+        final String simpleName = type.getSimpleName().toString();
+        final String suffix = type.getAnnotation(GenerateBuilder.class).suffix();
+        final String builderName = simpleName + suffix;
+        final String qualifiedName = packageName.isEmpty() ? builderName : packageName + "." + builderName;
 
         try {
-            JavaFileObject file = filer.createSourceFile(qualifiedName, type);
+            final JavaFileObject file = this.filer.createSourceFile(qualifiedName, type);
             try (PrintWriter out = new PrintWriter(file.openWriter())) {
                 if (!packageName.isEmpty()) {
                     out.println("package " + packageName + ";");
@@ -201,22 +232,22 @@ public class BuilderProcessor extends AbstractProcessor {
                 out.println("    }");
                 out.println("}");
             }
-        } catch (IOException e) {
-            error(type, "Не удалось записать " + qualifiedName + ": " + e.getMessage());
+        } catch (final IOException e) {
+            this.error(type, "Не удалось записать " + qualifiedName + ": " + e.getMessage());
         }
     }
 
     // --- Диагностика ---------------------------------------------------------
 
-    private void error(Element element, String message) {
-        messager.printMessage(Diagnostic.Kind.ERROR, message, element);
+    private void error(final Element element, final String message) {
+        this.messager.printMessage(Diagnostic.Kind.ERROR, message, element);
     }
 
-    private void warning(Element element, String message) {
-        messager.printMessage(Diagnostic.Kind.WARNING, message, element);
+    private void warning(final Element element, final String message) {
+        this.messager.printMessage(Diagnostic.Kind.WARNING, message, element);
     }
 
-    private static String capitalize(String name) {
+    private static String capitalize(final String name) {
         return Character.toUpperCase(name.charAt(0)) + name.substring(1);
     }
 

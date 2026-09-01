@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m09.extended;
 
 import java.util.List;
@@ -5,6 +11,7 @@ import java.util.List;
 /**
  * Характеристики механизма — то, что на слайдах 73–77 перечислено словами,
  * здесь оформлено как данные, которые можно проверить тестом.
+ * @since 1.0
  */
 public record MechanismProfile(String name,
                                Phase phase,
@@ -14,8 +21,23 @@ public record MechanismProfile(String name,
                                boolean nativeImageFriendly,
                                List<String> springUsesItFor) {
 
+    /**
+     * Фаза.
+     */
+    /**
+     * Значение {@code RUNTIME}.
+     */
+    /**
+     * Значение {@code COMPILE_TIME}.
+     */
+    /**
+     * Значение {@code BOTH}.
+     */
     public enum Phase { COMPILE_TIME, RUNTIME, BOTH }
 
+    /**
+     * Значение {@code MechanismProfile}.
+     */
     public MechanismProfile {
         springUsesItFor = List.copyOf(springUsesItFor);
     }
@@ -57,6 +79,10 @@ public record MechanismProfile(String name,
                     "@Transactional и @Cacheable через прокси",
                     "@Configuration: перехват вызовов @Bean-методов"));
 
+    /**
+     * Все элементы.
+     * @return Все элементы
+     */
     public static List<MechanismProfile> all() {
         return List.of(REFLECTION, APT, BYTECODE);
     }

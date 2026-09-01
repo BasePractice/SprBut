@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m09.extended;
 
 import java.util.ArrayList;
@@ -11,30 +17,43 @@ import ru.sprbut.m09.model.UserEntity;
 /**
  * Что пришлось бы объявить в {@code RuntimeHints}, чтобы каждая реализация
  * заработала в native image.
- * <p>
- * Здесь цена рефлексии становится наглядной: список для неё не пуст и растёт
+ *
+ * <p>Здесь цена рефлексии становится наглядной: список для неё не пуст и растёт
  * с каждым новым свойством, причём вычислен он тоже рефлексией. Для генерации
  * кода список пуст — обращений к метаданным просто нет. А для байткода вопрос
- * не имеет смысла: класса ещё не существует в момент сборки образа.
+ * не имеет смысла: класса ещё не существует в момент сборки образа.</p>
+ *
+ * @since 1.0
  */
 public final class RequiredHints {
 
+    /**
+     * Рефлективный вариант.
+     */
     private final ReflectiveMapper reflective;
 
+    /**
+     * Основной конструктор.
+     */
     public RequiredHints() {
         this(new ReflectiveMapper());
     }
 
-    public RequiredHints(ReflectiveMapper reflective) {
+    /**
+     * Основной конструктор.
+     * @param reflective Рефлективный вариант
+     */
+    public RequiredHints(final ReflectiveMapper reflective) {
         this.reflective = reflective;
     }
 
     /**
      * Подсказки по каждой реализации.
+     * @return Подсказки по каждой реализации
      */
     public Map<String, List<String>> byMapper() {
-        Map<String, List<String>> hints = new LinkedHashMap<>();
-        hints.put("ReflectiveMapper", accessors());
+        final Map<String, List<String>> hints = new LinkedHashMap<>();
+        hints.put("ReflectiveMapper", this.accessors());
         hints.put("GeneratedStyleMapper", List.of());
         hints.put(
             "BytecodeMapper",
@@ -45,11 +64,12 @@ public final class RequiredHints {
 
     /**
      * Методы, к которым рефлексивный маппер обращается по именам.
+     * @return Методы, к которым рефлексивный маппер обращается по именам
      */
     public List<String> accessors() {
-        List<String> needed = new ArrayList<>();
+        final List<String> needed = new ArrayList<>();
         for (String property : this.reflective.propertyNames()) {
-            String suffix = Character.toUpperCase(property.charAt(0)) + property.substring(1);
+            final String suffix = Character.toUpperCase(property.charAt(0)) + property.substring(1);
             needed.add(UserEntity.class.getSimpleName() + "#get" + suffix);
             needed.add(UserDto.class.getSimpleName() + "#set" + suffix);
         }

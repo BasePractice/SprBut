@@ -1,29 +1,35 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m07;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-
 import java.nio.file.Path;
 import java.util.List;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anEmptyMap;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.emptyArray;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.not;
-
+/**
+ * Слайды 57–64: AbstractProcessor генерирует и анализирует код.
+ * @since 1.0
+ */
 @DisplayName("Слайды 57–64: AbstractProcessor генерирует и анализирует код")
 final class BuilderProcessorTest {
 
+    /**
+     * Рабочий каталог.
+     */
     @TempDir
     private Path workDir;
 
+    /**
+     * Значение {@code VALID_BEAN}.
+     */
     private static final CompilationHarness.Source VALID_BEAN = new CompilationHarness.Source(
             "demo.Customer", """
                     package demo;
@@ -46,92 +52,96 @@ final class BuilderProcessorTest {
                     }
                     """);
 
-    private CompilationHarness.Result compile(CompilationHarness.Source... sources) {
+    private CompilationHarness.Result compile(final CompilationHarness.Source... sources) {
         return CompilationHarness.compile(this.workDir, List.of(sources), new BuilderProcessor());
     }
 
     @Nested
+/**
+ * Генерация исходного кода.
+ * @since 1.0
+ */
     @DisplayName("Генерация исходного кода")
     class Generation {
 
         @Test
         @DisplayName("Для помеченного класса рядом появляется CustomerBuilder")
         void generatesBuilder() {
-            CompilationHarness.Result result = compile(VALID_BEAN);
+            final CompilationHarness.Result result = compile(VALID_BEAN);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "annotated class cannot get its builder generated",
                 result.generatedSources(),
-                hasKey("demo.CustomerBuilder")
+                Matchers.hasKey("demo.CustomerBuilder")
             );
         }
 
         @Test
         @DisplayName("У билдера есть fluent-метод на каждое нестатическое поле")
         void generatesFluentSetters() {
-            String code = compile(VALID_BEAN).source("demo.CustomerBuilder");
+            final String code = compile(VALID_BEAN).source("demo.CustomerBuilder");
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "builder cannot get a fluent method per field",
                 code,
-                containsString("public CustomerBuilder name(java.lang.String value)")
+                Matchers.containsString("public CustomerBuilder name(java.lang.String value)")
             );
         }
 
         @Test
         @DisplayName("статическое поле в билдер не попадает")
         void skipsStaticField() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "static field cannot stay out of the builder",
                 compile(VALID_BEAN).source("demo.CustomerBuilder"),
-                not(containsString("ignored"))
+                Matchers.not(Matchers.containsString("ignored"))
             );
         }
 
         @Test
         @DisplayName("build() создаёт объект конструктором без параметров и зовёт сеттеры")
         void generatesBuildMethod() {
-            String code = compile(VALID_BEAN).source("demo.CustomerBuilder");
+            final String code = compile(VALID_BEAN).source("demo.CustomerBuilder");
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "build method cannot create the object with a no-arg constructor",
                 code,
-                containsString("Customer result = new Customer();")
+                Matchers.containsString("Customer result = new Customer();")
             );
         }
 
         @Test
         @DisplayName("build() наполняет объект через сеттеры")
         void callsSetters() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "build method cannot fill the object through setters",
                 compile(VALID_BEAN).source("demo.CustomerBuilder"),
-                containsString("result.setName(this.name);")
+                Matchers.containsString("result.setName(this.name);")
             );
         }
 
         @Test
         @DisplayName("Сгенерированный код компилируется и реально работает")
         void generatedCodeActuallyRuns() throws Exception {
-            CompilationHarness.Result result = compile(VALID_BEAN);
+            final CompilationHarness.Result result = compile(VALID_BEAN);
 
-            Class<?> builderClass = result.load("demo.CustomerBuilder");
+            final Class<?> builderClass = result.load("demo.CustomerBuilder");
             Object builder = builderClass.getMethod("create").invoke(null);
             builder = builderClass.getMethod("name", String.class).invoke(builder, "Иванов");
             builder = builderClass.getMethod("age", int.class).invoke(builder, 42);
-            Object customer = builderClass.getMethod("build").invoke(builder);
+            final Object customer = builderClass.getMethod("build").invoke(builder);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "generated code cannot actually build the object",
                 customer.getClass().getMethod("getName").invoke(customer),
-                equalTo("Иванов")
+                Matchers.equalTo("Иванов")
             );
         }
 
         @Test
         @DisplayName("Суффикс имени берётся из элемента аннотации")
         void respectsSuffixElement() {
-            CompilationHarness.Result result = compile(new CompilationHarness.Source(
+            final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.Order", """
                             package demo;
 
@@ -145,17 +155,17 @@ final class BuilderProcessorTest {
                             }
                             """));
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "suffix element cannot rename the generated class",
                 result.generatedSources(),
-                hasKey("demo.OrderFactory")
+                Matchers.hasKey("demo.OrderFactory")
             );
         }
 
         @Test
         @DisplayName("Класс без аннотации не трогается вовсе")
         void ignoresUnannotatedClasses() {
-            CompilationHarness.Result result = compile(new CompilationHarness.Source(
+            final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.Plain", """
                             package demo;
                             public class Plain {
@@ -165,22 +175,26 @@ final class BuilderProcessorTest {
                             }
                             """));
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "unannotated class cannot be left alone",
                 result.generatedSources(),
-                anEmptyMap()
+                Matchers.anEmptyMap()
             );
         }
     }
 
     @Nested
+/**
+ * Анализ исходного кода.
+ * @since 1.0
+ */
     @DisplayName("Анализ исходного кода")
     class Analysis {
 
         @Test
         @DisplayName("Без конструктора без параметров сборка падает с внятной ошибкой")
         void requiresNoArgConstructor() {
-            CompilationHarness.Result result = compile(new CompilationHarness.Source(
+            final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.NoDefaultCtor", """
                             package demo;
 
@@ -195,17 +209,17 @@ final class BuilderProcessorTest {
                             }
                             """));
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "missing no-arg constructor cannot fail the build with an explanation",
                 result.errors(),
-                hasItem(containsString("публичный конструктор без параметров"))
+                Matchers.hasItem(Matchers.containsString("публичный конструктор без параметров"))
             );
         }
 
         @Test
         @DisplayName("Поле без сеттера — ошибка с точным указанием, чего не хватает")
         void requiresSetterForEveryField() {
-            CompilationHarness.Result result = compile(new CompilationHarness.Source(
+            final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.NoSetter", """
                             package demo;
 
@@ -218,17 +232,17 @@ final class BuilderProcessorTest {
                             }
                             """));
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "missing setter cannot be named in the error",
                 result.errors(),
-                hasItem(containsString("setName"))
+                Matchers.hasItem(Matchers.containsString("setName"))
             );
         }
 
         @Test
         @DisplayName("Абстрактный класс отклоняется")
         void rejectsAbstractClasses() {
-            CompilationHarness.Result result = compile(new CompilationHarness.Source(
+            final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.Abstract", """
                             package demo;
 
@@ -239,17 +253,17 @@ final class BuilderProcessorTest {
                             }
                             """));
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "abstract class cannot be rejected with an explanation",
                 result.errors(),
-                hasItem(containsString("абстрактному классу"))
+                Matchers.hasItem(Matchers.containsString("абстрактному классу"))
             );
         }
 
         @Test
         @DisplayName("Класс без свойств — предупреждение, но сборка проходит")
         void warnsOnEmptyClass() {
-            CompilationHarness.Result result = compile(new CompilationHarness.Source(
+            final CompilationHarness.Result result = compile(new CompilationHarness.Source(
                     "demo.Empty", """
                             package demo;
 
@@ -260,22 +274,26 @@ final class BuilderProcessorTest {
                             }
                             """));
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "empty class cannot yield a warning instead of an error",
                 result.warnings(),
-                hasItem(containsString("билдер будет пустым"))
+                Matchers.hasItem(Matchers.containsString("билдер будет пустым"))
             );
         }
     }
 
     @Nested
+/**
+ * Как процессор видит код.
+ * @since 1.0
+ */
     @DisplayName("Как процессор видит код")
     class ProcessingModel {
 
         @Test
         @DisplayName("Обрабатываются все помеченные классы за одну сборку")
         void processesEveryAnnotatedClass() {
-            CompilationHarness.Result result = compile(VALID_BEAN, new CompilationHarness.Source(
+            final CompilationHarness.Result result = compile(VALID_BEAN, new CompilationHarness.Source(
                     "demo.Order", """
                             package demo;
 
@@ -289,36 +307,36 @@ final class BuilderProcessorTest {
                             }
                             """));
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "every annotated class cannot be processed in one build",
                 result.generatedSources(),
-                hasKey("demo.OrderBuilder")
+                Matchers.hasKey("demo.OrderBuilder")
             );
         }
 
         @Test
         @DisplayName("Аннотация с retention SOURCE в байткод не попадает")
         void sourceRetentionLeavesNoTrace() {
-            CompilationHarness.Result result = compile(VALID_BEAN);
+            final CompilationHarness.Result result = compile(VALID_BEAN);
 
-            Class<?> customer = result.load("demo.Customer");
+            final Class<?> customer = result.load("demo.Customer");
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "source retained annotation cannot vanish from the bytecode",
                 customer.getAnnotations(),
-                emptyArray()
+                Matchers.emptyArray()
             );
         }
 
         @Test
         @DisplayName("Процессор запускается минимум в двух раундах: рабочем и завершающем")
         void runsInMultipleRounds() {
-            BuilderProcessor processor = new BuilderProcessor();
+            final BuilderProcessor processor = new BuilderProcessor();
             CompilationHarness.compile(BuilderProcessorTest.this.workDir, List.of(VALID_BEAN), processor);
-            assertThat(
+            MatcherAssert.assertThat(
                 "processor cannot run in at least two rounds",
                 processor.rounds(),
-                greaterThanOrEqualTo(2)
+                Matchers.greaterThanOrEqualTo(2)
             );
         }
     }

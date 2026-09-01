@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m05;
 
 import java.lang.annotation.Annotation;
@@ -6,31 +12,45 @@ import java.util.Optional;
 /**
  * Ручной подъём по иерархии — то, что приходится писать, когда
  * {@code @Inherited} не спасает.
- * <p>
- * А не спасает оно почти всегда: на аннотации может не быть {@code @Inherited},
+ *
+ * <p>А не спасает оно почти всегда: на аннотации может не быть {@code @Inherited},
  * искать может понадобиться на методе, а источником может оказаться интерфейс.
  * Отсюда и {@code AnnotatedElementUtils} в Spring — та же работа, только
- * с кэшированием и поддержкой композиций.
+ * с кэшированием и поддержкой композиций.</p>
+ *
+ * @since 1.0
  */
 public final class HierarchySearch<A extends Annotation> {
 
+    /**
+     * Тип.
+     */
     private final Class<?> type;
 
+    /**
+     * Аннотация.
+     */
     private final Class<A> annotation;
 
-    public HierarchySearch(Class<?> type, Class<A> annotation) {
+    /**
+     * Основной конструктор.
+     * @param type Тип
+     * @param annotation Аннотация
+     */
+    public HierarchySearch(final Class<?> type, final Class<A> annotation) {
         this.type = type;
         this.annotation = annotation;
     }
 
     /**
      * Аннотация класса, найденная подъёмом до {@code Object}.
+     * @return Аннотация класса, найденная подъёмом до {@code Object}
      */
     public Optional<A> onClass() {
         for (Class<?> current = this.type;
              current != null && current != Object.class;
              current = current.getSuperclass()) {
-            A found = current.getDeclaredAnnotation(this.annotation);
+            final A found = current.getDeclaredAnnotation(this.annotation);
             if (found != null) {
                 return Optional.of(found);
             }
@@ -41,16 +61,19 @@ public final class HierarchySearch<A extends Annotation> {
     /**
      * Аннотация метода: сначала сам класс, затем родители, затем интерфейсы.
      * Порядок именно такой — ближайшее объявление должно побеждать.
+     * @param method Метод
+     * @param parameters Типы параметров
+     * @return Аннотация метода: сначала сам класс, затем родители, затем интерфейсы
      */
-    public Optional<A> onMethod(String method, Class<?>... parameters) {
+    public Optional<A> onMethod(final String method, final Class<?>... parameters) {
         for (Class<?> current = this.type; current != null; current = current.getSuperclass()) {
-            Optional<A> found = declaredOn(current, method, parameters);
+            final Optional<A> found = this.declaredOn(current, method, parameters);
             if (found.isPresent()) {
                 return found;
             }
         }
         for (Class<?> contract : this.type.getInterfaces()) {
-            Optional<A> found = declaredOn(contract, method, parameters);
+            final Optional<A> found = this.declaredOn(contract, method, parameters);
             if (found.isPresent()) {
                 return found;
             }
@@ -58,12 +81,12 @@ public final class HierarchySearch<A extends Annotation> {
         return Optional.empty();
     }
 
-    private Optional<A> declaredOn(Class<?> owner, String method, Class<?>... parameters) {
+    private Optional<A> declaredOn(final Class<?> owner, final String method, final Class<?>... parameters) {
         try {
             return Optional.ofNullable(
                 owner.getDeclaredMethod(method, parameters).getDeclaredAnnotation(this.annotation)
             );
-        } catch (NoSuchMethodException absent) {
+        } catch (final NoSuchMethodException absent) {
             return Optional.empty();
         }
     }

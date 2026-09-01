@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m11;
 
 import org.junit.jupiter.api.DisplayName;
@@ -12,141 +17,146 @@ import ru.sprbut.m11.step1.HardcodedOrderService;
 import ru.sprbut.m11.step2.ManualOrderService;
 import ru.sprbut.m11.step2.ObjectFactory;
 import ru.sprbut.m11.step3.SpringWiringConfig;
-
 import java.math.BigDecimal;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.arrayContaining;
-import static org.hamcrest.Matchers.comparesEqualTo;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.sameInstance;
-
+/**
+ * Слайды 83–88 (СХЕМА 5): от new к контейнеру.
+ * @since 1.0
+ */
 @DisplayName("Слайды 83–88 (СХЕМА 5): от new к контейнеру")
 final class ThreeWaysTest {
 
     @Nested
+/**
+ * Шаг 1: зависимости создаются внутри.
+ * @since 1.0
+ */
     @DisplayName("Шаг 1: зависимости создаются внутри")
     class Hardcoded {
 
         @Test
         @DisplayName("Работает, но реализацию подменить нечем")
         void worksButIsRigid() {
-            HardcodedOrderService service = new HardcodedOrderService();
+            final HardcodedOrderService service = new HardcodedOrderService();
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "hardcoded service cannot place the order",
                 service.placeOrder("ivanov@mail.ru", new BigDecimal("100")),
-                comparesEqualTo(new BigDecimal("120.00"))
+                Matchers.comparesEqualTo(new BigDecimal("120.00"))
             );
         }
 
         @Test
         @DisplayName("Чтобы что-то проверить, пришлось добавить геттер ради теста")
         void testabilityRequiresProductionCodeChanges() {
-            HardcodedOrderService service = new HardcodedOrderService();
+            final HardcodedOrderService service = new HardcodedOrderService();
             service.placeOrder("ivanov@mail.ru", new BigDecimal("100"));
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "testability cannot demand a getter added for the test",
                 service.senderForTests().sent(),
-                contains("ivanov@mail.ru <- Заказ на сумму 120.00")
+                Matchers.contains("ivanov@mail.ru <- Заказ на сумму 120.00")
             );
         }
 
         @Test
         @DisplayName("Каждый экземпляр сервиса плодит свои копии зависимостей")
         void everyInstanceDuplicatesItsDependencies() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "every instance cannot duplicate its dependencies",
                 new HardcodedOrderService().senderForTests(),
-                not(sameInstance(new HardcodedOrderService().senderForTests()))
+                Matchers.not(Matchers.sameInstance(new HardcodedOrderService().senderForTests()))
             );
         }
 
         @Test
         @DisplayName("Сигнатура молчит о зависимостях — их видно только из тела класса")
         void dependenciesAreInvisibleFromOutside() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "constructor cannot stay silent about the dependencies",
                 HardcodedOrderService.class.getConstructors()[0].getParameterCount(),
-                equalTo(0)
+                Matchers.equalTo(0)
             );
         }
     }
 
     @Nested
+/**
+ * Шаг 2: ручное управление.
+ * @since 1.0
+ */
     @DisplayName("Шаг 2: ручное управление")
     class Manual {
 
         @Test
         @DisplayName("Зависимости приходят снаружи — реализация подменяется в одну строку")
         void dependenciesAreInjectable() {
-            SmsSender sms = new SmsSender();
-            ManualOrderService service = new ManualOrderService(
+            final SmsSender sms = new SmsSender();
+            final ManualOrderService service = new ManualOrderService(
                     sms, new PriceCalculator(new BigDecimal("0.20")));
 
             service.placeOrder("+79001234567", new BigDecimal("100"));
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "injected implementation cannot be swapped in one line",
                 service.usedChannel(),
-                equalTo("sms")
+                Matchers.equalTo("sms")
             );
         }
 
         @Test
         @DisplayName("Конструктор — честный список того, без чего объект не работает")
         void constructorDocumentsDependencies() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "constructor cannot document the dependencies honestly",
                 ManualOrderService.class.getConstructors()[0].getParameterTypes(),
-                arrayContaining(NotificationSender.class, PriceCalculator.class)
+                Matchers.arrayContaining(NotificationSender.class, PriceCalculator.class)
             );
         }
 
         @Test
         @DisplayName("Фабрика собирает граф и хранит синглтоны")
         void factoryAssemblesAndCaches() {
-            ObjectFactory factory = new ObjectFactory("email");
+            final ObjectFactory factory = new ObjectFactory("email");
 
-            ManualOrderService first = factory.orderService();
-            ManualOrderService second = factory.orderService();
+            final ManualOrderService first = factory.orderService();
+            final ManualOrderService second = factory.orderService();
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "factory cannot cache the assembled singleton",
                 first,
-                sameInstance(second)
+                Matchers.sameInstance(second)
             );
         }
 
         @Test
         @DisplayName("фабрика собирает весь граф целиком")
         void factoryAssemblesWholeGraph() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "factory cannot assemble the whole graph",
                 new ObjectFactory("email").notificationSender(),
-                instanceOf(EmailSender.class)
+                Matchers.instanceOf(EmailSender.class)
             );
         }
 
         @Test
         @DisplayName("Выбор реализации перенесён в одну точку — в фабрику")
         void factoryDecidesTheImplementation() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "factory cannot concentrate the implementation choice",
                 new ObjectFactory("sms").orderService().usedChannel(),
-                equalTo("sms")
+                Matchers.equalTo("sms")
             );
         }
     }
 
     @Nested
+/**
+ * Шаг 3: управление DI Spring.
+ * @since 1.0
+ */
     @DisplayName("Шаг 3: управление DI Spring")
     class SpringManaged {
 
@@ -154,12 +164,12 @@ final class ThreeWaysTest {
         @DisplayName("Контейнер сам подбирает аргументы по типу — ни одного new для зависимостей")
         void containerResolvesArgumentsByType() {
             try (var context = new AnnotationConfigApplicationContext(SpringWiringConfig.class)) {
-                ManualOrderService service = context.getBean(ManualOrderService.class);
+                final ManualOrderService service = context.getBean(ManualOrderService.class);
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "container cannot resolve the arguments by type",
                     service.placeOrder("ivanov@mail.ru", new BigDecimal("100")),
-                    comparesEqualTo(new BigDecimal("120.00"))
+                    Matchers.comparesEqualTo(new BigDecimal("120.00"))
                 );
             }
         }
@@ -168,10 +178,10 @@ final class ThreeWaysTest {
         @DisplayName("Бины по умолчанию — синглтоны")
         void beansAreSingletonsByDefault() {
             try (var context = new AnnotationConfigApplicationContext(SpringWiringConfig.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "beans cannot be singletons by default",
                     context.getBean(ManualOrderService.class),
-                    sameInstance(context.getBean(ManualOrderService.class))
+                    Matchers.sameInstance(context.getBean(ManualOrderService.class))
                 );
             }
         }
@@ -181,12 +191,12 @@ final class ThreeWaysTest {
         void creationOrderIsDerivedFromTheGraph() {
             try (var context = new AnnotationConfigApplicationContext(SpringWiringConfig.class)) {
                 // orderService не мог быть создан раньше своих зависимостей
-                ManualOrderService service = context.getBean(ManualOrderService.class);
+                final ManualOrderService service = context.getBean(ManualOrderService.class);
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "creation order cannot be derived from the graph",
                     service,
-                    notNullValue()
+                    Matchers.notNullValue()
                 );
             }
         }
@@ -194,13 +204,13 @@ final class ThreeWaysTest {
         @Test
         @DisplayName("Контейнер закрывается — и вместе с ним заканчивается жизненный цикл бинов")
         void containerOwnsTheLifecycle() {
-            AnnotationConfigApplicationContext context =
+            final AnnotationConfigApplicationContext context =
                     new AnnotationConfigApplicationContext(SpringWiringConfig.class);
             context.close();
-            assertThat(
+            MatcherAssert.assertThat(
                 "closed container cannot end the lifecycle of its beans",
                 context.isActive(),
-                equalTo(false)
+                Matchers.equalTo(false)
             );
         }
     }

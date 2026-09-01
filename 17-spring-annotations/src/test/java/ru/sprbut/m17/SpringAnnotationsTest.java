@@ -1,5 +1,13 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m17;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -12,27 +20,18 @@ import ru.sprbut.m17.configuration.ProxyBeanMethods;
 import ru.sprbut.m17.stereotypes.Stereotypes;
 import ru.sprbut.m17.transactional.TransactionalDemo;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.comparesEqualTo;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+/**
+ * Слайды 139–149: аннотации Spring.
+ * @since 1.0
+ */
 @DisplayName("Слайды 139–149: аннотации Spring")
 class SpringAnnotationsTest {
 
     @Nested
+/**
+ * Слайды 140–144: стереотипы.
+ * @since 1.0
+ */
     @DisplayName("Слайды 140–144: стереотипы")
     class StereotypeScanning {
 
@@ -45,53 +44,57 @@ class SpringAnnotationsTest {
         @DisplayName("Сканер находит все четыре стереотипа и не находит класс без аннотации")
         void scannerFindsStereotypes() {
             try (var context = new AnnotationConfigApplicationContext(ScanConfig.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that scanner finds stereotypes",
                     context.getBean(Stereotypes.PlainComponent.class).role(),
-                    equalTo("component")
+                    Matchers.equalTo("component")
                 );
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that scanner finds stereotypes",
                     context.getBean(Stereotypes.BusinessService.class).role(),
-                    equalTo("service")
+                    Matchers.equalTo("service")
                 );
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that scanner finds stereotypes",
                     context.getBean(Stereotypes.DataRepository.class).role(),
-                    equalTo("repository")
+                    Matchers.equalTo("repository")
                 );
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that scanner finds stereotypes",
                     context.getBean(Stereotypes.WebController.class).role(),
-                    equalTo("controller")
+                    Matchers.equalTo("controller")
                 );
 
-                assertThrows(org.springframework.beans.factory.NoSuchBeanDefinitionException.class, () -> context.getBean(Stereotypes.NotAComponent.class));
+                Assertions.assertThrows(org.springframework.beans.factory.NoSuchBeanDefinitionException.class, () -> context.getBean(Stereotypes.NotAComponent.class));
             }
         }
 
         @Test
         @DisplayName("Все стереотипы сводятся к @Component — механика у них общая")
         void allStereotypesAreComponents() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that all stereotypes are components",
                 org.springframework.stereotype.Service.class .isAnnotationPresent(org.springframework.stereotype.Component.class),
-                equalTo(true)
+                Matchers.equalTo(true)
             );
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that all stereotypes are components",
                 org.springframework.stereotype.Repository.class .isAnnotationPresent(org.springframework.stereotype.Component.class),
-                equalTo(true)
+                Matchers.equalTo(true)
             );
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that all stereotypes are components",
                 org.springframework.stereotype.Controller.class .isAnnotationPresent(org.springframework.stereotype.Component.class),
-                equalTo(true)
+                Matchers.equalTo(true)
             );
         }
     }
 
     @Nested
+/**
+ * Слайд 143: @Configuration и proxyBeanMethods.
+ * @since 1.0
+ */
     @DisplayName("Слайд 143: @Configuration и proxyBeanMethods")
     class ConfigurationProxy {
 
@@ -106,18 +109,18 @@ class SpringAnnotationsTest {
             try (var context = new AnnotationConfigApplicationContext(
                     ProxyBeanMethods.ProxiedConfig.class)) {
 
-                var first = context.getBean("first", ProxyBeanMethods.Consumer.class);
-                var second = context.getBean("second", ProxyBeanMethods.Consumer.class);
+                final var first = context.getBean("first", ProxyBeanMethods.Consumer.class);
+                final var second = context.getBean("second", ProxyBeanMethods.Consumer.class);
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that proxied configuration reuses the bean",
                     first.shared(),
-                    sameInstance(second.shared())
+                    Matchers.sameInstance(second.shared())
                 );
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that proxied configuration reuses the bean",
                     ProxyBeanMethods.INSTANCES.get(),
-                    equalTo(1)
+                    Matchers.equalTo(1)
                 );
             }
         }
@@ -128,12 +131,12 @@ class SpringAnnotationsTest {
             try (var context = new AnnotationConfigApplicationContext(
                     ProxyBeanMethods.ProxiedConfig.class)) {
 
-                Object config = context.getBean(ProxyBeanMethods.ProxiedConfig.class);
+                final Object config = context.getBean(ProxyBeanMethods.ProxiedConfig.class);
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "configuration class cannot be wrapped in a CGLIB proxy",
                     config.getClass().getName(),
-                    containsString("$$SpringCGLIB$$")
+                    Matchers.containsString("$$SpringCGLIB$$")
                 );
             }
         }
@@ -144,18 +147,18 @@ class SpringAnnotationsTest {
             try (var context = new AnnotationConfigApplicationContext(
                     ProxyBeanMethods.LiteConfig.class)) {
 
-                var first = context.getBean("first", ProxyBeanMethods.Consumer.class);
-                var second = context.getBean("second", ProxyBeanMethods.Consumer.class);
+                final var first = context.getBean("first", ProxyBeanMethods.Consumer.class);
+                final var second = context.getBean("second", ProxyBeanMethods.Consumer.class);
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that lite configuration creates duplicates",
                     first.shared(),
-                    not(sameInstance(second.shared()))
+                    Matchers.not(Matchers.sameInstance(second.shared()))
                 );
-                assertThat(
+                MatcherAssert.assertThat(
                     "lite configuration cannot create a copy per call",
                     ProxyBeanMethods.INSTANCES.get(),
-                    equalTo(3)
+                    Matchers.equalTo(3)
                 );
             }
         }
@@ -166,24 +169,28 @@ class SpringAnnotationsTest {
             try (var context = new AnnotationConfigApplicationContext(
                     ProxyBeanMethods.LiteConfigDone.class)) {
 
-                var first = context.getBean("first", ProxyBeanMethods.Consumer.class);
-                var second = context.getBean("second", ProxyBeanMethods.Consumer.class);
+                final var first = context.getBean("first", ProxyBeanMethods.Consumer.class);
+                final var second = context.getBean("second", ProxyBeanMethods.Consumer.class);
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that lite configuration done right",
                     first.shared(),
-                    sameInstance(second.shared())
+                    Matchers.sameInstance(second.shared())
                 );
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that lite configuration done right",
                     ProxyBeanMethods.INSTANCES.get(),
-                    equalTo(1)
+                    Matchers.equalTo(1)
                 );
             }
         }
     }
 
     @Nested
+/**
+ * Слайд 147: @Transactional через AOP-прокси.
+ * @since 1.0
+ */
     @DisplayName("Слайд 147: @Transactional через AOP-прокси")
     class Transactions {
 
@@ -198,10 +205,10 @@ class SpringAnnotationsTest {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
                 context.getBean(TransactionalDemo.OrderService.class).save("ORD-1");
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that transaction is opened and committed",
                     TransactionalDemo.LOG,
-                    contains("begin", "save:ORD-1", "commit")
+                    Matchers.contains("begin", "save:ORD-1", "commit")
                 );
             }
         }
@@ -213,10 +220,10 @@ class SpringAnnotationsTest {
                 context.getBean(TransactionalDemo.OrderService.class)
                         .saveWithoutTransaction("ORD-2");
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that no annotation no transaction",
                     TransactionalDemo.LOG,
-                    contains("save:ORD-2")
+                    Matchers.contains("save:ORD-2")
                 );
             }
         }
@@ -225,14 +232,14 @@ class SpringAnnotationsTest {
         @DisplayName("Unchecked-исключение откатывает транзакцию")
         void uncheckedExceptionRollsBack() {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
-                var service = context.getBean(TransactionalDemo.OrderService.class);
+                final var service = context.getBean(TransactionalDemo.OrderService.class);
 
-                assertThrows(IllegalStateException.class, service::failUnchecked);
+                Assertions.assertThrows(IllegalStateException.class, service::failUnchecked);
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that unchecked exception rolls back",
                     TransactionalDemo.LOG,
-                    contains("begin", "work", "rollback")
+                    Matchers.contains("begin", "work", "rollback")
                 );
             }
         }
@@ -241,14 +248,14 @@ class SpringAnnotationsTest {
         @DisplayName("Checked-исключение по умолчанию транзакцию КОММИТИТ — частый сюрприз")
         void checkedExceptionCommitsByDefault() {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
-                var service = context.getBean(TransactionalDemo.OrderService.class);
+                final var service = context.getBean(TransactionalDemo.OrderService.class);
 
-                assertThrows(Exception.class, service::failChecked);
+                Assertions.assertThrows(Exception.class, service::failChecked);
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that checked exception commits by default",
                     TransactionalDemo.LOG,
-                    contains("begin", "work", "commit")
+                    Matchers.contains("begin", "work", "commit")
                 );
             }
         }
@@ -257,14 +264,14 @@ class SpringAnnotationsTest {
         @DisplayName("rollbackFor = Exception.class чинит это поведение")
         void rollbackForFixesIt() {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
-                var service = context.getBean(TransactionalDemo.OrderService.class);
+                final var service = context.getBean(TransactionalDemo.OrderService.class);
 
-                assertThrows(Exception.class, service::failCheckedWithRollback);
+                Assertions.assertThrows(Exception.class, service::failCheckedWithRollback);
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that rollback for fixes it",
                     TransactionalDemo.LOG,
-                    contains("begin", "work", "rollback")
+                    Matchers.contains("begin", "work", "rollback")
                 );
             }
         }
@@ -275,16 +282,20 @@ class SpringAnnotationsTest {
             try (var context = new AnnotationConfigApplicationContext(TransactionalDemo.Config.class)) {
                 context.getBean(TransactionalDemo.OrderService.class).saveViaThis("ORD-3");
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "self invocation cannot bypass the transactional proxy",
                     TransactionalDemo.LOG,
-                    contains("save:ORD-3")
+                    Matchers.contains("save:ORD-3")
                 );
             }
         }
     }
 
     @Nested
+/**
+ * Слайды 148–149: @ConditionalOnProperty и @ConditionalOnMissingBean.
+ * @since 1.0
+ */
     @DisplayName("Слайды 148–149: @ConditionalOnProperty и @ConditionalOnMissingBean")
     class Conditionals {
 
@@ -293,10 +304,10 @@ class SpringAnnotationsTest {
         void propertyConditionIsOffByDefault() {
             try (var context = new AnnotationConfigApplicationContext(
                     ConditionalOnDemo.DefaultsConfig.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that property condition is off by default",
                     context.containsBean("metricsCollector"),
-                    equalTo(false)
+                    Matchers.equalTo(false)
                 );
             }
         }
@@ -310,10 +321,10 @@ class SpringAnnotationsTest {
                 context.register(ConditionalOnDemo.DefaultsConfig.class);
                 context.refresh();
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that property condition turns on",
                     context.getBean("metricsCollector"),
-                    equalTo("метрики включены")
+                    Matchers.equalTo("метрики включены")
                 );
             } finally {
                 System.clearProperty("sprbut.metrics.enabled");
@@ -325,10 +336,10 @@ class SpringAnnotationsTest {
         void matchIfMissingIsOnByDefault() {
             try (var context = new AnnotationConfigApplicationContext(
                     ConditionalOnDemo.DefaultsConfig.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that match if missing is on by default",
                     context.getBean("auditCollector"),
-                    equalTo("аудит включён")
+                    Matchers.equalTo("аудит включён")
                 );
             }
         }
@@ -338,10 +349,10 @@ class SpringAnnotationsTest {
         void missingBeanConditionProvidesDefault() {
             try (var context = new AnnotationConfigApplicationContext(
                     ConditionalOnDemo.DefaultsConfig.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that missing bean condition provides default",
                     context.getBean(ConditionalOnDemo.Notifier.class).send("привет"),
-                    equalTo("по умолчанию: привет")
+                    Matchers.equalTo("по умолчанию: привет")
                 );
             }
         }
@@ -355,15 +366,15 @@ class SpringAnnotationsTest {
                         ConditionalOnDemo.DefaultsConfig.class);
                 context.refresh();
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that user bean wins",
                     context.getBean(ConditionalOnDemo.Notifier.class).send("привет"),
-                    equalTo("пользовательский: привет")
+                    Matchers.equalTo("пользовательский: привет")
                 );
-                assertThat(
+                MatcherAssert.assertThat(
                     "user bean cannot remain the only candidate",
                     context.getBeanNamesForType(ConditionalOnDemo.Notifier.class).length,
-                    equalTo(1)
+                    Matchers.equalTo(1)
                 );
             }
         }

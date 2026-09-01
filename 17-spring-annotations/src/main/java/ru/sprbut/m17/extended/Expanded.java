@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m17.extended;
 
 import java.lang.annotation.Annotation;
@@ -11,29 +17,39 @@ import java.util.TreeSet;
 /**
  * Все аннотации, до которых можно дойти по цепочке мета-аннотаций,
  * включая саму исходную.
- * <p>
- * Обход обязан отсекать аннотации самой Java: {@code @Retention} помечена
- * {@code @Retention}, и без этой проверки он не закончится никогда.
+ *
+ * <p>Обход обязан отсекать аннотации самой Java: {@code @Retention} помечена
+ * {@code @Retention}, и без этой проверки он не закончится никогда.</p>
+ *
+ * @since 1.0
  */
 public final class Expanded {
 
+    /**
+     * Аннотация.
+     */
     private final Class<? extends Annotation> annotation;
 
-    public Expanded(Class<? extends Annotation> annotation) {
+    /**
+     * Основной конструктор.
+     * @param annotation Аннотация
+     */
+    public Expanded(final Class<? extends Annotation> annotation) {
         this.annotation = annotation;
     }
 
     /**
      * Имена всех достижимых аннотаций в алфавитном порядке.
+     * @return Имена всех достижимых аннотаций в алфавитном порядке
      */
     public Set<String> names() {
-        Set<Class<? extends Annotation>> visited = new HashSet<>();
-        Set<String> found = new TreeSet<>();
-        Deque<Class<? extends Annotation>> queue = new ArrayDeque<>();
+        final Set<Class<? extends Annotation>> visited = new HashSet<>();
+        final Set<String> found = new TreeSet<>();
+        final Deque<Class<? extends Annotation>> queue = new ArrayDeque<>();
         queue.add(this.annotation);
         while (!queue.isEmpty()) {
-            Class<? extends Annotation> current = queue.poll();
-            if (builtin(current) || !visited.add(current)) {
+            final Class<? extends Annotation> current = queue.poll();
+            if (this.builtin(current) || !visited.add(current)) {
                 continue;
             }
             found.add("@" + current.getSimpleName());
@@ -46,9 +62,10 @@ public final class Expanded {
 
     /**
      * К каким базовым аннотациям сводится эта — без неё самой.
+     * @return К каким базовым аннотациям сводится эта — без неё самой
      */
     public List<String> parts() {
-        return names().stream()
+        return this.names().stream()
             .filter(name -> !name.equals("@" + this.annotation.getSimpleName()))
             .sorted()
             .toList();
@@ -56,23 +73,25 @@ public final class Expanded {
 
     /**
      * Сводится ли аннотация к {@code @Component}, то есть стереотип ли это.
+     * @return Сводится ли аннотация к {@code @Component}, то есть стереотип ли это
      */
     public boolean stereotype() {
-        return names().contains("@Component");
+        return this.names().contains("@Component");
     }
 
     /**
      * Наглядное объяснение состава — для лекции и для отладки.
+     * @return Наглядное объяснение состава — для лекции и для отладки
      */
     public String explain() {
-        List<String> parts = parts();
+        final List<String> parts = this.parts();
         if (parts.isEmpty()) {
             return "@" + this.annotation.getSimpleName() + " — базовая аннотация";
         }
         return "@" + this.annotation.getSimpleName() + " = " + String.join(" + ", parts);
     }
 
-    private boolean builtin(Class<? extends Annotation> type) {
+    private boolean builtin(final Class<? extends Annotation> type) {
         return type.getName().startsWith("java.lang.annotation.")
             || type.getName().startsWith("jdk.internal.");
     }

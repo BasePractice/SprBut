@@ -1,3 +1,10 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
+// @checkstyle NonStaticMethodCheck disable
 package ru.sprbut.m12.cycles;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,18 +14,20 @@ import org.springframework.context.annotation.Lazy;
 
 /**
  * Слайд 94: «Циклические зависимости и {@code @Lazy}».
- * <p>
- * Цикл через <b>конструкторы</b> неразрешим в принципе: чтобы создать A,
+ *
+ * <p>Цикл через <b>конструкторы</b> неразрешим в принципе: чтобы создать A,
  * нужен готовый B, а чтобы создать B — готовый A. Spring это обнаруживает
- * и падает с {@code BeanCurrentlyInCreationException}.
- * <p>
- * {@code @Lazy} разрывает цикл: вместо настоящего бина в конструктор
+ * и падает с {@code BeanCurrentlyInCreationException}.</p>
+ *
+ * <p>{@code @Lazy} разрывает цикл: вместо настоящего бина в конструктор
  * подставляется прокси, а реальный объект достаётся из контейнера при первом
- * обращении к методу — когда оба уже созданы.
- * <p>
- * Важно понимать, что {@code @Lazy} — это <b>обход симптома</b>. Цикл почти
+ * обращении к методу — когда оба уже созданы.</p>
+ *
+ * <p>Важно понимать, что {@code @Lazy} — это <b>обход симптома</b>. Цикл почти
  * всегда означает, что обязанности разложены неудачно, и правильное решение —
- * выделить третий бин.
+ * выделить третий бин.</p>
+ *
+ * @since 1.0
  */
 public final class CircularBeans {
 
@@ -27,104 +36,235 @@ public final class CircularBeans {
 
     // --- Неразрешимый цикл через конструкторы --------------------------------
 
+    /**
+     * Значение {@code Alpha}.
+     */
     public static class Alpha {
+        /**
+         * Бета-зависимость.
+         */
         private final Beta beta;
 
-        public Alpha(Beta beta) {
+        /**
+         * Основной конструктор.
+         * @param beta Бета-зависимость
+         */
+        public Alpha(final Beta beta) {
             this.beta = beta;
         }
 
+        /**
+         * Описание.
+         * @return Описание
+         */
         public String describe() {
-            return "alpha+" + beta.name();
+            return "alpha+" + this.beta.name();
         }
     }
 
+    /**
+     * Значение {@code Beta}.
+     */
     public static class Beta {
+        /**
+         * Альфа-зависимость.
+         */
         private final Alpha alpha;
 
-        public Beta(Alpha alpha) {
+        /**
+         * Основной конструктор.
+         * @param alpha Альфа-зависимость
+         */
+        public Beta(final Alpha alpha) {
             this.alpha = alpha;
         }
 
+        /**
+         * Имя.
+         * @return Имя
+         */
         public String name() {
             return "beta";
         }
     }
 
+    /**
+     * Конфигурация.
+     */
     @Configuration
     public static class BrokenConfig {
 
+        /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public BrokenConfig() {
+            // нечего инициализировать
+        }
+
+        /**
+         * Альфа-зависимость.
+         * @param beta Бета-зависимость
+         * @return Альфа-зависимость
+         */
         @Bean
-        public Alpha alpha(Beta beta) {
+        public Alpha alpha(final Beta beta) {
             return new Alpha(beta);
         }
 
+        /**
+         * Бета-зависимость.
+         * @param alpha Альфа-зависимость
+         * @return Бета-зависимость
+         */
         @Bean
-        public Beta beta(Alpha alpha) {
+        public Beta beta(final Alpha alpha) {
             return new Beta(alpha);
         }
     }
 
     // --- Тот же цикл, разорванный @Lazy --------------------------------------
 
+    /**
+     * Конфигурация.
+     */
     @Configuration
     public static class LazyConfig {
 
         /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public LazyConfig() {
+            // нечего инициализировать
+        }
+
+        /**
          * {@code @Lazy} на параметре: сюда придёт прокси, а настоящий {@code Beta}
          * будет получен из контейнера при первом вызове его метода.
+         * @param beta Бета-зависимость
+         * @return {@code @Lazy} на параметре: сюда придёт прокси, а настоящий {@code Beta} будет получен из контейнера при первом вызове его метода
          */
         @Bean
-        public Alpha alpha(@Lazy Beta beta) {
+        public Alpha alpha(final @Lazy Beta beta) {
             return new Alpha(beta);
         }
 
+        /**
+         * Бета-зависимость.
+         * @param alpha Альфа-зависимость
+         * @return Бета-зависимость
+         */
         @Bean
-        public Beta beta(Alpha alpha) {
+        public Beta beta(final Alpha alpha) {
             return new Beta(alpha);
         }
     }
 
     // --- Цикл через сеттеры: разрешим, но объекты временно невалидны ---------
 
+    /**
+     * Значение {@code Gamma}.
+     */
     public static class Gamma {
+
+        /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public Gamma() {
+            // нечего инициализировать
+        }
+
+        /**
+         * Дельта-зависимость.
+         */
         private Delta delta;
 
+        /**
+         * Новое значение: дельта-зависимость.
+         * @param delta Дельта-зависимость
+         */
         @Autowired
-        public void setDelta(Delta delta) {
+        public void setDelta(final Delta delta) {
             this.delta = delta;
         }
 
+        /**
+         * Описание.
+         * @return Описание
+         */
         public String describe() {
-            return "gamma+" + delta.name();
+            return "gamma+" + this.delta.name();
         }
     }
 
+    /**
+     * Значение {@code Delta}.
+     */
     public static class Delta {
+
+        /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public Delta() {
+            // нечего инициализировать
+        }
+
+        /**
+         * Гамма-зависимость.
+         */
         private Gamma gamma;
 
+        /**
+         * Новое значение: гамма-зависимость.
+         * @param gamma Гамма-зависимость
+         */
         @Autowired
-        public void setGamma(Gamma gamma) {
+        public void setGamma(final Gamma gamma) {
             this.gamma = gamma;
         }
 
+        /**
+         * Имя.
+         * @return Имя
+         */
         public String name() {
             return "delta";
         }
 
+        /**
+         * Знание о гамме.
+         * @return Знание о гамме
+         */
         public boolean knowsGamma() {
-            return gamma != null;
+            return this.gamma != null;
         }
     }
 
+    /**
+     * Конфигурация.
+     */
     @Configuration
     public static class SetterCycleConfig {
 
+        /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public SetterCycleConfig() {
+            // нечего инициализировать
+        }
+
+        /**
+         * Гамма-зависимость.
+         * @return Гамма-зависимость
+         */
         @Bean
         public Gamma gamma() {
             return new Gamma();
         }
 
+        /**
+         * Дельта-зависимость.
+         * @return Дельта-зависимость
+         */
         @Bean
         public Delta delta() {
             return new Delta();
@@ -133,51 +273,118 @@ public final class CircularBeans {
 
     // --- Правильное решение: третий бин без цикла ----------------------------
 
+    /**
+     * Значение {@code SharedRules}.
+     */
     public static class SharedRules {
+
+        /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public SharedRules() {
+            // нечего инициализировать
+        }
+
+        /**
+         * Правило.
+         * @return Правило
+         */
         public String rule() {
             return "общее правило";
         }
     }
 
+    /**
+     * Значение {@code Epsilon}.
+     */
     public static class Epsilon {
+        /**
+         * Правила.
+         */
         private final SharedRules rules;
 
-        public Epsilon(SharedRules rules) {
+        /**
+         * Основной конструктор.
+         * @param rules Правила
+         */
+        public Epsilon(final SharedRules rules) {
             this.rules = rules;
         }
 
+        /**
+         * Описание.
+         * @return Описание
+         */
         public String describe() {
-            return "epsilon: " + rules.rule();
+            return "epsilon: " + this.rules.rule();
         }
     }
 
+    /**
+     * Значение {@code Zeta}.
+     */
     public static class Zeta {
+        /**
+         * Правила.
+         */
         private final SharedRules rules;
 
-        public Zeta(SharedRules rules) {
+        /**
+         * Основной конструктор.
+         * @param rules Правила
+         */
+        public Zeta(final SharedRules rules) {
             this.rules = rules;
         }
 
+        /**
+         * Описание.
+         * @return Описание
+         */
         public String describe() {
-            return "zeta: " + rules.rule();
+            return "zeta: " + this.rules.rule();
         }
     }
 
+    /**
+     * Конфигурация.
+     */
     @Configuration
     public static class RefactoredConfig {
 
+        /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public RefactoredConfig() {
+            // нечего инициализировать
+        }
+
+        /**
+         * Общие правила.
+         * @return Общие правила
+         */
         @Bean
         public SharedRules sharedRules() {
             return new SharedRules();
         }
 
+        /**
+         * Значение {@code epsilon}.
+         * @param rules Правила
+         * @return Значение {@code epsilon}
+         */
         @Bean
-        public Epsilon epsilon(SharedRules rules) {
+        public Epsilon epsilon(final SharedRules rules) {
             return new Epsilon(rules);
         }
 
+        /**
+         * Зета-зависимость.
+         * @param rules Правила
+         * @return Зета-зависимость
+         */
         @Bean
-        public Zeta zeta(SharedRules rules) {
+        public Zeta zeta(final SharedRules rules) {
             return new Zeta(rules);
         }
     }

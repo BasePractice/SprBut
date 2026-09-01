@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m06.targets;
 
 import java.util.List;
@@ -5,12 +10,21 @@ import java.util.List;
 /**
  * Носитель аннотаций новых целей: на переменной типа, на самом типе поля
  * и внутри аргумента дженерика.
- * <p>
- * Три случая отличаются тем, <b>откуда</b> аннотация читается, и это главное,
- * что стоит вынести из слайдов 48–49.
+ *
+ * <p>Три случая отличаются тем, <b>откуда</b> аннотация читается, и это главное,
+ * что стоит вынести из слайдов 48–49.</p>
+ *
+ * @since 1.0
  */
 @SuppressWarnings("unused")
 public class Holder<@Comparablish T> {
+
+    /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    public Holder() {
+        // нечего инициализировать
+    }
 
     /**
      * Аннотация стоит на самом типе поля.

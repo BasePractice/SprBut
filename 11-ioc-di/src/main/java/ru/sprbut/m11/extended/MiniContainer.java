@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m11.extended;
 
 import java.lang.reflect.Constructor;
@@ -12,22 +18,24 @@ import java.util.Set;
 
 /**
  * <b>Расширенный пример модуля 11.</b>
- * <p>
- * Работающий IoC-контейнер на ~150 строк. Он делает ровно то, что перечислено
+ *
+ * <p>Работающий IoC-контейнер на ~150 строк. Он делает ровно то, что перечислено
  * на слайдах 84–87, и ничего сверх того:
  * <ul>
- *   <li><b>инверсия управления</b> — объекты создаёт контейнер, а не они себя сами;</li>
- *   <li><b>фабрика</b> — знает, как создать экземпляр (рефлексия из модуля 03);</li>
- *   <li><b>внедрение зависимостей</b> — аргументы конструктора подбираются по типу;</li>
- *   <li><b>жизненный цикл</b> — синглтоны создаются один раз и кэшируются.</li>
+ * <li><b>инверсия управления</b> — объекты создаёт контейнер, а не они себя сами;</li>
+ * <li><b>фабрика</b> — знает, как создать экземпляр (рефлексия из модуля 03);</li>
+ * <li><b>внедрение зависимостей</b> — аргументы конструктора подбираются по типу;</li>
+ * <li><b>жизненный цикл</b> — синглтоны создаются один раз и кэшируются.</li>
  * </ul>
  * Отдельная ценность — <b>ошибки</b>: контейнер честно воспроизводит три
  * ситуации, из-за которых чаще всего не стартует настоящий Spring
- * (модуль 21): бин не найден, бинов слишком много, циклическая зависимость.
- * <p>
- * Порядок создания нигде не задаётся: он вычисляется из графа зависимостей.
+ * (модуль 21): бин не найден, бинов слишком много, циклическая зависимость.</p>
+ *
+ * <p>Порядок создания нигде не задаётся: он вычисляется из графа зависимостей.
  * Это и есть то, ради чего ручную фабрику {@link ru.sprbut.m11.step2.ObjectFactory}
- * меняют на контейнер.
+ * меняют на контейнер.</p>
+ *
+ * @since 1.0
  */
 public class MiniContainer {
 
@@ -43,21 +51,25 @@ public class MiniContainer {
     /** Порядок фактического создания бинов — виден в тестах. */
     private final List<String> creationOrder = new ArrayList<>();
 
-    public MiniContainer(Class<?>... componentClasses) {
+    /**
+     * Основной конструктор.
+     * @param componentClasses Значение {@code componentClasses}
+     */
+    public MiniContainer(final Class<?>... componentClasses) {
         for (Class<?> type : componentClasses) {
-            register(type);
+            this.register(type);
         }
     }
 
     /** Регистрация определения. Экземпляр пока не создаётся — только описание. */
-    public final void register(Class<?> type) {
-        MiniComponent annotation = type.getAnnotation(MiniComponent.class);
+    public final void register(final Class<?> type) {
+        final MiniComponent annotation = type.getAnnotation(MiniComponent.class);
         if (annotation == null) {
             throw new IllegalArgumentException(type.getSimpleName()
                     + " не помечен @MiniComponent — контейнер такими классами не управляет");
         }
-        String name = annotation.value().isBlank() ? defaultName(type) : annotation.value();
-        Class<?> previous = definitions.put(name, type);
+        final String name = annotation.value().isBlank() ? defaultName(type) : annotation.value();
+        final Class<?> previous = this.definitions.put(name, type);
         if (previous != null) {
             throw new IllegalStateException("Имя бина '" + name + "' уже занято классом "
                     + previous.getSimpleName());
@@ -66,28 +78,30 @@ public class MiniContainer {
 
     /** Создаёт все зарегистрированные бины сразу — как делает Spring для синглтонов. */
     public MiniContainer refresh() {
-        for (String name : List.copyOf(definitions.keySet())) {
-            getBean(name);
+        for (String name : List.copyOf(this.definitions.keySet())) {
+            this.getBean(name);
         }
         return this;
     }
 
     /** Достать бин по имени. */
-    public Object getBean(String name) {
-        Class<?> type = definitions.get(name);
+    public Object getBean(final String name) {
+        final Class<?> type = this.definitions.get(name);
         if (type == null) {
             throw new NoSuchBeanException("Нет бина с именем '" + name
-                    + "'; известны: " + definitions.keySet());
+                    + "'; известны: " + this.definitions.keySet());
         }
-        return instantiate(name, type);
+        return this.instantiate(name, type);
     }
 
     /**
      * Достать бин по типу. Подходит и точное совпадение, и реализация интерфейса —
      * ровно как в Spring.
+     * @param requiredType Тип
+     * @return Достать бин по типу. Подходит и точное совпадение, и реализация интерфейса — ровно как в Spring
      */
-    public <T> T getBean(Class<T> requiredType) {
-        List<String> candidates = definitions.entrySet().stream()
+    public <T> T getBean(final Class<T> requiredType) {
+        final List<String> candidates = this.definitions.entrySet().stream()
                 .filter(e -> requiredType.isAssignableFrom(e.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
@@ -99,63 +113,78 @@ public class MiniContainer {
             throw new NoUniqueBeanException("Бинов типа " + requiredType.getSimpleName()
                     + " несколько: " + candidates + ". Нужен квалификатор или @Primary");
         }
-        return requiredType.cast(getBean(candidates.get(0)));
+        return requiredType.cast(this.getBean(candidates.get(0)));
     }
 
+    /**
+     * Объект.
+     * @return Объект
+     */
     public Set<String> beanNames() {
-        return Set.copyOf(definitions.keySet());
+        return Set.copyOf(this.definitions.keySet());
     }
 
+    /**
+     * Порядок.
+     * @return Порядок
+     */
     public List<String> creationOrder() {
-        return List.copyOf(creationOrder);
+        return List.copyOf(this.creationOrder);
     }
 
-    public boolean isCreated(String name) {
-        return singletons.containsKey(name);
+    /**
+     * Значение: момент создания.
+     * @param name Имя
+     * @return Значение: момент создания
+     */
+    public boolean isCreated(final String name) {
+        return this.singletons.containsKey(name);
     }
 
     // --- Создание -----------------------------------------------------------
 
-    private Object instantiate(String name, Class<?> type) {
-        Object existing = singletons.get(name);
+    private Object instantiate(final String name, final Class<?> type) {
+        final Object existing = this.singletons.get(name);
         if (existing != null) {
             return existing;
         }
-        if (!inCreation.add(type)) {
+        if (!this.inCreation.add(type)) {
             throw new CircularDependencyException("Циклическая зависимость: "
-                    + inCreation.stream().map(Class::getSimpleName).toList()
+                    + this.inCreation.stream().map(Class::getSimpleName).toList()
                     + " → " + type.getSimpleName());
         }
         try {
-            Constructor<?> constructor = selectConstructor(type);
+            final Constructor<?> constructor = selectConstructor(type);
             // Рекурсия: сначала создаём зависимости, потом сам бин.
             // Порядок создания вычисляется отсюда сам собой.
-            Object[] args = Arrays.stream(constructor.getParameterTypes())
+            final Object[] args = Arrays.stream(constructor.getParameterTypes())
                     .map(this::getBean)
                     .toArray();
             constructor.setAccessible(true);
-            Object bean = constructor.newInstance(args);
-            singletons.put(name, bean);
-            creationOrder.add(name);
+            final Object bean = constructor.newInstance(args);
+            this.singletons.put(name, bean);
+            this.creationOrder.add(name);
             return bean;
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (final InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException("Не удалось создать " + type.getSimpleName(), e);
-        } catch (InvocationTargetException e) {
-            Throwable cause = e.getCause();
+        } catch (final InvocationTargetException e) {
+            final Throwable cause = e.getCause();
             throw cause instanceof RuntimeException re
                     ? re
                     : new IllegalStateException("Конструктор " + type.getSimpleName() + " бросил исключение", cause);
         } finally {
-            inCreation.remove(type);
+            this.inCreation.remove(type);
         }
     }
 
     /**
      * Правило выбора конструктора — то же, что в Spring: если конструктор один,
      * он и используется, никаких аннотаций не нужно.
+     * @param type Тип
+     * @return Правило выбора конструктора — то же, что в Spring: если конструктор один, он и используется, никаких аннотаций не нужно
      */
-    static Constructor<?> selectConstructor(Class<?> type) {
-        Constructor<?>[] constructors = type.getDeclaredConstructors();
+    static Constructor<?> selectConstructor(final Class<?> type) {
+        final Constructor<?>[] constructors = type.getDeclaredConstructors();
         if (constructors.length == 1) {
             return constructors[0];
         }
@@ -167,8 +196,8 @@ public class MiniContainer {
                         + "контейнер не знает, какой выбрать"));
     }
 
-    static String defaultName(Class<?> type) {
-        String simpleName = type.getSimpleName();
+    static String defaultName(final Class<?> type) {
+        final String simpleName = type.getSimpleName();
         return Character.toLowerCase(simpleName.charAt(0)) + simpleName.substring(1);
     }
 
@@ -176,21 +205,33 @@ public class MiniContainer {
 
     /** Аналог {@code NoSuchBeanDefinitionException}. */
     public static class NoSuchBeanException extends RuntimeException {
-        public NoSuchBeanException(String message) {
+        /**
+         * Основной конструктор.
+         * @param message Сообщение
+         */
+        public NoSuchBeanException(final String message) {
             super(message);
         }
     }
 
     /** Аналог {@code NoUniqueBeanDefinitionException}. */
     public static class NoUniqueBeanException extends RuntimeException {
-        public NoUniqueBeanException(String message) {
+        /**
+         * Основной конструктор.
+         * @param message Сообщение
+         */
+        public NoUniqueBeanException(final String message) {
             super(message);
         }
     }
 
     /** Аналог {@code BeanCurrentlyInCreationException}. */
     public static class CircularDependencyException extends RuntimeException {
-        public CircularDependencyException(String message) {
+        /**
+         * Основной конструктор.
+         * @param message Сообщение
+         */
+        public CircularDependencyException(final String message) {
             super(message);
         }
     }

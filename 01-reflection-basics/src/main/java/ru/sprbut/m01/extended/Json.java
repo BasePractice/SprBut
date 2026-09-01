@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m01.extended;
 
 import java.lang.reflect.Array;
@@ -9,32 +15,42 @@ import java.util.stream.IntStream;
 
 /**
  * <b>Расширенный пример модуля 01.</b>
- * <p>
- * Значение, представленное в JSON, — мини-сериализатор, написанный
+ *
+ * <p>Значение, представленное в JSON, — мини-сериализатор, написанный
  * <i>исключительно</i> на рефлексии. Собирает вместе всё, что перечислено
  * на слайдах 3–10:
  * <ul>
- *   <li>получает {@code Class} объекта и поднимается по иерархии наследования;</li>
- *   <li>читает модификаторы, чтобы пропустить {@code static} и {@code transient};</li>
- *   <li>читает значения private-полей через {@code setAccessible(true)};</li>
- *   <li>читает аннотации {@link JsonProperty} и {@link JsonIgnore}.</li>
+ * <li>получает {@code Class} объекта и поднимается по иерархии наследования;</li>
+ * <li>читает модификаторы, чтобы пропустить {@code static} и {@code transient};</li>
+ * <li>читает значения private-полей через {@code setAccessible(true)};</li>
+ * <li>читает аннотации {@link JsonProperty} и {@link JsonIgnore}.</li>
  * </ul>
  * Это ровно тот принцип, на котором построены Jackson, Gson и биндинг Spring:
- * поведение задаётся метаданными, а не написанным вручную кодом.
- * <p>
- * Вложенные объекты сериализуются тем же классом — рекурсия здесь выражена
- * композицией, а не отдельным методом обхода.
+ * поведение задаётся метаданными, а не написанным вручную кодом.</p>
+ *
+ * <p>Вложенные объекты сериализуются тем же классом — рекурсия здесь выражена
+ * композицией, а не отдельным методом обхода.</p>
+ *
+ * @since 1.0
  */
 public final class Json {
 
+    /**
+     * Значение.
+     */
     private final Object value;
 
-    public Json(Object value) {
+    /**
+     * Основной конструктор.
+     * @param value Значение
+     */
+    public Json(final Object value) {
         this.value = value;
     }
 
     /**
      * Текст JSON для этого значения.
+     * @return Текст JSON для этого значения
      */
     public String text() {
         if (this.value == null) {
@@ -49,43 +65,43 @@ public final class Json {
             return this.value.toString();
         }
         if (this.value instanceof Collection<?> items) {
-            return array(items.stream());
+            return this.array(items.stream());
         }
         if (this.value.getClass().isArray()) {
-            return array(
+            return this.array(
                 IntStream.range(0, Array.getLength(this.value))
                     .mapToObj(index -> Array.get(this.value, index))
             );
         }
         if (this.value instanceof Map<?, ?> entries) {
             return entries.entrySet().stream()
-                .map(entry -> pair(String.valueOf(entry.getKey()), entry.getValue()))
+                .map(entry -> this.pair(String.valueOf(entry.getKey()), entry.getValue()))
                 .collect(Collectors.joining(",", "{", "}"));
         }
-        return object();
+        return this.object();
     }
 
     private String object() {
         return new SerializableFields(this.value.getClass()).list().stream()
-            .map(field -> pair(new PropertyName(field).text(), read(field)))
+            .map(field -> this.pair(new PropertyName(field).text(), this.read(field)))
             .collect(Collectors.joining(",", "{", "}"));
     }
 
-    private String array(java.util.stream.Stream<?> items) {
+    private String array(final java.util.stream.Stream<?> items) {
         return items
             .map(item -> new Json(item).text())
             .collect(Collectors.joining(",", "[", "]"));
     }
 
-    private String pair(String key, Object nested) {
+    private String pair(final String key, final Object nested) {
         return '"' + new Escaped(key).text() + "\":" + new Json(nested).text();
     }
 
-    private Object read(Field field) {
+    private Object read(final Field field) {
         field.setAccessible(true);
         try {
             return field.get(this.value);
-        } catch (IllegalAccessException denied) {
+        } catch (final IllegalAccessException denied) {
             throw new IllegalStateException("Поле " + field.getName() + " недоступно", denied);
         }
     }

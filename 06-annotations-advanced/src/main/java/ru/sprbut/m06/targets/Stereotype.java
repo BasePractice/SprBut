@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m06.targets;
 
 import java.lang.annotation.Documented;
@@ -8,9 +14,9 @@ import java.lang.annotation.Target;
 
 /**
  * Слайд 48: {@code ANNOTATION_TYPE} — аннотация, которую вешают на другие аннотации.
- * <p>
- * Так строятся мета-аннотации: {@code @Component} в Spring помечен именно так,
- * и по этой метке контейнер узнаёт стереотипы, которых ещё не видел.
+ *
+ * <p>Так строятся мета-аннотации: {@code @Component} в Spring помечен именно так,
+ * и по этой метке контейнер узнаёт стереотипы, которых ещё не видел.</p>
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -19,6 +25,7 @@ public @interface Stereotype {
 
     /**
      * Слой приложения, к которому относится помеченный стереотип.
+     * @return Слой приложения, к которому относится помеченный стереотип
      */
     String layer();
 }

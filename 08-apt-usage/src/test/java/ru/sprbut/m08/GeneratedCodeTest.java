@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m08;
 
 import org.junit.jupiter.api.DisplayName;
@@ -8,41 +13,35 @@ import ru.sprbut.m08.model.Customer;
 import ru.sprbut.m08.model.CustomerBuilder;
 import ru.sprbut.m08.model.Order;
 import ru.sprbut.m08.model.OrderMaker;
-import ru.sprbut.m08.service.AuditLog;
 import ru.sprbut.m08.service.CustomerRepository;
 import ru.sprbut.m08.service.OrderRepository;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.arrayWithSize;
-import static org.hamcrest.Matchers.comparesEqualTo;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.emptyArray;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 
 /**
  * Тест сам по себе — доказательство работы APT: он импортирует классы,
  * которых нет ни в одном файле {@code src}. Если бы процессор не отработал,
  * тест не скомпилировался бы вовсе.
+ * @since 1.0
  */
 @DisplayName("Слайды 66–70: сгенерированный код — обычный код")
 final class GeneratedCodeTest {
 
     @Nested
+/**
+ * Билдеры, сгенерированные @GenerateBuilder.
+ * @since 1.0
+ */
     @DisplayName("Билдеры, сгенерированные @GenerateBuilder")
     class Builders {
 
         @Test
         @DisplayName("CustomerBuilder существует и собирает объект")
         void builderBuildsObject() {
-            Customer customer = CustomerBuilder.create()
+            final Customer customer = CustomerBuilder.create()
                     .id("C-1")
                     .name("Иванов")
                     .email("ivanov@mail.ru")
@@ -51,41 +50,41 @@ final class GeneratedCodeTest {
                     .balance(new BigDecimal("100.50"))
                     .build();
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "generated builder cannot assemble the object",
                 customer.getBalance(),
-                comparesEqualTo(new BigDecimal("100.50"))
+                Matchers.comparesEqualTo(new BigDecimal("100.50"))
             );
         }
 
         @Test
         @DisplayName("Незаданные поля остаются со значениями по умолчанию Java")
         void unsetFieldsKeepJavaDefaults() {
-            Customer customer = CustomerBuilder.create().id("C-2").build();
+            final Customer customer = CustomerBuilder.create().id("C-2").build();
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "unset field cannot keep the Java default",
                 customer.getName(),
-                nullValue()
+                Matchers.nullValue()
             );
         }
 
         @Test
         @DisplayName("Методы билдера возвращают сам билдер — вызовы цепляются")
         void buildersAreFluent() {
-            CustomerBuilder builder = CustomerBuilder.create();
+            final CustomerBuilder builder = CustomerBuilder.create();
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "builder method cannot return the builder itself",
                 builder.id("C-3"),
-                sameInstance(builder)
+                Matchers.sameInstance(builder)
             );
         }
 
         @Test
         @DisplayName("Суффикс имени взят из @GenerateBuilder(suffix = \"Maker\")")
         void suffixComesFromAnnotation() {
-            Order order = OrderMaker.create()
+            final Order order = OrderMaker.create()
                     .number("ORD-1")
                     .customerId("C-1")
                     .total(new BigDecimal("999"))
@@ -93,109 +92,113 @@ final class GeneratedCodeTest {
                     .status("NEW")
                     .build();
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "suffix element cannot rename the generated builder",
                 OrderMaker.class.getSimpleName(),
-                equalTo("OrderMaker")
+                Matchers.equalTo("OrderMaker")
             );
         }
 
         @Test
         @DisplayName("билдер с суффиксом собирает объект как обычный")
         void suffixedBuilderWorks() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "renamed builder cannot assemble the object",
                 OrderMaker.create().number("ORD-1").build().getNumber(),
-                equalTo("ORD-1")
+                Matchers.equalTo("ORD-1")
             );
         }
 
         @Test
         @DisplayName("Билдер финальный, с приватным конструктором и статической фабрикой")
         void builderShapeIsAsGenerated() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "generated builder cannot hide its constructor",
                 CustomerBuilder.class.getDeclaredConstructors(),
-                arrayWithSize(1)
+                Matchers.arrayWithSize(1)
             );
         }
 
         @Test
         @DisplayName("Статические поля исходного класса в билдер не попали")
         void staticFieldsAreSkipped() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "static field cannot stay out of the generated builder",
                 java.util.Arrays.stream(CustomerBuilder.class.getDeclaredMethods())
                     .map(java.lang.reflect.Method::getName).toList(),
-                containsInAnyOrder("create", "build", "id", "name", "email",
+                Matchers.containsInAnyOrder("create", "build", "id", "name", "email",
                     "age", "vip", "balance")
             );
         }
     }
 
     @Nested
+/**
+ * Реестр, сгенерированный JavaPoet.
+ * @since 1.0
+ */
     @DisplayName("Реестр, сгенерированный JavaPoet")
     class Registry {
 
         @Test
         @DisplayName("В реестр попали все три класса с @Registered")
         void containsEveryRegisteredClass() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "registry cannot contain every annotated class",
                 ModuleRegistry.names(),
-                containsInAnyOrder("customers", "orderRepository", "audit")
+                Matchers.containsInAnyOrder("customers", "orderRepository", "audit")
             );
         }
 
         @Test
         @DisplayName("Имя берётся из value, иначе — имя класса с маленькой буквы")
         void namesFollowTheDeclaredRule() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "explicit name cannot map to its own class",
                 ModuleRegistry.create("customers"),
-                instanceOf(CustomerRepository.class)
+                Matchers.instanceOf(CustomerRepository.class)
             );
         }
 
         @Test
         @DisplayName("без value имя выводится из имени класса")
         void derivesNameFromClass() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "default name cannot map to its own class",
                 ModuleRegistry.create("orderRepository"),
-                instanceOf(OrderRepository.class)
+                Matchers.instanceOf(OrderRepository.class)
             );
         }
 
         @Test
         @DisplayName("Каждый вызов create() даёт новый экземпляр — это фабрика, а не синглтон")
         void createReturnsNewInstances() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "factory cannot produce a new instance each time",
                 ModuleRegistry.create("audit"),
-                not(sameInstance(ModuleRegistry.create("audit")))
+                Matchers.not(Matchers.sameInstance(ModuleRegistry.create("audit")))
             );
         }
 
         @Test
         @DisplayName("Неизвестное имя даёт понятную ошибку")
         void unknownNameIsRejected() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "unknown name cannot be reported clearly",
-                assertThrows(
+                Assertions.assertThrows(
                     IllegalArgumentException.class, () -> ModuleRegistry.create("нет-такого")
                 ).getMessage(),
-                equalTo("В реестре нет записи: нет-такого")
+                Matchers.equalTo("В реестре нет записи: нет-такого")
             );
         }
 
         @Test
         @DisplayName("Пакет и имя класса заданы опциями -A в pom.xml")
         void packageAndClassNameCameFromProcessorOptions() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "processor options cannot define the generated class name",
                 ModuleRegistry.class.getName(),
-                equalTo("ru.sprbut.m08.generated.ModuleRegistry")
+                Matchers.equalTo("ru.sprbut.m08.generated.ModuleRegistry")
             );
         }
 
@@ -203,27 +206,31 @@ final class GeneratedCodeTest {
         @DisplayName("Объекты создаются конструктором, а не рефлексией — это работает в native image")
         void createsWithoutReflection() {
             // В сгенерированном коде лежит Xxx::new, а не Class.forName(...).newInstance()
-            Object created = ModuleRegistry.create("customers");
+            final Object created = ModuleRegistry.create("customers");
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "generated factory cannot create the object without reflection",
                 ((CustomerRepository) created).count(),
-                equalTo(0)
+                Matchers.equalTo(0)
             );
         }
     }
 
     @Nested
+/**
+ * Аннотации с retention SOURCE.
+ * @since 1.0
+ */
     @DisplayName("Аннотации с retention SOURCE")
     class SourceRetention {
 
         @Test
         @DisplayName("@GenerateBuilder и @Registered в байткоде отсутствуют")
         void annotationsLeaveNoTraceInBytecode() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "source retained annotation cannot vanish from the bytecode",
                 Customer.class.getAnnotations(),
-                emptyArray()
+                Matchers.emptyArray()
             );
         }
 
@@ -231,10 +238,10 @@ final class GeneratedCodeTest {
         @DisplayName("Поэтому зависимость на процессор нужна только на этапе компиляции")
         void processorIsCompileTimeOnly() {
             // scope=provided в pom.xml: в runtime-classpath приложения этих классов нет
-            assertThat(
+            MatcherAssert.assertThat(
                 "processor dependency cannot stay compile time only",
                 Customer.class.getDeclaredAnnotations(),
-                emptyArray()
+                Matchers.emptyArray()
             );
         }
     }

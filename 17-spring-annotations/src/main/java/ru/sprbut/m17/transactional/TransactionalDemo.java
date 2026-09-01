@@ -1,3 +1,10 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
+// @checkstyle NonStaticMethodCheck disable
 package ru.sprbut.m17.transactional;
 
 import org.springframework.context.annotation.Bean;
@@ -10,24 +17,25 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.SimpleTransactionStatus;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Слайд 147: «{@code @Transactional} — через AOP-прокси».
- * <p>
- * Здесь настоящий {@code @Transactional} со своим менеджером транзакций,
+ *
+ * <p>Здесь настоящий {@code @Transactional} со своим менеджером транзакций,
  * который вместо базы пишет в список. Так видно <b>механику</b>, не отвлекаясь
- * на JDBC: аннотация — только метаданные, всю работу делает прокси.
- * <p>
- * Отсюда же все известные особенности:
+ * на JDBC: аннотация — только метаданные, всю работу делает прокси.</p>
+ *
+ * <p>Отсюда же все известные особенности:
  * <ul>
- *   <li>self-invocation не открывает транзакцию (модуль 15);</li>
- *   <li>по умолчанию откат происходит только на unchecked-исключениях;</li>
- *   <li>{@code private}-метод аннотацией не перехватывается — прокси видит
- *       только публичный API.</li>
- * </ul>
+ * <li>self-invocation не открывает транзакцию (модуль 15);</li>
+ * <li>по умолчанию откат происходит только на unchecked-исключениях;</li>
+ * <li>{@code private}-метод аннотацией не перехватывается — прокси видит
+ * только публичный API.</li>
+ * </ul></p>
+ *
+ * @since 1.0
  */
 public final class TransactionalDemo {
 
@@ -37,6 +45,9 @@ public final class TransactionalDemo {
     /** Журнал операций менеджера транзакций. */
     public static final List<String> LOG = new ArrayList<>();
 
+    /**
+     * Сброс состояния.
+     */
     public static void reset() {
         LOG.clear();
     }
@@ -44,29 +55,51 @@ public final class TransactionalDemo {
     /** Менеджер транзакций, который вместо БД пишет в журнал. */
     public static class LoggingTransactionManager implements PlatformTransactionManager {
 
+        /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public LoggingTransactionManager() {
+            // нечего инициализировать
+        }
+
         @Override
-        public TransactionStatus getTransaction(TransactionDefinition definition)
+        public TransactionStatus getTransaction(final TransactionDefinition definition)
                 throws TransactionException {
             LOG.add("begin");
             return new SimpleTransactionStatus();
         }
 
         @Override
-        public void commit(TransactionStatus status) throws TransactionException {
+        public void commit(final TransactionStatus status) throws TransactionException {
             LOG.add("commit");
         }
 
         @Override
-        public void rollback(TransactionStatus status) throws TransactionException {
+        public void rollback(final TransactionStatus status) throws TransactionException {
             LOG.add("rollback");
         }
     }
 
+    /**
+     * Порядок.
+     */
     @Service
     public static class OrderService {
 
+        /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public OrderService() {
+            // нечего инициализировать
+        }
+
+        /**
+         * Сохранение.
+         * @param order Порядок
+         * @return Сохранение
+         */
         @Transactional
-        public String save(String order) {
+        public String save(final String order) {
             LOG.add("save:" + order);
             return order;
         }
@@ -93,26 +126,44 @@ public final class TransactionalDemo {
         }
 
         /** Метод без аннотации — транзакции не будет. */
-        public String saveWithoutTransaction(String order) {
+        public String saveWithoutTransaction(final String order) {
             LOG.add("save:" + order);
             return order;
         }
 
         /** Self-invocation: транзакция не откроется, прокси в стороне. */
-        public String saveViaThis(String order) {
-            return save(order);
+        public String saveViaThis(final String order) {
+            return this.save(order);
         }
     }
 
+    /**
+     * Конфигурация.
+     */
     @Configuration
     @EnableTransactionManagement
     public static class Config {
 
+        /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public Config() {
+            // нечего инициализировать
+        }
+
+        /**
+         * Менеджер транзакций.
+         * @return Менеджер транзакций
+         */
         @Bean
         public PlatformTransactionManager transactionManager() {
             return new LoggingTransactionManager();
         }
 
+        /**
+         * Порядок.
+         * @return Порядок
+         */
         @Bean
         public OrderService orderService() {
             return new OrderService();

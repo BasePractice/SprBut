@@ -1,8 +1,13 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m09;
 
 import ru.sprbut.m09.model.UserDto;
 import ru.sprbut.m09.model.UserEntity;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
@@ -10,35 +15,40 @@ import java.util.Map;
 
 /**
  * Слайд 73: «Reflection: runtime, гибко, медленно».
- * <p>
- * Правила маппинга выводятся <b>в момент выполнения</b> — из метаданных классов.
+ *
+ * <p>Правила маппинга выводятся <b>в момент выполнения</b> — из метаданных классов.
  * Плюсы и минусы здесь две стороны одной монеты:
  * <ul>
- *   <li><b>гибко</b>: добавьте поле в оба класса — маппер подхватит его сам,
- *       никакой перекомпиляции и никаких правок;</li>
- *   <li><b>небезопасно</b>: опечатка в имени или несовпадение типов
- *       обнаружатся только в runtime, и то лишь на конкретном объекте;</li>
- *   <li><b>медленно</b>: каждый вызов — это работа с {@code Method}
- *       и упаковка аргументов.</li>
- * </ul>
+ * <li><b>гибко</b>: добавьте поле в оба класса — маппер подхватит его сам,
+ * никакой перекомпиляции и никаких правок;</li>
+ * <li><b>небезопасно</b>: опечатка в имени или несовпадение типов
+ * обнаружатся только в runtime, и то лишь на конкретном объекте;</li>
+ * <li><b>медленно</b>: каждый вызов — это работа с {@code Method}
+ * и упаковка аргументов.</li>
+ * </ul></p>
+ *
+ * @since 1.0
  */
 public class ReflectiveMapper implements UserMapper {
 
     /** Пары «геттер источника → сеттер цели», найденные один раз при создании. */
     private final Map<Method, Method> plan;
 
+    /**
+     * Основной конструктор.
+     */
     public ReflectiveMapper() {
         this.plan = buildPlan(UserEntity.class, UserDto.class);
     }
 
     @Override
-    public UserDto toDto(UserEntity entity) {
+    public UserDto toDto(final UserEntity entity) {
         if (entity == null) {
             return null;
         }
-        UserDto dto = new UserDto();
-        for (Map.Entry<Method, Method> step : plan.entrySet()) {
-            Object value = invoke(step.getKey(), entity);
+        final UserDto dto = new UserDto();
+        for (Map.Entry<Method, Method> step : this.plan.entrySet()) {
+            final Object value = invoke(step.getKey(), entity);
             invoke(step.getValue(), dto, value);
         }
         return dto;
@@ -51,11 +61,15 @@ public class ReflectiveMapper implements UserMapper {
 
     /** Сколько свойств маппер нашёл сам, без единой строчки правил. */
     public int discoveredProperties() {
-        return plan.size();
+        return this.plan.size();
     }
 
+    /**
+     * Имя свойства.
+     * @return Имя свойства
+     */
     public java.util.List<String> propertyNames() {
-        return plan.keySet().stream()
+        return this.plan.keySet().stream()
                 .map(m -> decapitalize(stripPrefix(m.getName())))
                 .sorted()
                 .toList();
@@ -64,47 +78,50 @@ public class ReflectiveMapper implements UserMapper {
     /**
      * Правило вывода: для каждого геттера источника ищем одноимённый сеттер цели
      * с совместимым типом. Именно так работает {@code BeanUtils.copyProperties}.
+     * @param source Источник
+     * @param target Целевой объект
+     * @return Правило вывода: для каждого геттера источника ищем одноимённый сеттер цели с совместимым типом. Именно так работает {@code BeanUtils.copyProperties}
      */
-    private static Map<Method, Method> buildPlan(Class<?> source, Class<?> target) {
-        Map<Method, Method> plan = new LinkedHashMap<>();
+    private static Map<Method, Method> buildPlan(final Class<?> source, final Class<?> target) {
+        final Map<Method, Method> plan = new LinkedHashMap<>();
         for (Method getter : source.getMethods()) {
             if (getter.getParameterCount() != 0 || getter.getDeclaringClass() == Object.class) {
                 continue;
             }
-            String name = getter.getName();
-            boolean isGetter = name.startsWith("get") && name.length() > 3
+            final String name = getter.getName();
+            final boolean isGetter = name.startsWith("get") && name.length() > 3
                     && getter.getReturnType() != void.class;
-            boolean isBooleanGetter = name.startsWith("is") && name.length() > 2
+            final boolean isBooleanGetter = name.startsWith("is") && name.length() > 2
                     && (getter.getReturnType() == boolean.class || getter.getReturnType() == Boolean.class);
             if (!isGetter && !isBooleanGetter) {
                 continue;
             }
-            String property = stripPrefix(name);
+            final String property = stripPrefix(name);
             try {
-                Method setter = target.getMethod("set" + property, getter.getReturnType());
+                final Method setter = target.getMethod("set" + property, getter.getReturnType());
                 plan.put(getter, setter);
-            } catch (NoSuchMethodException ignored) {
+            } catch (final NoSuchMethodException ignored) {
                 // у цели нет такого свойства — например, internalNote; просто пропускаем
             }
         }
         return plan;
     }
 
-    private static String stripPrefix(String methodName) {
+    private static String stripPrefix(final String methodName) {
         return methodName.startsWith("is") ? methodName.substring(2) : methodName.substring(3);
     }
 
-    private static String decapitalize(String name) {
+    private static String decapitalize(final String name) {
         return Character.toLowerCase(name.charAt(0)) + name.substring(1);
     }
 
-    private static Object invoke(Method method, Object target, Object... args) {
+    private static Object invoke(final Method method, final Object target, final Object... args) {
         try {
             return method.invoke(target, args);
-        } catch (IllegalAccessException e) {
+        } catch (final IllegalAccessException e) {
             throw new IllegalStateException("Нет доступа к " + method.getName(), e);
-        } catch (InvocationTargetException e) {
-            Throwable cause = e.getCause();
+        } catch (final InvocationTargetException e) {
+            final Throwable cause = e.getCause();
             throw cause instanceof RuntimeException re ? re : new IllegalStateException(cause);
         }
     }

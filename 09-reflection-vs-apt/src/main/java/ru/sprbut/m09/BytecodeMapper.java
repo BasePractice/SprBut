@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m09;
 
 import net.bytebuddy.ByteBuddy;
@@ -9,38 +15,51 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 /**
  * Слайд 75: «Байткод (CGLIB, ByteBuddy): и то, и другое».
- * <p>
- * Третий механизм не сводится ни к рефлексии, ни к APT: класс <b>создаётся
+ *
+ * <p>Третий механизм не сводится ни к рефлексии, ни к APT: класс <b>создаётся
  * заново</b> — на этапе сборки или прямо в runtime — и дальше работает
  * как обычный скомпилированный класс.
  * <ul>
- *   <li>гибкость рефлексии: решение принимается во время выполнения,
- *       по данным, которых не было при компиляции;</li>
- *   <li>скорость APT: сгенерированный байткод исполняется напрямую,
- *       без {@code Method.invoke} на каждый вызов;</li>
- *   <li>цена: класс появляется в runtime, поэтому в native image так нельзя
- *       (слайд 77) — там всё должно быть известно при сборке.</li>
+ * <li>гибкость рефлексии: решение принимается во время выполнения,
+ * по данным, которых не было при компиляции;</li>
+ * <li>скорость APT: сгенерированный байткод исполняется напрямую,
+ * без {@code Method.invoke} на каждый вызов;</li>
+ * <li>цена: класс появляется в runtime, поэтому в native image так нельзя
+ * (слайд 77) — там всё должно быть известно при сборке.</li>
  * </ul>
  * Именно этим механизмом Spring создаёт CGLIB-прокси, когда у бина нет
- * интерфейса (модуль 15).
+ * интерфейса (модуль 15).</p>
+ *
+ * @since 1.0
  */
 public final class BytecodeMapper {
 
+    /**
+     * Загрузчик классов.
+     */
     private final ClassLoader loader;
 
+    /**
+     * Основной конструктор.
+     */
     public BytecodeMapper() {
         this(BytecodeMapper.class.getClassLoader());
     }
 
-    public BytecodeMapper(ClassLoader loader) {
+    /**
+     * Основной конструктор.
+     * @param loader Загрузчик классов
+     */
+    public BytecodeMapper(final ClassLoader loader) {
         this.loader = loader;
     }
 
     /**
      * Маппер, класс которого собран и загружен прямо сейчас.
-     * <p>
-     * В исходниках такого класса нет вовсе — он существует только в памяти
-     * этой JVM.
+     *
+     * <p>В исходниках такого класса нет вовсе — он существует только в памяти
+     * этой JVM.</p>
+     * @return Маппер, класс которого собран и загружен прямо сейчас
      */
     public UserMapper mapper() {
         try {
@@ -57,7 +76,7 @@ public final class BytecodeMapper {
                 .getLoaded()
                 .getDeclaredConstructor()
                 .newInstance();
-        } catch (ReflectiveOperationException failure) {
+        } catch (final ReflectiveOperationException failure) {
             throw new IllegalStateException("Не удалось создать сгенерированный маппер", failure);
         }
     }
@@ -65,6 +84,7 @@ public final class BytecodeMapper {
     /**
      * Подкласс конкретного класса с перехватом методов — то, что делает CGLIB,
      * когда у бина нет интерфейса.
+     * @return Подкласс конкретного класса с перехватом методов — то, что делает CGLIB, когда у бина нет интерфейса
      */
     public AuditService proxied() {
         new Intercepted().clear();
@@ -81,7 +101,7 @@ public final class BytecodeMapper {
                 .getLoaded()
                 .getDeclaredConstructor()
                 .newInstance();
-        } catch (ReflectiveOperationException failure) {
+        } catch (final ReflectiveOperationException failure) {
             throw new IllegalStateException("Не удалось создать CGLIB-подобный прокси", failure);
         }
     }

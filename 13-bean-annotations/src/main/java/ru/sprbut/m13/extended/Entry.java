@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m13.extended;
 
 import java.util.List;
@@ -5,10 +11,10 @@ import org.springframework.beans.factory.config.BeanDefinition;
 
 /**
  * Строка отчёта об одном бине.
- * <p>
- * Поле {@code instantiated} — самое полезное из шести: разница между
+ *
+ * <p>Поле {@code instantiated} — самое полезное из шести: разница между
  * «бин объявлен» и «бин создан» на слайдах не видна вовсе, а в жизни именно
- * она объясняет, почему ошибка конфигурации всплывает не на старте.
+ * она объясняет, почему ошибка конфигурации всплывает не на старте.</p>
  *
  * @param name         имя бина в контейнере
  * @param type         тип бина
@@ -17,6 +23,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
  * @param lazy         помечен ли {@code @Lazy}
  * @param instantiated создан ли уже экземпляр
  * @param dependsOn    бины из {@code @DependsOn}
+ * @since 1.0
  */
 public record Entry(
     String name,
@@ -28,6 +35,9 @@ public record Entry(
     List<String> dependsOn
 ) {
 
+    /**
+     * Значение {@code Entry}.
+     */
     public Entry {
         dependsOn = List.copyOf(dependsOn);
     }

@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m05;
 
 import java.lang.annotation.Annotation;
@@ -6,34 +12,45 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Слайд 40: {@code @Retention{SOURCE, CLASS, RUNTIME}}.
- * <p>
- * Единственный практический вывод: <b>если аннотация не помечена
+ *
+ * <p>Единственный практический вывод: <b>если аннотация не помечена
  * {@code @Retention(RUNTIME)}, ни Spring, ни ваш собственный код её не увидят.</b>
- * Это причина примерно половины вопросов «почему моя аннотация не работает».
- * <p>
- * Умолчание коварно: без {@code @Retention} политика равна {@code CLASS},
- * то есть аннотация попадёт в байткод, но останется невидимой для рефлексии.
+ * Это причина примерно половины вопросов «почему моя аннотация не работает».</p>
+ *
+ * <p>Умолчание коварно: без {@code @Retention} политика равна {@code CLASS},
+ * то есть аннотация попадёт в байткод, но останется невидимой для рефлексии.</p>
+ *
+ * @since 1.0
  */
 public final class AnnotationRetention {
 
+    /**
+     * Аннотация.
+     */
     private final Class<? extends Annotation> annotation;
 
-    public AnnotationRetention(Class<? extends Annotation> annotation) {
+    /**
+     * Основной конструктор.
+     * @param annotation Аннотация
+     */
+    public AnnotationRetention(final Class<? extends Annotation> annotation) {
         this.annotation = annotation;
     }
 
     /**
      * Политика хранения; {@code CLASS}, если {@code @Retention} не указан.
+     * @return Политика хранения; {@code CLASS}, если {@code @Retention} не указан
      */
     public RetentionPolicy policy() {
-        Retention retention = this.annotation.getAnnotation(Retention.class);
+        final Retention retention = this.annotation.getAnnotation(Retention.class);
         return retention == null ? RetentionPolicy.CLASS : retention.value();
     }
 
     /**
      * Видна ли аннотация рефлексии.
+     * @return Видна ли аннотация рефлексии
      */
     public boolean visible() {
-        return policy() == RetentionPolicy.RUNTIME;
+        return this.policy() == RetentionPolicy.RUNTIME;
     }
 }

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m05.samples;
 
 import ru.sprbut.m05.declarations.Schedule;
@@ -5,12 +10,21 @@ import ru.sprbut.m05.declarations.Schedules;
 
 /**
  * Методы с нулём, одним и несколькими вхождениями повторяемой аннотации.
- * <p>
- * Три случая нужны все три: именно на границе между «одно» и «два» меняется
- * то, что реально лежит в байткоде.
+ *
+ * <p>Три случая нужны все три: именно на границе между «одно» и «два» меняется
+ * то, что реально лежит в байткоде.</p>
+ *
+ * @since 1.0
  */
 @SuppressWarnings("unused")
 public class Jobs {
+
+    /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    public Jobs() {
+        // нечего инициализировать
+    }
 
     /**
      * Без расписания вовсе.

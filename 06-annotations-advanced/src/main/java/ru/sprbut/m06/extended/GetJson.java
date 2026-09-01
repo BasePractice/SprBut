@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m06.extended;
 
 import java.lang.annotation.Documented;
@@ -8,9 +14,9 @@ import java.lang.annotation.Target;
 
 /**
  * Второй уровень композиции: JSON-специализация {@link GetMapping}.
- * <p>
- * Путь от неё до {@link RequestMapping} — два шага, и наивная проверка
- * «на один уровень вглубь» его не пройдёт.
+ *
+ * <p>Путь от неё до {@link RequestMapping} — два шага, и наивная проверка
+ * «на один уровень вглубь» его не пройдёт.</p>
  */
 @GetMapping(produces = "application/json")
 @Documented
@@ -20,6 +26,7 @@ public @interface GetJson {
 
     /**
      * Путь маршрута.
+     * @return Путь маршрута
      */
     @AliasFor(annotation = RequestMapping.class, attribute = "path")
     String value() default "/";

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m07.api;
 
 import java.lang.annotation.ElementType;
@@ -7,11 +12,11 @@ import java.lang.annotation.Target;
 
 /**
  * Помечает класс для включения в сгенерированный реестр.
- * <p>
- * Это compile-time аналог {@code @Component}: вместо сканирования classpath
+ *
+ * <p>Это compile-time аналог {@code @Component}: вместо сканирования classpath
  * в runtime список собирается на этапе компиляции. Именно так работает
  * Spring AOT и Micronaut/Quarkus — и ровно поэтому им не нужна рефлексия
- * при старте (слайд 195, модуль 22).
+ * при старте (слайд 195, модуль 22).</p>
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)

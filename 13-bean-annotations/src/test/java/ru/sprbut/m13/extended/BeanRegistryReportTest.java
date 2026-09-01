@@ -1,18 +1,23 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m13.extended;
 
 import java.time.LocalDate;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ru.sprbut.m13.qualifiers.QualifierConfig;
 import ru.sprbut.m13.scopes.ScopeConfig;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.not;
-
+/**
+ * Расширенный пример: диагностический отчёт о контейнере.
+ * @since 1.0
+ */
 @DisplayName("Расширенный пример: диагностический отчёт о контейнере")
 final class BeanRegistryReportTest {
 
@@ -21,10 +26,10 @@ final class BeanRegistryReportTest {
     void listsApplicationBeans() {
         try (AnnotationConfigApplicationContext context =
                  new AnnotationConfigApplicationContext(ScopeConfig.class)) {
-            assertThat(
+            MatcherAssert.assertThat(
                 "report cannot list the application beans",
                 new BeanRegistryReport(context).application().stream().map(Entry::name).toList(),
-                hasItem("singletonBean")
+                Matchers.hasItem("singletonBean")
             );
         }
     }
@@ -34,10 +39,10 @@ final class BeanRegistryReportTest {
     void hidesSpringInfrastructure() {
         try (AnnotationConfigApplicationContext context =
                  new AnnotationConfigApplicationContext(ScopeConfig.class)) {
-            assertThat(
+            MatcherAssert.assertThat(
                 "Spring internals cannot stay out of the application report",
                 new BeanRegistryReport(context).application().stream().map(Entry::name).toList(),
-                not(hasItem(containsString("org.springframework")))
+                Matchers.not(Matchers.hasItem(Matchers.containsString("org.springframework")))
             );
         }
     }
@@ -47,10 +52,10 @@ final class BeanRegistryReportTest {
     void countsScopes() {
         try (AnnotationConfigApplicationContext context =
                  new AnnotationConfigApplicationContext(ScopeConfig.class)) {
-            assertThat(
+            MatcherAssert.assertThat(
                 "scope summary cannot count the prototypes",
                 new BeanRegistryReport(context).scopes(),
-                hasKey("prototype")
+                Matchers.hasKey("prototype")
             );
         }
     }
@@ -60,12 +65,12 @@ final class BeanRegistryReportTest {
     void explainsPrimaryWinner() {
         try (AnnotationConfigApplicationContext context =
                  new AnnotationConfigApplicationContext(QualifierConfig.class)) {
-            assertThat(
+            MatcherAssert.assertThat(
                 "report cannot explain the primary winner",
                 new BeanRegistryReport(context).resolution(
                     ru.sprbut.m13.qualifiers.QualifierConfig.PaymentGateway.class
                 ),
-                containsString("@Primary")
+                Matchers.containsString("@Primary")
             );
         }
     }
@@ -75,10 +80,10 @@ final class BeanRegistryReportTest {
     void predictsMissingBean() {
         try (AnnotationConfigApplicationContext context =
                  new AnnotationConfigApplicationContext(ScopeConfig.class)) {
-            assertThat(
+            MatcherAssert.assertThat(
                 "report cannot predict NoSuchBeanDefinitionException",
                 new BeanRegistryReport(context).resolution(LocalDate.class),
-                containsString("NoSuchBeanDefinitionException")
+                Matchers.containsString("NoSuchBeanDefinitionException")
             );
         }
     }
@@ -88,10 +93,10 @@ final class BeanRegistryReportTest {
     void reportsPrototypeAsPending() {
         try (AnnotationConfigApplicationContext context =
                  new AnnotationConfigApplicationContext(ScopeConfig.class)) {
-            assertThat(
+            MatcherAssert.assertThat(
                 "prototype cannot be reported as pending",
                 new BeanRegistryReport(context).pending(),
-                hasItem("prototypeBean")
+                Matchers.hasItem("prototypeBean")
             );
         }
     }

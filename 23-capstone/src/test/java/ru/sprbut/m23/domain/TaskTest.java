@@ -1,62 +1,69 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m23.domain;
 
 import java.time.Instant;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+/**
+ * Домен: правила переходов живут в самой задаче.
+ * @since 1.0
+ */
 @DisplayName("Домен: правила переходов живут в самой задаче")
 final class TaskTest {
 
     @Test
     @DisplayName("новая задача открыта")
     void opensInOpenStatus() {
-        assertThat(
+        MatcherAssert.assertThat(
             "fresh task cannot start as open",
             new Task("сверстать отчёт", Instant.parse("2026-07-30T10:00:00Z")).status(),
-            equalTo(TaskStatus.OPEN)
+            Matchers.equalTo(TaskStatus.OPEN)
         );
     }
 
     @Test
     @DisplayName("открытая задача переходит в работу")
     void movesToInProgress() {
-        Task task = new Task("собрать логи", Instant.parse("2026-07-30T10:00:00Z"));
+        final Task task = new Task("собрать логи", Instant.parse("2026-07-30T10:00:00Z"));
         task.start();
-        assertThat(
+        MatcherAssert.assertThat(
             "open task cannot move to in progress",
             task.status(),
-            equalTo(TaskStatus.IN_PROGRESS)
+            Matchers.equalTo(TaskStatus.IN_PROGRESS)
         );
     }
 
     @Test
     @DisplayName("закрытая задача не открывается заново")
     void dontReopenFinishedTask() {
-        Task task = new Task("выкатить релиз", Instant.parse("2026-07-30T10:00:00Z"));
+        final Task task = new Task("выкатить релиз", Instant.parse("2026-07-30T10:00:00Z"));
         task.start();
         task.finish();
-        assertThat(
+        MatcherAssert.assertThat(
             "finished task cannot refuse to go backwards",
-            assertThrows(IllegalStateException.class, task::start).getMessage(),
-            containsString("DONE")
+            Assertions.assertThrows(IllegalStateException.class, task::start).getMessage(),
+            Matchers.containsString("DONE")
         );
     }
 
     @Test
     @DisplayName("отказ перехода не меняет состояние задачи")
     void keepsStatusOnRejectedMove() {
-        Task task = new Task("починить сборку", Instant.parse("2026-07-30T10:00:00Z"));
+        final Task task = new Task("починить сборку", Instant.parse("2026-07-30T10:00:00Z"));
         task.finish();
-        assertThrows(IllegalStateException.class, task::finish);
-        assertThat(
+        Assertions.assertThrows(IllegalStateException.class, task::finish);
+        MatcherAssert.assertThat(
             "rejected transition cannot leave the status untouched",
             task.status(),
-            equalTo(TaskStatus.DONE)
+            Matchers.equalTo(TaskStatus.DONE)
         );
     }
 }

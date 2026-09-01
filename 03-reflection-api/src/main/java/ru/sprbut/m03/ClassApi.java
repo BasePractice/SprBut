@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m03;
 
 import java.lang.reflect.Array;
@@ -12,21 +18,31 @@ import java.util.TreeSet;
 
 /**
  * Слайды 26–27 (СХЕМА 1): {@link Class} — центр карты Reflection API.
- * <p>
- * Всё остальное — {@code Field}, {@code Method}, {@code Constructor} — добывается
+ *
+ * <p>Всё остальное — {@code Field}, {@code Method}, {@code Constructor} — добывается
  * из него. Сам {@code Class} при этом отвечает и на вопросы о природе типа:
- * массив ли это, enum, record, вложенный класс.
+ * массив ли это, enum, record, вложенный класс.</p>
+ *
+ * @since 1.0
  */
 public final class ClassApi {
 
+    /**
+     * Тип.
+     */
     private final Class<?> type;
 
-    public ClassApi(Class<?> type) {
+    /**
+     * Основной конструктор.
+     * @param type Тип
+     */
+    public ClassApi(final Class<?> type) {
         this.type = type;
     }
 
     /**
      * Имена объявленных полей в алфавитном порядке.
+     * @return Имена объявленных полей в алфавитном порядке
      */
     public List<String> fields() {
         return Arrays.stream(this.type.getDeclaredFields())
@@ -38,6 +54,7 @@ public final class ClassApi {
 
     /**
      * Имена объявленных методов без повторов от перегрузок.
+     * @return Имена объявленных методов без повторов от перегрузок
      */
     public List<String> methods() {
         return Arrays.stream(this.type.getDeclaredMethods())
@@ -50,6 +67,7 @@ public final class ClassApi {
 
     /**
      * Сколько всего конструкторов объявлено, включая непубличные.
+     * @return Сколько всего конструкторов объявлено, включая непубличные
      */
     public int constructorCount() {
         return this.type.getDeclaredConstructors().length;
@@ -57,6 +75,7 @@ public final class ClassApi {
 
     /**
      * Тип элемента массива: {@code String} для {@code String[]}, иначе {@code null}.
+     * @return Тип элемента массива: {@code String} для {@code String[]}, иначе {@code null}
      */
     public Class<?> componentType() {
         return this.type.getComponentType();
@@ -64,6 +83,7 @@ public final class ClassApi {
 
     /**
      * Класс, внутри которого объявлен вложенный тип.
+     * @return Класс, внутри которого объявлен вложенный тип
      */
     public Class<?> enclosing() {
         return this.type.getEnclosingClass();
@@ -71,9 +91,10 @@ public final class ClassApi {
 
     /**
      * Иерархия наследования снизу вверх, до {@code Object} включительно.
+     * @return Иерархия наследования снизу вверх, до {@code Object} включительно
      */
     public List<String> superChain() {
-        List<String> chain = new ArrayList<>();
+        final List<String> chain = new ArrayList<>();
         for (Class<?> current = this.type; current != null; current = current.getSuperclass()) {
             chain.add(current.getSimpleName());
         }
@@ -83,27 +104,31 @@ public final class ClassApi {
     /**
      * Все интерфейсы, включая унаследованные, — по ним фреймворки решают,
      * подходит ли бин под тип зависимости.
+     * @return Все интерфейсы, включая унаследованные, — по ним фреймворки решают, подходит ли бин под тип зависимости
      */
     public List<String> allInterfaces() {
-        Set<String> collected = new TreeSet<>();
+        final Set<String> collected = new TreeSet<>();
         for (Class<?> current = this.type; current != null; current = current.getSuperclass()) {
-            collect(current, collected);
+            this.collect(current, collected);
         }
         return List.copyOf(collected);
     }
 
     /**
      * Может ли переменная этого типа хранить значение другого.
-     * <p>
-     * {@code isAssignableFrom} читается наоборот, чем кажется:
-     * {@code Number.class.isAssignableFrom(Integer.class)} — истина.
+     *
+     * <p>{@code isAssignableFrom} читается наоборот, чем кажется:
+     * {@code Number.class.isAssignableFrom(Integer.class)} — истина.</p>
+     * @param actual Значение {@code actual}
+     * @return Может ли переменная этого типа хранить значение другого
      */
-    public boolean canHold(Class<?> actual) {
+    public boolean canHold(final Class<?> actual) {
         return this.type.isAssignableFrom(actual);
     }
 
     /**
      * Компоненты record — отдельная сущность API, появившаяся в Java 16.
+     * @return Компоненты record — отдельная сущность API, появившаяся в Java 16
      */
     public List<String> recordComponents() {
         if (!this.type.isRecord()) {
@@ -116,9 +141,10 @@ public final class ClassApi {
 
     /**
      * Константы enum в порядке объявления.
+     * @return Константы enum в порядке объявления
      */
     public List<String> enumConstants() {
-        Object[] constants = this.type.getEnumConstants();
+        final Object[] constants = this.type.getEnumConstants();
         if (constants == null) {
             return List.of();
         }
@@ -127,18 +153,20 @@ public final class ClassApi {
 
     /**
      * Новый массив этого типа элементов.
-     * <p>
-     * Массив создаётся не конструктором, а фабрикой {@link Array} — отдельная
-     * ветка API, которую легко упустить.
+     *
+     * <p>Массив создаётся не конструктором, а фабрикой {@link Array} — отдельная
+     * ветка API, которую легко упустить.</p>
+     * @param length Длина
+     * @return Новый массив этого типа элементов
      */
-    public Object array(int length) {
+    public Object array(final int length) {
         return Array.newInstance(this.type, length);
     }
 
-    private void collect(Class<?> from, Set<String> sink) {
+    private void collect(final Class<?> from, final Set<String> sink) {
         for (Class<?> each : from.getInterfaces()) {
             if (sink.add(each.getSimpleName())) {
-                collect(each, sink);
+                this.collect(each, sink);
             }
         }
     }

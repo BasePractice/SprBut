@@ -1,5 +1,12 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m13;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -10,31 +17,18 @@ import ru.sprbut.m13.conditional.ConditionalConfig;
 import ru.sprbut.m13.qualifiers.QualifierConfig;
 import ru.sprbut.m13.scopes.ScopeConfig;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.comparesEqualTo;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.emptyArray;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+/**
+ * Слайды 99–110: аннотации бина.
+ * @since 1.0
+ */
 @DisplayName("Слайды 99–110: аннотации бина")
 class BeanAnnotationsTest {
 
     @Nested
+/**
+ * Слайд 101: @Scope.
+ * @since 1.0
+ */
     @DisplayName("Слайд 101: @Scope")
     class Scopes {
 
@@ -47,15 +41,15 @@ class BeanAnnotationsTest {
         @DisplayName("singleton — один экземпляр на контейнер")
         void singletonIsCreatedOnce() {
             try (var context = new AnnotationConfigApplicationContext(ScopeConfig.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that singleton is created once",
                     context.getBean(ScopeConfig.SingletonBean.class),
-                    sameInstance(context.getBean(ScopeConfig.SingletonBean.class))
+                    Matchers.sameInstance(context.getBean(ScopeConfig.SingletonBean.class))
                 );
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that singleton is created once",
                     ScopeConfig.SINGLETON_INSTANCES.get(),
-                    equalTo(1)
+                    Matchers.equalTo(1)
                 );
             }
         }
@@ -64,18 +58,18 @@ class BeanAnnotationsTest {
         @DisplayName("prototype — новый экземпляр на каждый запрос")
         void prototypeIsCreatedEveryTime() {
             try (var context = new AnnotationConfigApplicationContext(ScopeConfig.class)) {
-                ScopeConfig.PrototypeBean first = context.getBean(ScopeConfig.PrototypeBean.class);
-                ScopeConfig.PrototypeBean second = context.getBean(ScopeConfig.PrototypeBean.class);
+                final ScopeConfig.PrototypeBean first = context.getBean(ScopeConfig.PrototypeBean.class);
+                final ScopeConfig.PrototypeBean second = context.getBean(ScopeConfig.PrototypeBean.class);
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that prototype is created every time",
                     first,
-                    not(sameInstance(second))
+                    Matchers.not(Matchers.sameInstance(second))
                 );
-                assertThat(
+                MatcherAssert.assertThat(
                     "second prototype cannot get a fresh serial",
                     second.serial(),
-                    greaterThan(first.serial())
+                    Matchers.greaterThan(first.serial())
                 );
             }
         }
@@ -84,15 +78,15 @@ class BeanAnnotationsTest {
         @DisplayName("Ловушка: prototype внутри singleton без прокси создаётся один раз")
         void prototypeInsideSingletonDegradesWithoutProxy() {
             try (var context = new AnnotationConfigApplicationContext(ScopeConfig.class)) {
-                var holder = context.getBean(ScopeConfig.HolderWithoutProxy.class);
+                final var holder = context.getBean(ScopeConfig.HolderWithoutProxy.class);
 
-                int first = holder.prototypeSerial();
-                int second = holder.prototypeSerial();
+                final int first = holder.prototypeSerial();
+                final int second = holder.prototypeSerial();
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "prototype injected once cannot keep the same serial",
                     first,
-                    equalTo(second)
+                    Matchers.equalTo(second)
                 );
             }
         }
@@ -101,18 +95,22 @@ class BeanAnnotationsTest {
         @DisplayName("proxyMode = TARGET_CLASS возвращает prototype его настоящее поведение")
         void proxyModeRestoresPrototypeSemantics() {
             try (var context = new AnnotationConfigApplicationContext(ScopeConfig.class)) {
-                var holder = context.getBean(ScopeConfig.HolderWithProxy.class);
+                final var holder = context.getBean(ScopeConfig.HolderWithProxy.class);
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "scoped proxy cannot fetch a fresh prototype per call",
                     holder.prototypeSerial(),
-                    not(equalTo(holder.prototypeSerial()))
+                    Matchers.not(Matchers.equalTo(holder.prototypeSerial()))
                 );
             }
         }
     }
 
     @Nested
+/**
+ * Слайды 102–103: @Qualifier и @Primary.
+ * @since 1.0
+ */
     @DisplayName("Слайды 102–103: @Qualifier и @Primary")
     class Qualifiers {
 
@@ -120,10 +118,10 @@ class BeanAnnotationsTest {
         @DisplayName("Без уточнений выбирается @Primary")
         void primaryWinsByDefault() {
             try (var context = new AnnotationConfigApplicationContext(QualifierConfig.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that primary wins by default",
                     context.getBean(QualifierConfig.PrimaryConsumer.class) .gateway().name(),
-                    equalTo("card")
+                    Matchers.equalTo("card")
                 );
             }
         }
@@ -132,10 +130,10 @@ class BeanAnnotationsTest {
         @DisplayName("@Qualifier по имени бина перебивает @Primary")
         void qualifierBeatsPrimary() {
             try (var context = new AnnotationConfigApplicationContext(QualifierConfig.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that qualifier beats primary",
                     context.getBean(QualifierConfig.QualifiedConsumer.class) .gateway().name(),
-                    equalTo("cash")
+                    Matchers.equalTo("cash")
                 );
             }
         }
@@ -144,10 +142,10 @@ class BeanAnnotationsTest {
         @DisplayName("@Qualifier работает и по значению аннотации, а не только по имени бина")
         void qualifierByTag() {
             try (var context = new AnnotationConfigApplicationContext(QualifierConfig.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that qualifier by tag",
                     context.getBean(QualifierConfig.TaggedConsumer.class) .gateway().name(),
-                    equalTo("sbp")
+                    Matchers.equalTo("sbp")
                 );
             }
         }
@@ -156,23 +154,27 @@ class BeanAnnotationsTest {
         @DisplayName("Список и карта внедряют все бины типа сразу — @Primary тут ни при чём")
         void collectionsInjectEverything() {
             try (var context = new AnnotationConfigApplicationContext(QualifierConfig.class)) {
-                var registry = context.getBean(QualifierConfig.GatewayRegistry.class);
+                final var registry = context.getBean(QualifierConfig.GatewayRegistry.class);
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that collections inject everything",
                     registry.all(),
-                    hasSize(3)
+                    Matchers.hasSize(3)
                 );
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that collections inject everything",
                     registry.byName().keySet(),
-                    containsInAnyOrder("cardGateway", "cashGateway", "sbpGateway")
+                    Matchers.containsInAnyOrder("cardGateway", "cashGateway", "sbpGateway")
                 );
             }
         }
     }
 
     @Nested
+/**
+ * Слайды 104–106: @Conditional, @Profile, @Lazy, @DependsOn.
+ * @since 1.0
+ */
     @DisplayName("Слайды 104–106: @Conditional, @Profile, @Lazy, @DependsOn")
     class Conditions {
 
@@ -185,10 +187,10 @@ class BeanAnnotationsTest {
         @DisplayName("@Conditional: без свойства бина нет вовсе")
         void conditionalBeanIsAbsentByDefault() {
             try (var context = new AnnotationConfigApplicationContext(ConditionalConfig.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that conditional bean is absent by default",
                     context.containsBean("featureBean"),
-                    equalTo(false)
+                    Matchers.equalTo(false)
                 );
             }
         }
@@ -201,10 +203,10 @@ class BeanAnnotationsTest {
                 context.register(ConditionalConfig.class);
                 context.refresh();
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that conditional bean appears when property set",
                     context.containsBean("featureBean"),
-                    equalTo(true)
+                    Matchers.equalTo(true)
                 );
             } finally {
                 System.clearProperty("sprbut.feature.enabled");
@@ -219,15 +221,15 @@ class BeanAnnotationsTest {
                 context.register(ConditionalConfig.class);
                 context.refresh();
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that profile selects beans",
                     context.containsBean("devOnlyBean"),
-                    equalTo(true)
+                    Matchers.equalTo(true)
                 );
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that profile selects beans",
                     context.containsBean("notDevBean"),
-                    equalTo(false)
+                    Matchers.equalTo(false)
                 );
             }
         }
@@ -236,15 +238,15 @@ class BeanAnnotationsTest {
         @DisplayName("@Profile(\"!dev\") — отрицание профиля")
         void negatedProfile() {
             try (var context = new AnnotationConfigApplicationContext(ConditionalConfig.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that negated profile",
                     context.containsBean("notDevBean"),
-                    equalTo(true)
+                    Matchers.equalTo(true)
                 );
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that negated profile",
                     context.containsBean("devOnlyBean"),
-                    equalTo(false)
+                    Matchers.equalTo(false)
                 );
             }
         }
@@ -253,18 +255,18 @@ class BeanAnnotationsTest {
         @DisplayName("@Lazy откладывает создание до первого обращения")
         void lazyBeanIsCreatedOnDemand() {
             try (var context = new AnnotationConfigApplicationContext(ConditionalConfig.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "lazy bean cannot stay uncreated until requested",
                     ConditionalConfig.CREATED,
-                    not(hasItem("lazyBean"))
+                    Matchers.not(Matchers.hasItem("lazyBean"))
                 );
 
                 context.getBean("lazyBean");
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that lazy bean is created on demand",
                     ConditionalConfig.CREATED,
-                    hasItems("lazyBean")
+                    Matchers.hasItems("lazyBean")
                 );
             }
         }
@@ -273,16 +275,20 @@ class BeanAnnotationsTest {
         @DisplayName("@DependsOn задаёт порядок там, где зависимости в коде нет")
         void dependsOnOrdersCreation() {
             try (var ignored = new AnnotationConfigApplicationContext(ConditionalConfig.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "@DependsOn cannot order the creation",
                     ConditionalConfig.CREATED.indexOf("schemaInitializer"),
-                    lessThan(ConditionalConfig.CREATED.indexOf("cacheWarmer"))
+                    Matchers.lessThan(ConditionalConfig.CREATED.indexOf("cacheWarmer"))
                 );
             }
         }
     }
 
     @Nested
+/**
+ * Слайд 108: @Component vs @Bean.
+ * @since 1.0
+ */
     @DisplayName("Слайд 108: @Component vs @Bean")
     class ComponentOrBean {
 
@@ -290,10 +296,10 @@ class BeanAnnotationsTest {
         @DisplayName("Свой класс находится сканированием")
         void ownClassIsScanned() {
             try (var context = new AnnotationConfigApplicationContext(ComponentVsBean.Config.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that own class is scanned",
                     context.getBean(ComponentVsBean.OwnService.class).describe(),
-                    equalTo("свой класс, найден сканированием")
+                    Matchers.equalTo("свой класс, найден сканированием")
                 );
             }
         }
@@ -302,15 +308,15 @@ class BeanAnnotationsTest {
         @DisplayName("Чужой класс регистрируется @Bean-методом — аннотацию ставить некуда")
         void thirdPartyClassNeedsABeanMethod() {
             try (var context = new AnnotationConfigApplicationContext(ComponentVsBean.Config.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that third party class needs a bean method",
                     context.getBean(ComponentVsBean.ThirdPartyClient.class).describe(),
-                    equalTo("чужой класс: https://api.example.com (3000 мс)")
+                    Matchers.equalTo("чужой класс: https://api.example.com (3000 мс)")
                 );
-                assertThat(
+                MatcherAssert.assertThat(
                     "third party class cannot stay free of our annotations",
                     ComponentVsBean.ThirdPartyClient.class.getAnnotations(),
-                    emptyArray()
+                    Matchers.emptyArray()
                 );
             }
         }
@@ -319,10 +325,10 @@ class BeanAnnotationsTest {
         @DisplayName("@Bean умеет регистрировать даже классы из JDK")
         void beanMethodWorksForJdkClasses() {
             try (var context = new AnnotationConfigApplicationContext(ComponentVsBean.Config.class)) {
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that bean method works for jdk classes",
                     context.getBean(java.util.TimeZone.class).getID(),
-                    equalTo("Europe/Moscow")
+                    Matchers.equalTo("Europe/Moscow")
                 );
             }
         }
@@ -332,10 +338,10 @@ class BeanAnnotationsTest {
         void bothProduceBeanDefinitions() {
             try (var context = new AnnotationConfigApplicationContext(ComponentVsBean.Config.class)) {
                 // имя бина от @Component — от имени класса, от @Bean — от имени метода
-                assertThat(
+                MatcherAssert.assertThat(
                     "both styles cannot produce bean definitions",
                     java.util.Arrays.asList(context.getBeanDefinitionNames()),
-                    hasItems("thirdPartyClient", "applicationTimeZone")
+                    Matchers.hasItems("thirdPartyClient", "applicationTimeZone")
                 );
             }
         }

@@ -1,17 +1,20 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m09.extended;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.sprbut.m09.model.UserEntity;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.emptyIterable;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-
+/**
+ * Расширенный пример: СХЕМА 4 — compile-time против runtime.
+ * @since 1.0
+ */
 @DisplayName("Расширенный пример: СХЕМА 4 — compile-time против runtime")
 final class MappersShowcaseTest {
 
@@ -22,80 +25,80 @@ final class MappersShowcaseTest {
     @Test
     @DisplayName("механизм не меняет поведение — только свойства")
     void agreeOnResult() {
-        assertThat(
+        MatcherAssert.assertThat(
             "three mechanisms cannot agree on the result",
             new Mappers().agree(entity()),
-            equalTo(true)
+            Matchers.equalTo(true)
         );
     }
 
     @Test
     @DisplayName("реализаций ровно три — по одной на механизм со слайда")
     void coversThreeMechanisms() {
-        assertThat(
+        MatcherAssert.assertThat(
             "showcase cannot cover all three mechanisms",
             new Mappers().list(),
-            hasSize(3)
+            Matchers.hasSize(3)
         );
     }
 
     @Test
     @DisplayName("каждая реализация объявляет свою стратегию")
     void namesEveryStrategy() {
-        assertThat(
+        MatcherAssert.assertThat(
             "every mapper cannot name its own strategy",
             new Mappers().strategies(),
-            hasSize(3)
+            Matchers.hasSize(3)
         );
     }
 
     @Test
     @DisplayName("замер даёт число для каждой реализации")
     void measuresEveryMapper() {
-        assertThat(
+        MatcherAssert.assertThat(
             "benchmark cannot measure the reflective mapper",
             new Benchmark(new Mappers(), entity()).timings(100),
-            hasKey("ReflectiveMapper")
+            Matchers.hasKey("ReflectiveMapper")
         );
     }
 
     @Test
     @DisplayName("рефлексии для native image нужны подсказки на каждое свойство")
     void demandsHintsForReflection() {
-        assertThat(
+        MatcherAssert.assertThat(
             "reflective mapper cannot demand runtime hints",
             new RequiredHints().accessors(),
-            not(emptyIterable())
+            Matchers.not(Matchers.emptyIterable())
         );
     }
 
     @Test
     @DisplayName("подсказка называет конкретный метод, а не класс целиком")
     void namesExactAccessor() {
-        assertThat(
+        MatcherAssert.assertThat(
             "hint cannot name the exact accessor",
             new RequiredHints().accessors(),
-            hasItem("UserEntity#getFirstName")
+            Matchers.hasItem("UserEntity#getFirstName")
         );
     }
 
     @Test
     @DisplayName("сгенерированному коду подсказки не нужны вовсе")
     void demandsNoHintsForGeneratedCode() {
-        assertThat(
+        MatcherAssert.assertThat(
             "generated mapper cannot avoid runtime hints entirely",
             new RequiredHints().byMapper().get("GeneratedStyleMapper"),
-            emptyIterable()
+            Matchers.emptyIterable()
         );
     }
 
     @Test
     @DisplayName("для байткода вопрос подсказок не имеет смысла — класса ещё нет")
     void reportsBytecodeAsInapplicable() {
-        assertThat(
+        MatcherAssert.assertThat(
             "bytecode mapper cannot be reported as inapplicable for native image",
             new RequiredHints().byMapper().get("BytecodeMapper"),
-            hasSize(1)
+            Matchers.hasSize(1)
         );
     }
 }

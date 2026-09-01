@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m02.classic;
 
 import java.io.Serializable;
@@ -8,45 +14,64 @@ import java.util.List;
 
 /**
  * Слайды 12–16: подчиняется ли класс соглашению JavaBeans.
- * <p>
- * Проверка написана на рефлексии из модуля 01 — тем же способом, каким Spring
- * и Hibernate решают, умеют ли они работать с типом.
- * <p>
- * Требование {@link Serializable} необязательно: слайд прямо оговаривает,
+ *
+ * <p>Проверка написана на рефлексии из модуля 01 — тем же способом, каким Spring
+ * и Hibernate решают, умеют ли они работать с типом.</p>
+ *
+ * <p>Требование {@link Serializable} необязательно: слайд прямо оговаривает,
  * что Spring его не спрашивает. Поэтому строгость вынесена в конструктор —
- * один и тот же класс отвечает на оба вопроса.
+ * один и тот же класс отвечает на оба вопроса.</p>
+ *
+ * @since 1.0
  */
 public final class BeanVerdict {
 
+    /**
+     * Тип.
+     */
     private final Class<?> type;
 
+    /**
+     * Признак сериализуемости.
+     */
     private final boolean serializable;
 
-    public BeanVerdict(Class<?> type) {
+    /**
+     * Основной конструктор.
+     * @param type Тип
+     */
+    public BeanVerdict(final Class<?> type) {
         this(type, false);
     }
 
-    public BeanVerdict(Class<?> type, boolean serializable) {
+    /**
+     * Основной конструктор.
+     * @param type Тип
+     * @param serializable Признак сериализуемости
+     */
+    public BeanVerdict(final Class<?> type, final boolean serializable) {
         this.type = type;
         this.serializable = serializable;
     }
 
     /**
      * Подчиняется ли класс соглашению.
+     * @return Подчиняется ли класс соглашению
      */
     public boolean valid() {
-        return violations().isEmpty();
+        return this.violations().isEmpty();
     }
 
     /**
      * Нарушения соглашения, каждое одним предложением.
+     * @return Нарушения соглашения, каждое одним предложением
      */
     public List<String> violations() {
-        List<String> found = new ArrayList<>();
-        if (!constructible()) {
+        final List<String> found = new ArrayList<>();
+        if (!this.constructible()) {
             found.add("нет публичного конструктора без параметров");
         }
-        BeanProperties properties = new BeanProperties(this.type);
+        final BeanProperties properties = new BeanProperties(this.type);
         for (String property : properties.writable()) {
             if (properties.reader(property) == null) {
                 found.add("у свойства '" + property + "' есть setter, но нет getter");
@@ -61,6 +86,7 @@ public final class BeanVerdict {
     /**
      * Первое требование соглашения: {@code public Xxx()}. Без него контейнер
      * не сможет создать объект дефолтным способом.
+     * @return Первое требование соглашения: {@code public Xxx()}. Без него контейнер не сможет создать объект дефолтным способом
      */
     public boolean constructible() {
         for (Constructor<?> candidate : this.type.getConstructors()) {

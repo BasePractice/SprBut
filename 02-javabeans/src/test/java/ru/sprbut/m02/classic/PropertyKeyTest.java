@@ -1,71 +1,79 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m02.classic;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-
+/**
+ * Правило java.beans: имя свойства из имени метода.
+ * @since 1.0
+ */
 @DisplayName("Правило java.beans: имя свойства из имени метода")
 final class PropertyKeyTest {
 
     @Test
     @DisplayName("обычное имя начинается со строчной буквы")
     void decapitalizesOrdinaryName() {
-        assertThat(
+        MatcherAssert.assertThat(
             "ordinary name cannot be decapitalised",
             new PropertyKey("Name").decapitalized(),
-            equalTo("name")
+            Matchers.equalTo("name")
         );
     }
 
     @Test
     @DisplayName("аббревиатуру из двух заглавных подряд трогать нельзя")
     void dontDecapitalizeAbbreviation() {
-        assertThat(
+        MatcherAssert.assertThat(
             "abbreviation cannot survive decapitalisation untouched",
             new PropertyKey("URL").decapitalized(),
-            equalTo("URL")
+            Matchers.equalTo("URL")
         );
     }
 
     @Test
     @DisplayName("имя метода строится из имени свойства заглавной буквой")
     void capitalizesProperty() {
-        assertThat(
+        MatcherAssert.assertThat(
             "property name cannot be capitalised for the method name",
             new PropertyKey("firstName").capitalized(),
-            equalTo("FirstName")
+            Matchers.equalTo("FirstName")
         );
     }
 
     @Test
     @DisplayName("kebab-case из конфигурации становится camelCase")
     void convertsKebabCase() {
-        assertThat(
+        MatcherAssert.assertThat(
             "kebab case key cannot become camel case",
             new PropertyKey("first-name").camelCase(),
-            equalTo("firstName")
+            Matchers.equalTo("firstName")
         );
     }
 
     @Test
     @DisplayName("snake_case тоже становится camelCase")
     void convertsSnakeCase() {
-        assertThat(
+        MatcherAssert.assertThat(
             "snake case key cannot become camel case",
             new PropertyKey("first_name").camelCase(),
-            equalTo("firstName")
+            Matchers.equalTo("firstName")
         );
     }
 
     @Test
     @DisplayName("уже готовое имя не меняется")
     void keepsCamelCaseAsIs() {
-        assertThat(
+        MatcherAssert.assertThat(
             "camel case key cannot survive unchanged",
             new PropertyKey("firstName").camelCase(),
-            equalTo("firstName")
+            Matchers.equalTo("firstName")
         );
     }
 }

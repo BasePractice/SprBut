@@ -1,6 +1,14 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m15.extended;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -10,63 +18,66 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.comparesEqualTo;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+/**
+ * Расширенный пример: своя @Retryable через AOP и обход self-invocation.
+ * @since 1.0
+ */
 @DisplayName("Расширенный пример: своя @Retryable через AOP и обход self-invocation")
 class RetryAspectTest {
 
+    /**
+     * Контекст.
+     */
     private AnnotationConfigApplicationContext context;
+    /**
+     * Значение {@code payments}.
+     */
     private PaymentService payments;
+    /**
+     * Исполнитель.
+     */
     private ChargeExecutor executor;
+    /**
+     * Значение {@code aspect}.
+     */
     private RetryAspect aspect;
 
     @BeforeEach
     void setUp() {
-        context = new AnnotationConfigApplicationContext(ExtendedAopConfig.class);
-        payments = context.getBean(PaymentService.class);
-        executor = context.getBean(ChargeExecutor.class);
-        aspect = context.getBean(RetryAspect.class);
-        payments.reset();
-        executor.reset();
-        aspect.clear();
+        this.context = new AnnotationConfigApplicationContext(ExtendedAopConfig.class);
+        this.payments = this.context.getBean(PaymentService.class);
+        this.executor = this.context.getBean(ChargeExecutor.class);
+        this.aspect = this.context.getBean(RetryAspect.class);
+        this.payments.reset();
+        this.executor.reset();
+        this.aspect.clear();
     }
 
     @AfterEach
     void tearDown() {
-        context.close();
+        this.context.close();
     }
 
     @Nested
+/**
+ * Аннотация работает как @Transactional: метаданные + аспект.
+ * @since 1.0
+ */
     @DisplayName("Аннотация работает как @Transactional: метаданные + аспект")
     class Behaviour {
 
         @Test
         @DisplayName("Успешный вызов проходит с первой попытки")
         void succeedsImmediately() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that succeeds immediately",
                 payments.charge("ORD-1"),
-                equalTo("оплачен ORD-1")
+                Matchers.equalTo("оплачен ORD-1")
             );
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that succeeds immediately",
                 aspect.log(),
-                contains("success:charge:попытка1")
+                Matchers.contains("success:charge:попытка1")
             );
         }
 
@@ -75,21 +86,21 @@ class RetryAspectTest {
         void retriesUntilSuccess() {
             payments.failFirst(2);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that retries until success",
                 payments.charge("ORD-2"),
-                equalTo("оплачен ORD-2")
+                Matchers.equalTo("оплачен ORD-2")
             );
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that retries until success",
                 payments.executions(),
-                equalTo(3)
+                Matchers.equalTo(3)
             );
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that retries until success",
                 aspect.log(),
-                contains( "fail:charge:попытка1", "fail:charge:попытка2", "success:charge:попытка3")
+                Matchers.contains( "fail:charge:попытка1", "fail:charge:попытка2", "success:charge:попытка3")
             );
         }
 
@@ -98,21 +109,21 @@ class RetryAspectTest {
         void rethrowsAfterExhaustion() {
             payments.failFirst(99);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that rethrows after exhaustion",
-                assertThrows(IllegalStateException.class, () -> payments.charge("ORD-3")).getMessage(),
-                containsString("сбой платежа №3")
+                Assertions.assertThrows(IllegalStateException.class, () -> payments.charge("ORD-3")).getMessage(),
+                Matchers.containsString("сбой платежа №3")
             );
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that rethrows after exhaustion",
                 aspect.log(),
-                hasItems("exhausted:charge")
+                Matchers.hasItems("exhausted:charge")
             );
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that rethrows after exhaustion",
                 payments.executions(),
-                equalTo(3)
+                Matchers.equalTo(3)
             );
         }
 
@@ -125,20 +136,24 @@ class RetryAspectTest {
             payments.charge("ORD-4");
             executor.execute("ORD-5");
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that pointcut is annotation driven",
                 aspect.attemptsOf("charge"),
-                equalTo(2L)
+                Matchers.equalTo(2L)
             );
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that pointcut is annotation driven",
                 aspect.attemptsOf("execute"),
-                equalTo(2L)
+                Matchers.equalTo(2L)
             );
         }
     }
 
     @Nested
+/**
+ * Слайд 124: self-invocation и три способа его обойти.
+ * @since 1.0
+ */
     @DisplayName("Слайд 124: self-invocation и три способа его обойти")
     class SelfInvocation {
 
@@ -147,21 +162,21 @@ class RetryAspectTest {
         void thisCallBypassesTheProxy() {
             payments.failFirst(1);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that this call bypasses the proxy",
-                assertThrows(IllegalStateException.class, () -> payments.chargeViaThis("ORD-6")).getMessage(),
-                containsString("сбой платежа №1")
+                Assertions.assertThrows(IllegalStateException.class, () -> payments.chargeViaThis("ORD-6")).getMessage(),
+                Matchers.containsString("сбой платежа №1")
             );
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that this call bypasses the proxy",
                 payments.executions(),
-                equalTo(1)
+                Matchers.equalTo(1)
             );
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that this call bypasses the proxy",
                 aspect.log().stream().anyMatch(e -> e.contains(":charge:")),
-                equalTo(false)
+                Matchers.equalTo(false)
             );
         }
 
@@ -170,21 +185,21 @@ class RetryAspectTest {
         void selfInjectionRestoresTheAspect() {
             payments.failFirst(1);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that self injection restores the aspect",
                 payments.chargeViaSelf("ORD-7"),
-                equalTo("оплачен ORD-7")
+                Matchers.equalTo("оплачен ORD-7")
             );
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that self injection restores the aspect",
                 payments.executions(),
-                equalTo(2)
+                Matchers.equalTo(2)
             );
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that self injection restores the aspect",
                 aspect.attemptsOf("charge"),
-                equalTo(2L)
+                Matchers.equalTo(2L)
             );
         }
 
@@ -193,16 +208,16 @@ class RetryAspectTest {
         void aopContextRestoresTheAspect() {
             payments.failFirst(1);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that aop context restores the aspect",
                 payments.chargeViaAopContext("ORD-8"),
-                equalTo("оплачен ORD-8")
+                Matchers.equalTo("оплачен ORD-8")
             );
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that aop context restores the aspect",
                 aspect.attemptsOf("charge"),
-                equalTo(2L)
+                Matchers.equalTo(2L)
             );
         }
 
@@ -211,21 +226,21 @@ class RetryAspectTest {
         void separateBeanIsTheCleanSolution() {
             executor.failFirst(2);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that separate bean is the clean solution",
                 payments.chargeViaSeparateBean("ORD-9"),
-                equalTo("оплачен ORD-9")
+                Matchers.equalTo("оплачен ORD-9")
             );
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that separate bean is the clean solution",
                 executor.executions(),
-                equalTo(3)
+                Matchers.equalTo(3)
             );
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that separate bean is the clean solution",
                 aspect.attemptsOf("execute"),
-                equalTo(3L)
+                Matchers.equalTo(3L)
             );
         }
 
@@ -233,12 +248,12 @@ class RetryAspectTest {
         @DisplayName("Без exposeProxy обход через AopContext падает — флаг не бесплатный")
         void aopContextNeedsExposeProxy() {
             try (var plain = new AnnotationConfigApplicationContext(PlainConfig.class)) {
-                PaymentService service = plain.getBean(PaymentService.class);
+                final PaymentService service = plain.getBean(PaymentService.class);
 
-                assertThat(
+                MatcherAssert.assertThat(
                     "cannot verify that aop context needs expose proxy",
-                    assertThrows(IllegalStateException.class, () -> service.chargeViaAopContext("ORD-10")).getMessage(),
-                    containsString("Cannot find current proxy")
+                    Assertions.assertThrows(IllegalStateException.class, () -> service.chargeViaAopContext("ORD-10")).getMessage(),
+                    Matchers.containsString("Cannot find current proxy")
                 );
             }
         }
@@ -252,26 +267,30 @@ class RetryAspectTest {
     }
 
     @Nested
+/**
+ * Прокси — это другой объект, а не ваш бин.
+ * @since 1.0
+ */
     @DisplayName("Прокси — это другой объект, а не ваш бин")
     class ProxyIsNotTheTarget {
 
         @Test
         @DisplayName("Из контекста приходит CGLIB-подкласс, а не сам PaymentService")
         void contextReturnsAProxy() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that context returns a proxy",
                 org.springframework.aop.support.AopUtils.isCglibProxy(payments),
-                equalTo(true)
+                Matchers.equalTo(true)
             );
-            assertThat(
+            MatcherAssert.assertThat(
                 "proxy class cannot differ from the target class",
                 payments.getClass(),
-                not(equalTo(PaymentService.class))
+                Matchers.not(Matchers.equalTo(PaymentService.class))
             );
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that context returns a proxy",
                 payments.getClass().getSuperclass(),
-                equalTo(PaymentService.class)
+                Matchers.equalTo(PaymentService.class)
             );
         }
 
@@ -282,10 +301,10 @@ class RetryAspectTest {
             payments.charge("ORD-11");
 
             // executions() — метод, вызов делегируется настоящему бину
-            assertThat(
+            MatcherAssert.assertThat(
                 "cannot verify that state is reachable only through methods",
                 payments.executions(),
-                equalTo(2)
+                Matchers.equalTo(2)
             );
         }
     }

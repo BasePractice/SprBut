@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m06.extended;
 
 import java.lang.annotation.Annotation;
@@ -12,29 +18,39 @@ import ru.sprbut.m06.Builtin;
 
 /**
  * Все аннотации элемента, включая мета-аннотации, одним плоским списком.
- * <p>
- * Первое, что стоит напечатать при вопросе «что вообще навешано на этот класс
+ *
+ * <p>Первое, что стоит напечатать при вопросе «что вообще навешано на этот класс
  * и почему он ведёт себя не так»: цепочки композиций в исходниках не видны
- * вовсе, а здесь видны все сразу.
+ * вовсе, а здесь видны все сразу.</p>
+ *
+ * @since 1.0
  */
 public final class Flattened {
 
+    /**
+     * Элемент.
+     */
     private final AnnotatedElement element;
 
-    public Flattened(AnnotatedElement element) {
+    /**
+     * Основной конструктор.
+     * @param element Элемент
+     */
+    public Flattened(final AnnotatedElement element) {
         this.element = element;
     }
 
     /**
      * Имена всех аннотаций вглубь, в алфавитном порядке.
+     * @return Имена всех аннотаций вглубь, в алфавитном порядке
      */
     public List<String> names() {
-        List<String> collected = new ArrayList<>();
-        Deque<Annotation> queue = new ArrayDeque<>(List.of(this.element.getAnnotations()));
-        Set<Class<? extends Annotation>> visited = new HashSet<>();
+        final List<String> collected = new ArrayList<>();
+        final Deque<Annotation> queue = new ArrayDeque<>(List.of(this.element.getAnnotations()));
+        final Set<Class<? extends Annotation>> visited = new HashSet<>();
         while (!queue.isEmpty()) {
-            Annotation each = queue.poll();
-            Class<? extends Annotation> type = each.annotationType();
+            final Annotation each = queue.poll();
+            final Class<? extends Annotation> type = each.annotationType();
             if (new Builtin(type).yes() || !visited.add(type)) {
                 continue;
             }

@@ -1,19 +1,25 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m01;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.sprbut.m01.extended.JsonIgnore;
 import ru.sprbut.m01.extended.JsonProperty;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.emptyIterable;
-import static org.hamcrest.Matchers.equalTo;
-
+/**
+ * Слайд 9: чтение аннотаций через рефлексию.
+ * @since 1.0
+ */
 @DisplayName("Слайд 9: чтение аннотаций через рефлексию")
 final class AnnotationsTest {
 
@@ -25,12 +31,21 @@ final class AnnotationsTest {
     @SuppressWarnings("unused")
     private static final class Sample {
 
+        /**
+         * Идентификатор.
+         */
         @JsonProperty("account_id")
         @JsonIgnore
         String id;
 
+        /**
+         * Обычный вариант.
+         */
         String plain;
 
+        /**
+         * Невидимый элемент.
+         */
         @SourceOnly
         String invisible;
     }
@@ -38,63 +53,63 @@ final class AnnotationsTest {
     @Test
     @DisplayName("isAnnotationPresent проверяет наличие аннотации")
     void detectsPresentAnnotation() {
-        assertThat(
+        MatcherAssert.assertThat(
             "present annotation cannot be detected",
             new Annotations(new Declared(Sample.class).field("id")).has(JsonProperty.class),
-            equalTo(true)
+            Matchers.equalTo(true)
         );
     }
 
     @Test
     @DisplayName("getAnnotation отдаёт саму аннотацию со значениями элементов")
     void readsAnnotationValue() {
-        assertThat(
+        MatcherAssert.assertThat(
             "annotation element value cannot be read",
             new Annotations(new Declared(Sample.class).field("id"))
                 .find(JsonProperty.class)
                 .map(JsonProperty::value)
                 .orElseThrow(),
-            equalTo("account_id")
+            Matchers.equalTo("account_id")
         );
     }
 
     @Test
     @DisplayName("поле без аннотации даёт пустой Optional, а не исключение")
     void dontFailOnMissingAnnotation() {
-        assertThat(
+        MatcherAssert.assertThat(
             "missing annotation cannot yield an empty optional",
             new Annotations(new Declared(Sample.class).field("plain")).find(JsonProperty.class).isEmpty(),
-            equalTo(true)
+            Matchers.equalTo(true)
         );
     }
 
     @Test
     @DisplayName("все runtime-аннотации элемента перечисляются разом")
     void listsRuntimeAnnotations() {
-        assertThat(
+        MatcherAssert.assertThat(
             "runtime annotations cannot be listed together",
             new Annotations(new Declared(Sample.class).field("id")).names(),
-            contains("JsonIgnore", "JsonProperty")
+            Matchers.contains("JsonIgnore", "JsonProperty")
         );
     }
 
     @Test
     @DisplayName("аннотация с RetentionPolicy.SOURCE в runtime не существует вовсе")
     void dontSeeSourceRetention() {
-        assertThat(
+        MatcherAssert.assertThat(
             "source retained annotation cannot stay invisible at runtime",
             new Annotations(new Declared(Sample.class).field("invisible")).names(),
-            emptyIterable()
+            Matchers.emptyIterable()
         );
     }
 
     @Test
     @DisplayName("аннотации читаются с любого AnnotatedElement, в том числе с самой аннотации")
     void readsFromAnyAnnotatedElement() {
-        assertThat(
+        MatcherAssert.assertThat(
             "annotation on an annotation cannot be read the same way",
             new Annotations(JsonProperty.class).has(Retention.class),
-            equalTo(true)
+            Matchers.equalTo(true)
         );
     }
 }

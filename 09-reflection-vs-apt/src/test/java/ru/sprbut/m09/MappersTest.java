@@ -1,18 +1,21 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m09;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.sprbut.m09.model.UserDto;
 import ru.sprbut.m09.model.UserEntity;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-
+/**
+ * Слайды 73–75: три механизма, один результат.
+ * @since 1.0
+ */
 @DisplayName("Слайды 73–75: три механизма, один результат")
 final class MappersTest {
 
@@ -23,133 +26,133 @@ final class MappersTest {
     @Test
     @DisplayName("рефлексия выводит правила маппинга из метаданных, а не из кода")
     void discoversRulesItself() {
-        assertThat(
+        MatcherAssert.assertThat(
             "reflective mapper cannot discover the properties itself",
             new ReflectiveMapper().discoveredProperties(),
-            greaterThan(0)
+            Matchers.greaterThan(0)
         );
     }
 
     @Test
     @DisplayName("рефлексивный маппинг даёт правильный результат")
     void mapsReflectively() {
-        assertThat(
+        MatcherAssert.assertThat(
             "reflective mapping cannot copy the first name",
             new ReflectiveMapper().toDto(entity()).getFirstName(),
-            equalTo("Иван")
+            Matchers.equalTo("Иван")
         );
     }
 
     @Test
     @DisplayName("null на входе — null на выходе")
     void handlesNull() {
-        assertThat(
+        MatcherAssert.assertThat(
             "null entity cannot yield a null dto",
             new ReflectiveMapper().toDto(null),
-            nullValue()
+            Matchers.nullValue()
         );
     }
 
     @Test
     @DisplayName("сгенерированный код даёт тот же результат, что и рефлексия")
     void agreesWithGeneratedStyle() {
-        assertThat(
+        MatcherAssert.assertThat(
             "generated mapper cannot agree with the reflective one",
             new GeneratedStyleMapper().toDto(entity()),
-            equalTo(new ReflectiveMapper().toDto(entity()))
+            Matchers.equalTo(new ReflectiveMapper().toDto(entity()))
         );
     }
 
     @Test
     @DisplayName("класс байткодного маппера собирается в runtime — в исходниках его нет")
     void generatesClassAtRuntime() {
-        assertThat(
+        MatcherAssert.assertThat(
             "bytecode mapper class cannot be generated at runtime",
             new BytecodeMapper().mapper().getClass().getName(),
-            containsString("bytebuddy")
+            Matchers.containsString("bytebuddy")
         );
     }
 
     @Test
     @DisplayName("сгенерированный класс — полноценная реализация интерфейса")
     void generatedClassWorks() {
-        assertThat(
+        MatcherAssert.assertThat(
             "generated class cannot implement the contract",
             new BytecodeMapper().mapper().toDto(entity()),
-            equalTo(new GeneratedStyleMapper().toDto(entity()))
+            Matchers.equalTo(new GeneratedStyleMapper().toDto(entity()))
         );
     }
 
     @Test
     @DisplayName("каждый вызов даёт новый загруженный класс")
     void loadsNewClassEachTime() {
-        assertThat(
+        MatcherAssert.assertThat(
             "each generation cannot produce its own loaded class",
             new BytecodeMapper().mapper().getClass(),
-            not(equalTo(new BytecodeMapper().mapper().getClass()))
+            Matchers.not(Matchers.equalTo(new BytecodeMapper().mapper().getClass()))
         );
     }
 
     @Test
     @DisplayName("байткод проксирует класс без интерфейса — то, чего не умеет JDK-прокси")
     void proxiesClassWithoutInterface() {
-        assertThat(
+        MatcherAssert.assertThat(
             "class without an interface cannot be proxied by a subclass",
             new BytecodeMapper().proxied().getClass().getSuperclass(),
-            equalTo(AuditService.class)
+            Matchers.equalTo(AuditService.class)
         );
     }
 
     @Test
     @DisplayName("цель интерфейсов не реализует вовсе")
     void keepsTargetInterfaceFree() {
-        assertThat(
+        MatcherAssert.assertThat(
             "target cannot stay free of interfaces",
             AuditService.class.getInterfaces().length,
-            equalTo(0)
+            Matchers.equalTo(0)
         );
     }
 
     @Test
     @DisplayName("перехват срабатывает, а оригинальный метод всё равно вызывается")
     void interceptsAndDelegates() {
-        AuditService proxied = new BytecodeMapper().proxied();
+        final AuditService proxied = new BytecodeMapper().proxied();
         proxied.record("вход");
-        assertThat(
+        MatcherAssert.assertThat(
             "interceptor cannot record the call",
             new Intercepted().entries(),
-            hasItem(containsString("Enhanced"))
+            Matchers.hasItem(Matchers.containsString("Enhanced"))
         );
     }
 
     @Test
     @DisplayName("оригинальный метод возвращает своё значение, несмотря на перехват")
     void keepsOriginalResult() {
-        assertThat(
+        MatcherAssert.assertThat(
             "original method cannot keep its own result",
             new BytecodeMapper().proxied().record("вход"),
-            equalTo("записано: вход")
+            Matchers.equalTo("записано: вход")
         );
     }
 
     @Test
     @DisplayName("каждая реализация называет свою стратегию сама")
     void namesItsOwnStrategy() {
-        assertThat(
+        MatcherAssert.assertThat(
             "reflective mapper cannot name its own strategy",
             new ReflectiveMapper().strategy(),
-            containsString("reflection")
+            Matchers.containsString("reflection")
         );
     }
 
     @Test
     @DisplayName("копия совпадает с оригиналом по всем полям")
     void copiesEveryField() {
-        UserDto dto = new GeneratedStyleMapper().toDto(entity());
-        assertThat(
+        final UserDto dto = new GeneratedStyleMapper().toDto(entity());
+        MatcherAssert.assertThat(
             "generated mapping cannot copy the boolean field",
             dto.isActive(),
-            equalTo(true)
+            Matchers.equalTo(true)
         );
     }
 }

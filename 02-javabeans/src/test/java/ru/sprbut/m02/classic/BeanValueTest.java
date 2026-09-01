@@ -1,20 +1,25 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m02.classic;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+/**
+ * Чтение и запись свойств по строковому имени.
+ * @since 1.0
+ */
 @DisplayName("Чтение и запись свойств по строковому имени")
 final class BeanValueTest {
 
     private static CustomerBean customer() {
-        CustomerBean bean = new CustomerBean();
+        final CustomerBean bean = new CustomerBean();
         bean.setId("C-1");
         bean.setFirstName("Иван");
         bean.setLastName("Петров");
@@ -26,78 +31,78 @@ final class BeanValueTest {
     @Test
     @DisplayName("свойство читается по имени, без знания класса при компиляции")
     void readsByName() {
-        assertThat(
+        MatcherAssert.assertThat(
             "property cannot be read by its name",
             new BeanValue(customer(), "firstName").value(),
-            equalTo("Иван")
+            Matchers.equalTo("Иван")
         );
     }
 
     @Test
     @DisplayName("boolean-свойство читается через is-getter")
     void readsBooleanProperty() {
-        assertThat(
+        MatcherAssert.assertThat(
             "boolean property cannot be read through its is-getter",
             new BeanValue(customer(), "vip").value(),
-            equalTo(true)
+            Matchers.equalTo(true)
         );
     }
 
     @Test
     @DisplayName("свойство пишется по имени — так контейнер заполняет бин из yaml")
     void writesByName() {
-        CustomerBean bean = customer();
+        final CustomerBean bean = customer();
         new BeanValue(bean, "firstName").assign("Пётр");
-        assertThat(
+        MatcherAssert.assertThat(
             "property cannot be written by its name",
             bean.getFirstName(),
-            equalTo("Пётр")
+            Matchers.equalTo("Пётр")
         );
     }
 
     @Test
     @DisplayName("запись в свойство только для чтения отклоняется с внятной ошибкой")
     void dontWriteReadOnlyProperty() {
-        assertThat(
+        MatcherAssert.assertThat(
             "read only property cannot reject the write",
-            assertThrows(
+            Assertions.assertThrows(
                 IllegalArgumentException.class,
                 () -> new BeanValue(customer(), "fullName").assign("X")
             ).getMessage(),
-            containsString("только на чтение")
+            Matchers.containsString("только на чтение")
         );
     }
 
     @Test
     @DisplayName("неизвестное свойство отклоняется")
     void dontReadUnknownProperty() {
-        assertThat(
+        MatcherAssert.assertThat(
             "unknown property cannot be reported by its name",
-            assertThrows(
+            Assertions.assertThrows(
                 IllegalArgumentException.class,
                 () -> new BeanValue(customer(), "salary").value()
             ).getMessage(),
-            containsString("salary")
+            Matchers.containsString("salary")
         );
     }
 
     @Test
     @DisplayName("бин целиком превращается в карту свойств")
     void convertsBeanToMap() {
-        assertThat(
+        MatcherAssert.assertThat(
             "bean cannot be turned into a property map",
             new BeanMap(customer()).values(),
-            hasEntry("lastName", "Петров")
+            Matchers.hasEntry("lastName", "Петров")
         );
     }
 
     @Test
     @DisplayName("слайд 18: пустой бин заведомо невалиден — все свойства пусты")
     void createsInvalidEmptyBean() {
-        assertThat(
+        MatcherAssert.assertThat(
             "empty bean cannot start with null properties",
             ((CustomerBean) new EmptyBean(CustomerBean.class).instance()).getFirstName(),
-            nullValue()
+            Matchers.nullValue()
         );
     }
 }

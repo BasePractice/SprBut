@@ -1,7 +1,12 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m18.extended;
 
 import ru.sprbut.m18.StartupLog;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,24 +14,36 @@ import java.util.Optional;
 
 /**
  * <b>Расширенный пример модуля 18.</b>
- * <p>
- * Восстановление последовательности запуска — прямая реализация СХЕМЫ 11
- * (слайд 172, «sequence-диаграмма: run() → события → ApplicationReadyEvent»).
- * <p>
- * Главная практическая ценность — {@link #whereToHook}: справочник «что уже
+ *
+ * <p>Восстановление последовательности запуска — прямая реализация СХЕМЫ 11
+ * (слайд 172, «sequence-диаграмма: run() → события → ApplicationReadyEvent»).</p>
+ *
+ * <p>Главная практическая ценность — {@link #whereToHook}: справочник «что уже
  * готово в каждой точке». Без него выбор места для своего кода превращается
  * в угадывание, а ошибка проявляется как {@code NullPointerException} на старте
- * или, что хуже, как молчаливо неинициализированный компонент.
+ * или, что хуже, как молчаливо неинициализированный компонент.</p>
+ *
+ * @since 1.0
  */
 public final class StartupTimeline {
 
+    /**
+     * Журнал.
+     */
     private final StartupLog log;
 
+    /**
+     * Основной конструктор.
+     */
     public StartupTimeline() {
         this(new StartupLog());
     }
 
-    public StartupTimeline(StartupLog log) {
+    /**
+     * Основной конструктор.
+     * @param log Журнал
+     */
+    public StartupTimeline(final StartupLog log) {
         this.log = log;
     }
 
@@ -65,8 +82,13 @@ public final class StartupTimeline {
                         "сообщить, что приложение принимает нагрузку"));
     }
 
-    public Optional<HookPoint> hook(String name) {
-        return whereToHook().stream().filter(point -> point.name().startsWith(name)).findFirst();
+    /**
+     * Перехватчик.
+     * @param name Имя
+     * @return Перехватчик
+     */
+    public Optional<HookPoint> hook(final String name) {
+        return this.whereToHook().stream().filter(point -> point.name().startsWith(name)).findFirst();
     }
 
     /** Фактическая последовательность, восстановленная из журнала. */
@@ -88,7 +110,7 @@ public final class StartupTimeline {
 
     /** Не нарушен ли порядок: номера шагов должны только возрастать. */
     public boolean isOrdered() {
-        List<Integer> order = actualOrder();
+        final List<Integer> order = this.actualOrder();
         for (int i = 1; i < order.size(); i++) {
             if (order.get(i) < order.get(i - 1)) {
                 return false;
@@ -99,7 +121,7 @@ public final class StartupTimeline {
 
     /** Наглядная диаграмма — то, что стоит распечатать при разборе старта. */
     public String render() {
-        StringBuilder sb = new StringBuilder("SpringApplication.run()\n");
+        final StringBuilder sb = new StringBuilder("SpringApplication.run()\n");
         for (String event : this.log.events()) {
             sb.append("  │ ").append(event).append('\n');
         }
@@ -109,23 +131,25 @@ public final class StartupTimeline {
 
     /** Сколько раз встретился каждый шаг. */
     public Map<String, Long> counts() {
-        Map<String, Long> counts = new LinkedHashMap<>();
-        this.log.events().forEach(event -> counts.merge(phaseOf(event), 1L, Long::sum));
+        final Map<String, Long> counts = new LinkedHashMap<>();
+        this.log.events().forEach(event -> counts.merge(this.phaseOf(event), 1L, Long::sum));
         return counts;
     }
 
-    private String phaseOf(String event) {
-        int dash = event.indexOf('-');
-        String tail = dash < 0 ? event : event.substring(dash + 1);
-        int colon = tail.indexOf(':');
+    private String phaseOf(final String event) {
+        final int dash = event.indexOf('-');
+        final String tail = dash < 0 ? event : event.substring(dash + 1);
+        final int colon = tail.indexOf(':');
         return colon < 0 ? tail : tail.substring(0, colon);
     }
 
     /**
      * Номер шага — <b>все</b> ведущие цифры, а не первая.
      * Иначе «10-ApplicationReadyEvent» превратился бы в шаг 1 и встал в начало.
+     * @param event Событие
+     * @return Номер шага — <b>все</b> ведущие цифры, а не первая
      */
-    private int orderOf(String event) {
+    private int orderOf(final String event) {
         int end = 0;
         while (end < event.length() && Character.isDigit(event.charAt(end))) {
             end++;

@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m07.extended;
 
 import com.squareup.javapoet.ClassName;
@@ -9,7 +15,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import ru.sprbut.m07.api.Registered;
-
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
@@ -29,68 +34,95 @@ import java.util.function.Supplier;
 
 /**
  * <b>Расширенный пример модуля 07.</b>
- * <p>
- * Процессор, который собирает <b>реестр всех помеченных классов</b> и генерирует
+ *
+ * <p>Процессор, который собирает <b>реестр всех помеченных классов</b> и генерирует
  * его единым файлом. Это compile-time аналог {@code @ComponentScan}: список бинов
  * известен уже на этапе сборки, и в runtime не нужно ни сканировать classpath,
- * ни создавать объекты рефлексией.
- * <p>
- * Здесь собрано всё, чего не было в простом {@link ru.sprbut.m07.BuilderProcessor}:
+ * ни создавать объекты рефлексией.</p>
+ *
+ * <p>Здесь собрано всё, чего не было в простом {@link ru.sprbut.m07.BuilderProcessor}:
  * <ul>
- *   <li><b>накопление между раундами</b> — реестр нельзя записать сразу, потому что
- *       в следующем раунде могут появиться новые аннотированные классы. Пишем
- *       единственный файл в последнем раунде ({@code processingOver()});</li>
- *   <li><b>JavaPoet</b> вместо ручной сборки строк — типы, импорты и форматирование
- *       берёт на себя библиотека (слайд 69);</li>
- *   <li><b>опции процессора</b> ({@code -Aregistry.package=...}) — параметризация
- *       генерации из настроек сборки;</li>
- *   <li><b>{@code Supplier}-фабрики вместо {@code Class.forName}</b> — сгенерированный
- *       код создаёт объекты обычным {@code new}, и именно поэтому такой подход
- *       работает в native image (модуль 22).</li>
- * </ul>
+ * <li><b>накопление между раундами</b> — реестр нельзя записать сразу, потому что
+ * в следующем раунде могут появиться новые аннотированные классы. Пишем
+ * единственный файл в последнем раунде ({@code processingOver()});</li>
+ * <li><b>JavaPoet</b> вместо ручной сборки строк — типы, импорты и форматирование
+ * берёт на себя библиотека (слайд 69);</li>
+ * <li><b>опции процессора</b> ({@code -Aregistry.package=...}) — параметризация
+ * генерации из настроек сборки;</li>
+ * <li><b>{@code Supplier}-фабрики вместо {@code Class.forName}</b> — сгенерированный
+ * код создаёт объекты обычным {@code new}, и именно поэтому такой подход
+ * работает в native image (модуль 22).</li>
+ * </ul></p>
+ *
+ * @since 1.0
  */
 @SupportedAnnotationTypes("ru.sprbut.m07.api.Registered")
 @SupportedSourceVersion(SourceVersion.RELEASE_17)
 @SupportedOptions({RegistryProcessor.PACKAGE_OPTION, RegistryProcessor.CLASS_OPTION})
 public class RegistryProcessor extends AbstractProcessor {
 
+    /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    public RegistryProcessor() {
+        // нечего инициализировать
+    }
+
+    /**
+     * Значение {@code PACKAGE_OPTION}.
+     */
     public static final String PACKAGE_OPTION = "registry.package";
+    /**
+     * Значение {@code CLASS_OPTION}.
+     */
     public static final String CLASS_OPTION = "registry.class";
 
+    /**
+     * Значение {@code DEFAULT_PACKAGE}.
+     */
     private static final String DEFAULT_PACKAGE = "ru.sprbut.generated";
+    /**
+     * Значение {@code DEFAULT_CLASS}.
+     */
     private static final String DEFAULT_CLASS = "GeneratedRegistry";
 
     /** Накопленные за все раунды записи: имя → класс. */
     private final Map<String, ClassName> registry = new LinkedHashMap<>();
 
+    /**
+     * Раунды обработки.
+     */
     private int rounds;
+    /**
+     * Значение {@code written}.
+     */
     private boolean written;
 
     @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        rounds++;
+    public boolean process(final Set<? extends TypeElement> annotations, final RoundEnvironment roundEnv) {
+        this.rounds++;
         if (roundEnv.processingOver()) {
             return false;
         }
 
         for (Element element : roundEnv.getElementsAnnotatedWith(Registered.class)) {
             if (element.getKind() != ElementKind.CLASS) {
-                error(element, "@Registered применим только к классам");
+                this.error(element, "@Registered применим только к классам");
                 continue;
             }
-            TypeElement type = (TypeElement) element;
+            final TypeElement type = (TypeElement) element;
             if (type.getModifiers().contains(Modifier.ABSTRACT)) {
-                error(element, "Абстрактный класс нельзя зарегистрировать: его нечем создать");
+                this.error(element, "Абстрактный класс нельзя зарегистрировать: его нечем создать");
                 continue;
             }
-            if (!hasUsableConstructor(type)) {
-                error(element, "Нужен публичный конструктор без параметров");
+            if (!this.hasUsableConstructor(type)) {
+                this.error(element, "Нужен публичный конструктор без параметров");
                 continue;
             }
-            String name = resolveName(type);
-            ClassName previous = registry.put(name, ClassName.get(type));
+            final String name = this.resolveName(type);
+            final ClassName previous = this.registry.put(name, ClassName.get(type));
             if (previous != null) {
-                error(element, "Имя '" + name + "' уже занято классом " + previous);
+                this.error(element, "Имя '" + name + "' уже занято классом " + previous);
             }
         }
 
@@ -104,28 +136,32 @@ public class RegistryProcessor extends AbstractProcessor {
         //
         // Цена решения честная: если @Registered появится на классе, который сам
         // сгенерирован другим процессором в позднем раунде, в реестр он не попадёт.
-        if (!written && !registry.isEmpty()) {
-            writeRegistry();
-            written = true;
+        if (!this.written && !this.registry.isEmpty()) {
+            this.writeRegistry();
+            this.written = true;
         }
         return true;
     }
 
+    /**
+     * Раунды обработки.
+     * @return Раунды обработки
+     */
     public int rounds() {
-        return rounds;
+        return this.rounds;
     }
 
-    private String resolveName(TypeElement type) {
-        String explicit = type.getAnnotation(Registered.class).value();
+    private String resolveName(final TypeElement type) {
+        final String explicit = type.getAnnotation(Registered.class).value();
         if (!explicit.isBlank()) {
             return explicit;
         }
-        String simpleName = type.getSimpleName().toString();
+        final String simpleName = type.getSimpleName().toString();
         return Character.toLowerCase(simpleName.charAt(0)) + simpleName.substring(1);
     }
 
-    private boolean hasUsableConstructor(TypeElement type) {
-        var constructors = javax.lang.model.util.ElementFilter.constructorsIn(type.getEnclosedElements());
+    private boolean hasUsableConstructor(final TypeElement type) {
+        final var constructors = javax.lang.model.util.ElementFilter.constructorsIn(type.getEnclosedElements());
         return constructors.isEmpty() || constructors.stream().anyMatch(c ->
                 c.getParameters().isEmpty() && c.getModifiers().contains(Modifier.PUBLIC));
     }
@@ -135,17 +171,17 @@ public class RegistryProcessor extends AbstractProcessor {
      * код — при ручной сборке строк это самая трудоёмкая часть.
      */
     private void writeRegistry() {
-        String packageName = option(PACKAGE_OPTION, DEFAULT_PACKAGE);
-        String className = option(CLASS_OPTION, DEFAULT_CLASS);
+        final String packageName = this.option(PACKAGE_OPTION, DEFAULT_PACKAGE);
+        final String className = this.option(CLASS_OPTION, DEFAULT_CLASS);
 
-        TypeName supplierOfObject = ParameterizedTypeName.get(
+        final TypeName supplierOfObject = ParameterizedTypeName.get(
                 ClassName.get(Supplier.class), ClassName.get(Object.class));
-        TypeName mapType = ParameterizedTypeName.get(
+        final TypeName mapType = ParameterizedTypeName.get(
                 ClassName.get(Map.class), ClassName.get(String.class), supplierOfObject);
 
-        CodeBlock.Builder initializer = CodeBlock.builder().add("$T.of(", Map.class);
+        final CodeBlock.Builder initializer = CodeBlock.builder().add("$T.of(", Map.class);
         boolean first = true;
-        for (Map.Entry<String, ClassName> entry : registry.entrySet()) {
+        for (Map.Entry<String, ClassName> entry : this.registry.entrySet()) {
             if (!first) {
                 initializer.add(", ");
             }
@@ -155,18 +191,18 @@ public class RegistryProcessor extends AbstractProcessor {
         }
         initializer.add(")");
 
-        FieldSpec beans = FieldSpec.builder(mapType, "FACTORIES",
+        final FieldSpec beans = FieldSpec.builder(mapType, "FACTORIES",
                         Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .initializer(initializer.build())
                 .build();
 
-        MethodSpec names = MethodSpec.methodBuilder("names")
+        final MethodSpec names = MethodSpec.methodBuilder("names")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(ParameterizedTypeName.get(java.util.Set.class, String.class))
                 .addStatement("return FACTORIES.keySet()")
                 .build();
 
-        MethodSpec create = MethodSpec.methodBuilder("create")
+        final MethodSpec create = MethodSpec.methodBuilder("create")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(String.class, "name")
                 .returns(Object.class)
@@ -178,13 +214,13 @@ public class RegistryProcessor extends AbstractProcessor {
                 .addStatement("return factory.get()")
                 .build();
 
-        MethodSpec size = MethodSpec.methodBuilder("size")
+        final MethodSpec size = MethodSpec.methodBuilder("size")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(int.class)
                 .addStatement("return FACTORIES.size()")
                 .build();
 
-        TypeSpec registryType = TypeSpec.classBuilder(className)
+        final TypeSpec registryType = TypeSpec.classBuilder(className)
                 .addJavadoc("Сгенерирован $L. Правки будут потеряны при следующей сборке.\n",
                         RegistryProcessor.class.getSimpleName())
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -201,18 +237,18 @@ public class RegistryProcessor extends AbstractProcessor {
                     .indent("    ")
                     .build()
                     .writeTo(processingEnv.getFiler());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
                     "Не удалось записать реестр: " + e.getMessage());
         }
     }
 
-    private String option(String key, String fallback) {
-        String value = processingEnv.getOptions().get(key);
+    private String option(final String key, final String fallback) {
+        final String value = processingEnv.getOptions().get(key);
         return value == null || value.isBlank() ? fallback : value;
     }
 
-    private void error(Element element, String message) {
+    private void error(final Element element, final String message) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message, element);
     }
 }

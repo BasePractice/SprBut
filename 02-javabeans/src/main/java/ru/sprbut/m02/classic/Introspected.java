@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m02.classic;
 
 import java.beans.BeanInfo;
@@ -10,28 +16,38 @@ import java.util.Optional;
 
 /**
  * Слайд 16: «Используется в таких фреймворках как Spring, Hibernate, JavaEE».
- * <p>
- * Соглашение JavaBeans поддержано прямо в JDK: пакет {@code java.beans} сам
+ *
+ * <p>Соглашение JavaBeans поддержано прямо в JDK: пакет {@code java.beans} сам
  * находит пары getter/setter и отдаёт их как {@link PropertyDescriptor}.
  * Ровно этим пользуется {@code org.springframework.beans.BeanWrapper}
- * при биндинге данных формы.
- * <p>
- * Служебное свойство {@code class} — от {@code Object.getClass()} — есть
- * у любого объекта и в отчётах только мешает, поэтому отфильтровано.
+ * при биндинге данных формы.</p>
+ *
+ * <p>Служебное свойство {@code class} — от {@code Object.getClass()} — есть
+ * у любого объекта и в отчётах только мешает, поэтому отфильтровано.</p>
+ *
+ * @since 1.0
  */
 public final class Introspected {
 
+    /**
+     * Тип.
+     */
     private final Class<?> type;
 
-    public Introspected(Class<?> type) {
+    /**
+     * Основной конструктор.
+     * @param type Тип
+     */
+    public Introspected(final Class<?> type) {
         this.type = type;
     }
 
     /**
      * Имена всех свойств бина.
+     * @return Имена всех свойств бина
      */
     public List<String> names() {
-        return descriptors().stream()
+        return this.descriptors().stream()
             .map(PropertyDescriptor::getName)
             .filter(name -> !"class".equals(name))
             .sorted()
@@ -40,9 +56,10 @@ public final class Introspected {
 
     /**
      * Свойства, у которых есть и getter, и setter, — по-настоящему управляемые контейнером.
+     * @return Свойства, у которых есть и getter, и setter, — по-настоящему управляемые контейнером
      */
     public List<String> readWrite() {
-        return descriptors().stream()
+        return this.descriptors().stream()
             .filter(property -> property.getReadMethod() != null)
             .filter(property -> property.getWriteMethod() != null)
             .map(PropertyDescriptor::getName)
@@ -52,9 +69,10 @@ public final class Introspected {
 
     /**
      * Свойства только для чтения: {@code getFullName()} без сеттера.
+     * @return Свойства только для чтения: {@code getFullName()} без сеттера
      */
     public List<String> readOnly() {
-        return descriptors().stream()
+        return this.descriptors().stream()
             .filter(property -> property.getReadMethod() != null)
             .filter(property -> property.getWriteMethod() == null)
             .map(PropertyDescriptor::getName)
@@ -65,21 +83,24 @@ public final class Introspected {
 
     /**
      * Описание одного свойства по имени.
+     * @param property Имя свойства
+     * @return Описание одного свойства по имени
      */
-    public Optional<PropertyDescriptor> descriptor(String property) {
-        return descriptors().stream()
+    public Optional<PropertyDescriptor> descriptor(final String property) {
+        return this.descriptors().stream()
             .filter(candidate -> candidate.getName().equals(property))
             .findFirst();
     }
 
     /**
      * Все описания свойств, как их видит {@link Introspector}.
+     * @return Все описания свойств, как их видит {@link Introspector}
      */
     public List<PropertyDescriptor> descriptors() {
         try {
-            BeanInfo info = Introspector.getBeanInfo(this.type);
+            final BeanInfo info = Introspector.getBeanInfo(this.type);
             return Arrays.asList(info.getPropertyDescriptors());
-        } catch (IntrospectionException failure) {
+        } catch (final IntrospectionException failure) {
             throw new IllegalStateException(
                 "Introspector не смог разобрать " + this.type.getName(), failure
             );

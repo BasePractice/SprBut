@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m04;
 
 import java.lang.reflect.GenericArrayType;
@@ -10,27 +16,37 @@ import java.util.List;
 
 /**
  * Слайд 32: «Стирание типов: getGenericType, ParameterizedType».
- * <p>
- * Стирание не абсолютно. Из байткода исчезают типы <i>значений</i>, но
+ *
+ * <p>Стирание не абсолютно. Из байткода исчезают типы <i>значений</i>, но
  * <i>объявления</i> — полей, параметров, возвращаемых значений, суперклассов —
  * сохраняют параметры типа в атрибуте {@code Signature}. Именно поэтому Jackson
  * умеет десериализовать в {@code List<Order>}, а Spring — понять, что бину
- * нужен {@code Repository<User>}.
- * <p>
- * {@link Type} — не один класс, а семейство: разбирать сигнатуру приходится,
- * спрашивая у каждого узла, какого он рода.
+ * нужен {@code Repository<User>}.</p>
+ *
+ * <p>{@link Type} — не один класс, а семейство: разбирать сигнатуру приходится,
+ * спрашивая у каждого узла, какого он рода.</p>
+ *
+ * @since 1.0
  */
 public final class GenericType {
 
+    /**
+     * Тип.
+     */
     private final Type type;
 
-    public GenericType(Type type) {
+    /**
+     * Основной конструктор.
+     * @param type Тип
+     */
+    public GenericType(final Type type) {
         this.type = type;
     }
 
     /**
      * Параметры типа. Для {@code Map<String, List<Integer>>} — оба, вторым
      * останется вложенный {@code List<Integer>} целиком.
+     * @return Параметры типа. Для {@code Map<String, List<Integer>>} — оба, вторым останется вложенный {@code List<Integer>} целиком
      */
     public List<String> arguments() {
         if (this.type instanceof ParameterizedType parameterized) {
@@ -43,6 +59,7 @@ public final class GenericType {
 
     /**
      * Разновидность узла в дереве типов — ключ к разбору произвольной сигнатуры.
+     * @return Разновидность узла в дереве типов — ключ к разбору произвольной сигнатуры
      */
     public String kind() {
         if (this.type instanceof ParameterizedType) {
@@ -66,6 +83,7 @@ public final class GenericType {
     /**
      * Верхняя граница: для {@code ? extends Number} — {@code Number},
      * для переменной типа — её объявленные границы.
+     * @return Верхняя граница: для {@code ? extends Number} — {@code Number}, для переменной типа — её объявленные границы
      */
     public List<String> bounds() {
         if (this.type instanceof WildcardType wildcard) {

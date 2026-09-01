@@ -1,131 +1,137 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m04;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.emptyIterable;
-import static org.hamcrest.Matchers.equalTo;
-
+/**
+ * Слайд 32: стирание типов не абсолютно.
+ * @since 1.0
+ */
 @DisplayName("Слайд 32: стирание типов не абсолютно")
 final class GenericTypeTest {
 
     @Test
     @DisplayName("параметры типа поля сохранены в атрибуте Signature")
     void keepsFieldTypeArguments() throws NoSuchFieldException {
-        assertThat(
+        MatcherAssert.assertThat(
             "field type arguments cannot survive erasure",
             new GenericType(Holder.class.getField("names").getGenericType()).arguments(),
-            contains("java.lang.String")
+            Matchers.contains("java.lang.String")
         );
     }
 
     @Test
     @DisplayName("вложенный дженерик остаётся вложенным")
     void keepsNestedTypeArguments() throws NoSuchFieldException {
-        assertThat(
+        MatcherAssert.assertThat(
             "nested generic cannot stay nested",
             new GenericType(Holder.class.getField("nested").getGenericType()).arguments(),
-            contains("java.lang.String", "java.util.List<java.lang.Integer>")
+            Matchers.contains("java.lang.String", "java.util.List<java.lang.Integer>")
         );
     }
 
     @Test
     @DisplayName("у необобщённого поля параметров типа нет")
     void reportsNoArgumentsForPlainField() throws NoSuchFieldException {
-        assertThat(
+        MatcherAssert.assertThat(
             "plain field cannot report an empty argument list",
             new GenericType(Holder.class.getField("plain").getGenericType()).arguments(),
-            emptyIterable()
+            Matchers.emptyIterable()
         );
     }
 
     @Test
     @DisplayName("параметризованный тип распознаётся как ParameterizedType")
     void classifiesParameterizedType() throws NoSuchFieldException {
-        assertThat(
+        MatcherAssert.assertThat(
             "parameterized type cannot be classified",
             new GenericType(Holder.class.getField("names").getGenericType()).kind(),
-            equalTo("ParameterizedType")
+            Matchers.equalTo("ParameterizedType")
         );
     }
 
     @Test
     @DisplayName("wildcard — отдельный род узла")
     void classifiesWildcard() throws NoSuchFieldException {
-        Type argument = ((ParameterizedType) Holder.class.getField("covariant").getGenericType())
+        final Type argument = ((ParameterizedType) Holder.class.getField("covariant").getGenericType())
             .getActualTypeArguments()[0];
-        assertThat(
+        MatcherAssert.assertThat(
             "wildcard cannot be classified as its own kind",
             new GenericType(argument).kind(),
-            equalTo("WildcardType")
+            Matchers.equalTo("WildcardType")
         );
     }
 
     @Test
     @DisplayName("переменная типа — тоже отдельный род узла")
     void classifiesTypeVariable() throws NoSuchFieldException {
-        assertThat(
+        MatcherAssert.assertThat(
             "type variable cannot be classified as its own kind",
             new GenericType(Holder.class.getField("typeVariable").getGenericType()).kind(),
-            equalTo("TypeVariable")
+            Matchers.equalTo("TypeVariable")
         );
     }
 
     @Test
     @DisplayName("обобщённый массив отличается от обычного")
     void classifiesGenericArray() throws NoSuchFieldException {
-        assertThat(
+        MatcherAssert.assertThat(
             "generic array cannot be told apart from a plain one",
             new GenericType(Holder.class.getField("genericArray").getGenericType()).kind(),
-            equalTo("GenericArrayType")
+            Matchers.equalTo("GenericArrayType")
         );
     }
 
     @Test
     @DisplayName("верхняя граница wildcard читается напрямую")
     void readsWildcardBound() throws NoSuchFieldException {
-        Type argument = ((ParameterizedType) Holder.class.getField("covariant").getGenericType())
+        final Type argument = ((ParameterizedType) Holder.class.getField("covariant").getGenericType())
             .getActualTypeArguments()[0];
-        assertThat(
+        MatcherAssert.assertThat(
             "wildcard upper bound cannot be read",
             new GenericType(argument).bounds(),
-            contains("java.lang.Number")
+            Matchers.contains("java.lang.Number")
         );
     }
 
     @Test
     @DisplayName("границы переменной типа читаются так же")
     void readsTypeVariableBounds() throws NoSuchFieldException {
-        assertThat(
+        MatcherAssert.assertThat(
             "type variable bounds cannot be read",
             new GenericType(Holder.class.getField("typeVariable").getGenericType()).bounds(),
-            contains("java.lang.Comparable<T>")
+            Matchers.contains("java.lang.Comparable<T>")
         );
     }
 
     @Test
     @DisplayName("тип возвращаемого значения тоже сохраняет параметры")
     void keepsReturnTypeArguments() throws NoSuchMethodException {
-        assertThat(
+        MatcherAssert.assertThat(
             "return type arguments cannot survive erasure",
             new GenericType(Holder.class.getMethod("produce").getGenericReturnType()).arguments(),
-            contains("T")
+            Matchers.contains("T")
         );
     }
 
     @Test
     @DisplayName("анонимный подкласс ловит фактический параметр типа")
     void capturesTypeByToken() {
-        assertThat(
+        MatcherAssert.assertThat(
             "type token cannot capture the actual type argument",
             new TypeToken<List<String>>() {
             }.type().getTypeName(),
-            equalTo("java.util.List<java.lang.String>")
+            Matchers.equalTo("java.util.List<java.lang.String>")
         );
     }
 }

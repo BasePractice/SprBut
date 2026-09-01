@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m06;
 
 import java.lang.annotation.Annotation;
@@ -8,45 +14,59 @@ import java.util.Set;
 
 /**
  * Слайд 55: «{@code @RestController} = {@code @Controller} + {@code @ResponseBody}».
- * <p>
- * Важное следствие композиции: штатный {@code getAnnotation(Controller.class)}
+ *
+ * <p>Важное следствие композиции: штатный {@code getAnnotation(Controller.class)}
  * на классе с {@code @RestController} вернёт {@code null} — язык мета-аннотации
  * не раскрывает. Искать их приходится рекурсивно вручную, что Spring и делает
- * в {@code AnnotatedElementUtils}.
- * <p>
- * Обход обязан помнить, где был: {@code @Retention} помечена {@code @Retention},
- * и наивная рекурсия зациклилась бы на первом же шаге.
+ * в {@code AnnotatedElementUtils}.</p>
+ *
+ * <p>Обход обязан помнить, где был: {@code @Retention} помечена {@code @Retention},
+ * и наивная рекурсия зациклилась бы на первом же шаге.</p>
+ *
+ * @since 1.0
  */
 public final class MetaAnnotated {
 
+    /**
+     * Тип.
+     */
     private final Class<?> type;
 
-    public MetaAnnotated(Class<?> type) {
+    /**
+     * Основной конструктор.
+     * @param type Тип
+     */
+    public MetaAnnotated(final Class<?> type) {
         this.type = type;
     }
 
     /**
      * Наивная проверка: только то, что написано прямо на классе.
+     * @param annotation Аннотация
+     * @return Наивная проверка: только то, что написано прямо на классе
      */
-    public boolean direct(Class<? extends Annotation> annotation) {
+    public boolean direct(final Class<? extends Annotation> annotation) {
         return this.type.isAnnotationPresent(annotation);
     }
 
     /**
      * Рекурсивный поиск, в том числе через мета-аннотации, — упрощённый
      * {@code AnnotatedElementUtils.hasAnnotation}.
+     * @param annotation Аннотация
+     * @return Рекурсивный поиск, в том числе через мета-аннотации, — упрощённый {@code AnnotatedElementUtils.hasAnnotation}
      */
-    public boolean deep(Class<? extends Annotation> annotation) {
-        return search(this.type.getAnnotations(), annotation, new HashSet<>());
+    public boolean deep(final Class<? extends Annotation> annotation) {
+        return this.search(this.type.getAnnotations(), annotation, new HashSet<>());
     }
 
     /**
      * Полная цепочка мета-аннотаций вглубь — то, что нужно печатать при отладке
      * «почему мой бин не подхватился».
+     * @return Полная цепочка мета-аннотаций вглубь — то, что нужно печатать при отладке «почему мой бин не подхватился»
      */
     public List<String> chain() {
-        List<String> collected = new ArrayList<>();
-        collect(this.type.getAnnotations(), collected, new HashSet<>(), 0);
+        final List<String> collected = new ArrayList<>();
+        this.collect(this.type.getAnnotations(), collected, new HashSet<>(), 0);
         return List.copyOf(collected);
     }
 
@@ -56,14 +76,14 @@ public final class MetaAnnotated {
         Set<Class<? extends Annotation>> visited
     ) {
         for (Annotation each : annotations) {
-            Class<? extends Annotation> candidate = each.annotationType();
+            final Class<? extends Annotation> candidate = each.annotationType();
             if (candidate.equals(target)) {
                 return true;
             }
             if (new Builtin(candidate).yes() || !visited.add(candidate)) {
                 continue;
             }
-            if (search(candidate.getAnnotations(), target, visited)) {
+            if (this.search(candidate.getAnnotations(), target, visited)) {
                 return true;
             }
         }
@@ -77,12 +97,12 @@ public final class MetaAnnotated {
         int depth
     ) {
         for (Annotation each : annotations) {
-            Class<? extends Annotation> candidate = each.annotationType();
+            final Class<? extends Annotation> candidate = each.annotationType();
             if (new Builtin(candidate).yes() || !visited.add(candidate)) {
                 continue;
             }
             sink.add("  ".repeat(depth) + "@" + candidate.getSimpleName());
-            collect(candidate.getAnnotations(), sink, visited, depth + 1);
+            this.collect(candidate.getAnnotations(), sink, visited, depth + 1);
         }
     }
 }

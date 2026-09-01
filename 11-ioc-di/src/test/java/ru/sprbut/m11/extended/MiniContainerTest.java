@@ -1,20 +1,21 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m11.extended;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+/**
+ * Расширенный пример: собственный IoC-контейнер.
+ * @since 1.0
+ */
 @DisplayName("Расширенный пример: собственный IoC-контейнер")
 final class MiniContainerTest {
 
@@ -27,246 +28,258 @@ final class MiniContainerTest {
     }
 
     @Nested
+/**
+ * Контейнер собирает граф.
+ * @since 1.0
+ */
     @DisplayName("Контейнер собирает граф")
     class Wiring {
 
         @Test
         @DisplayName("Зависимости подбираются по типу и внедряются через конструктор")
         void injectsByType() {
-            Components.OrderFacade facade = healthyContainer().getBean(Components.OrderFacade.class);
+            final Components.OrderFacade facade = healthyContainer().getBean(Components.OrderFacade.class);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "container cannot wire the graph by type",
                 facade.checkout("книга"),
-                equalTo("2026-07-30 книга")
+                Matchers.equalTo("2026-07-30 книга")
             );
         }
 
         @Test
         @DisplayName("Бины — синглтоны: один и тот же экземпляр везде")
         void beansAreSingletons() {
-            MiniContainer container = healthyContainer();
+            final MiniContainer container = healthyContainer();
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "container cannot keep beans singleton",
                 container.getBean(Components.Repository.class),
-                sameInstance(container.getBean(Components.OrderService.class).repository())
+                Matchers.sameInstance(container.getBean(Components.OrderService.class).repository())
             );
         }
 
         @Test
         @DisplayName("Порядок создания вычисляется из графа: сначала зависимости")
         void creationOrderFollowsTheGraph() {
-            MiniContainer container = healthyContainer();
+            final MiniContainer container = healthyContainer();
             container.getBean(Components.OrderFacade.class);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "creation order cannot follow the dependency graph",
                 container.creationOrder(),
-                contains("repository", "clock", "orders", "orderFacade")
+                Matchers.contains("repository", "clock", "orders", "orderFacade")
             );
         }
 
         @Test
         @DisplayName("Пока бин не запрошен, он не создан — ленивость по умолчанию")
         void beansAreCreatedOnDemand() {
-            MiniContainer container = healthyContainer();
+            final MiniContainer container = healthyContainer();
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "unrequested bean cannot stay uncreated",
                 container.isCreated("repository"),
-                equalTo(false)
+                Matchers.equalTo(false)
             );
         }
 
         @Test
         @DisplayName("после запроса бин создан")
         void createsOnRequest() {
-            MiniContainer container = healthyContainer();
+            final MiniContainer container = healthyContainer();
             container.getBean(Components.Repository.class);
-            assertThat(
+            MatcherAssert.assertThat(
                 "requested bean cannot be created",
                 container.isCreated("repository"),
-                equalTo(true)
+                Matchers.equalTo(true)
             );
         }
 
         @Test
         @DisplayName("refresh() создаёт все бины сразу — как Spring поступает с синглтонами")
         void refreshCreatesEverything() {
-            MiniContainer container = healthyContainer().refresh();
+            final MiniContainer container = healthyContainer().refresh();
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "refresh cannot create every singleton at once",
                 container.beanNames(),
-                containsInAnyOrder("orderFacade", "orders", "repository", "clock")
+                Matchers.containsInAnyOrder("orderFacade", "orders", "repository", "clock")
             );
         }
 
         @Test
         @DisplayName("Имя бина берётся из аннотации, иначе — из имени класса")
         void resolvesBeanNames() {
-            MiniContainer container = healthyContainer();
+            final MiniContainer container = healthyContainer();
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "annotation cannot define the bean name",
                 container.beanNames(),
-                hasItem("orders")
+                Matchers.hasItem("orders")
             );
         }
 
         @Test
         @DisplayName("по заданному имени находится нужный бин")
         void findsBeanByName() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "named bean cannot be found by its name",
                 healthyContainer().getBean("orders"),
-                instanceOf(Components.OrderService.class)
+                Matchers.instanceOf(Components.OrderService.class)
             );
         }
 
         @Test
         @DisplayName("Поиск по интерфейсу находит реализацию")
         void findsByInterface() {
-            MiniContainer container = new MiniContainer(Components.CardPayment.class);
+            final MiniContainer container = new MiniContainer(Components.CardPayment.class);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "interface lookup cannot find the implementation",
                 container.getBean(Components.Payment.class).kind(),
-                equalTo("card")
+                Matchers.equalTo("card")
             );
         }
     }
 
     @Nested
+/**
+ * Ошибки, которые повторяет настоящий Spring.
+ * @since 1.0
+ */
     @DisplayName("Ошибки, которые повторяет настоящий Spring")
     class Failures {
 
         @Test
         @DisplayName("Зависимости нет в контейнере — аналог NoSuchBeanDefinitionException")
         void missingDependency() {
-            MiniContainer container = new MiniContainer(Components.NeedsUnmanaged.class);
+            final MiniContainer container = new MiniContainer(Components.NeedsUnmanaged.class);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "missing dependency cannot be named in the failure",
-                assertThrows(
+                Assertions.assertThrows(
                     MiniContainer.NoSuchBeanException.class,
                     () -> container.getBean(Components.NeedsUnmanaged.class)
                 ).getMessage(),
-                containsString("UnmanagedDependency")
+                Matchers.containsString("UnmanagedDependency")
             );
         }
 
         @Test
         @DisplayName("Кандидатов слишком много — аналог NoUniqueBeanDefinitionException")
         void ambiguousDependency() {
-            MiniContainer container = new MiniContainer(
+            final MiniContainer container = new MiniContainer(
                     Components.CardPayment.class, Components.CashPayment.class);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "ambiguous candidates cannot be listed in the failure",
-                assertThrows(
+                Assertions.assertThrows(
                     MiniContainer.NoUniqueBeanException.class,
                     () -> container.getBean(Components.Payment.class)
                 ).getMessage(),
-                containsString("cardPayment")
+                Matchers.containsString("cardPayment")
             );
         }
 
         @Test
         @DisplayName("Цикл через конструкторы — аналог BeanCurrentlyInCreationException")
         void circularDependency() {
-            MiniContainer container = new MiniContainer(
+            final MiniContainer container = new MiniContainer(
                     Components.AlphaService.class, Components.BetaService.class);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "circular dependency cannot name both beans",
-                assertThrows(
+                Assertions.assertThrows(
                     MiniContainer.CircularDependencyException.class,
                     () -> container.getBean(Components.AlphaService.class)
                 ).getMessage(),
-                containsString("BetaService")
+                Matchers.containsString("BetaService")
             );
         }
 
         @Test
         @DisplayName("Несколько конструкторов без явного указания — контейнер отказывается гадать")
         void ambiguousConstructor() {
-            MiniContainer container = new MiniContainer(
+            final MiniContainer container = new MiniContainer(
                     Components.TwoConstructors.class, Components.Repository.class,
                     Components.Clock.class);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "ambiguous constructor cannot make the container refuse to guess",
-                assertThrows(
+                Assertions.assertThrows(
                     IllegalStateException.class,
                     () -> container.getBean(Components.TwoConstructors.class)
                 ).getMessage(),
-                containsString("несколько конструкторов")
+                Matchers.containsString("несколько конструкторов")
             );
         }
 
         @Test
         @DisplayName("Неуправляемый класс зарегистрировать нельзя")
         void unmanagedClassCannotBeRegistered() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "unmanaged class cannot be rejected at registration",
-                assertThrows(
+                Assertions.assertThrows(
                     IllegalArgumentException.class,
                     () -> new MiniContainer(Components.UnmanagedDependency.class)
                 ).getMessage(),
-                containsString("@MiniComponent")
+                Matchers.containsString("@MiniComponent")
             );
         }
 
         @Test
         @DisplayName("Дубликат имени бина обнаруживается сразу при регистрации")
         void duplicateBeanName() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "duplicate bean name cannot be caught at registration",
-                assertThrows(
+                Assertions.assertThrows(
                     IllegalStateException.class,
                     () -> new MiniContainer(Components.Repository.class, Components.Repository.class)
                 ).getMessage(),
-                containsString("уже занято")
+                Matchers.containsString("уже занято")
             );
         }
 
         @Test
         @DisplayName("Неизвестное имя бина — понятная ошибка со списком известных")
         void unknownBeanName() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "unknown bean name cannot be reported with the known ones",
-                assertThrows(
+                Assertions.assertThrows(
                     MiniContainer.NoSuchBeanException.class,
                     () -> healthyContainer().getBean("нет-такого")
                 ).getMessage(),
-                containsString("известны")
+                Matchers.containsString("известны")
             );
         }
     }
 
     @Nested
+/**
+ * Единственный конструктор — правило Spring.
+ * @since 1.0
+ */
     @DisplayName("Единственный конструктор — правило Spring")
     class ConstructorSelection {
 
         @Test
         @DisplayName("Один конструктор используется без всяких аннотаций")
         void singleConstructorNeedsNoAnnotation() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "single constructor cannot be used without an annotation",
                 MiniContainer.selectConstructor(Components.OrderService.class).getParameterCount(),
-                equalTo(2)
+                Matchers.equalTo(2)
             );
         }
 
         @Test
         @DisplayName("Имя бина по умолчанию — имя класса с маленькой буквы")
         void defaultNameIsDecapitalizedClassName() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "default bean name cannot be the decapitalised class name",
                 MiniContainer.defaultName(Components.Repository.class),
-                equalTo("repository")
+                Matchers.equalTo("repository")
             );
         }
     }

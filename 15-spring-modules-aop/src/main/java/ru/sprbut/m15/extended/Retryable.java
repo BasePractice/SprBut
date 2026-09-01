@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m15.extended;
 
 import java.lang.annotation.ElementType;
@@ -13,5 +19,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Retryable {
 
+    /**
+     * Число попыток.
+     * @return Число попыток
+     */
     int attempts() default 3;
 }

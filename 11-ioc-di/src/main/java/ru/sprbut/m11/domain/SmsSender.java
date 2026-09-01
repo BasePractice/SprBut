@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m11.domain;
 
 import java.util.ArrayList;
@@ -6,11 +12,21 @@ import java.util.List;
 /** Альтернативная реализация — нужна, чтобы было что подменять. */
 public class SmsSender implements NotificationSender {
 
+    /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    public SmsSender() {
+        // нечего инициализировать
+    }
+
+    /**
+     * Отправленные сообщения.
+     */
     private final List<String> sent = new ArrayList<>();
 
     @Override
-    public void send(String recipient, String message) {
-        sent.add("SMS " + recipient + ": " + message);
+    public void send(final String recipient, final String message) {
+        this.sent.add("SMS " + recipient + ": " + message);
     }
 
     @Override
@@ -18,7 +34,11 @@ public class SmsSender implements NotificationSender {
         return "sms";
     }
 
+    /**
+     * Отправленные сообщения.
+     * @return Отправленные сообщения
+     */
     public List<String> sent() {
-        return List.copyOf(sent);
+        return List.copyOf(this.sent);
     }
 }

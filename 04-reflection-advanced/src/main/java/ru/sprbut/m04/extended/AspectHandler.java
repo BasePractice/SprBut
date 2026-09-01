@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m04.extended;
 
 import java.lang.invoke.MethodHandle;
@@ -10,26 +16,45 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Единственная точка, через которую проходят все вызовы прокси.
- * <p>
- * Порядок аспектов здесь — часть контракта, а не случайность: заглушка
+ *
+ * <p>Порядок аспектов здесь — часть контракта, а не случайность: заглушка
  * отменяет вызов целиком, кэш стоит выше повторов (незачем повторять то,
- * что уже посчитано), замер времени охватывает все попытки.
- * <p>
- * Методы {@code Object} — {@code equals}, {@code hashCode}, {@code toString} —
+ * что уже посчитано), замер времени охватывает все попытки.</p>
+ *
+ * <p>Методы {@code Object} — {@code equals}, {@code hashCode}, {@code toString} —
  * проксировать нельзя: иначе прокси станет непригоден для отладки и для
- * помещения в коллекции.
+ * помещения в коллекции.</p>
+ *
+ * @since 1.0
  */
 public final class AspectHandler implements InvocationHandler {
 
+    /**
+     * Целевой объект.
+     */
     private final Object target;
 
+    /**
+     * Журнал.
+     */
     private final Journal journal;
 
+    /**
+     * Значение {@code handles}.
+     */
     private final Map<Method, MethodHandle> handles;
 
+    /**
+     * Значение {@code results}.
+     */
     private final Map<String, Object> results;
 
-    public AspectHandler(Object target, Journal journal) {
+    /**
+     * Основной конструктор.
+     * @param target Целевой объект
+     * @param journal Журнал
+     */
+    public AspectHandler(final Object target, final Journal journal) {
         this.target = target;
         this.journal = journal;
         this.handles = new ConcurrentHashMap<>();
@@ -37,30 +62,30 @@ public final class AspectHandler implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
         if (method.getDeclaringClass() == Object.class) {
             return method.invoke(this.target, args);
         }
-        Method implementation = new TargetMethod(this.target, method).method();
-        Stubbed stubbed = implementation.getAnnotation(Stubbed.class);
+        final Method implementation = new TargetMethod(this.target, method).method();
+        final Stubbed stubbed = implementation.getAnnotation(Stubbed.class);
         if (stubbed != null) {
             this.journal.record("stub " + method.getName());
             return stubbed.value();
         }
         if (implementation.isAnnotationPresent(Cached.class)) {
-            return cached(method, implementation, args);
+            return this.cached(method, implementation, args);
         }
-        return timed(method, implementation, args);
+        return this.timed(method, implementation, args);
     }
 
-    private Object cached(Method method, Method implementation, Object[] args) throws Throwable {
-        String key = method.getName() + Arrays.toString(args);
-        Object stored = this.results.get(key);
+    private Object cached(final Method method, final Method implementation, final Object[] args) throws Throwable {
+        final String key = method.getName() + Arrays.toString(args);
+        final Object stored = this.results.get(key);
         if (stored != null) {
             this.journal.record("cache-hit " + method.getName());
             return stored;
         }
-        Object computed = timed(method, implementation, args);
+        final Object computed = this.timed(method, implementation, args);
         if (computed != null) {
             this.results.put(key, computed);
         }
@@ -68,15 +93,15 @@ public final class AspectHandler implements InvocationHandler {
         return computed;
     }
 
-    private Object timed(Method method, Method implementation, Object[] args) throws Throwable {
-        boolean measured = implementation.isAnnotationPresent(Timed.class);
-        long started = measured ? System.nanoTime() : 0L;
+    private Object timed(final Method method, final Method implementation, final Object[] args) throws Throwable {
+        final boolean measured = implementation.isAnnotationPresent(Timed.class);
+        final long started = measured ? System.nanoTime() : 0L;
         try {
-            Retry retry = implementation.getAnnotation(Retry.class);
+            final Retry retry = implementation.getAnnotation(Retry.class);
             if (retry == null) {
-                return call(method, args);
+                return this.call(method, args);
             }
-            return repeated(method, args, retry.attempts());
+            return this.repeated(method, args, retry.attempts());
         } finally {
             if (measured) {
                 this.journal.record(
@@ -86,16 +111,16 @@ public final class AspectHandler implements InvocationHandler {
         }
     }
 
-    private Object repeated(Method method, Object[] args, int attempts) throws Throwable {
+    private Object repeated(final Method method, final Object[] args, final int attempts) throws Throwable {
         Throwable last = null;
         for (int attempt = 1; attempt <= attempts; attempt++) {
             try {
-                Object result = call(method, args);
+                final Object result = this.call(method, args);
                 if (attempt > 1) {
                     this.journal.record("retry-success " + method.getName() + " попытка " + attempt);
                 }
                 return result;
-            } catch (Throwable failure) {
+            } catch (final Throwable failure) {
                 last = failure;
                 this.journal.record("retry-fail " + method.getName() + " попытка " + attempt);
             }
@@ -104,18 +129,18 @@ public final class AspectHandler implements InvocationHandler {
         throw last;
     }
 
-    private Object call(Method method, Object[] args) throws Throwable {
-        MethodHandle handle = this.handles.computeIfAbsent(
+    private Object call(final Method method, final Object[] args) throws Throwable {
+        final MethodHandle handle = this.handles.computeIfAbsent(
             method, each -> new TargetMethod(this.target, each).handle()
         );
-        Object[] withReceiver = new Object[(args == null ? 0 : args.length) + 1];
+        final Object[] withReceiver = new Object[(args == null ? 0 : args.length) + 1];
         withReceiver[0] = this.target;
         if (args != null) {
             System.arraycopy(args, 0, withReceiver, 1, args.length);
         }
         try {
             return handle.invokeWithArguments(withReceiver);
-        } catch (InvocationTargetException wrapped) {
+        } catch (final InvocationTargetException wrapped) {
             throw wrapped.getCause();
         }
     }

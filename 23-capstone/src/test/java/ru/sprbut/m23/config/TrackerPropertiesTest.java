@@ -1,5 +1,12 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m23.config;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -8,47 +15,55 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-
+/**
+ * Конфигурация: приоритеты источников и профили.
+ * @since 1.0
+ */
 @DisplayName("Конфигурация: приоритеты источников и профили")
 final class TrackerPropertiesTest {
 
     @Test
     @DisplayName("значения по умолчанию живут в самом конструкторе")
     void fallsBackToCodeDefaults() {
-        assertThat(
+        MatcherAssert.assertThat(
             "constructor cannot supply the default limit",
             new TrackerProperties(null, null, null).limit(),
-            equalTo(100)
+            Matchers.equalTo(100)
         );
     }
 
     @Test
     @DisplayName("свойства неизменяемы: сеттеров нет, значения приезжают один раз")
     void keepsValuesImmutable() {
-        assertThat(
+        MatcherAssert.assertThat(
             "constructor binding cannot fix the title once",
             new TrackerProperties("Свой трекер", 5, false).title(),
-            equalTo("Свой трекер")
+            Matchers.equalTo("Свой трекер")
         );
     }
 
     @Nested
     @SpringBootTest
+/**
+ * значения из application.yaml.
+ * @since 1.0
+ */
     @DisplayName("значения из application.yaml")
     class FromFile {
 
+        /**
+         * Настройки.
+         */
         @Autowired
         private TrackerProperties settings;
 
         @Test
         @DisplayName("yaml перебивает значения по умолчанию из кода")
         void overridesCodeDefaults() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "yaml cannot override the code default title",
                 this.settings.title(),
-                equalTo("SprBut Tracker")
+                Matchers.equalTo("SprBut Tracker")
             );
         }
     }
@@ -56,19 +71,26 @@ final class TrackerPropertiesTest {
     @Nested
     @SpringBootTest
     @ActiveProfiles("demo")
+/**
+ * профиль demo.
+ * @since 1.0
+ */
     @DisplayName("профиль demo")
     class FromProfile {
 
+        /**
+         * Настройки.
+         */
         @Autowired
         private TrackerProperties settings;
 
         @Test
         @DisplayName("профиль перебивает основной файл")
         void overridesBaseFile() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "profile file cannot override the base yaml",
                 this.settings.limit(),
-                equalTo(3)
+                Matchers.equalTo(3)
             );
         }
     }
@@ -77,19 +99,26 @@ final class TrackerPropertiesTest {
     @SpringBootTest
     @ActiveProfiles("demo")
     @TestPropertySource(properties = "tracker.limit=42")
+/**
+ * явное свойство поверх профиля.
+ * @since 1.0
+ */
     @DisplayName("явное свойство поверх профиля")
     class FromProperty {
 
+        /**
+         * Настройки.
+         */
         @Autowired
         private TrackerProperties settings;
 
         @Test
         @DisplayName("заданное снаружи свойство сильнее любого файла")
         void outranksEveryFile() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "external property cannot outrank the profile file",
                 this.settings.limit(),
-                equalTo(42)
+                Matchers.equalTo(42)
             );
         }
     }

@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m05.declarations;
 
 import java.lang.annotation.ElementType;
@@ -9,12 +14,13 @@ import java.lang.annotation.Target;
  * Слайд 40: {@code @Retention{SOURCE, CLASS, RUNTIME}} — три аннотации, отличающиеся
  * только политикой хранения. На них видно, что политика решает всё.
  * <ul>
- *   <li><b>SOURCE</b> — существует только для компилятора и annotation processor'ов;
- *       в class-файл не попадает вовсе. Пример: {@code @Override}, лombok'овские аннотации;</li>
- *   <li><b>CLASS</b> (значение по умолчанию!) — попадает в class-файл, но JVM её
- *       не загружает. Читают только инструменты, работающие с байткодом;</li>
- *   <li><b>RUNTIME</b> — доступна через рефлексию. Всё, на чём стоит Spring.</li>
+ * <li><b>SOURCE</b> — существует только для компилятора и annotation processor'ов;
+ * в class-файл не попадает вовсе. Пример: {@code @Override}, лombok'овские аннотации;</li>
+ * <li><b>CLASS</b> (значение по умолчанию!) — попадает в class-файл, но JVM её
+ * не загружает. Читают только инструменты, работающие с байткодом;</li>
+ * <li><b>RUNTIME</b> — доступна через рефлексию. Всё, на чём стоит Spring.</li>
  * </ul>
+ * @since 1.0
  */
 public final class Retentions {
 

@@ -1,67 +1,73 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m08;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+/**
+ * Слайд 66: регистрация процессора через META-INF/services.
+ * @since 1.0
+ */
 @DisplayName("Слайд 66: регистрация процессора через META-INF/services")
 final class ProcessorRegistrationTest {
 
     @Test
     @DisplayName("файл регистрации перечисляет процессоры модуля 07")
     void listsDeclaredProcessors() {
-        assertThat(
+        MatcherAssert.assertThat(
             "service file cannot list the declared processor",
             new ProcessorRegistration().declared(),
-            hasItem("ru.sprbut.m07.BuilderProcessor")
+            Matchers.hasItem("ru.sprbut.m07.BuilderProcessor")
         );
     }
 
     @Test
     @DisplayName("ServiceLoader загружает ровно то, что объявлено в файле")
     void loadsExactlyWhatIsDeclared() {
-        assertThat(
+        MatcherAssert.assertThat(
             "service loader cannot load exactly the declared processors",
             new ProcessorRegistration().loaded(),
-            equalTo(new ProcessorRegistration().declared())
+            Matchers.equalTo(new ProcessorRegistration().declared())
         );
     }
 
     @Test
     @DisplayName("процессор сам объявляет, какие аннотации обрабатывает")
     void readsSupportedAnnotations() {
-        assertThat(
+        MatcherAssert.assertThat(
             "processor cannot declare its supported annotations",
             new ProcessorRegistration().supported("ru.sprbut.m07.BuilderProcessor"),
-            hasItem(containsString("Builder"))
+            Matchers.hasItem(Matchers.containsString("Builder"))
         );
     }
 
     @Test
     @DisplayName("незарегистрированный процессор — понятная ошибка с его именем")
     void failsOnUnregisteredProcessor() {
-        assertThat(
+        MatcherAssert.assertThat(
             "unregistered processor cannot be reported by name",
-            assertThrows(
+            Assertions.assertThrows(
                 IllegalArgumentException.class,
                 () -> new ProcessorRegistration().supported("ru.sprbut.Nope")
             ).getMessage(),
-            containsString("ru.sprbut.Nope")
+            Matchers.containsString("ru.sprbut.Nope")
         );
     }
 
     @Test
     @DisplayName("путь регистрации — часть контракта javac, а не выдумка проекта")
     void keepsStandardServicePath() {
-        assertThat(
+        MatcherAssert.assertThat(
             "service path cannot follow the javac contract",
             new ProcessorRegistration().servicePath(),
-            equalTo("META-INF/services/javax.annotation.processing.Processor")
+            Matchers.equalTo("META-INF/services/javax.annotation.processing.Processor")
         );
     }
 }

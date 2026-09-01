@@ -1,29 +1,35 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m12.cycles;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+/**
+ * Слайд 94: циклические зависимости и @Lazy.
+ * @since 1.0
+ */
 @DisplayName("Слайд 94: циклические зависимости и @Lazy")
 final class CircularDependencyTest {
 
     @Test
     @DisplayName("Цикл через конструкторы неразрешим — контекст не поднимается")
     void constructorCycleBreaksTheContext() {
-        assertThat(
+        MatcherAssert.assertThat(
             "constructor cycle cannot break the context",
-            assertThrows(
+            Assertions.assertThrows(
                 BeanCreationException.class,
                 () -> new AnnotationConfigApplicationContext(CircularBeans.BrokenConfig.class)
             ).getMessage(),
-            containsString("Circular")
+            Matchers.containsString("Circular")
         );
     }
 
@@ -31,12 +37,12 @@ final class CircularDependencyTest {
     @DisplayName("@Lazy разрывает цикл: вместо бина подставляется прокси")
     void lazyBreaksTheCycle() {
         try (var context = new AnnotationConfigApplicationContext(CircularBeans.LazyConfig.class)) {
-            CircularBeans.Alpha alpha = context.getBean(CircularBeans.Alpha.class);
+            final CircularBeans.Alpha alpha = context.getBean(CircularBeans.Alpha.class);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "lazy proxy cannot break the cycle",
                 alpha.describe(),
-                equalTo("alpha+beta")
+                Matchers.equalTo("alpha+beta")
             );
         }
     }
@@ -45,13 +51,13 @@ final class CircularDependencyTest {
     @DisplayName("Цикл через сеттеры разрешается, но объекты временно неполны")
     void setterCycleIsResolvable() {
         try (var context = new AnnotationConfigApplicationContext(CircularBeans.SetterCycleConfig.class)) {
-            CircularBeans.Gamma gamma = context.getBean(CircularBeans.Gamma.class);
-            CircularBeans.Delta delta = context.getBean(CircularBeans.Delta.class);
+            final CircularBeans.Gamma gamma = context.getBean(CircularBeans.Gamma.class);
+            final CircularBeans.Delta delta = context.getBean(CircularBeans.Delta.class);
 
-            assertThat(
+            MatcherAssert.assertThat(
                 "setter cycle cannot be resolved by the container",
                 gamma.describe(),
-                equalTo("gamma+delta")
+                Matchers.equalTo("gamma+delta")
             );
         }
     }
@@ -60,10 +66,10 @@ final class CircularDependencyTest {
     @DisplayName("Правильное решение — третий бин: цикла нет вовсе")
     void extractingAThirdBeanRemovesTheCycle() {
         try (var context = new AnnotationConfigApplicationContext(CircularBeans.RefactoredConfig.class)) {
-            assertThat(
+            MatcherAssert.assertThat(
                 "extracted third bean cannot remove the cycle",
                 context.getBean(CircularBeans.Epsilon.class).describe(),
-                equalTo("epsilon: общее правило")
+                Matchers.equalTo("epsilon: общее правило")
             );
         }
     }
@@ -73,10 +79,10 @@ final class CircularDependencyTest {
     void sharesTheExtractedBean() {
         try (var context =
                  new AnnotationConfigApplicationContext(CircularBeans.RefactoredConfig.class)) {
-            assertThat(
+            MatcherAssert.assertThat(
                 "shared bean cannot appear in the context",
                 java.util.Arrays.asList(context.getBeanDefinitionNames()),
-                hasItem("sharedRules")
+                Matchers.hasItem("sharedRules")
             );
         }
     }
@@ -85,13 +91,13 @@ final class CircularDependencyTest {
     @DisplayName("@Lazy — обход симптома: прокси приходит вместо настоящего объекта")
     void lazyInjectsAProxy() {
         try (var context = new AnnotationConfigApplicationContext(CircularBeans.LazyConfig.class)) {
-            CircularBeans.Alpha alpha = context.getBean(CircularBeans.Alpha.class);
+            final CircularBeans.Alpha alpha = context.getBean(CircularBeans.Alpha.class);
 
             // сам alpha — обычный бин, но beta внутри него подменена прокси
-            assertThat(
+            MatcherAssert.assertThat(
                 "lazy proxy cannot stand in for the real object",
                 alpha.describe(),
-                containsString("beta")
+                Matchers.containsString("beta")
             );
         }
     }

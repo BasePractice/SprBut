@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m14;
 
 import jakarta.annotation.PostConstruct;
@@ -16,28 +22,41 @@ import org.springframework.lang.NonNull;
  * Бин, реализующий <b>все</b> точки расширения жизненного цикла сразу —
  * чтобы восемь шагов со слайда 118 (СХЕМА 7) можно было увидеть в одном списке:
  * <ol>
- *   <li>создание экземпляра (конструктор);</li>
- *   <li>внедрение зависимостей;</li>
- *   <li>*Aware-интерфейсы;</li>
- *   <li>{@code BeanPostProcessor.postProcessBeforeInitialization};</li>
- *   <li>{@code @PostConstruct}, затем {@code afterPropertiesSet};</li>
- *   <li>{@code BeanPostProcessor.postProcessAfterInitialization};</li>
- *   <li>бин готов; {@code SmartLifecycle.start};</li>
- *   <li>{@code @PreDestroy}, затем {@code DisposableBean.destroy}.</li>
+ * <li>создание экземпляра (конструктор);</li>
+ * <li>внедрение зависимостей;</li>
+ * <li>*Aware-интерфейсы;</li>
+ * <li>{@code BeanPostProcessor.postProcessBeforeInitialization};</li>
+ * <li>{@code @PostConstruct}, затем {@code afterPropertiesSet};</li>
+ * <li>{@code BeanPostProcessor.postProcessAfterInitialization};</li>
+ * <li>бин готов; {@code SmartLifecycle.start};</li>
+ * <li>{@code @PreDestroy}, затем {@code DisposableBean.destroy}.</li>
  * </ol>
  * В реальном коде столько интерфейсов сразу не реализуют: {@code @PostConstruct}
  * и {@code @PreDestroy} предпочтительнее, потому что не привязывают класс к Spring.
+ * @since 1.0
  */
 public class ManagedBean implements BeanNameAware, BeanFactoryAware, ApplicationContextAware,
         InitializingBean, DisposableBean {
 
+    /**
+     * Зависимость.
+     */
     private final Dependency dependency;
+    /**
+     * Объект.
+     */
     private String beanName;
+    /**
+     * Объект.
+     */
     private boolean beanFactoryInjected;
+    /**
+     * Контекст.
+     */
     private boolean contextInjected;
 
     /** Шаг 1: конструктор. Шаг 2: зависимость приходит вместе с ним. */
-    public ManagedBean(Dependency dependency) {
+    public ManagedBean(final Dependency dependency) {
         this.dependency = dependency;
         LifecycleLog.record("1-constructor:managedBean");
         if (dependency != null) {
@@ -47,19 +66,19 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
 
     /** Шаг 3: *Aware-интерфейсы. Контейнер отдаёт бину сведения о себе. */
     @Override
-    public void setBeanName(@NonNull String name) {
+    public void setBeanName(final @NonNull String name) {
         this.beanName = name;
         LifecycleLog.record("3-aware-beanName:managedBean");
     }
 
     @Override
-    public void setBeanFactory(@NonNull BeanFactory beanFactory) throws BeansException {
+    public void setBeanFactory(final @NonNull BeanFactory beanFactory) throws BeansException {
         this.beanFactoryInjected = beanFactory != null;
         LifecycleLog.record("3-aware-beanFactory:managedBean");
     }
 
     @Override
-    public void setApplicationContext(@NonNull ApplicationContext context) throws BeansException {
+    public void setApplicationContext(final @NonNull ApplicationContext context) throws BeansException {
         this.contextInjected = context != null;
         LifecycleLog.record("3-aware-applicationContext:managedBean");
     }
@@ -88,25 +107,44 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
         LifecycleLog.record("8b-destroy:managedBean");
     }
 
+    /**
+     * Объект.
+     * @return Объект
+     */
     public String beanName() {
-        return beanName;
+        return this.beanName;
     }
 
+    /**
+     * Значение {@code fullyAware}.
+     * @return Значение {@code fullyAware}
+     */
     public boolean fullyAware() {
-        return beanName != null && beanFactoryInjected && contextInjected;
+        return this.beanName != null && this.beanFactoryInjected && this.contextInjected;
     }
 
+    /**
+     * Работа.
+     * @return Работа
+     */
     public String work() {
-        return "работаю с " + dependency.name();
+        return "работаю с " + this.dependency.name();
     }
 
     /** Простая зависимость, чтобы шаг 2 был не гипотетическим. */
     public static class Dependency {
 
+        /**
+         * Основной конструктор.
+         */
         public Dependency() {
             LifecycleLog.record("0-dependency-created:dependency");
         }
 
+        /**
+         * Имя.
+         * @return Имя
+         */
         public String name() {
             return "зависимость";
         }

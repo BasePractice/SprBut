@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m08.extended;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -8,140 +13,152 @@ import ru.sprbut.m08.model.Order;
 import ru.sprbut.m08.service.AuditLog;
 import ru.sprbut.m08.service.CustomerRepository;
 import ru.sprbut.m08.service.OrderRepository;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.comparesEqualTo;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+/**
+ * Расширенный пример: полный цикл APT в рабочем коде.
+ * @since 1.0
+ */
 @DisplayName("Расширенный пример: полный цикл APT в рабочем коде")
 final class CheckoutFacadeTest {
 
+    /**
+     * Значение {@code DAY}.
+     */
     private static final LocalDate DAY = LocalDate.of(2026, 7, 30);
 
+    /**
+     * Клиенты.
+     */
     private CustomerRepository customers;
+    /**
+     * Заказы.
+     */
     private OrderRepository orders;
+    /**
+     * Аудит.
+     */
     private AuditLog audit;
+    /**
+     * Значение {@code facade}.
+     */
     private CheckoutFacade facade;
 
     @BeforeEach
     void setUp() {
-        customers = new CustomerRepository();
-        orders = new OrderRepository();
-        audit = new AuditLog();
-        facade = new CheckoutFacade(customers, orders, audit);
+        this.customers = new CustomerRepository();
+        this.orders = new OrderRepository();
+        this.audit = new AuditLog();
+        this.facade = new CheckoutFacade(this.customers, this.orders, this.audit);
     }
 
     @Test
     @DisplayName("Регистрация собирает объект сгенерированным билдером")
     void registersCustomer() {
-        Customer customer = facade.register("C-1", "Иванов", "ivanov@mail.ru", 42, false);
+        final Customer customer = this.facade.register("C-1", "Иванов", "ivanov@mail.ru", 42, false);
 
-        assertThat(
+        MatcherAssert.assertThat(
             "generated builder cannot assemble the registered customer",
             customer.getName(),
-            equalTo("Иванов")
+            Matchers.equalTo("Иванов")
         );
     }
 
     @Test
     @DisplayName("Оформление заказа использует второй сгенерированный билдер")
     void placesOrder() {
-        facade.register("C-1", "Иванов", "ivanov@mail.ru", 42, false);
+        this.facade.register("C-1", "Иванов", "ivanov@mail.ru", 42, false);
 
-        Order order = facade.checkout("C-1", new BigDecimal("1000"), DAY);
+        final Order order = this.facade.checkout("C-1", new BigDecimal("1000"), DAY);
 
-        assertThat(
+        MatcherAssert.assertThat(
             "second generated builder cannot assemble the order",
             order.getTotal(),
-            comparesEqualTo(new BigDecimal("1000"))
+            Matchers.comparesEqualTo(new BigDecimal("1000"))
         );
     }
 
     @Test
     @DisplayName("VIP получает скидку — бизнес-логика поверх сгенерированного кода")
     void vipGetsDiscount() {
-        facade.register("C-2", "Петров", "petrov@mail.ru", 35, true);
+        this.facade.register("C-2", "Петров", "petrov@mail.ru", 35, true);
 
-        Order order = facade.checkout("C-2", new BigDecimal("1000"), DAY);
+        final Order order = this.facade.checkout("C-2", new BigDecimal("1000"), DAY);
 
-        assertThat(
+        MatcherAssert.assertThat(
             "vip discount cannot be applied on top of the generated code",
             order.getTotal(),
-            comparesEqualTo(new BigDecimal("900.0"))
+            Matchers.comparesEqualTo(new BigDecimal("900.0"))
         );
     }
 
     @Test
     @DisplayName("Номера заказов нумеруются подряд")
     void numbersOrdersSequentially() {
-        facade.register("C-1", "Иванов", "i@mail.ru", 42, false);
+        this.facade.register("C-1", "Иванов", "i@mail.ru", 42, false);
 
-        facade.checkout("C-1", BigDecimal.TEN, DAY);
-        facade.checkout("C-1", BigDecimal.ONE, DAY);
+        this.facade.checkout("C-1", BigDecimal.TEN, DAY);
+        this.facade.checkout("C-1", BigDecimal.ONE, DAY);
 
-        assertThat(
+        MatcherAssert.assertThat(
             "orders cannot be numbered sequentially",
-            facade.ordersOf("C-1").stream().map(Order::getNumber).toList(),
-            contains("ORD-1", "ORD-2")
+            this.facade.ordersOf("C-1").stream().map(Order::getNumber).toList(),
+            Matchers.contains("ORD-1", "ORD-2")
         );
     }
 
     @Test
     @DisplayName("Неизвестный покупатель отклоняется")
     void rejectsUnknownCustomer() {
-        assertThat(
+        MatcherAssert.assertThat(
             "unknown customer cannot be rejected with an explanation",
-            assertThrows(
+            Assertions.assertThrows(
                 IllegalArgumentException.class,
-                () -> facade.checkout("нет-такого", BigDecimal.TEN, DAY)
+                () -> this.facade.checkout("нет-такого", BigDecimal.TEN, DAY)
             ).getMessage(),
-            containsString("Нет покупателя")
+            Matchers.containsString("Нет покупателя")
         );
     }
 
     @Test
     @DisplayName("Аудит фиксирует все шаги")
     void auditTrailIsRecorded() {
-        facade.register("C-1", "Иванов", "i@mail.ru", 42, false);
-        facade.checkout("C-1", new BigDecimal("500"), DAY);
+        this.facade.register("C-1", "Иванов", "i@mail.ru", 42, false);
+        this.facade.checkout("C-1", new BigDecimal("500"), DAY);
 
-        assertThat(
+        MatcherAssert.assertThat(
             "audit cannot record every step",
-            facade.auditTrail(),
-            contains("зарегистрирован C-1", "заказ ORD-1 на 500")
+            this.facade.auditTrail(),
+            Matchers.contains("зарегистрирован C-1", "заказ ORD-1 на 500")
         );
     }
 
     @Test
     @DisplayName("Конструктор без аргументов достаёт зависимости из сгенерированного реестра")
     void resolvesDependenciesFromGeneratedRegistry() {
-        CheckoutFacade fromRegistry = new CheckoutFacade();
+        final CheckoutFacade fromRegistry = new CheckoutFacade();
 
         fromRegistry.register("C-9", "Сидоров", "s@mail.ru", 30, false);
-        Order order = fromRegistry.checkout("C-9", new BigDecimal("250"), DAY);
+        final Order order = fromRegistry.checkout("C-9", new BigDecimal("250"), DAY);
 
-        assertThat(
+        MatcherAssert.assertThat(
             "generated registry cannot supply the dependencies",
             order.getCustomerId(),
-            equalTo("C-9")
+            Matchers.equalTo("C-9")
         );
     }
 
     @Test
     @DisplayName("Реестр знает все три компонента модуля")
     void registryKnowsEveryComponent() {
-        assertThat(
+        MatcherAssert.assertThat(
             "registry cannot know every component of the module",
             CheckoutFacade.registeredNames(),
-            containsInAnyOrder("customers", "orderRepository", "audit")
+            Matchers.containsInAnyOrder("customers", "orderRepository", "audit")
         );
     }
 }

@@ -1,26 +1,33 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m07;
 
 import java.nio.file.Path;
 import java.util.List;
 import javax.tools.Diagnostic;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.anEmptyMap;
-import static org.hamcrest.Matchers.emptyIterable;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.containsString;
-
+/**
+ * Слайд 60: процессор-анализатор, который ничего не генерирует.
+ * @since 1.0
+ */
 @DisplayName("Слайд 60: процессор-анализатор, который ничего не генерирует")
 final class TodoProcessorTest {
 
+    /**
+     * Рабочий каталог.
+     */
     @TempDir
     private Path workDir;
 
-    private CompilationHarness.Result compile(String code) {
+    private CompilationHarness.Result compile(final String code) {
         return CompilationHarness.compile(
             this.workDir,
             List.of(new CompilationHarness.Source("demo.Service", code)),
@@ -31,9 +38,9 @@ final class TodoProcessorTest {
     @Test
     @DisplayName("непроходящий TODO сборку не роняет")
     void keepsBuildGreenOnPlainTodo() {
-        assertThat(
+        MatcherAssert.assertThat(
             "non blocking todo cannot leave the build green",
-            compile("""
+            this.compile("""
                 package demo;
 
                 import ru.sprbut.m07.api.Todo;
@@ -46,16 +53,16 @@ final class TodoProcessorTest {
                     }
                 }
                 """).success(),
-            equalTo(true)
+            Matchers.equalTo(true)
         );
     }
 
     @Test
     @DisplayName("текст TODO попадает в предупреждение вместе с именем элемента")
     void reportsTodoAsWarning() {
-        assertThat(
+        MatcherAssert.assertThat(
             "todo text cannot reach the warning",
-            compile("""
+            this.compile("""
                 package demo;
 
                 import ru.sprbut.m07.api.Todo;
@@ -65,16 +72,16 @@ final class TodoProcessorTest {
                     private int timeout = 30;
                 }
                 """).warnings(),
-            hasItem(containsString("вынести в конфигурацию"))
+            Matchers.hasItem(Matchers.containsString("вынести в конфигурацию"))
         );
     }
 
     @Test
     @DisplayName("анализатор не генерирует ни одного файла")
     void generatesNothing() {
-        assertThat(
+        MatcherAssert.assertThat(
             "analyser cannot stay free of generated sources",
-            compile("""
+            this.compile("""
                 package demo;
 
                 import ru.sprbut.m07.api.Todo;
@@ -84,16 +91,16 @@ final class TodoProcessorTest {
                     private int timeout = 30;
                 }
                 """).generatedSources(),
-            anEmptyMap()
+            Matchers.anEmptyMap()
         );
     }
 
     @Test
     @DisplayName("blocking = true роняет сборку — так работают Error Prone и NullAway")
     void failsBuildOnBlockingTodo() {
-        assertThat(
+        MatcherAssert.assertThat(
             "blocking todo cannot fail the build",
-            compile("""
+            this.compile("""
                 package demo;
 
                 import ru.sprbut.m07.api.Todo;
@@ -102,16 +109,16 @@ final class TodoProcessorTest {
                 public class Service {
                 }
                 """).success(),
-            equalTo(false)
+            Matchers.equalTo(false)
         );
     }
 
     @Test
     @DisplayName("текст блокирующего TODO попадает в ошибку")
     void reportsBlockingTodoAsError() {
-        assertThat(
+        MatcherAssert.assertThat(
             "blocking todo text cannot reach the error",
-            compile("""
+            this.compile("""
                 package demo;
 
                 import ru.sprbut.m07.api.Todo;
@@ -120,16 +127,16 @@ final class TodoProcessorTest {
                 public class Service {
                 }
                 """).errors(),
-            hasItem(containsString("нельзя выпускать в прод"))
+            Matchers.hasItem(Matchers.containsString("нельзя выпускать в прод"))
         );
     }
 
     @Test
     @DisplayName("диагностика ставится на конкретный элемент — с номером строки")
     void pointsAtTheElement() {
-        assertThat(
+        MatcherAssert.assertThat(
             "diagnostic cannot point at a concrete line",
-            compile("""
+            this.compile("""
                 package demo;
 
                 import ru.sprbut.m07.api.Todo;
@@ -142,16 +149,16 @@ final class TodoProcessorTest {
                 """).diagnostics().stream()
                 .filter(each -> each.getKind() == Diagnostic.Kind.WARNING)
                 .anyMatch(each -> each.getLineNumber() > 0 && each.getSource() != null),
-            equalTo(true)
+            Matchers.equalTo(true)
         );
     }
 
     @Test
     @DisplayName("код без TODO проходит молча")
     void staysSilentOnCleanCode() {
-        assertThat(
+        MatcherAssert.assertThat(
             "clean code cannot pass without warnings",
-            compile("""
+            this.compile("""
                 package demo;
 
                 public class Service {
@@ -159,7 +166,7 @@ final class TodoProcessorTest {
                     }
                 }
                 """).warnings(),
-            emptyIterable()
+            Matchers.emptyIterable()
         );
     }
 }

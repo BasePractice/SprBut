@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m23.web;
 
 import jakarta.validation.Valid;
@@ -16,43 +22,76 @@ import ru.sprbut.m23.service.Tasks;
 
 /**
  * HTTP-вход в трекер.
- * <p>
- * {@code @RestController} — это {@code @Controller} плюс {@code @ResponseBody},
+ *
+ * <p>{@code @RestController} — это {@code @Controller} плюс {@code @ResponseBody},
  * ровно как сказано на слайде про аннотации Spring. Первая делает класс бином
  * и обработчиком запросов, вторая избавляет от {@code ResponseEntity} вокруг
- * каждого возвращаемого объекта.
+ * каждого возвращаемого объекта.</p>
+ *
+ * @since 1.0
  */
 @RestController
 @RequestMapping("/api/tasks")
 public final class TaskController {
 
+    /**
+     * Задачи.
+     */
     private final Tasks tasks;
 
+    /**
+     * Представления.
+     */
     private final TaskViews views;
 
-    public TaskController(Tasks tasks, TaskViews views) {
+    /**
+     * Основной конструктор.
+     * @param tasks Задачи
+     * @param views Представления
+     */
+    public TaskController(final Tasks tasks, final TaskViews views) {
         this.tasks = tasks;
         this.views = views;
     }
 
+    /**
+     * Открытие.
+     * @param request Запрос
+     * @return Открытие
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TaskView open(@Valid @RequestBody NewTaskRequest request) {
+    public TaskView open(final @Valid @RequestBody NewTaskRequest request) {
         return this.views.view(this.tasks.open(request.title()));
     }
 
+    /**
+     * Старт.
+     * @param id Идентификатор
+     * @return Старт
+     */
     @PostMapping("/{id}/start")
-    public TaskView start(@PathVariable long id) {
+    public TaskView start(final @PathVariable long id) {
         return this.views.view(this.tasks.start(id));
     }
 
+    /**
+     * Значение {@code finish}.
+     * @param id Идентификатор
+     * @return Значение {@code finish}
+     */
     @PostMapping("/{id}/finish")
-    public TaskView finish(@PathVariable long id) {
+    public TaskView finish(final @PathVariable long id) {
         return this.views.view(this.tasks.finish(id));
     }
 
+    /**
+     * Статус.
+     * @param status Статус
+     * @return Статус
+     */
     @GetMapping
-    public List<TaskView> byStatus(@RequestParam(defaultValue = "OPEN") TaskStatus status) {
+    public List<TaskView> byStatus(final @RequestParam(defaultValue = "OPEN") TaskStatus status) {
         return this.views.views(this.tasks.byStatus(status));
     }
 }

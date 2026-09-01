@@ -1,3 +1,10 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
+// @checkstyle NonStaticMethodCheck disable
 package ru.sprbut.m18;
 
 import org.springframework.beans.BeansException;
@@ -12,23 +19,24 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.MapPropertySource;
-
 import java.util.Map;
 
 /**
  * Слайды 161, 170: {@code ApplicationContextInitializer}, {@code ApplicationRunner}
  * и {@code BeanFactoryPostProcessor} — три хука, которые вызываются между событиями.
- * <p>
- * У каждого своё место в последовательности и своя задача:
+ *
+ * <p>У каждого своё место в последовательности и своя задача:
  * <ul>
- *   <li>{@code ApplicationContextInitializer} — контекст создан, но пуст.
- *       Здесь регистрируют источники настроек и профили программно;</li>
- *   <li>{@code BeanFactoryPostProcessor} — определения бинов загружены, сами бины
- *       ещё не созданы. Это <b>не</b> {@code BeanPostProcessor} из модуля 14:
- *       тот работает с готовыми объектами, а этот — с их описаниями;</li>
- *   <li>{@code ApplicationRunner} / {@code CommandLineRunner} — контекст поднят.
- *       Отсюда запускают разовые задачи при старте.</li>
- * </ul>
+ * <li>{@code ApplicationContextInitializer} — контекст создан, но пуст.
+ * Здесь регистрируют источники настроек и профили программно;</li>
+ * <li>{@code BeanFactoryPostProcessor} — определения бинов загружены, сами бины
+ * ещё не созданы. Это <b>не</b> {@code BeanPostProcessor} из модуля 14:
+ * тот работает с готовыми объектами, а этот — с их описаниями;</li>
+ * <li>{@code ApplicationRunner} / {@code CommandLineRunner} — контекст поднят.
+ * Отсюда запускают разовые задачи при старте.</li>
+ * </ul></p>
+ *
+ * @since 1.0
  */
 public final class StartupHooks {
 
@@ -39,8 +47,15 @@ public final class StartupHooks {
     public static class MarkerInitializer
             implements ApplicationContextInitializer<GenericApplicationContext> {
 
+        /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public MarkerInitializer() {
+            // нечего инициализировать
+        }
+
         @Override
-        public void initialize(GenericApplicationContext context) {
+        public void initialize(final GenericApplicationContext context) {
             StartupLog.record("3-ApplicationContextInitializer");
             // Программное добавление источника настроек — типичная задача инициализатора
             context.getEnvironment().getPropertySources().addFirst(
@@ -52,11 +67,19 @@ public final class StartupHooks {
     /**
      * Шаг 6: работает с {@code BeanDefinition}, а не с объектами.
      * Бины ещё не созданы — их можно переопределить.
+     * @since 1.0
      */
     public static class DefinitionTweaker implements BeanFactoryPostProcessor {
 
+        /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public DefinitionTweaker() {
+            // нечего инициализировать
+        }
+
         @Override
-        public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
+        public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory)
                 throws BeansException {
             StartupLog.record("6-BeanFactoryPostProcessor:определений="
                     + beanFactory.getBeanDefinitionCount());
@@ -67,8 +90,15 @@ public final class StartupHooks {
     @Order(1)
     public static class FirstRunner implements ApplicationRunner {
 
+        /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public FirstRunner() {
+            // нечего инициализировать
+        }
+
         @Override
-        public void run(ApplicationArguments args) {
+        public void run(final ApplicationArguments args) {
             StartupLog.record("9a-ApplicationRunner:опции=" + args.getOptionNames());
         }
     }
@@ -77,25 +107,54 @@ public final class StartupHooks {
     @Order(2)
     public static class SecondRunner implements CommandLineRunner {
 
+        /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public SecondRunner() {
+            // нечего инициализировать
+        }
+
         @Override
-        public void run(String... args) {
+        public void run(final String... args) {
             StartupLog.record("9b-CommandLineRunner:аргументов=" + args.length);
         }
     }
 
+    /**
+     * Конфигурация.
+     */
     @Configuration
     public static class HooksConfig {
 
+        /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public HooksConfig() {
+            // нечего инициализировать
+        }
+
+        /**
+         * Правщик определений бинов.
+         * @return Правщик определений бинов
+         */
         @Bean
         public static BeanFactoryPostProcessor definitionTweaker() {
             return new DefinitionTweaker();
         }
 
+        /**
+         * Первый runner.
+         * @return Первый runner
+         */
         @Bean
         public FirstRunner firstRunner() {
             return new FirstRunner();
         }
 
+        /**
+         * Второй runner.
+         * @return Второй runner
+         */
         @Bean
         public SecondRunner secondRunner() {
             return new SecondRunner();

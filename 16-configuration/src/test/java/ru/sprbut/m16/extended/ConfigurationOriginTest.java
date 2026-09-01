@@ -1,5 +1,12 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m16.extended;
 
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -8,72 +15,76 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.context.TestPropertySource;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
-
+/**
+ * Расширенный пример: СХЕМА 10 — откуда взялось значение.
+ * @since 1.0
+ */
 @DisplayName("Расширенный пример: СХЕМА 10 — откуда взялось значение")
 final class ConfigurationOriginTest {
 
     @Nested
     @SpringBootTest
+/**
+ * стек источников.
+ * @since 1.0
+ */
     @DisplayName("стек источников")
     class Stack {
 
+        /**
+         * Окружение.
+         */
         @Autowired
         private ConfigurableEnvironment environment;
 
         @Test
         @DisplayName("Environment — это упорядоченный список источников, а не карта")
         void listsSourcesInOrder() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "environment cannot expose its source stack",
                 new ConfigurationOrigin(this.environment).stack(),
-                not(hasSize(0))
+                Matchers.not(Matchers.hasSize(0))
             );
         }
 
         @Test
         @DisplayName("значение находится в первом же подходящем источнике")
         void resolvesFromFirstSource() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "value cannot be resolved from the first matching source",
                 new ConfigurationOrigin(this.environment)
                     .resolve("sprbut.server.host").orElseThrow().value(),
-                equalTo("api.example.com")
+                Matchers.equalTo("api.example.com")
             );
         }
 
         @Test
         @DisplayName("несуществующий ключ не находится нигде")
         void findsNothingForUnknownKey() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "unknown key cannot stay unresolved",
                 new ConfigurationOrigin(this.environment).resolve("sprbut.no.such.key").isEmpty(),
-                equalTo(true)
+                Matchers.equalTo(true)
             );
         }
 
         @Test
         @DisplayName("объяснение для ненайденного ключа так и говорит")
         void explainsMissingKey() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "missing key cannot be explained plainly",
                 new ConfigurationOrigin(this.environment).explain("sprbut.no.such.key"),
-                containsString("не найден ни в одном источнике")
+                Matchers.containsString("не найден ни в одном источнике")
             );
         }
 
         @Test
         @DisplayName("эффективная конфигурация по префиксу — то, что реально увидит приложение")
         void collectsEffectiveConfig() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "effective config cannot collect the prefixed keys",
                 new ConfigurationOrigin(this.environment).effective("sprbut.server"),
-                hasKey("sprbut.server.host")
+                Matchers.hasKey("sprbut.server.host")
             );
         }
     }
@@ -81,60 +92,67 @@ final class ConfigurationOriginTest {
     @Nested
     @SpringBootTest
     @TestPropertySource(properties = "sprbut.server.host=inline.example.com")
+/**
+ * перекрытие значений.
+ * @since 1.0
+ */
     @DisplayName("перекрытие значений")
     class Overriding {
 
+        /**
+         * Окружение.
+         */
         @Autowired
         private ConfigurableEnvironment environment;
 
         @Test
         @DisplayName("ключ встречается в двух источниках — выигрывает более приоритетный")
         void prefersHigherPriority() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "higher priority source cannot win",
                 new ConfigurationOrigin(this.environment)
                     .resolve("sprbut.server.host").orElseThrow().value(),
-                equalTo("inline.example.com")
+                Matchers.equalTo("inline.example.com")
             );
         }
 
         @Test
         @DisplayName("перекрытое значение из отчёта не пропадает")
         void keepsOverriddenValue() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "overridden value cannot stay in the report",
                 new ConfigurationOrigin(this.environment).occurrences("sprbut.server.host"),
-                hasSize(2)
+                Matchers.hasSize(2)
             );
         }
 
         @Test
         @DisplayName("факт перекрытия виден явно")
         void reportsOverriding() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "overriding cannot be reported explicitly",
                 new ConfigurationOrigin(this.environment).overridden("sprbut.server.host"),
-                equalTo(true)
+                Matchers.equalTo(true)
             );
         }
 
         @Test
         @DisplayName("неперекрытое значение перекрытым не считается")
         void dontReportPlainValueAsOverridden() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "plain value cannot avoid the overriding verdict",
                 new ConfigurationOrigin(this.environment).overridden("sprbut.server.timeout"),
-                equalTo(false)
+                Matchers.equalTo(false)
             );
         }
 
         @Test
         @DisplayName("объяснение показывает и победителя, и перекрытое значение")
         void explainsBothValues() {
-            assertThat(
+            MatcherAssert.assertThat(
                 "explanation cannot show the overridden value",
                 new ConfigurationOrigin(this.environment).explain("sprbut.server.host"),
-                containsString("перекрыто")
+                Matchers.containsString("перекрыто")
             );
         }
     }

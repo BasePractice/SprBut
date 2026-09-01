@@ -1,29 +1,49 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m02.classic;
 
 import java.beans.PropertyDescriptor;
 
 /**
  * Одно свойство одного бина, доступное по имени.
- * <p>
- * Читается и пишется без знания класса на этапе компиляции — именно так
- * контейнер заполняет объект из properties или yaml.
+ *
+ * <p>Читается и пишется без знания класса на этапе компиляции — именно так
+ * контейнер заполняет объект из properties или yaml.</p>
+ *
+ * @since 1.0
  */
 public final class BeanValue {
 
+    /**
+     * Объект.
+     */
     private final Object bean;
 
+    /**
+     * Имя свойства.
+     */
     private final String property;
 
-    public BeanValue(Object bean, String property) {
+    /**
+     * Основной конструктор.
+     * @param bean Объект
+     * @param property Имя свойства
+     */
+    public BeanValue(final Object bean, final String property) {
         this.bean = bean;
         this.property = property;
     }
 
     /**
      * Значение свойства.
+     * @return Значение свойства
      */
     public Object value() {
-        PropertyDescriptor described = described();
+        final PropertyDescriptor described = this.described();
         if (described.getReadMethod() == null) {
             throw new IllegalArgumentException(
                 "Свойство '" + this.property + "' недоступно на чтение"
@@ -34,9 +54,10 @@ public final class BeanValue {
 
     /**
      * Записывает значение через сеттер.
+     * @param value Значение
      */
-    public void assign(Object value) {
-        PropertyDescriptor described = described();
+    public void assign(final Object value) {
+        final PropertyDescriptor described = this.described();
         if (described.getWriteMethod() == null) {
             throw new IllegalArgumentException(
                 "Свойство '" + this.property + "' доступно только на чтение"
