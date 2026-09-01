@@ -15,7 +15,7 @@ import java.lang.reflect.Proxy;
  * и никогда не было. Здесь синтез сведён к минимуму: возвращается значение
  * по умолчанию для типа результата.</p>
  *
-  * @param <T> Параметр типа
+ * @param <T> Параметр типа
  * @since 1.0
  */
 public final class StubProxy<T> {

@@ -18,8 +18,8 @@ package ru.sprbut.m02.modern;
  * {@link java.beans.Introspector} не увидит у него ни одного свойства, и
  * старый код, рассчитанный на соглашение, с record работать не будет.</p>
  *
-  * @param age Параметр типа
-  * @param firstName Параметр типа
+ * @param age Параметр типа
+ * @param firstName Параметр типа
  * @since 1.0
  */
 public record CustomerRecord(String id, String firstName, String lastName, int age, boolean vip) {

@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// поля публичны и названы по смыслу: предмет разговора — откуда читается
+// аннотация, а не инкапсуляция
+// @checkstyle VisibilityModifierCheck disable
+// @checkstyle MemberNameCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m06.targets;
 
@@ -15,7 +19,7 @@ import java.util.List;
  * <p>Три случая отличаются тем, <b>откуда</b> аннотация читается, и это главное,
  * что стоит вынести из слайдов 48–49.</p>
  *
-  * @param <T> Параметр типа
+ * @param <T> Параметр типа
  * @since 1.0
  */
 @SuppressWarnings("unused")

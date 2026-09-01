@@ -160,5 +160,4 @@ final class TodoProcessorTest {
             new TodoProcessor()
         );
     }
-
 }

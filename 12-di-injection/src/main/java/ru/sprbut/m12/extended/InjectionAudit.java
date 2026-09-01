@@ -70,9 +70,9 @@ public final class InjectionAudit {
      */
     public Report report() {
         final InjectionPoints points = new InjectionPoints(this.type);
-        final List<Style> styles = new ArrayList<>();
-        final List<String> dependencies = new ArrayList<>();
-        final List<String> warnings = new ArrayList<>();
+        final List<Style> styles = new ArrayList<>(0);
+        final List<String> dependencies = new ArrayList<>(0);
+        final List<String> warnings = new ArrayList<>(0);
         final Constructor<?> injectable = points.constructor();
         if (injectable != null && injectable.getParameterCount() > 0) {
             styles.add(Style.CONSTRUCTOR);

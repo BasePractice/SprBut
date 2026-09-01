@@ -49,6 +49,8 @@ public final class RecordColumn {
                 return Optional.ofNullable(each.getAnnotation(Column.class)).map(Column::name);
             }
         }
-        throw new IllegalArgumentException("Нет компонента '" + this.component + "'");
+        throw new IllegalArgumentException(
+            String.format("Нет компонента '%s'", this.component)
+        );
     }
 }

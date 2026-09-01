@@ -80,7 +80,7 @@ final class MetaAnnotatedTest {
         MatcherAssert.assertThat(
             "annotation chain cannot show the nested level",
             new MetaAnnotated(UserApi.class).chain(),
-            Matchers.hasItem("  @" + Controller.class.getSimpleName())
+            Matchers.hasItem(String.format("  @%s", Controller.class.getSimpleName()))
         );
     }
 
@@ -90,7 +90,7 @@ final class MetaAnnotatedTest {
         MatcherAssert.assertThat(
             "second meta annotation cannot appear in the chain",
             new MetaAnnotated(UserApi.class).chain(),
-            Matchers.hasItem("  @" + ResponseBody.class.getSimpleName())
+            Matchers.hasItem(String.format("  @%s", ResponseBody.class.getSimpleName()))
         );
     }
 
@@ -110,7 +110,7 @@ final class MetaAnnotatedTest {
         MatcherAssert.assertThat(
             "chain cannot start with the composite annotation",
             new MetaAnnotated(UserApi.class).chain().get(0),
-            Matchers.equalTo("@" + RestController.class.getSimpleName())
+            Matchers.equalTo(String.format("@%s", RestController.class.getSimpleName()))
         );
     }
 }

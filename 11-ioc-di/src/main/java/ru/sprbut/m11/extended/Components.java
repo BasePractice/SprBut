@@ -31,7 +31,7 @@ public final class Components {
         /**
          * Строки.
          */
-        private final List<String> rows = new ArrayList<>();
+        private final List<String> rows = new ArrayList<>(0);
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -179,7 +179,6 @@ public final class Components {
         public UnmanagedDependency() {
             // нечего инициализировать
         }
-
     }
 
     /**

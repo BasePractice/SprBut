@@ -67,7 +67,7 @@ public final class BeanVerdict {
      * @return Нарушения соглашения, каждое одним предложением
      */
     public List<String> violations() {
-        final List<String> found = new ArrayList<>();
+        final List<String> found = new ArrayList<>(0);
         if (!this.constructible()) {
             found.add("нет публичного конструктора без параметров");
         }

@@ -94,7 +94,7 @@ public final class ClassApi {
      * @return Иерархия наследования снизу вверх, до {@code Object} включительно
      */
     public List<String> superChain() {
-        final List<String> chain = new ArrayList<>();
+        final List<String> chain = new ArrayList<>(0);
         for (Class<?> current = this.type; current != null; current = current.getSuperclass()) {
             chain.add(current.getSimpleName());
         }

@@ -56,7 +56,9 @@ public final class RawAttributes {
             element.setAccessible(true);
             return element.invoke(this.annotation);
         } catch (final ReflectiveOperationException denied) {
-            throw new IllegalStateException("Не прочитать элемент " + element.getName(), denied);
+            throw new IllegalStateException(
+                String.format("Не прочитать элемент %s", element.getName()), denied
+            );
         }
     }
 }

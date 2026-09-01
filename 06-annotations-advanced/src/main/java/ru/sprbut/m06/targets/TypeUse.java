@@ -41,7 +41,7 @@ public final class TypeUse {
      * @return Аннотации на самом типе поля
      */
     public List<String> onType() {
-        return this.names(this.field.getAnnotatedType());
+        return TypeUse.names(this.field.getAnnotatedType());
     }
 
     /**
@@ -49,12 +49,15 @@ public final class TypeUse {
      * @return Аннотации на аргументах дженерика: {@code List<@NonNull String>}
      */
     public List<String> onArguments() {
+        final List<String> found;
         if (this.field.getAnnotatedType() instanceof AnnotatedParameterizedType parameterized) {
-            return Arrays.stream(parameterized.getAnnotatedActualTypeArguments())
-                .flatMap(argument -> this.names(argument).stream())
+            found = Arrays.stream(parameterized.getAnnotatedActualTypeArguments())
+                .flatMap(argument -> TypeUse.names(argument).stream())
                 .toList();
+        } else {
+            found = List.of();
         }
-        return List.of();
+        return found;
     }
 
     private static List<String> names(final AnnotatedType type) {

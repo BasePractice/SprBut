@@ -21,5 +21,4 @@ public class OrderApi {
     public OrderApi() {
         // нечего инициализировать
     }
-
 }

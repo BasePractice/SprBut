@@ -50,7 +50,7 @@ public final class BeanRegistryReport {
      */
     public List<Entry> entries() {
         final ConfigurableListableBeanFactory beans = this.context.getBeanFactory();
-        final List<Entry> collected = new ArrayList<>();
+        final List<Entry> collected = new ArrayList<>(0);
         for (final String name : beans.getBeanDefinitionNames()) {
             final BeanDefinition definition = beans.getBeanDefinition(name);
             final Class<?> type = beans.getType(

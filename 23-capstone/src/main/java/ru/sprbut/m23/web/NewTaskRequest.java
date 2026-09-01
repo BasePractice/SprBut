@@ -19,7 +19,7 @@ import jakarta.validation.constraints.Size;
  * <p>Аннотации проверки — снова метаданные: сами по себе они ничего не запрещают,
  * работать их заставляет {@code @Valid} в контроллере.</p>
  *
-  * @param title Параметр типа
+ * @param title Параметр типа
  * @since 1.0
  */
 public record NewTaskRequest(

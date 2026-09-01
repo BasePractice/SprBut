@@ -36,7 +36,7 @@ public class RetryAspect {
     /**
      * Журнал.
      */
-    private final List<String> log = new ArrayList<>();
+    private final List<String> log = new ArrayList<>(0);
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.

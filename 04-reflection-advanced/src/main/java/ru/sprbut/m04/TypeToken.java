@@ -20,7 +20,7 @@ import java.lang.reflect.Type;
  * <p>На этом построены {@code TypeReference} в Jackson и
  * {@code ParameterizedTypeReference} в Spring.</p>
  *
-  * @param <T> Параметр типа
+ * @param <T> Параметр типа
  * @since 1.0
  */
 public abstract class TypeToken<T> {

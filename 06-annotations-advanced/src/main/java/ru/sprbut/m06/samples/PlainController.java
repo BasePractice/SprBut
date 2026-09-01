@@ -21,5 +21,4 @@ public class PlainController {
     public PlainController() {
         // нечего инициализировать
     }
-
 }

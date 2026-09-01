@@ -57,7 +57,7 @@ public class MiniContainer {
     /**
      * Порядок фактического создания бинов — виден в тестах.
      */
-    private final List<String> creationOrder = new ArrayList<>();
+    private final List<String> creationOrder = new ArrayList<>(0);
 
     /**
      * Основной конструктор.

@@ -57,7 +57,7 @@ public final class ChosenMethod {
      * @return Подходящий метод
      */
     public Method method() {
-        final List<Method> candidates = new ArrayList<>();
+        final List<Method> candidates = new ArrayList<>(0);
         for (Class<?> current = this.type; current != null; current = current.getSuperclass()) {
             for (final Method candidate : current.getDeclaredMethods()) {
                 if (candidate.getName().equals(this.name)

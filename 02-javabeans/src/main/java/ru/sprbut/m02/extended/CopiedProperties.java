@@ -49,7 +49,7 @@ public final class CopiedProperties {
      * @return Имена скопированных свойств
      */
     public List<String> list() {
-        final List<String> copied = new ArrayList<>();
+        final List<String> copied = new ArrayList<>(0);
         final Introspected from = new Introspected(this.source.getClass());
         for (final PropertyDescriptor into : new Introspected(this.target.getClass()).descriptors()) {
             if (into.getWriteMethod() == null || "class".equals(into.getName())) {

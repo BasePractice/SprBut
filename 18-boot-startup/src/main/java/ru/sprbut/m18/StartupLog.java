@@ -24,7 +24,7 @@ public final class StartupLog {
     /**
      * Значение {@code EVENTS}.
      */
-    private static final List<String> EVENTS = new ArrayList<>();
+    private static final List<String> EVENTS = new ArrayList<>(0);
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.

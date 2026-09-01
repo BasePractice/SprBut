@@ -18,7 +18,7 @@ public class SmsSender implements NotificationSender {
     /**
      * Отправленные сообщения.
      */
-    private final List<String> sent = new ArrayList<>();
+    private final List<String> sent = new ArrayList<>(0);
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.

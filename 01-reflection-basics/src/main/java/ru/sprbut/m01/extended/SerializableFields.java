@@ -41,7 +41,7 @@ public final class SerializableFields {
      * @return Отобранные поля в порядке от потомка к предку
      */
     public List<Field> list() {
-        final List<Field> selected = new ArrayList<>();
+        final List<Field> selected = new ArrayList<>(0);
         for (Class<?> current = this.type;
              current != null && current != Object.class;
              current = current.getSuperclass()) {

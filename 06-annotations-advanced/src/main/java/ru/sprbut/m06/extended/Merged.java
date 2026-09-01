@@ -38,6 +38,8 @@ public record Merged(
 
     /**
      * Значение элемента.
+     * @param attribute Имя элемента
+     * @return Значение элемента
      */
     public Object value(final String attribute) {
         return this.attributes.get(attribute);
@@ -45,6 +47,8 @@ public record Merged(
 
     /**
      * Значение элемента строкой.
+     * @param attribute Имя элемента
+     * @return Значение элемента строкой
      */
     public String text(final String attribute) {
         return String.valueOf(this.attributes.get(attribute));

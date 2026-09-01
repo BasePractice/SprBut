@@ -344,5 +344,4 @@ final class BuilderProcessorTest {
      */
     @TempDir
     private Path workDir;
-
 }

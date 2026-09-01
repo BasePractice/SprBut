@@ -71,7 +71,7 @@ public final class ProcessorRegistration {
      * @return Что реально написано в файлах регистрации на текущем classpath — ровно это и прочитает javac при сборке
      */
     public List<String> declared() {
-        final List<String> names = new ArrayList<>();
+        final List<String> names = new ArrayList<>(0);
         try {
             final Enumeration<URL> resources = this.loader.getResources(this.servicePath());
             while (resources.hasMoreElements()) {
@@ -90,7 +90,7 @@ public final class ProcessorRegistration {
      * @return Процессоры, реально загруженные {@link ServiceLoader}, — то же самое, что делает javac, только вручную
      */
     public List<String> loaded() {
-        final List<String> names = new ArrayList<>();
+        final List<String> names = new ArrayList<>(0);
         for (final Processor each : ServiceLoader.load(Processor.class, this.loader)) {
 
             names.add(each.getClass().getName());

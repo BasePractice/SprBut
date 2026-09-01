@@ -67,7 +67,7 @@ public final class RequiredHints {
      * @return Методы, к которым рефлексивный маппер обращается по именам
      */
     public List<String> accessors() {
-        final List<String> needed = new ArrayList<>();
+        final List<String> needed = new ArrayList<>(0);
         for (final String property : this.reflective.propertyNames()) {
             final String suffix = Character.toUpperCase(property.charAt(0)) + property.substring(1);
             needed.add(UserEntity.class.getSimpleName() + "#get" + suffix);

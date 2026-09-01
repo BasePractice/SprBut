@@ -34,7 +34,7 @@ public class ObjectFactory {
     /**
      * Синглтоны.
      */
-    private final Map<String, Object> singletons = new HashMap<>();
+    private final Map<String, Object> singletons = new HashMap<>(0);
 
     /**
      * Канал.

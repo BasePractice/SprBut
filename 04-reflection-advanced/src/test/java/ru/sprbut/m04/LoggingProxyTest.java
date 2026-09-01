@@ -24,7 +24,7 @@ final class LoggingProxyTest {
     void keepsTargetResult() {
         MatcherAssert.assertThat(
             "proxy cannot pass the target result through",
-            new LoggingProxy<>(Greeter.class, new SimpleGreeter(), new ArrayList<>())
+            new LoggingProxy<>(Greeter.class, new SimpleGreeter(), new ArrayList<>(0))
                 .proxy().greet("Мир"),
             Matchers.equalTo("Привет, Мир")
         );
@@ -33,7 +33,7 @@ final class LoggingProxyTest {
     @Test
     @DisplayName("каждый вызов проходит через единственный обработчик")
     void routesEveryCallThroughHandler() {
-        final List<String> log = new ArrayList<>();
+        final List<String> log = new ArrayList<>(0);
         new LoggingProxy<>(Greeter.class, new SimpleGreeter(), log).proxy().greet("Мир");
         MatcherAssert.assertThat(
             "every call cannot reach the single handler",
@@ -45,7 +45,7 @@ final class LoggingProxyTest {
     @Test
     @DisplayName("self-invocation минует прокси — основа поведения @Transactional")
     void dontInterceptSelfInvocation() {
-        final List<String> log = new ArrayList<>();
+        final List<String> log = new ArrayList<>(0);
         new LoggingProxy<>(Greeter.class, new SimpleGreeter(), log).proxy().greetTwice("Мир");
         MatcherAssert.assertThat(
             "inner call cannot bypass the proxy",
@@ -57,7 +57,7 @@ final class LoggingProxyTest {
     @Test
     @DisplayName("сам default-метод через прокси проходит")
     void interceptsDefaultMethod() {
-        final List<String> log = new ArrayList<>();
+        final List<String> log = new ArrayList<>(0);
         new LoggingProxy<>(Greeter.class, new SimpleGreeter(), log).proxy().greetTwice("Мир");
         MatcherAssert.assertThat(
             "default method cannot be intercepted",

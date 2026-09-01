@@ -34,32 +34,32 @@ public final class Described {
         this.value = value;
     }
 
-    private String array() {
-        final int length = Array.getLength(this.value);
-        final Object[] items = new Object[length];
-        for (int index = 0; index < length; index++) {
-            items[index] = new Described(Array.get(this.value, index)).text();
-        }
-        return Arrays.toString(items);
-    }
-
     /**
      * Читаемое представление значения.
      * @return Читаемое представление значения
      */
     public Object text() {
+        final Object shown;
         if (this.value == null) {
-            return null;
+            shown = null;
+        } else if (this.value instanceof Class<?> type) {
+            shown = type.getSimpleName();
+        } else if (this.value.getClass().isArray()) {
+            shown = this.array();
+        } else if (this.value instanceof Annotation nested) {
+            shown = String.format("@%s", nested.annotationType().getSimpleName());
+        } else {
+            shown = this.value;
         }
-        if (this.value instanceof Class<?> type) {
-            return type.getSimpleName();
+        return shown;
+    }
+
+    private String array() {
+        final int length = Array.getLength(this.value);
+        final Object[] items = new Object[length];
+        for (int index = 0; index < length; index += 1) {
+            items[index] = new Described(Array.get(this.value, index)).text();
         }
-        if (this.value.getClass().isArray()) {
-            return this.array();
-        }
-        if (this.value instanceof Annotation nested) {
-            return String.format("@%s", nested.annotationType().getSimpleName());
-        }
-        return this.value;
+        return Arrays.toString(items);
     }
 }

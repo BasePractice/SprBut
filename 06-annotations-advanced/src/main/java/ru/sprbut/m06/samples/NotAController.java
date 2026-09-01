@@ -17,5 +17,4 @@ public class NotAController {
     public NotAController() {
         // нечего инициализировать
     }
-
 }

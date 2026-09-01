@@ -30,5 +30,4 @@ public class AopConfig {
     public AopConfig() {
         // нечего инициализировать
     }
-
 }

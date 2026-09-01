@@ -82,5 +82,4 @@ public class StartupApp {
         application.addListeners(new StartupListeners.Ready(), new StartupListeners.Failed());
         application.run(args);
     }
-
 }

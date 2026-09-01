@@ -145,7 +145,7 @@ public class BuilderProcessor extends AbstractProcessor {
             );
             valid = false;
         }
-        final List<Property> properties = new ArrayList<>();
+        final List<Property> properties = new ArrayList<>(0);
         for (final VariableElement field : ElementFilter.fieldsIn(type.getEnclosedElements())) {
             final Set<Modifier> modifiers = field.getModifiers();
             if (modifiers.contains(Modifier.STATIC)) {

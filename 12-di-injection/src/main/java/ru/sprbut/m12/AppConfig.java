@@ -35,5 +35,4 @@ public class AppConfig {
     public AppConfig() {
         // нечего инициализировать
     }
-
 }

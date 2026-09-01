@@ -53,20 +53,20 @@ public final class MetaAnnotated {
      * Рекурсивный поиск, в том числе через мета-аннотации, — упрощённый
      * {@code AnnotatedElementUtils.hasAnnotation}.
      * @param annotation Аннотация
-     * @return Рекурсивный поиск, в том числе через мета-аннотации, — упрощённый {@code AnnotatedElementUtils.hasAnnotation}
+     * @return Признак того, что аннотация найдена
      */
     public boolean deep(final Class<? extends Annotation> annotation) {
-        return this.search(this.type.getAnnotations(), annotation, new HashSet<>());
+        return this.search(this.type.getAnnotations(), annotation, new HashSet<>(0));
     }
 
     /**
      * Полная цепочка мета-аннотаций вглубь — то, что нужно печатать при отладке
      * «почему мой бин не подхватился».
-     * @return Полная цепочка мета-аннотаций вглубь — то, что нужно печатать при отладке «почему мой бин не подхватился»
+     * @return Полная цепочка мета-аннотаций
      */
     public List<String> chain() {
-        final List<String> collected = new ArrayList<>();
-        this.collect(this.type.getAnnotations(), collected, new HashSet<>(), 0);
+        final List<String> collected = new ArrayList<>(0);
+        this.collect(this.type.getAnnotations(), collected, new HashSet<>(0), 0);
         return List.copyOf(collected);
     }
 
@@ -75,19 +75,19 @@ public final class MetaAnnotated {
         final Class<? extends Annotation> target,
         final Set<Class<? extends Annotation>> visited
     ) {
+        boolean found = false;
         for (final Annotation each : annotations) {
             final Class<? extends Annotation> candidate = each.annotationType();
             if (candidate.equals(target)) {
-                return true;
+                found = true;
+            } else if (!new Builtin(candidate).yes() && visited.add(candidate)) {
+                found = this.search(candidate.getAnnotations(), target, visited);
             }
-            if (new Builtin(candidate).yes() || !visited.add(candidate)) {
-                continue;
-            }
-            if (this.search(candidate.getAnnotations(), target, visited)) {
-                return true;
+            if (found) {
+                break;
             }
         }
-        return false;
+        return found;
     }
 
     private void collect(
@@ -101,7 +101,7 @@ public final class MetaAnnotated {
             if (new Builtin(candidate).yes() || !visited.add(candidate)) {
                 continue;
             }
-            sink.add("  ".repeat(depth) + "@" + candidate.getSimpleName());
+            sink.add(String.format("%s@%s", "  ".repeat(depth), candidate.getSimpleName()));
             this.collect(candidate.getAnnotations(), sink, visited, depth + 1);
         }
     }

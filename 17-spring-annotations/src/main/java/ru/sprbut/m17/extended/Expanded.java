@@ -43,9 +43,9 @@ public final class Expanded {
      * @return Имена всех достижимых аннотаций в алфавитном порядке
      */
     public Set<String> names() {
-        final Set<Class<? extends Annotation>> visited = new HashSet<>();
+        final Set<Class<? extends Annotation>> visited = new HashSet<>(0);
         final Set<String> found = new TreeSet<>();
-        final Deque<Class<? extends Annotation>> queue = new ArrayDeque<>();
+        final Deque<Class<? extends Annotation>> queue = new ArrayDeque<>(0);
         queue.add(this.annotation);
         while (!queue.isEmpty()) {
             final Class<? extends Annotation> current = queue.poll();

@@ -22,7 +22,7 @@ public class AuditLog {
     /**
      * Записи.
      */
-    private final List<String> entries = new ArrayList<>();
+    private final List<String> entries = new ArrayList<>(0);
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.

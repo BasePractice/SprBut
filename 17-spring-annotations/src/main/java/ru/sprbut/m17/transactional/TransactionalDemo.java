@@ -42,7 +42,7 @@ public final class TransactionalDemo {
     /**
      * Журнал операций менеджера транзакций.
      */
-    public static final List<String> LOG = new ArrayList<>();
+    public static final List<String> LOG = new ArrayList<>(0);
 
     private TransactionalDemo() {
     }

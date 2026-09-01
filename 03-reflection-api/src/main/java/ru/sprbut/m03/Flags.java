@@ -51,7 +51,7 @@ public final class Flags {
      * @return Все взведённые флаги списком имён
      */
     public List<String> names() {
-        final List<String> found = new ArrayList<>();
+        final List<String> found = new ArrayList<>(0);
         if (Modifier.isPublic(this.mask)) {
             found.add("public");
         }

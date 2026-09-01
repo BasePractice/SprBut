@@ -45,16 +45,16 @@ public final class Flattened {
      * @return Имена всех аннотаций вглубь, в алфавитном порядке
      */
     public List<String> names() {
-        final List<String> collected = new ArrayList<>();
+        final List<String> collected = new ArrayList<>(0);
         final Deque<Annotation> queue = new ArrayDeque<>(List.of(this.element.getAnnotations()));
-        final Set<Class<? extends Annotation>> visited = new HashSet<>();
+        final Set<Class<? extends Annotation>> visited = new HashSet<>(0);
         while (!queue.isEmpty()) {
             final Annotation each = queue.poll();
             final Class<? extends Annotation> type = each.annotationType();
             if (new Builtin(type).yes() || !visited.add(type)) {
                 continue;
             }
-            collected.add("@" + type.getSimpleName());
+            collected.add(String.format("@%s", type.getSimpleName()));
             queue.addAll(List.of(type.getAnnotations()));
         }
         collected.sort(String::compareTo);

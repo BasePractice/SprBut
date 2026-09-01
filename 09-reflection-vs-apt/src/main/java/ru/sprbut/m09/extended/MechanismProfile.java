@@ -11,8 +11,8 @@ import java.util.List;
 /**
  * Характеристики механизма — то, что на слайдах 73–77 перечислено словами,
  * здесь оформлено как данные, которые можно проверить тестом.
-  * @param fastCalls Параметр типа
-  * @param flexibleAtRuntime Параметр типа
+ * @param fastCalls Параметр типа
+ * @param flexibleAtRuntime Параметр типа
  * @since 1.0
  */
 public record MechanismProfile(String name,

@@ -349,5 +349,4 @@ final class RegistryProcessorTest {
      */
     @TempDir
     private Path workDir;
-
 }

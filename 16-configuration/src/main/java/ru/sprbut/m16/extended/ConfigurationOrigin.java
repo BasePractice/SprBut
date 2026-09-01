@@ -68,7 +68,7 @@ public final class ConfigurationOrigin {
      * @return Первый выигрывает, остальные перекрыты — именно это и надо видеть, когда значение оказалось не тем, что ожидалось
      */
     public List<Origin> occurrences(final String key) {
-        final List<Origin> found = new ArrayList<>();
+        final List<Origin> found = new ArrayList<>(0);
         int priority = 0;
         for (final PropertySource<?> source : this.environment.getPropertySources()) {
             if (this.real(source)) {
@@ -95,7 +95,7 @@ public final class ConfigurationOrigin {
      * @return Стек источников сверху вниз — визуализация СХЕМЫ 10
      */
     public List<String> stack() {
-        final List<String> names = new ArrayList<>();
+        final List<String> names = new ArrayList<>(0);
         this.environment.getPropertySources().stream()
             .filter(this::real)
             .forEach(source -> names.add(source.getName()));

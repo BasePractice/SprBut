@@ -29,7 +29,7 @@ public final class Journal {
      * Основной конструктор.
      */
     public Journal() {
-        this(new ArrayList<>());
+        this(new ArrayList<>(0));
     }
 
     /**

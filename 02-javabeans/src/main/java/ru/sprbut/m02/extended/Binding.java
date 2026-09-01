@@ -18,7 +18,7 @@ import java.util.List;
  * @param bean       заполненный объект
  * @param bound      свойства, которые удалось привязать
  * @param ignored    ключи, которым не нашлось свойства
-  * @param <T> Параметр типа
+ * @param <T> Параметр типа
  * @since 1.0
  */
 public record Binding<T>(T bean, List<String> bound, List<String> ignored) {

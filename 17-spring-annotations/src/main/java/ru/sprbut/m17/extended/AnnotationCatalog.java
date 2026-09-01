@@ -82,7 +82,7 @@ public final class AnnotationCatalog {
      * @return Аннотации, сводящиеся к {@code @Component}
      */
     public List<String> stereotypes() {
-        final List<String> found = new ArrayList<>();
+        final List<String> found = new ArrayList<>(0);
         for (final Class<? extends Annotation> annotation : this.annotations) {
             if (new Expanded(annotation).stereotype()) {
                 found.add("@" + annotation.getSimpleName());

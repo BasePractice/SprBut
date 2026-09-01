@@ -41,7 +41,7 @@ public class ConditionalConfig {
     /**
      * Порядок фактического создания бинов — заполняется конструкторами.
      */
-    public static final List<String> CREATED = new ArrayList<>();
+    public static final List<String> CREATED = new ArrayList<>(0);
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.

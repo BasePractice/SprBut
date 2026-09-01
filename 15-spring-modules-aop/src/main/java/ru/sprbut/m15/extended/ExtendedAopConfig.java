@@ -30,5 +30,4 @@ public class ExtendedAopConfig {
     public ExtendedAopConfig() {
         // нечего инициализировать
     }
-
 }

@@ -42,7 +42,7 @@ public final class BeanProperties {
      * @return Свойства, доступные на чтение: {@code getXxx()} и {@code isXxx()}
      */
     public List<String> readable() {
-        final List<String> names = new ArrayList<>();
+        final List<String> names = new ArrayList<>(0);
         for (final Method method : this.type.getMethods()) {
             if (method.getDeclaringClass() == Object.class || method.getParameterCount() != 0) {
 
@@ -65,7 +65,7 @@ public final class BeanProperties {
      * @return Свойства, доступные на запись: {@code setXxx(T)} с ровно одним параметром
      */
     public List<String> writable() {
-        final List<String> names = new ArrayList<>();
+        final List<String> names = new ArrayList<>(0);
         for (final Method method : this.type.getMethods()) {
             if (method.getParameterCount() == 1 && method.getName().startsWith("set")
                 && method.getName().length() > 3) {

@@ -75,7 +75,7 @@ public final class ClassMetadata {
      * @return Цепочка наследования до {@link Object} включительно
      */
     public List<String> hierarchy() {
-        final List<String> names = new ArrayList<>();
+        final List<String> names = new ArrayList<>(0);
         for (Class<?> current = this.type; current != null; current = current.getSuperclass()) {
             names.add(current.getSimpleName());
         }

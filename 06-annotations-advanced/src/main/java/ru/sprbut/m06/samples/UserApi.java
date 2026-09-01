@@ -21,5 +21,4 @@ public class UserApi {
     public UserApi() {
         // нечего инициализировать
     }
-
 }

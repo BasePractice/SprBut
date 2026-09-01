@@ -53,7 +53,7 @@ public final class LifecycleTimeline {
      * @return Журнал, разобранный в список шагов
      */
     public List<Step> steps() {
-        final List<Step> steps = new ArrayList<>();
+        final List<Step> steps = new ArrayList<>(0);
         for (final String event : this.log.events()) {
             final int colon = event.indexOf(':');
             final String left = event.substring(
@@ -104,7 +104,7 @@ public final class LifecycleTimeline {
                 new Violation("нет данных", "бин '" + bean + "' не встречается в журнале")
             );
         }
-        final List<Violation> found = new ArrayList<>();
+        final List<Violation> found = new ArrayList<>(0);
         for (int index = 1; index < steps.size(); index++) {
             if (
                 steps.get(

@@ -22,7 +22,7 @@ public class OrderRepository {
     /**
      * Заказы.
      */
-    private final List<Order> orders = new ArrayList<>();
+    private final List<Order> orders = new ArrayList<>(0);
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.

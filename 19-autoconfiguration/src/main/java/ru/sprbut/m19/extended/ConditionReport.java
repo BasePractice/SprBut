@@ -89,7 +89,7 @@ public final class ConditionReport {
             if (!source.contains(nameFragment)) {
                 return;
             }
-            final List<String> reasons = new ArrayList<>();
+            final List<String> reasons = new ArrayList<>(0);
             outcomes.forEach(outcome -> reasons.add(
                     (
                         outcome.getOutcome().isMatch() ? "✓ " : "✗ "

@@ -30,7 +30,7 @@ import ru.sprbut.m02.classic.PropertyKey;
  * Spring Boot для неизменяемых конфигураций пришлось учить отдельному режиму
  * constructor binding — тот самый, что используется в модуле 16.</p>
  *
-  * @param <T> Параметр типа
+ * @param <T> Параметр типа
  * @since 1.0
  */
 public final class BoundBean<T> {
@@ -71,8 +71,8 @@ public final class BoundBean<T> {
         }
         final T bean = (T) new EmptyBean(this.type).instance();
         final Introspected introspected = new Introspected(this.type);
-        final List<String> bound = new ArrayList<>();
-        final List<String> ignored = new ArrayList<>();
+        final List<String> bound = new ArrayList<>(0);
+        final List<String> ignored = new ArrayList<>(0);
         for (final Map.Entry<String, String> entry : this.values.entrySet()) {
             final String property = new PropertyKey(entry.getKey()).camelCase();
             final PropertyDescriptor described = introspected.descriptor(property).orElse(null);

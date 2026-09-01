@@ -67,7 +67,7 @@ public final class InjectionPoints {
      * @return Поля, помеченные для внедрения, включая унаследованные
      */
     public List<Field> fields() {
-        final List<Field> found = new ArrayList<>();
+        final List<Field> found = new ArrayList<>(0);
         for (Class<?> current = this.type;
              current != null && current != Object.class;
              current = current.getSuperclass()) {
