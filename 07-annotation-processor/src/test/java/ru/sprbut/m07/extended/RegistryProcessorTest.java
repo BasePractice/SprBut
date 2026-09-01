@@ -47,6 +47,7 @@ final class RegistryProcessorTest {
 
     /**
      * Значение {@code SERVICE}.
+     * @since 1.0
      */
     private static final CompilationHarness.Source SERVICE = new CompilationHarness.Source(
             "demo.UserService", """
@@ -70,7 +71,7 @@ final class RegistryProcessorTest {
  * @since 1.0
  */
     @DisplayName("Генерация реестра")
-    class Generation {
+    final class Generation {
 
         @Test
         @DisplayName("Все помеченные классы собираются в один сгенерированный файл")
@@ -175,7 +176,7 @@ final class RegistryProcessorTest {
  * @since 1.0
  */
     @DisplayName("Сгенерированный реестр работает")
-    class Behaviour {
+    final class Behaviour {
 
         @Test
         @DisplayName("create() создаёт объект через конструктор, а не через Class.forName")
@@ -225,7 +226,7 @@ final class RegistryProcessorTest {
  * @since 1.0
  */
     @DisplayName("Раунды обработки и валидация")
-    class RoundsAndValidation {
+    final class RoundsAndValidation {
 
         @Test
         @DisplayName("Процессор работает в нескольких раундах, но реестр пишет ровно один раз")

@@ -35,22 +35,27 @@ public class Customer {
     /**
      * Имя.
      */
+
     private String name;
     /**
      * Адрес почты.
      */
+
     private String email;
     /**
      * Возраст.
      */
+
     private int age;
     /**
      * Признак привилегированного клиента.
      */
+
     private boolean vip;
     /**
      * Баланс.
      */
+
     private BigDecimal balance;
 
     /**

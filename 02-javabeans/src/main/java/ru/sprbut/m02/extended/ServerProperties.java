@@ -35,26 +35,32 @@ public class ServerProperties implements Serializable {
     /**
      * Порт.
      */
+
     private int port = 8080;
     /**
      * Признак включённого TLS.
      */
+
     private boolean sslEnabled;
     /**
      * Таймаут в миллисекундах.
      */
+
     private long timeoutMillis = 5_000L;
     /**
      * Режим.
      */
+
     private Mode mode = Mode.DEV;
     /**
      * Предел.
      */
+
     private BigDecimal rateLimit = BigDecimal.ZERO;
     /**
      * Срок действия.
      */
+
     private LocalDate validUntil;
 
     /**

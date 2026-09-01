@@ -59,6 +59,7 @@ public class ConditionalConfig {
 
     /**
      * Значение {@code Marker}.
+     * @since 1.0
      */
     public static class Marker {
         /**
@@ -72,6 +73,7 @@ public class ConditionalConfig {
 
     /**
      * Своё условие: бин создаётся, только если задано системное свойство.
+     * @since 1.0
      */
     public static class OnPropertyCondition implements Condition {
 

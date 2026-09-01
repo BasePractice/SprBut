@@ -37,6 +37,7 @@ public class AuditBeanPostProcessor implements BeanPostProcessor {
 
     /**
      * Интерфейс, реализации которого будут подменены прокси.
+     * @since 1.0
      */
     public interface Auditable {
         /**
@@ -48,6 +49,7 @@ public class AuditBeanPostProcessor implements BeanPostProcessor {
 
     /**
      * Бин, который на выходе из контейнера окажется прокси, а не собой.
+     * @since 1.0
      */
     public static class AuditableBean implements Auditable {
 

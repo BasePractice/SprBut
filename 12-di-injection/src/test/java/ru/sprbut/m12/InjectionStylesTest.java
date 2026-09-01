@@ -28,10 +28,11 @@ import org.junit.jupiter.api.Assertions;
  * @since 1.0
  */
 @DisplayName("Слайды 91–96 (СХЕМА 6): три способа внедрения рядом")
-class InjectionStylesTest {
+final class InjectionStylesTest {
 
     /**
      * Контекст.
+     * @since 1.0
      */
     private AnnotationConfigApplicationContext context;
 
@@ -51,7 +52,7 @@ class InjectionStylesTest {
  * @since 1.0
  */
     @DisplayName("Все три способа работают одинаково")
-    class Equivalence {
+    final class Equivalence {
 
         @Test
         @DisplayName("Результат не зависит от способа внедрения")
@@ -81,7 +82,7 @@ class InjectionStylesTest {
  * @since 1.0
  */
     @DisplayName("Слайд 92: почему конструктор предпочтителен")
-    class ConstructorWins {
+    final class ConstructorWins {
 
         @Test
         @DisplayName("Класс собирается обычным new — тест не требует контейнера вовсе")
@@ -137,7 +138,7 @@ class InjectionStylesTest {
  * @since 1.0
  */
     @DisplayName("Слайд 93: внедрение в поле мешает тестам без контейнера")
-    class FieldInjectionProblems {
+    final class FieldInjectionProblems {
 
         @Test
         @DisplayName("Собранный руками объект падает: поля остались null")
@@ -190,7 +191,7 @@ class InjectionStylesTest {
  * @since 1.0
  */
     @DisplayName("Сеттер: единственный уместный случай — необязательная зависимость")
-    class SetterInjection {
+    final class SetterInjection {
 
         @Test
         @DisplayName("@Autowired(required = false) оставляет поле пустым, если бина нет")
@@ -242,7 +243,7 @@ class InjectionStylesTest {
  * @since 1.0
  */
     @DisplayName("Слайд 95: Service Locator — антипаттерн")
-    class ServiceLocator {
+    final class ServiceLocator {
 
         @Test
         @DisplayName("Работает, но зависимость достаётся вручную из контейнера")
@@ -287,7 +288,7 @@ class InjectionStylesTest {
  * @since 1.0
  */
     @DisplayName("Слайд 96: jakarta-аннотации")
-    class Jakarta {
+    final class Jakarta {
 
         @Test
         @DisplayName("@Inject работает как @Autowired, @Resource — как @Resource")

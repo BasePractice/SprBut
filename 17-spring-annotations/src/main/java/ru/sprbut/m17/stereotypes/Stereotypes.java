@@ -37,6 +37,7 @@ public final class Stereotypes {
 
     /**
      * Значение {@code PlainComponent}.
+     * @since 1.0
      */
     @Component
     public static class PlainComponent {
@@ -59,6 +60,7 @@ public final class Stereotypes {
 
     /**
      * Сервис.
+     * @since 1.0
      */
     @Service
     public static class BusinessService {
@@ -106,6 +108,7 @@ public final class Stereotypes {
 
     /**
      * Значение {@code WebController}.
+     * @since 1.0
      */
     @Controller
     public static class WebController {
@@ -128,6 +131,7 @@ public final class Stereotypes {
 
     /**
      * Класс без стереотипа — сканер его не найдёт.
+     * @since 1.0
      */
     public static class NotAComponent {
 

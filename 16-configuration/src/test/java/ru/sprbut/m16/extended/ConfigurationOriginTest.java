@@ -29,10 +29,11 @@ final class ConfigurationOriginTest {
  * @since 1.0
  */
     @DisplayName("стек источников")
-    class Stack {
+    final class Stack {
 
         /**
          * Окружение.
+         * @since 1.0
          */
         @Autowired
         private ConfigurableEnvironment environment;
@@ -97,7 +98,7 @@ final class ConfigurationOriginTest {
  * @since 1.0
  */
     @DisplayName("перекрытие значений")
-    class Overriding {
+    final class Overriding {
 
         /**
          * Окружение.

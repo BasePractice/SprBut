@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 
 /**
  * Сущность каталога. На ней показывается срез {@code @DataJpaTest}.
+ * @since 1.0
  */
 @Entity
 @Table(name = "products")

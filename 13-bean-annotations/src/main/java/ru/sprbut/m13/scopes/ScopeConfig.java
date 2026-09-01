@@ -48,6 +48,7 @@ public class ScopeConfig {
     /**
      * Значение {@code PROTOTYPE_INSTANCES}.
      */
+
     public static final AtomicInteger PROTOTYPE_INSTANCES = new AtomicInteger();
 
     /**
@@ -60,6 +61,7 @@ public class ScopeConfig {
 
     /**
      * Объект.
+     * @since 1.0
      */
     public static class SingletonBean {
         /**
@@ -85,6 +87,7 @@ public class ScopeConfig {
 
     /**
      * Объект.
+     * @since 1.0
      */
     public static class PrototypeBean {
         /**
@@ -167,6 +170,7 @@ public class ScopeConfig {
 
     /**
      * Объект.
+     * @since 1.0
      */
     public static class ProxiedPrototypeBean {
         /**

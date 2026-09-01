@@ -27,6 +27,7 @@ public class CatalogService {
     /**
      * Валюта.
      */
+
     private final String currency;
 
     /**
@@ -99,6 +100,7 @@ public class CatalogService {
 
     /**
      * Исключение доменного слоя — контроллер превратит его в 404.
+     * @since 1.0
      */
     public static class ProductNotFoundException extends RuntimeException {
         /**

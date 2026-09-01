@@ -38,6 +38,8 @@ import ru.sprbut.m19.greeter.SimpleGreeter;
  * </ol>
  * {@code @AutoConfiguration} — это {@code @Configuration(proxyBeanMethods = false)}
  * плюс порядок относительно других автоконфигураций.</p>
+ *
+ * @since 1.0
  */
 @AutoConfiguration
 @ConditionalOnClass(Greeter.class)

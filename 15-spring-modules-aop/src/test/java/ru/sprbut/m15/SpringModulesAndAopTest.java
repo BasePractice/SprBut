@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Assertions;
  * @since 1.0
  */
 @DisplayName("Слайды 119–126 (СХЕМЫ 8 и 9): модули Spring и AOP")
-class SpringModulesAndAopTest {
+final class SpringModulesAndAopTest {
 
     @Nested
 /**
@@ -36,7 +36,7 @@ class SpringModulesAndAopTest {
  * @since 1.0
  */
     @DisplayName("СХЕМА 8 (слайд 120): карта модулей")
-    class ModuleMap {
+    final class ModuleMap {
 
         @Test
         @DisplayName("В основании карты — spring-core, он ни от чего не зависит")
@@ -109,7 +109,7 @@ class SpringModulesAndAopTest {
  * @since 1.0
  */
     @DisplayName("СХЕМА 9 (слайд 126): прокси вокруг бина")
-    class Proxies {
+    final class Proxies {
 
         /**
          * Контекст.
@@ -118,6 +118,7 @@ class SpringModulesAndAopTest {
         /**
          * Значение {@code aspect}.
          */
+
         private AuditAspect aspect;
 
         @BeforeEach

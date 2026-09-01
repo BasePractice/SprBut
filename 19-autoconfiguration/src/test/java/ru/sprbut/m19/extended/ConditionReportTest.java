@@ -26,7 +26,7 @@ import ru.sprbut.m19.greeter.Greeter;
 final class ConditionReportTest {
 
     @Configuration(proxyBeanMethods = false)
-    static class OwnGreeterConfig {
+    static final class OwnGreeterConfig {
 
         @Bean
         Greeter greeter() {

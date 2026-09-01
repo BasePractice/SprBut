@@ -14,6 +14,8 @@ import ru.sprbut.m12.jakarta.JakartaInjected;
  *
  * <p>Классы с циклическими зависимостями лежат отдельно и <b>не</b> попадают
  * в сканирование — иначе контекст бы просто не поднялся.</p>
+ *
+ * @since 1.0
  */
 @Configuration
 @ComponentScan(basePackageClasses = {

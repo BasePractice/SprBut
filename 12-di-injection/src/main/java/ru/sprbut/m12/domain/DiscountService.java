@@ -12,6 +12,7 @@ import java.math.RoundingMode;
 
 /**
  * Вторая зависимость — чтобы у сервиса их было больше одной.
+ * @since 1.0
  */
 @Component
 public class DiscountService {

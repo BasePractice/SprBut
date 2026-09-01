@@ -85,6 +85,7 @@ public class LifecycleConfig {
 
     /**
      * Значение {@code PrototypeWithDestroy}.
+     * @since 1.0
      */
     public static class PrototypeWithDestroy {
 

@@ -38,14 +38,17 @@ final class CheckoutFacadeTest {
     /**
      * Заказы.
      */
+
     private OrderRepository orders;
     /**
      * Аудит.
      */
+
     private AuditLog audit;
     /**
      * Значение {@code facade}.
      */
+
     private CheckoutFacade facade;
 
     @BeforeEach

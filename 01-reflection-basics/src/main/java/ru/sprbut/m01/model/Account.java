@@ -31,18 +31,22 @@ public class Account {
     /**
      * Владелец.
      */
+
     private String owner;
     /**
      * Баланс.
      */
+
     private BigDecimal balance;
     /**
      * Значение {@code blocked}.
      */
+
     protected boolean blocked;
     /**
      * Значение {@code cachedLabel}.
      */
+
     transient String cachedLabel;
 
     /**

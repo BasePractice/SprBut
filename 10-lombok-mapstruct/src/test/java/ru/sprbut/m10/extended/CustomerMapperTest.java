@@ -25,6 +25,7 @@ final class CustomerMapperTest {
 
     /**
      * Маппер.
+     * @since 1.0
      */
     private final CustomerMapper mapper = CustomerMapper.INSTANCE;
 
@@ -39,7 +40,7 @@ final class CustomerMapperTest {
  * @since 1.0
  */
     @DisplayName("Маппинг работает")
-    class Mapping {
+    final class Mapping {
 
         @Test
         @DisplayName("Одноимённые свойства копируются напрямую")
@@ -138,7 +139,7 @@ final class CustomerMapperTest {
  * @since 1.0
  */
     @DisplayName("Что именно сгенерировано")
-    class Generated {
+    final class Generated {
 
         @Test
         @DisplayName("Реализация интерфейса появилась при компиляции")

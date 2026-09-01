@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * Альтернативная реализация — нужна, чтобы было что подменять.
+ * @since 1.0
  */
 public class SmsSender implements NotificationSender {
 

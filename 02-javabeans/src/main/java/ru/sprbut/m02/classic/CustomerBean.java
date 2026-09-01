@@ -34,18 +34,22 @@ public class CustomerBean implements Serializable {
     /**
      * Имя.
      */
+
     private String firstName;
     /**
      * Имя.
      */
+
     private String lastName;
     /**
      * Возраст.
      */
+
     private int age;
     /**
      * Признак привилегированного клиента.
      */
+
     private boolean vip;
 
     /**

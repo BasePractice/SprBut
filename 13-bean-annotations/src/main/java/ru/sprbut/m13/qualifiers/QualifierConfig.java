@@ -41,6 +41,7 @@ public class QualifierConfig {
 
     /**
      * Шлюз.
+     * @since 1.0
      */
     public interface PaymentGateway {
         /**

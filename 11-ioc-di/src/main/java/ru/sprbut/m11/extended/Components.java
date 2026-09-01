@@ -23,6 +23,7 @@ public final class Components {
 
     /**
      * Репозиторий.
+     * @since 1.0
      */
     @MiniComponent
     public static class Repository {
@@ -58,6 +59,7 @@ public final class Components {
 
     /**
      * Часы.
+     * @since 1.0
      */
     @MiniComponent
     public static class Clock {
@@ -80,6 +82,7 @@ public final class Components {
 
     /**
      * Порядок.
+     * @since 1.0
      */
     @MiniComponent("orders")
     public static class OrderService {
@@ -91,6 +94,7 @@ public final class Components {
         /**
          * Часы.
          */
+
         private final Clock clock;
 
         /**
@@ -125,6 +129,7 @@ public final class Components {
 
     /**
      * Порядок.
+     * @since 1.0
      */
     @MiniComponent
     public static class OrderFacade {
@@ -164,6 +169,7 @@ public final class Components {
 
     /**
      * Не помечен {@code @MiniComponent} — контейнер о нём не знает.
+     * @since 1.0
      */
     public static class UnmanagedDependency {
 
@@ -178,6 +184,7 @@ public final class Components {
 
     /**
      * Значение {@code NeedsUnmanaged}.
+     * @since 1.0
      */
     @MiniComponent
     public static class NeedsUnmanaged {
@@ -194,6 +201,7 @@ public final class Components {
 
     /**
      * Значение {@code Payment}.
+     * @since 1.0
      */
     public interface Payment {
         /**
@@ -205,6 +213,7 @@ public final class Components {
 
     /**
      * Значение {@code CardPayment}.
+     * @since 1.0
      */
     @MiniComponent("cardPayment")
     public static class CardPayment implements Payment {
@@ -224,6 +233,7 @@ public final class Components {
 
     /**
      * Значение {@code CashPayment}.
+     * @since 1.0
      */
     @MiniComponent("cashPayment")
     public static class CashPayment implements Payment {
@@ -245,6 +255,7 @@ public final class Components {
 
     /**
      * Сервис.
+     * @since 1.0
      */
     @MiniComponent
     public static class AlphaService {
@@ -259,6 +270,7 @@ public final class Components {
 
     /**
      * Сервис.
+     * @since 1.0
      */
     @MiniComponent
     public static class BetaService {
@@ -275,6 +287,7 @@ public final class Components {
 
     /**
      * Значение {@code TwoConstructors}.
+     * @since 1.0
      */
     @MiniComponent
     public static class TwoConstructors {

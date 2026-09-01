@@ -12,6 +12,7 @@ import java.math.RoundingMode;
 
 /**
  * Простая зависимость, которую будут внедрять тремя способами.
+ * @since 1.0
  */
 @Component
 public class TaxService {

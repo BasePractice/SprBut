@@ -38,6 +38,7 @@ public final class CircularBeans {
 
     /**
      * Значение {@code Alpha}.
+     * @since 1.0
      */
     public static class Alpha {
         /**
@@ -64,6 +65,7 @@ public final class CircularBeans {
 
     /**
      * Значение {@code Beta}.
+     * @since 1.0
      */
     public static class Beta {
         /**
@@ -90,6 +92,7 @@ public final class CircularBeans {
 
     /**
      * Конфигурация.
+     * @since 1.0
      */
     @Configuration
     public static class BrokenConfig {
@@ -126,6 +129,7 @@ public final class CircularBeans {
 
     /**
      * Конфигурация.
+     * @since 1.0
      */
     @Configuration
     public static class LazyConfig {
@@ -163,6 +167,7 @@ public final class CircularBeans {
 
     /**
      * Значение {@code Gamma}.
+     * @since 1.0
      */
     public static class Gamma {
 
@@ -198,6 +203,7 @@ public final class CircularBeans {
 
     /**
      * Значение {@code Delta}.
+     * @since 1.0
      */
     public static class Delta {
 
@@ -241,6 +247,7 @@ public final class CircularBeans {
 
     /**
      * Конфигурация.
+     * @since 1.0
      */
     @Configuration
     public static class SetterCycleConfig {
@@ -275,6 +282,7 @@ public final class CircularBeans {
 
     /**
      * Значение {@code SharedRules}.
+     * @since 1.0
      */
     public static class SharedRules {
 
@@ -296,6 +304,7 @@ public final class CircularBeans {
 
     /**
      * Значение {@code Epsilon}.
+     * @since 1.0
      */
     public static class Epsilon {
         /**
@@ -322,6 +331,7 @@ public final class CircularBeans {
 
     /**
      * Значение {@code Zeta}.
+     * @since 1.0
      */
     public static class Zeta {
         /**
@@ -348,6 +358,7 @@ public final class CircularBeans {
 
     /**
      * Конфигурация.
+     * @since 1.0
      */
     @Configuration
     public static class RefactoredConfig {

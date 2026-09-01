@@ -49,10 +49,11 @@ final class TrackerPropertiesTest {
  * @since 1.0
  */
     @DisplayName("значения из application.yaml")
-    class FromFile {
+    final class FromFile {
 
         /**
          * Настройки.
+         * @since 1.0
          */
         @Autowired
         private TrackerProperties settings;
@@ -76,10 +77,11 @@ final class TrackerPropertiesTest {
  * @since 1.0
  */
     @DisplayName("профиль demo")
-    class FromProfile {
+    final class FromProfile {
 
         /**
          * Настройки.
+         * @since 1.0
          */
         @Autowired
         private TrackerProperties settings;
@@ -104,7 +106,7 @@ final class TrackerPropertiesTest {
  * @since 1.0
  */
     @DisplayName("явное свойство поверх профиля")
-    class FromProperty {
+    final class FromProperty {
 
         /**
          * Настройки.

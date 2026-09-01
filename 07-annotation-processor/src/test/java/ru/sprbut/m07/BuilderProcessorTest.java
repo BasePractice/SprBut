@@ -29,6 +29,7 @@ final class BuilderProcessorTest {
 
     /**
      * Значение {@code VALID_BEAN}.
+     * @since 1.0
      */
     private static final CompilationHarness.Source VALID_BEAN = new CompilationHarness.Source(
             "demo.Customer", """
@@ -62,7 +63,7 @@ final class BuilderProcessorTest {
  * @since 1.0
  */
     @DisplayName("Генерация исходного кода")
-    class Generation {
+    final class Generation {
 
         @Test
         @DisplayName("Для помеченного класса рядом появляется CustomerBuilder")
@@ -180,7 +181,7 @@ final class BuilderProcessorTest {
  * @since 1.0
  */
     @DisplayName("Анализ исходного кода")
-    class Analysis {
+    final class Analysis {
 
         @Test
         @DisplayName("Без конструктора без параметров сборка падает с внятной ошибкой")
@@ -267,7 +268,7 @@ final class BuilderProcessorTest {
  * @since 1.0
  */
     @DisplayName("Как процессор видит код")
-    class ProcessingModel {
+    final class ProcessingModel {
 
         @Test
         @DisplayName("Обрабатываются все помеченные классы за одну сборку")

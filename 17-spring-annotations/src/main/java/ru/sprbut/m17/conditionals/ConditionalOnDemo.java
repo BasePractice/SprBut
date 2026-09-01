@@ -36,6 +36,7 @@ public final class ConditionalOnDemo {
 
     /**
      * Значение {@code Notifier}.
+     * @since 1.0
      */
     public interface Notifier {
         /**
@@ -60,6 +61,7 @@ public final class ConditionalOnDemo {
 
     /**
      * Роль «автоконфигурации»: даёт бин по умолчанию, но уступает пользовательскому.
+     * @since 1.0
      */
     @Configuration
     public static class DefaultsConfig {
@@ -105,6 +107,7 @@ public final class ConditionalOnDemo {
 
     /**
      * Роль пользователя: свой бин, который должен победить.
+     * @since 1.0
      */
     @Configuration
     public static class UserConfig {

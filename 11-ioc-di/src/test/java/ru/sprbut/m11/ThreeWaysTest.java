@@ -34,7 +34,7 @@ final class ThreeWaysTest {
  * @since 1.0
  */
     @DisplayName("Шаг 1: зависимости создаются внутри")
-    class Hardcoded {
+    final class Hardcoded {
 
         @Test
         @DisplayName("Работает, но реализацию подменить нечем")
@@ -86,7 +86,7 @@ final class ThreeWaysTest {
  * @since 1.0
  */
     @DisplayName("Шаг 2: ручное управление")
-    class Manual {
+    final class Manual {
 
         @Test
         @DisplayName("Зависимости приходят снаружи — реализация подменяется в одну строку")
@@ -152,7 +152,7 @@ final class ThreeWaysTest {
  * @since 1.0
  */
     @DisplayName("Шаг 3: управление DI Spring")
-    class SpringManaged {
+    final class SpringManaged {
 
         @Test
         @DisplayName("Контейнер сам подбирает аргументы по типу — ни одного new для зависимостей")

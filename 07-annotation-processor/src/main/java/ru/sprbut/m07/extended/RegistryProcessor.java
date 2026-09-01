@@ -75,6 +75,7 @@ public class RegistryProcessor extends AbstractProcessor {
     /**
      * Значение {@code CLASS_OPTION}.
      */
+
     public static final String CLASS_OPTION = "registry.class";
 
     /**
@@ -84,6 +85,7 @@ public class RegistryProcessor extends AbstractProcessor {
     /**
      * Значение {@code DEFAULT_CLASS}.
      */
+
     private static final String DEFAULT_CLASS = "GeneratedRegistry";
 
     /**
@@ -98,6 +100,7 @@ public class RegistryProcessor extends AbstractProcessor {
     /**
      * Значение {@code written}.
      */
+
     private boolean written;
 
     @Override

@@ -8,6 +8,7 @@ package ru.sprbut.m19.greeter;
 
 /**
  * Реализация по умолчанию, которую поставляет автоконфигурация.
+ * @since 1.0
  */
 public class SimpleGreeter implements Greeter {
 
@@ -18,6 +19,7 @@ public class SimpleGreeter implements Greeter {
     /**
      * Громкое сообщение.
      */
+
     private final boolean shout;
 
     /**

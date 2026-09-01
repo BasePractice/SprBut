@@ -21,7 +21,7 @@ import org.hamcrest.Matchers;
  * @since 1.0
  */
 @DisplayName("Слайды 129–137: конфигурация в коде и в файле")
-class ConfigurationBindingTest {
+final class ConfigurationBindingTest {
 
     @Nested
     @SpringBootTest
@@ -30,10 +30,11 @@ class ConfigurationBindingTest {
  * @since 1.0
  */
     @DisplayName("@ConfigurationProperties: типизированная группа настроек")
-    class Binding {
+    final class Binding {
 
         /**
          * Свойства.
+         * @since 1.0
          */
         @Autowired
         ServerProperties properties;
@@ -133,10 +134,11 @@ class ConfigurationBindingTest {
  * @since 1.0
  */
     @DisplayName("Слайд 138: профили — application-{profile}.yaml")
-    class Profiles {
+    final class Profiles {
 
         /**
          * Свойства.
+         * @since 1.0
          */
         @Autowired
         ServerProperties properties;
@@ -214,10 +216,11 @@ class ConfigurationBindingTest {
  * @since 1.0
  */
     @DisplayName("Слайд 137: @Value")
-    class ValueAnnotation {
+    final class ValueAnnotation {
 
         /**
          * Конфигурация.
+         * @since 1.0
          */
         @Autowired
         ValueBasedConfig config;
@@ -279,7 +282,7 @@ class ConfigurationBindingTest {
  * @since 1.0
  */
     @DisplayName("Слайды 133–136: приоритеты источников")
-    class Priority {
+    final class Priority {
 
         /**
          * Свойства.

@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 
 /**
  * Реализация {@link DiscountService}. Именно её Spring обернёт JDK-прокси.
+ * @since 1.0
  */
 @Service
 public class StandardDiscountService implements DiscountService {

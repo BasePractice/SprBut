@@ -44,6 +44,7 @@ public class PaymentService {
     /**
      * Значение {@code failuresBeforeSuccess}.
      */
+
     private volatile int failuresBeforeSuccess;
 
     /**
@@ -53,6 +54,7 @@ public class PaymentService {
     /**
      * Исполнитель.
      */
+
     private final ChargeExecutor executor;
 
     /**

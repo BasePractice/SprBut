@@ -25,6 +25,7 @@ final class BeanVerdictTest {
 
         /**
          * Имя.
+         * @since 1.0
          */
         private String name;
 
@@ -46,6 +47,7 @@ final class BeanVerdictTest {
 
         /**
          * Секрет.
+         * @since 1.0
          */
         private String secret;
 

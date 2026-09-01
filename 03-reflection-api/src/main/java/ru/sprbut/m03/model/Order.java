@@ -30,22 +30,27 @@ public class Order {
     /**
      * Клиент.
      */
+
     private String customer;
     /**
      * Итоговая сумма.
      */
+
     private BigDecimal total;
     /**
      * Значение {@code items}.
      */
+
     private List<String> items;
     /**
      * Значение {@code discounts}.
      */
+
     private Map<String, BigDecimal> discounts;
     /**
      * Значение {@code paid}.
      */
+
     private volatile boolean paid;
 
     /**
@@ -174,6 +179,7 @@ public class Order {
 
     /**
      * Значение {@code PaymentException}.
+     * @since 1.0
      */
     public static class PaymentException extends Exception {
         /**

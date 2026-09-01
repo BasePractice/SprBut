@@ -25,7 +25,7 @@ import ru.sprbut.m17.transactional.TransactionalDemo;
  * @since 1.0
  */
 @DisplayName("Слайды 139–149: аннотации Spring")
-class SpringAnnotationsTest {
+final class SpringAnnotationsTest {
 
     @Nested
 /**
@@ -33,7 +33,7 @@ class SpringAnnotationsTest {
  * @since 1.0
  */
     @DisplayName("Слайды 140–144: стереотипы")
-    class StereotypeScanning {
+    final class StereotypeScanning {
 
         @Configuration
         @ComponentScan(basePackageClasses = Stereotypes.class)
@@ -95,7 +95,7 @@ class SpringAnnotationsTest {
  * @since 1.0
  */
     @DisplayName("Слайд 143: @Configuration и proxyBeanMethods")
-    class ConfigurationProxy {
+    final class ConfigurationProxy {
 
         @BeforeEach
         void reset() {
@@ -183,7 +183,7 @@ class SpringAnnotationsTest {
  * @since 1.0
  */
     @DisplayName("Слайд 147: @Transactional через AOP-прокси")
-    class Transactions {
+    final class Transactions {
 
         @BeforeEach
         void reset() {
@@ -279,7 +279,7 @@ class SpringAnnotationsTest {
  * @since 1.0
  */
     @DisplayName("Слайды 148–149: @ConditionalOnProperty и @ConditionalOnMissingBean")
-    class Conditionals {
+    final class Conditionals {
 
         @Test
         @DisplayName("@ConditionalOnProperty: без свойства бина нет")

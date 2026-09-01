@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * Реализация «по умолчанию». Отправленное копится в списке — так его видно в тестах.
+ * @since 1.0
  */
 public class EmailSender implements NotificationSender {
 

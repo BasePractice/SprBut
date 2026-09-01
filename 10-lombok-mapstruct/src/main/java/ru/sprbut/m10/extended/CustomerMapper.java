@@ -98,7 +98,7 @@ public interface CustomerMapper {
      */
     @AfterMapping
     static void normalizeBalance(final CustomerEntity source,
-                                 @MappingTarget CustomerDto.CustomerDtoBuilder target) {
+                                 @MappingTarget final CustomerDto.CustomerDtoBuilder target) {
         if (source.getBalance() == null) {
             target.balance(BigDecimal.ZERO);
         }

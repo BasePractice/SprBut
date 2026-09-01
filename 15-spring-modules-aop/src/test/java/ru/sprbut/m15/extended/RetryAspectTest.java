@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Import;
  * @since 1.0
  */
 @DisplayName("Расширенный пример: своя @Retryable через AOP и обход self-invocation")
-class RetryAspectTest {
+final class RetryAspectTest {
 
     /**
      * Контекст.
@@ -32,14 +32,18 @@ class RetryAspectTest {
     /**
      * Значение {@code payments}.
      */
+
     private PaymentService payments;
     /**
      * Исполнитель.
      */
+
     private ChargeExecutor executor;
     /**
      * Значение {@code aspect}.
+     * @since 1.0
      */
+
     private RetryAspect aspect;
 
     @BeforeEach
@@ -64,7 +68,7 @@ class RetryAspectTest {
  * @since 1.0
  */
     @DisplayName("Аннотация работает как @Transactional: метаданные + аспект")
-    class Behaviour {
+    final class Behaviour {
 
         @Test
         @DisplayName("Успешный вызов проходит с первой попытки")
@@ -149,7 +153,7 @@ class RetryAspectTest {
  * @since 1.0
  */
     @DisplayName("Слайд 124: self-invocation и три способа его обойти")
-    class SelfInvocation {
+    final class SelfInvocation {
 
         @Test
         @DisplayName("Вызов через this минует прокси — ретрая нет, ошибка вылетает сразу")
@@ -245,6 +249,7 @@ class RetryAspectTest {
 
         /**
          * Та же конфигурация, но без {@code exposeProxy} и без сканирования пакета.
+         * @since 1.0
          */
         @Configuration
         @EnableAspectJAutoProxy
@@ -259,7 +264,7 @@ class RetryAspectTest {
  * @since 1.0
  */
     @DisplayName("Прокси — это другой объект, а не ваш бин")
-    class ProxyIsNotTheTarget {
+    final class ProxyIsNotTheTarget {
 
         @Test
         @DisplayName("Из контекста приходит CGLIB-подкласс, а не сам PaymentService")

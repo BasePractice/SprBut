@@ -67,10 +67,12 @@ public class BuilderProcessor extends AbstractProcessor {
     /**
      * Значение {@code messager}.
      */
+
     private Messager messager;
     /**
      * Элементы.
      */
+
     private Elements elements;
 
     /**

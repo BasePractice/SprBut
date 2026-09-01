@@ -47,6 +47,7 @@ public final class StartupListeners {
 
     /**
      * Самое раннее событие: нет ни Environment, ни контекста.
+     * @since 1.0
      */
     public static class Starting implements ApplicationListener<ApplicationStartingEvent> {
 
@@ -65,6 +66,7 @@ public final class StartupListeners {
 
     /**
      * Environment готов — можно добавить свой источник настроек.
+     * @since 1.0
      */
     public static class EnvironmentPrepared
             implements ApplicationListener<ApplicationEnvironmentPreparedEvent> {
@@ -86,6 +88,7 @@ public final class StartupListeners {
 
     /**
      * Контекст создан, инициализаторы отработали, бинов ещё нет.
+     * @since 1.0
      */
     public static class ContextInitialized
             implements ApplicationListener<ApplicationContextInitializedEvent> {
@@ -105,6 +108,7 @@ public final class StartupListeners {
 
     /**
      * Определения бинов загружены — последний шанс их изменить.
+     * @since 1.0
      */
     public static class Prepared implements ApplicationListener<ApplicationPreparedEvent> {
 
@@ -123,6 +127,7 @@ public final class StartupListeners {
 
     /**
      * refresh() завершён: все синглтоны созданы.
+     * @since 1.0
      */
     public static class Refreshed implements ApplicationListener<ContextRefreshedEvent> {
 
@@ -141,6 +146,7 @@ public final class StartupListeners {
 
     /**
      * Контекст поднят, но раннеры ещё не выполнялись.
+     * @since 1.0
      */
     public static class Started implements ApplicationListener<ApplicationStartedEvent> {
 
@@ -159,6 +165,7 @@ public final class StartupListeners {
 
     /**
      * Всё готово, включая раннеры. Финал последовательности.
+     * @since 1.0
      */
     public static class Ready implements ApplicationListener<ApplicationReadyEvent> {
 
@@ -177,6 +184,7 @@ public final class StartupListeners {
 
     /**
      * Запуск не удался — единственное событие, которое отменяет остальные.
+     * @since 1.0
      */
     public static class Failed implements ApplicationListener<ApplicationFailedEvent> {
 

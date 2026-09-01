@@ -24,10 +24,11 @@ import ru.sprbut.m19.greeter.GreeterProperties;
  * @since 1.0
  */
 @DisplayName("Слайды 173–178 (СХЕМА 12): starter → imports → условия → бин")
-class GreeterAutoConfigurationTest {
+final class GreeterAutoConfigurationTest {
 
     /**
      * Значение {@code runner}.
+     * @since 1.0
      */
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(GreeterAutoConfiguration.class));
@@ -38,7 +39,7 @@ class GreeterAutoConfigurationTest {
  * @since 1.0
  */
     @DisplayName("Бин появляется сам")
-    class WorksOutOfTheBox {
+    final class WorksOutOfTheBox {
 
         @Test
         @DisplayName("Без единой строки конфигурации в контексте есть готовый Greeter")
@@ -73,7 +74,7 @@ class GreeterAutoConfigurationTest {
  * @since 1.0
  */
     @DisplayName("Слайд 176: условия")
-    class Conditions {
+    final class Conditions {
 
         @Test
         @DisplayName("@ConditionalOnProperty: выключатель отключает весь стартер")
@@ -103,7 +104,7 @@ class GreeterAutoConfigurationTest {
  * @since 1.0
  */
     @DisplayName("Слайд 177: свой бин переопределяет автоконфигурацию")
-    class UserBeanWins {
+    final class UserBeanWins {
 
         @Configuration
         static class UserConfig {
@@ -150,7 +151,7 @@ class GreeterAutoConfigurationTest {
  * @since 1.0
  */
     @DisplayName("Слайд 175: регистрация через AutoConfiguration.imports")
-    class Registration {
+    final class Registration {
 
         @Test
         @DisplayName("Файл регистрации существует и содержит нашу автоконфигурацию")

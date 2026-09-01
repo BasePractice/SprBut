@@ -36,12 +36,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @DisplayName("Слайды 180–185 (СХЕМА 13): срезы поднимают разный объём контекста")
-class SliceTests {
+final class SliceTests {
 
     @Nested
     @SpringBootTest
     @DisplayName("@SpringBootTest — полный контекст")
-    class FullContext {
+    final class FullContext {
 
         /**
          * Контекст.
@@ -51,6 +51,7 @@ class SliceTests {
 
         /**
          * Каталог.
+         * @since 1.0
          */
         @Autowired
         CatalogService catalog;
@@ -116,7 +117,7 @@ class SliceTests {
     @Nested
     @DataJpaTest
     @DisplayName("@DataJpaTest — только слой данных")
-    class DataSlice {
+    final class DataSlice {
 
         /**
          * Репозиторий.
@@ -126,6 +127,7 @@ class SliceTests {
 
         /**
          * Контекст.
+         * @since 1.0
          */
         @Autowired
         ApplicationContext context;
@@ -176,7 +178,7 @@ class SliceTests {
     @Nested
     @WebMvcTest(ProductController.class)
     @DisplayName("@WebMvcTest — только web-слой")
-    class WebSlice {
+    final class WebSlice {
 
         /**
          * MockMvc.
@@ -198,6 +200,7 @@ class SliceTests {
 
         /**
          * Контекст.
+         * @since 1.0
          */
         @Autowired
         ApplicationContext context;
@@ -272,7 +275,7 @@ class SliceTests {
     @Nested
     @JsonTest
     @DisplayName("@JsonTest — только сериализация")
-    class JsonSlice {
+    final class JsonSlice {
 
         /**
          * JSON.
@@ -282,6 +285,7 @@ class SliceTests {
 
         /**
          * Контекст.
+         * @since 1.0
          */
         @Autowired
         ApplicationContext context;
@@ -338,7 +342,7 @@ class SliceTests {
 
     @Nested
     @DisplayName("Без Spring вовсе — самый быстрый тест")
-    class PlainUnitTest {
+    final class PlainUnitTest {
 
         @Test
         @DisplayName("Сервис тестируется обычным new, если зависимости внедрены конструктором")
@@ -371,6 +375,7 @@ class SliceTests {
 
     /**
      * Общий предок, чтобы не тянуть WebApplicationContext в каждый тест.
+     * @since 1.0
      */
     interface WebContextAware {
         WebApplicationContext context();

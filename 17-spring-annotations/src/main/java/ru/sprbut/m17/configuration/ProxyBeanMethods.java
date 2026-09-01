@@ -45,6 +45,7 @@ public final class ProxyBeanMethods {
 
     /**
      * Общая зависимость.
+     * @since 1.0
      */
     public static class Shared {
         /**
@@ -78,6 +79,7 @@ public final class ProxyBeanMethods {
 
     /**
      * Полноценная конфигурация: вызовы {@code @Bean}-методов перехватываются.
+     * @since 1.0
      */
     @Configuration
     public static class ProxiedConfig {
@@ -120,9 +122,10 @@ public final class ProxyBeanMethods {
 
     /**
      * «Lite»-режим: прокси нет, вызовы методов остаются обычными вызовами.
+     * @since 1.0
      */
     @Configuration(proxyBeanMethods = false)
-    public static class LiteConfig {
+    public static final class LiteConfig {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -162,9 +165,10 @@ public final class ProxyBeanMethods {
 
     /**
      * Правильный вариант для lite-режима: зависимость приходит параметром.
+     * @since 1.0
      */
     @Configuration(proxyBeanMethods = false)
-    public static class LiteConfigDone {
+    public static final class LiteConfigDone {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.

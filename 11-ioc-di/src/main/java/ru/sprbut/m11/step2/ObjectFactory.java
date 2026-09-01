@@ -37,6 +37,7 @@ public class ObjectFactory {
     /**
      * Канал.
      */
+
     private final String channel;
 
     /**

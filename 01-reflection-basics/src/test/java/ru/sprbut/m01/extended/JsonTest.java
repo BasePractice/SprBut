@@ -31,6 +31,7 @@ final class JsonTest {
 
         /**
          * Поле.
+         * @since 1.0
          */
         private final String baseField = "база";
     }

@@ -36,6 +36,7 @@ public class ChargeExecutor {
     /**
      * Значение {@code failuresBeforeSuccess}.
      */
+
     private volatile int failuresBeforeSuccess;
 
     /**

@@ -71,9 +71,9 @@ public final class MetaAnnotated {
     }
 
     private boolean search(
-        Annotation[] annotations,
-        Class<? extends Annotation> target,
-        Set<Class<? extends Annotation>> visited
+        final Annotation[] annotations,
+        final Class<? extends Annotation> target,
+        final Set<Class<? extends Annotation>> visited
     ) {
         for (Annotation each : annotations) {
             final Class<? extends Annotation> candidate = each.annotationType();
@@ -91,10 +91,10 @@ public final class MetaAnnotated {
     }
 
     private void collect(
-        Annotation[] annotations,
-        List<String> sink,
-        Set<Class<? extends Annotation>> visited,
-        int depth
+        final Annotation[] annotations,
+        final List<String> sink,
+        final Set<Class<? extends Annotation>> visited,
+        final int depth
     ) {
         for (Annotation each : annotations) {
             final Class<? extends Annotation> candidate = each.annotationType();

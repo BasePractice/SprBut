@@ -22,7 +22,7 @@ import ru.sprbut.m13.scopes.ScopeConfig;
  * @since 1.0
  */
 @DisplayName("Слайды 99–110: аннотации бина")
-class BeanAnnotationsTest {
+final class BeanAnnotationsTest {
 
     @Nested
 /**
@@ -30,7 +30,7 @@ class BeanAnnotationsTest {
  * @since 1.0
  */
     @DisplayName("Слайд 101: @Scope")
-    class Scopes {
+    final class Scopes {
 
         @BeforeEach
         void reset() {
@@ -108,7 +108,7 @@ class BeanAnnotationsTest {
  * @since 1.0
  */
     @DisplayName("Слайды 102–103: @Qualifier и @Primary")
-    class Qualifiers {
+    final class Qualifiers {
 
         @Test
         @DisplayName("Без уточнений выбирается @Primary")
@@ -171,7 +171,7 @@ class BeanAnnotationsTest {
  * @since 1.0
  */
     @DisplayName("Слайды 104–106: @Conditional, @Profile, @Lazy, @DependsOn")
-    class Conditions {
+    final class Conditions {
 
         @BeforeEach
         void reset() {
@@ -281,7 +281,7 @@ class BeanAnnotationsTest {
  * @since 1.0
  */
     @DisplayName("Слайд 108: @Component vs @Bean")
-    class ComponentOrBean {
+    final class ComponentOrBean {
 
         @Test
         @DisplayName("Свой класс находится сканированием")

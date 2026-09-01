@@ -36,6 +36,7 @@ public final class ComponentVsBean {
 
     /**
      * Свой класс — можно пометить аннотацией.
+     * @since 1.0
      */
     @Component
     public static class OwnService {
@@ -70,6 +71,7 @@ public final class ComponentVsBean {
         /**
          * Значение {@code timeout}.
          */
+
         private final int timeout;
 
         /**
@@ -93,6 +95,7 @@ public final class ComponentVsBean {
 
     /**
      * Конфигурация.
+     * @since 1.0
      */
     @Configuration
     @ComponentScan(basePackageClasses = OwnService.class)

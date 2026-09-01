@@ -222,6 +222,7 @@ public class MiniContainer {
 
     /**
      * Аналог {@code NoSuchBeanDefinitionException}.
+     * @since 1.0
      */
     public static class NoSuchBeanException extends RuntimeException {
         /**
@@ -235,6 +236,7 @@ public class MiniContainer {
 
     /**
      * Аналог {@code NoUniqueBeanDefinitionException}.
+     * @since 1.0
      */
     public static class NoUniqueBeanException extends RuntimeException {
         /**
@@ -248,6 +250,7 @@ public class MiniContainer {
 
     /**
      * Аналог {@code BeanCurrentlyInCreationException}.
+     * @since 1.0
      */
     public static class CircularDependencyException extends RuntimeException {
         /**

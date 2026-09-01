@@ -49,10 +49,12 @@ public final class CheckoutFacade {
     /**
      * Заказы.
      */
+
     private final OrderRepository orders;
     /**
      * Аудит.
      */
+
     private final AuditLog audit;
 
     /**
@@ -70,6 +72,7 @@ public final class CheckoutFacade {
      * Вариант с явным внедрением — для тестов, где нужны свои экземпляры.
      * @param audit Аудит
      * @param customers Клиенты
+     * @param orders Заказы
      */
     public CheckoutFacade(final CustomerRepository customers, final OrderRepository orders, final AuditLog audit) {
         this.customers = customers;

@@ -43,6 +43,7 @@ public class HardcodedOrderService {
     /**
      * Калькулятор.
      */
+
     private final PriceCalculator calculator = new PriceCalculator(new BigDecimal("0.20"));
 
     /**

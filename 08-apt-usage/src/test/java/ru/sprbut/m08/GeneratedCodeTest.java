@@ -36,7 +36,7 @@ final class GeneratedCodeTest {
  * @since 1.0
  */
     @DisplayName("Билдеры, сгенерированные @GenerateBuilder")
-    class Builders {
+    final class Builders {
 
         @Test
         @DisplayName("CustomerBuilder существует и собирает объект")
@@ -134,7 +134,7 @@ final class GeneratedCodeTest {
  * @since 1.0
  */
     @DisplayName("Реестр, сгенерированный JavaPoet")
-    class Registry {
+    final class Registry {
 
         @Test
         @DisplayName("В реестр попали все три класса с @Registered")
@@ -217,7 +217,7 @@ final class GeneratedCodeTest {
  * @since 1.0
  */
     @DisplayName("Аннотации с retention SOURCE")
-    class SourceRetention {
+    final class SourceRetention {
 
         @Test
         @DisplayName("@GenerateBuilder и @Registered в байткоде отсутствуют")

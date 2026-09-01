@@ -56,6 +56,7 @@ public final class TransactionalDemo {
 
     /**
      * Менеджер транзакций, который вместо БД пишет в журнал.
+     * @since 1.0
      */
     public static class LoggingTransactionManager implements PlatformTransactionManager {
 
@@ -86,6 +87,7 @@ public final class TransactionalDemo {
 
     /**
      * Порядок.
+     * @since 1.0
      */
     @Service
     public static class OrderService {
@@ -157,6 +159,7 @@ public final class TransactionalDemo {
 
     /**
      * Конфигурация.
+     * @since 1.0
      */
     @Configuration
     @EnableTransactionManagement

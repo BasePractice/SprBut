@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * Небольшое приложение, на котором показываются все виды тестов Spring Boot.
+ * @since 1.0
  */
 @SpringBootApplication
 public class TestingApp {

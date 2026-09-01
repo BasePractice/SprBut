@@ -45,14 +45,17 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
     /**
      * Объект.
      */
+
     private String beanName;
     /**
      * Объект.
      */
+
     private boolean beanFactoryInjected;
     /**
      * Контекст.
      */
+
     private boolean contextInjected;
 
     /**
@@ -146,6 +149,7 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
 
     /**
      * Простая зависимость, чтобы шаг 2 был не гипотетическим.
+     * @since 1.0
      */
     public static class Dependency {
 

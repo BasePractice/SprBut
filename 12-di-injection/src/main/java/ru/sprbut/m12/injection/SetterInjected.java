@@ -41,6 +41,7 @@ public class SetterInjected {
     /**
      * Сервис.
      */
+
     private DiscountService discountService;
 
     /**

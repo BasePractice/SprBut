@@ -33,7 +33,7 @@ final class MiniContainerTest {
  * @since 1.0
  */
     @DisplayName("Контейнер собирает граф")
-    class Wiring {
+    final class Wiring {
 
         @Test
         @DisplayName("Зависимости подбираются по типу и внедряются через конструктор")
@@ -142,7 +142,7 @@ final class MiniContainerTest {
  * @since 1.0
  */
     @DisplayName("Ошибки, которые повторяет настоящий Spring")
-    class Failures {
+    final class Failures {
 
         @Test
         @DisplayName("Зависимости нет в контейнере — аналог NoSuchBeanDefinitionException")
@@ -250,7 +250,7 @@ final class MiniContainerTest {
  * @since 1.0
  */
     @DisplayName("Единственный конструктор — правило Spring")
-    class ConstructorSelection {
+    final class ConstructorSelection {
 
         @Test
         @DisplayName("Один конструктор используется без всяких аннотаций")

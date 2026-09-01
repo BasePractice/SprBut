@@ -10,6 +10,7 @@ import java.util.Objects;
 
 /**
  * Целевой объект маппинга. Поля {@code internalNote} здесь намеренно нет.
+ * @since 1.0
  */
 public class UserDto {
 
@@ -20,18 +21,22 @@ public class UserDto {
     /**
      * Имя.
      */
+
     private String firstName;
     /**
      * Имя.
      */
+
     private String lastName;
     /**
      * Возраст.
      */
+
     private int age;
     /**
      * Признак активности.
      */
+
     private boolean active;
 
     /**

@@ -36,14 +36,17 @@ public class Order {
     /**
      * Идентификатор.
      */
+
     private String customerId;
     /**
      * Итоговая сумма.
      */
+
     private BigDecimal total;
     /**
      * Момент размещения.
      */
+
     private LocalDate placedOn;
 
     /**
