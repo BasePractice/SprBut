@@ -3,12 +3,15 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// doublePort назван так же, как SpEL-выражение, которое он показывает
+// @checkstyle MemberNameCheck disable
+// @checkstyle ParameterNameCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m16;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import java.util.List;
 
 /**
  * Слайд 137: {@code @Value} — второй способ читать конфигурацию.
@@ -27,6 +30,7 @@ import java.util.List;
  * @since 1.0
  */
 @Component
+@SuppressWarnings("PMD.DataClass")
 public class ValueBasedConfig {
 
     /**
@@ -60,16 +64,18 @@ public class ValueBasedConfig {
 
     /**
      * Основной конструктор.
-     * @param @Value("${sprbut.server.host}" Значение
+     * @param host Узел
+     * @param region Регион
+     * @param port Порт
+     * @param origins Источники
+     * @param doublePort Удвоенный порт
      */
     public ValueBasedConfig(
-            @Value(
-                "${sprbut.server.host}"
-            ) String host,
-            @Value("${sprbut.server.region:eu-central}") String region,
-            @Value("${sprbut.server.port}") int port,
-            @Value("${sprbut.server.origins-csv}") List<String> origins,
-            @Value("#{${sprbut.server.port} * 2}") int doublePort) {
+        @Value("${sprbut.server.host}") final String host,
+        @Value("${sprbut.server.region:eu-central}") final String region,
+        @Value("${sprbut.server.port}") final int port,
+        @Value("${sprbut.server.origins-csv}") final List<String> origins,
+        @Value("#{${sprbut.server.port} * 2}") final int doublePort) {
         this.host = host;
         this.region = region;
         this.port = port;

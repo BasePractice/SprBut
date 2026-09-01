@@ -31,13 +31,6 @@ import org.springframework.core.env.PropertySource;
 public final class ConfigurationOrigin {
 
     /**
-     * Служебный источник-адаптер, который Spring Boot кладёт поверх остальных.
-     * Он ничего не хранит сам — только приводит имена ключей к «расслабленному»
-     * виду, и в отчёте лишний: иначе любой ключ выглядел бы найденным дважды.
-     */
-    private static final String AGGREGATING = "configurationProperties";
-
-    /**
      * Окружение.
      */
     private final ConfigurableEnvironment environment;
@@ -54,7 +47,7 @@ public final class ConfigurationOrigin {
      * Первый источник, в котором есть ключ, — именно его значение и увидит
      * приложение. Порядок в списке источников и есть приоритет.
      * @param key Ключ
-     * @return Первый источник, в котором есть ключ, — именно его значение и увидит приложение. Порядок в списке источников и есть приоритет
+     * @return Первый источник, в котором есть ключ
      */
     public Optional<Origin> resolve(final String key) {
         return this.occurrences(key).stream().findFirst();
@@ -65,17 +58,17 @@ public final class ConfigurationOrigin {
      * Первый выигрывает, остальные перекрыты — именно это и надо видеть,
      * когда значение оказалось не тем, что ожидалось.
      * @param key Ключ
-     * @return Первый выигрывает, остальные перекрыты — именно это и надо видеть, когда значение оказалось не тем, что ожидалось
+     * @return Все источники, где встречается ключ
      */
     public List<Origin> occurrences(final String key) {
         final List<Origin> found = new ArrayList<>(0);
         int priority = 0;
         for (final PropertySource<?> source : this.environment.getPropertySources()) {
-            if (this.real(source)) {
+            if (ConfigurationOrigin.real(source)) {
                 if (source.containsProperty(key)) {
                     found.add(new Origin(source.getName(), source.getProperty(key), priority));
                 }
-                priority++;
+                priority += 1;
             }
         }
         return List.copyOf(found);
@@ -97,7 +90,7 @@ public final class ConfigurationOrigin {
     public List<String> stack() {
         final List<String> names = new ArrayList<>(0);
         this.environment.getPropertySources().stream()
-            .filter(this::real)
+            .filter(ConfigurationOrigin::real)
             .forEach(source -> names.add(source.getName()));
         return List.copyOf(names);
     }
@@ -106,12 +99,13 @@ public final class ConfigurationOrigin {
      * Эффективная конфигурация по префиксу: то, что реально увидит приложение,
      * с указанием источника каждого значения.
      * @param prefix Префикс
-     * @return Эффективная конфигурация по префиксу: то, что реально увидит приложение, с указанием источника каждого значения
+     * @return Эффективная конфигурация по префиксу
      */
     public Map<String, Origin> effective(final String prefix) {
         final Map<String, Origin> collected = new LinkedHashMap<>();
         for (final PropertySource<?> source : this.environment.getPropertySources()) {
-            if (!this.real(source) || !(source instanceof EnumerablePropertySource<?> enumerable)) {
+            if (!ConfigurationOrigin.real(source)
+                || !(source instanceof EnumerablePropertySource<?> enumerable)) {
                 continue;
             }
             for (final String name : enumerable.getPropertyNames()) {
@@ -126,26 +120,31 @@ public final class ConfigurationOrigin {
     /**
      * Человекочитаемое объяснение — то, что стоит напечатать в лог при старте.
      * @param key Ключ
-     * @return Человекочитаемое объяснение — то, что стоит напечатать в лог при старте
+     * @return Человекочитаемое объяснение
      */
     public String explain(final String key) {
         final List<Origin> found = this.occurrences(key);
+        final String text;
         if (found.isEmpty()) {
-            return String.format("'%s' не найден ни в одном источнике", key);
+            text = String.format("'%s' не найден ни в одном источнике", key);
+        } else {
+            final StringBuilder builder = new StringBuilder(
+                String.format(
+                    "'%s' = %s (из %s)", key, found.get(0).value(), found.get(0).source()
+                )
+            );
+            for (int index = 1; index < found.size(); index += 1) {
+                builder.append(String.format("%n  перекрыто: "))
+                    .append(found.get(index).value())
+                    .append(" из ")
+                    .append(found.get(index).source());
+            }
+            text = builder.toString();
         }
-        final StringBuilder text = new StringBuilder(
-            String.format("'%s' = %s (из %s)", key, found.get(0).value(), found.get(0).source())
-        );
-        for (int index = 1; index < found.size(); index++) {
-            text.append("\n  перекрыто: ").append(found.get(index).value())
-                .append(" из ").append(found.get(index).source());
-        }
-        return text.toString();
+        return text;
     }
 
-    // @checkstyle NonStaticMethodCheck (3 lines)
-    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
-    private boolean real(final PropertySource<?> source) {
-        return !AGGREGATING.equals(source.getName());
+    private static boolean real(final PropertySource<?> source) {
+        return !"configurationProperties".equals(source.getName());
     }
 }

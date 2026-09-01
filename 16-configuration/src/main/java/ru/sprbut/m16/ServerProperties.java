@@ -8,61 +8,53 @@ package ru.sprbut.m16;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * Слайд 137: «{@code @Value} и {@code @ConfigurationProperties}».
+ * Слайды 130–137: {@code @ConfigurationProperties} на record.
  *
- * <p>{@code @ConfigurationProperties} — предпочтительный способ: типизированный,
- * группирующий связанные настройки, поддерживающий вложенность, коллекции,
- * {@link Duration} и валидацию. {@code @Value} остаётся для одиночных значений.</p>
- *
- * <p>Это <b>constructor binding</b>: класс неизменяем, все поля {@code final},
- * сеттеров нет. Именно ради него Spring Boot пришлось учить отдельному режиму —
+ * <p>Компактный конструктор подставляет значения по умолчанию — это первый,
+ * самый нижний уровень приоритета. Record здесь не случаен: биндер Spring Boot
+ * умеет собирать неизменяемый объект через канонический конструктор, а
  * обычный биндинг JavaBeans (модуль 02) с неизменяемым объектом не работает.</p>
  *
- * @param allowedOrigins Параметр типа
- * @param headers Параметр типа
+ * @param host Узел
+ * @param port Порт
+ * @param sslEnabled Признак включённого TLS
+ * @param timeout Таймаут: значения вида {@code 30s}, {@code 5m}, {@code PT1H}
+ *  разбираются автоматически
+ * @param allowedOrigins Разрешённые источники
+ * @param headers Заголовки
+ * @param retry Вложенная группа настроек — обычный record внутри
  * @since 1.0
  */
 @ConfigurationProperties(prefix = "sprbut.server")
 public record ServerProperties(
-
-        String host,
-
-        @Min(1) @Max(65_535)
-        int port,
-
-        boolean sslEnabled,
-
-        /**
-         * Значения вида {@code 30s}, {@code 5m}, {@code PT1H} парсятся автоматически.
-         */
-        Duration timeout,
-
-        List<String> allowedOrigins,
-
-        Map<String, String> headers,
-
-        /**
-         * Вложенная группа настроек — обычный record внутри.
-         */
-        Retry retry) {
+    String host,
+    @Min(1) @Max(65_535) int port,
+    boolean sslEnabled,
+    Duration timeout,
+    List<String> allowedOrigins,
+    Map<String, String> headers,
+    Retry retry) {
 
     /**
      * Значения по умолчанию задаются <b>в коде</b> — это первый, самый нижний
      * уровень приоритета (слайд 133).
      */
     public ServerProperties {
-        host = host == null ? "localhost" : host;
-        port = port == 0 ? 8080 : port;
-        timeout = timeout == null ? Duration.ofSeconds(30) : timeout;
-        allowedOrigins = allowedOrigins == null ? List.of() : List.copyOf(allowedOrigins);
-        headers = headers == null ? Map.of() : Map.copyOf(headers);
-        retry = retry == null ? new Retry(3, Duration.ofMillis(500)) : retry;
+        host = Objects.requireNonNullElse(host, "localhost");
+        if (port == 0) {
+            port = 8080;
+        }
+        timeout = Objects.requireNonNullElse(timeout, Duration.ofSeconds(30));
+        allowedOrigins = List.copyOf(Objects.requireNonNullElse(allowedOrigins, List.of()));
+        headers = Map.copyOf(Objects.requireNonNullElse(headers, Map.of()));
+        retry = Objects.requireNonNullElse(retry, new Retry(3, Duration.ofMillis(500)));
     }
 
     /**
@@ -70,23 +62,32 @@ public record ServerProperties(
      * @return Базовый адрес
      */
     public String baseUrl() {
-        return (this.sslEnabled ? "https://" : "http://") + this.host + ":" + this.port;
+        final String scheme;
+        if (this.sslEnabled) {
+            scheme = "https";
+        } else {
+            scheme = "http";
+        }
+        return String.format("%s://%s:%s", scheme, this.host, this.port);
     }
 
     /**
-     * Повтор.
+     * Настройки повтора.
+     *
      * @param attempts Число попыток
-     * @param backoff Значение {@code backoff}
-     * @return Повтор
+     * @param backoff Пауза между попытками
+     * @since 1.0
      */
     public record Retry(int attempts, Duration backoff) {
 
         /**
-         * Повтор.
+         * Значения по умолчанию для группы повторов.
          */
         public Retry {
-            attempts = attempts == 0 ? 3 : attempts;
-            backoff = backoff == null ? Duration.ofMillis(500) : backoff;
+            if (attempts == 0) {
+                attempts = 3;
+            }
+            backoff = Objects.requireNonNullElse(backoff, Duration.ofMillis(500));
         }
     }
 }

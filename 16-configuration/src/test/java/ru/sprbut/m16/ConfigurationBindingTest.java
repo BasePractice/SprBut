@@ -3,8 +3,13 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// поля срезов внедряет контейнер — приватными qulice их видеть не даёт
+// @checkstyle VisibilityModifierCheck disable
 package ru.sprbut.m16;
 
+import java.time.Duration;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,9 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import java.time.Duration;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 
 /**
  * Слайды 129–137: конфигурация в коде и в файле.
@@ -23,17 +25,18 @@ import org.hamcrest.Matchers;
 @DisplayName("Слайды 129–137: конфигурация в коде и в файле")
 final class ConfigurationBindingTest {
 
+    /**
+     * Слайды 133–136: приоритеты источников.
+     * @since 1.0
+     */
     @Nested
     @SpringBootTest
-    @TestPropertySource(properties = {
+    @TestPropertySource(
+        properties = {
             "sprbut.server.host=overridden.example.com",
             "sprbut.server.port=9999"
-    })
-
-/**
- * Слайды 133–136: приоритеты источников.
- * @since 1.0
- */
+        }
+    )
     @DisplayName("Слайды 133–136: приоритеты источников")
     final class Priority {
 
@@ -52,6 +55,11 @@ final class ConfigurationBindingTest {
                 this.properties.host(),
                 Matchers.equalTo("overridden.example.com")
             );
+        }
+
+        @Test
+        @DisplayName("Более приоритетный источник перекрывает файл: порт")
+        void higherPrioritySourceWinsPort() {
             MatcherAssert.assertThat(
                 "cannot verify that higher priority source wins",
                 this.properties.port(),
@@ -71,7 +79,7 @@ final class ConfigurationBindingTest {
     }
 
     /**
-     * @ConfigurationProperties: типизированная группа настроек.
+     * Типизированная группа настроек через {@code @ConfigurationProperties}.
      * @since 1.0
      */
     @Nested
@@ -94,11 +102,21 @@ final class ConfigurationBindingTest {
                 this.properties.host(),
                 Matchers.equalTo("api.example.com")
             );
+        }
+
+        @Test
+        @DisplayName("Значения приходят из application.yaml с приведением типов: порт")
+        void bindsFromYamlPort() {
             MatcherAssert.assertThat(
                 "cannot verify that binds from yaml",
                 this.properties.port(),
                 Matchers.equalTo(8080)
             );
+        }
+
+        @Test
+        @DisplayName("Значения приходят из application.yaml с приведением типов: признак TLS")
+        void bindsFromYamlSslEnabled() {
             MatcherAssert.assertThat(
                 "cannot verify that binds from yaml",
                 this.properties.sslEnabled(),
@@ -114,6 +132,11 @@ final class ConfigurationBindingTest {
                 this.properties.timeout(),
                 Matchers.equalTo(Duration.ofSeconds(30))
             );
+        }
+
+        @Test
+        @DisplayName("Duration парсится из человекочитаемой записи: пауза между попытками")
+        void bindsDurationBackoff() {
             MatcherAssert.assertThat(
                 "cannot verify that binds duration",
                 this.properties.retry().backoff(),
@@ -129,6 +152,11 @@ final class ConfigurationBindingTest {
                 this.properties.allowedOrigins(),
                 Matchers.contains("https://app.example.com", "https://admin.example.com")
             );
+        }
+
+        @Test
+        @DisplayName("Списки и карты биндятся целиком: заголовки")
+        void bindsCollectionsHeaders() {
             MatcherAssert.assertThat(
                 "map property cannot be bound entry by entry",
                 this.properties.headers(),
@@ -149,12 +177,16 @@ final class ConfigurationBindingTest {
         @Test
         @DisplayName("kebab-case в yaml соответствует camelCase в коде")
         void relaxedBindingWorks() {
-            // ssl-enabled → sslEnabled, allowed-origins → allowedOrigins
             MatcherAssert.assertThat(
                 "cannot verify that relaxed binding works",
                 this.properties.sslEnabled(),
                 Matchers.equalTo(false)
             );
+        }
+
+        @Test
+        @DisplayName("kebab-case в yaml соответствует camelCase в коде: разрешённые источники")
+        void relaxedBindingWorksAllowedOrigins() {
             MatcherAssert.assertThat(
                 "cannot verify that relaxed binding works",
                 this.properties.allowedOrigins(),
@@ -198,16 +230,31 @@ final class ConfigurationBindingTest {
                 this.properties.host(),
                 Matchers.equalTo("api.prod.example.com")
             );
+        }
+
+        @Test
+        @DisplayName("Файл профиля перекрывает базовый там, где ключи заданы: порт")
+        void profileOverridesBaseFilePort() {
             MatcherAssert.assertThat(
                 "cannot verify that profile overrides base file",
                 this.properties.port(),
                 Matchers.equalTo(443)
             );
+        }
+
+        @Test
+        @DisplayName("Файл профиля перекрывает базовый там, где ключи заданы: признак TLS")
+        void profileOverridesBaseFileSslEnabled() {
             MatcherAssert.assertThat(
                 "cannot verify that profile overrides base file",
                 this.properties.sslEnabled(),
                 Matchers.equalTo(true)
             );
+        }
+
+        @Test
+        @DisplayName("Файл профиля перекрывает базовый там, где ключи заданы: таймаут")
+        void profileOverridesBaseFileTimeout() {
             MatcherAssert.assertThat(
                 "cannot verify that profile overrides base file",
                 this.properties.timeout(),
@@ -223,6 +270,11 @@ final class ConfigurationBindingTest {
                 this.properties.allowedOrigins(),
                 Matchers.contains("https://app.example.com", "https://admin.example.com")
             );
+        }
+
+        @Test
+        @DisplayName("Незаданные в профиле ключи берутся из базового файла: пауза между попытками")
+        void unspecifiedKeysFallBackToBaseFileBackoff() {
             MatcherAssert.assertThat(
                 "cannot verify that unspecified keys fall back to base file",
                 this.properties.retry().backoff(),
@@ -231,13 +283,18 @@ final class ConfigurationBindingTest {
         }
 
         @Test
-        @DisplayName("Вложенные группы сливаются по отдельным ключам, а не заменяются целиком")
+        @DisplayName("Вложенные группы сливаются по ключам, а не заменяются целиком")
         void nestedGroupsAreMerged() {
             MatcherAssert.assertThat(
                 "cannot verify that nested groups are merged",
                 this.properties.retry().attempts(),
                 Matchers.equalTo(5)
             );
+        }
+
+        @Test
+        @DisplayName("Вложенные группы сливаются по ключам: пауза между попытками")
+        void nestedGroupsAreMergedBackoff() {
             MatcherAssert.assertThat(
                 "cannot verify that nested groups are merged",
                 this.properties.retry().backoff(),
@@ -280,6 +337,11 @@ final class ConfigurationBindingTest {
                 this.config.host(),
                 Matchers.equalTo("api.example.com")
             );
+        }
+
+        @Test
+        @DisplayName("Существующий ключ читается и приводится к типу: порт")
+        void readsExistingKeysPort() {
             MatcherAssert.assertThat(
                 "cannot verify that reads existing keys",
                 this.config.port(),
