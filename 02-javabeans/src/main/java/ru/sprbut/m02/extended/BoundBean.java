@@ -30,6 +30,7 @@ import ru.sprbut.m02.classic.PropertyKey;
  * Spring Boot для неизменяемых конфигураций пришлось учить отдельному режиму
  * constructor binding — тот самый, что используется в модуле 16.</p>
  *
+  * @param <T> Параметр типа
  * @since 1.0
  */
 public final class BoundBean<T> {

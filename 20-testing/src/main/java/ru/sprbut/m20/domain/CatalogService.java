@@ -45,9 +45,9 @@ public class CatalogService {
 
     /**
      * Добавление.
+     * @param sku Артикул
      * @param name Имя
      * @param price Цена
-     * @param sku Артикул
      * @return Добавление
      */
     @Transactional
@@ -60,8 +60,8 @@ public class CatalogService {
 
     /**
      * Цена.
-     * @param newPrice Цена
      * @param sku Артикул
+     * @param newPrice Цена
      * @return Цена
      */
     @Transactional

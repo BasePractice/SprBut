@@ -199,8 +199,9 @@ public class BuilderProcessor extends AbstractProcessor {
      * Пишет новый исходник через {@link Filer}. Важно: файл создаётся именно
      * так, а не через {@code new FileWriter} — иначе javac не узнает о новом
      * коде и не скомпилирует его в следующем раунде.
-     * @param properties Свойства
      * @param type Тип
+      * @param type Параметр типа
+     * @param properties Свойства
      */
     private void generate(final TypeElement type, final List<Property> properties) {
         final String packageName = this.elements.getPackageOf(type).getQualifiedName().toString();
@@ -280,6 +281,8 @@ public class BuilderProcessor extends AbstractProcessor {
 
     /**
      * Свойство, для которого генерируется метод билдера.
+      * @param setter Параметр типа
+      * @param name Параметр типа
      */
     record Property(String name, String type, String setter) {
     }

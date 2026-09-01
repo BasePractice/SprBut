@@ -43,8 +43,8 @@ public final class ReflectiveArray {
 
     /**
      * Многомерный массив создаётся тем же API — просто размеров больше одного.
-     * @param columns Значение {@code columns}
      * @param rows Строки
+     * @param columns Значение {@code columns}
      * @return Многомерный массив создаётся тем же API — просто размеров больше одного
      */
     public Object matrix(final int rows, final int columns) {

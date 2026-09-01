@@ -39,8 +39,7 @@ public final class Service {
 
     /**
      * Настройка через метод — вторая разновидность точки внедрения.
-     * @param label Метка
-     * @param millis Значение {@code millis}
+     * @param lines Значение {@code lines}
      */
     // @checkstyle NonStaticMethodCheck (3 lines)
     public void configure(final @Injected("timeout") long millis, final String label) {

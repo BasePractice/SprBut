@@ -18,6 +18,7 @@ import java.util.Optional;
  * для аннотаций типов. На интерфейсы язык не смотрит вообще — а Spring смотрит,
  * и именно поэтому {@code @Transactional} на интерфейсе репозитория работает.</p>
  *
+  * @param <A> Параметр типа
  * @since 1.0
  */
 public final class HierarchyMerged<A extends Annotation> {

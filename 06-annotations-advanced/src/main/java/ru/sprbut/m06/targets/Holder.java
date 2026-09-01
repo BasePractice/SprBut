@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m06.targets;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
  * <p>Три случая отличаются тем, <b>откуда</b> аннотация читается, и это главное,
  * что стоит вынести из слайдов 48–49.</p>
  *
+  * @param <T> Параметр типа
  * @since 1.0
  */
 @SuppressWarnings("unused")

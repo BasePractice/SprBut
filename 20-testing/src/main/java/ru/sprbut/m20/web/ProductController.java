@@ -85,7 +85,7 @@ public class ProductController {
 
     /**
      * Запрос.
-     * @param e Событие
+     * @param lines Значение {@code lines}
      * @return Запрос
      */
     // @checkstyle NonStaticMethodCheck (3 lines)

@@ -100,8 +100,8 @@ public class ObjectFactory {
      * а {@code computeIfAbsent} такого не допускает — будет
      * {@code ConcurrentModificationException}. Контейнеру приходится решать
      * ровно эту задачу, только на графе произвольной глубины.</p>
-     * @param factory Фабрика
      * @param name Имя
+     * @param factory Фабрика
      * @return Ленивое создание с кэшированием
      */
     private Object singleton(final String name, final Supplier<Object> factory) {

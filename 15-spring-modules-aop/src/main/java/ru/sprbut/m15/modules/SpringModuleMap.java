@@ -23,6 +23,8 @@ import java.util.stream.Collectors;
  * а всё остальное — прямо или косвенно от него. Именно поэтому «выучить Spring»
  * начинают с контейнера, а не с веба.</p>
  *
+  * @param dependsOn Параметр типа
+  * @param layer Параметр типа
  * @since 1.0
  */
 public record SpringModuleMap(String name, Layer layer, String responsibility, List<String> dependsOn) {

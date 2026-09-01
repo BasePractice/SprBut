@@ -44,8 +44,8 @@ public final class Handles {
      * Хэндл публичного метода. {@link MethodType} описывает сигнатуру целиком
      * и проверяется строго — ошибиться в типе параметра здесь нельзя.
      * @param name Имя
-     * @param parameters Типы параметров
      * @param returns Возвращаемое значение
+     * @param parameters Типы параметров
      * @return Хэндл публичного метода. {@link MethodType} описывает сигнатуру целиком и проверяется строго — ошибиться в типе параметра здесь нельзя
      */
     public MethodHandle virtual(final String name, final Class<?> returns, final Class<?>... parameters)
@@ -57,8 +57,8 @@ public final class Handles {
     /**
      * Хэндл приватного метода чужого класса.
      * @param name Имя
-     * @param parameters Типы параметров
      * @param returns Возвращаемое значение
+     * @param parameters Типы параметров
      * @return Хэндл приватного метода чужого класса
      */
     public MethodHandle hidden(final String name, final Class<?> returns, final Class<?>... parameters)

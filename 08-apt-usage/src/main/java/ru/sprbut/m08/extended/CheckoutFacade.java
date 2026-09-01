@@ -69,9 +69,9 @@ public final class CheckoutFacade {
 
     /**
      * Вариант с явным внедрением — для тестов, где нужны свои экземпляры.
-     * @param audit Аудит
      * @param customers Клиенты
      * @param orders Заказы
+     * @param audit Аудит
      */
     public CheckoutFacade(final CustomerRepository customers, final OrderRepository orders, final AuditLog audit) {
         this.customers = customers;
@@ -82,10 +82,10 @@ public final class CheckoutFacade {
     /**
      * Регистрирует покупателя. Объект собирается сгенерированным билдером —
      * ни одного вызова сеттера в этом коде нет.
-     * @param age Возраст
-     * @param email Адрес почты
      * @param id Идентификатор
      * @param name Имя
+     * @param email Адрес почты
+     * @param age Возраст
      * @param vip Признак привилегированного клиента
      * @return Регистрирует покупателя. Объект собирается сгенерированным билдером — ни одного вызова сеттера в этом коде нет
      */
@@ -111,8 +111,8 @@ public final class CheckoutFacade {
      * Оформляет заказ. Билдер называется {@code OrderMaker} — суффикс задан
      * элементом аннотации {@code @GenerateBuilder(suffix = "Maker")}.
      * @param customerId Идентификатор
-     * @param date Дата
      * @param total Итоговая сумма
+     * @param date Дата
      * @return Оформляет заказ. Билдер называется {@code OrderMaker} — суффикс задан элементом аннотации {@code @GenerateBuilder(suffix = "Maker")}
      */
     public Order checkout(final String customerId, final BigDecimal total, final LocalDate date) {

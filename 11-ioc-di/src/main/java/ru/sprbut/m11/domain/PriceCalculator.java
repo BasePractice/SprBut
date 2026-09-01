@@ -11,6 +11,7 @@ import java.math.RoundingMode;
 
 /**
  * Вторая зависимость сервиса — чтобы граф был не тривиальным.
+  * @param vatRate Параметр типа
  * @since 1.0
  */
 public record PriceCalculator(BigDecimal vatRate) {

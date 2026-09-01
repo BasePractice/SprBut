@@ -45,10 +45,10 @@ public final class CompilationHarness {
 
     /**
      * Компилирует исходники с указанными процессорами.
-     * @param workDir    временный каталог теста
-     * @param sources    что компилировать
-     * @param processor  процессор, который нужно запустить
-     * @param options    дополнительные опции javac (например, {@code -Akey=value})
+     * @param workDir временный каталог теста
+     * @param sources что компилировать
+     * @param processor процессор, который нужно запустить
+     * @param options дополнительные опции javac (например, {@code -Akey=value})
      * @return Компилирует исходники с указанными процессорами
      */
     public static Result compile(final Path workDir, final List<Source> sources, final Processor processor, final String... options) {
@@ -142,6 +142,11 @@ public final class CompilationHarness {
 
     /**
      * Исходник: полное имя класса и его текст.
+      * @param generatedSources Параметр типа
+      * @param success Параметр типа
+      * @param generatedSources Параметр типа
+      * @param success Параметр типа
+      * @param diagnostics Параметр типа
      */
     public record Source(String qualifiedName, String code) {
 
@@ -159,6 +164,8 @@ public final class CompilationHarness {
 
     /**
      * Результат компиляции вместе со сгенерированными исходниками и диагностикой.
+      * @param diagnostics Параметр типа
+      * @param classesDir Параметр типа
      */
     public record Result(boolean success,
                   List<Diagnostic<? extends JavaFileObject>> diagnostics,

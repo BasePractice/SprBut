@@ -42,6 +42,7 @@ import ru.sprbut.m06.Builtin;
  * {@code @Controller}»: не потому, что так устроена Java, а потому,
  * что так написан читающий код.</p>
  *
+  * @param <A> Параметр типа
  * @since 1.0
  */
 public final class MergedAnnotation<A extends Annotation> {
@@ -134,8 +135,10 @@ public final class MergedAnnotation<A extends Annotation> {
      * названный там элемент; одноимённый элемент переопределяет одноимённый,
      * но только если его значение отличается от {@code default} — иначе
      * «незаданный» элемент затирал бы осмысленное значение.</p>
-     * @param attributes Значение {@code attributes}
      * @param source Источник
+      * @param annotation Параметр типа
+      * @param path Параметр типа
+     * @param attributes Значение {@code attributes}
      */
     private void override(final Annotation source, final Map<String, Object> attributes) {
         final RawAttributes raw = new RawAttributes(source);

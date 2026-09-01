@@ -18,6 +18,7 @@ import java.util.Optional;
  * Отсюда и {@code AnnotatedElementUtils} в Spring — та же работа, только
  * с кэшированием и поддержкой композиций.</p>
  *
+  * @param <A> Параметр типа
  * @since 1.0
  */
 public final class HierarchySearch<A extends Annotation> {

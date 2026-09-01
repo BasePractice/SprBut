@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
 package ru.sprbut.m23.web;
 
 import jakarta.validation.constraints.NotBlank;
@@ -18,6 +19,7 @@ import jakarta.validation.constraints.Size;
  * <p>Аннотации проверки — снова метаданные: сами по себе они ничего не запрещают,
  * работать их заставляет {@code @Valid} в контроллере.</p>
  *
+  * @param title Параметр типа
  * @since 1.0
  */
 public record NewTaskRequest(

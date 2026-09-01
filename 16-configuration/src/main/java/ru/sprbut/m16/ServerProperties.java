@@ -24,6 +24,8 @@ import java.util.Map;
  * сеттеров нет. Именно ради него Spring Boot пришлось учить отдельному режиму —
  * обычный биндинг JavaBeans (модуль 02) с неизменяемым объектом не работает.</p>
  *
+  * @param allowedOrigins Параметр типа
+  * @param headers Параметр типа
  * @since 1.0
  */
 @ConfigurationProperties(prefix = "sprbut.server")

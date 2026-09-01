@@ -26,6 +26,7 @@ import java.util.List;
  * {@code this} идёт мимо прокси, и в журнале его не будет. Ровно поэтому
  * {@code @Transactional} не работает при self-invocation.</p>
  *
+  * @param <T> Параметр типа
  * @since 1.0
  */
 public final class LoggingProxy<T> {

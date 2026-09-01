@@ -61,8 +61,8 @@ public class PaymentService {
      * {@code ObjectProvider} вместо прямого внедрения себя: обычная зависимость
      * на самого себя даёт циклическую зависимость (модуль 12), а провайдер
      * достаёт бин лениво — уже готовый прокси.
-     * @param executor Исполнитель
      * @param self Ссылка на себя
+     * @param executor Исполнитель
      */
     public PaymentService(final ObjectProvider<PaymentService> self, final ChargeExecutor executor) {
         this.self = self;

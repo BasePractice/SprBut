@@ -16,6 +16,7 @@ import java.util.Map;
  * <p>Существует ради того, чтобы у {@link GenericType} было что разбирать:
  * каждое поле здесь — отдельный род узла в дереве типов.</p>
  *
+  * @param <T> Параметр типа
  * @since 1.0
  */
 @SuppressWarnings("unused")

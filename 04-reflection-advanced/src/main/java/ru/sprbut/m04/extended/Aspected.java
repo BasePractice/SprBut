@@ -24,6 +24,7 @@ import java.lang.reflect.Proxy;
  * Это устройство Spring AOP в миниатюре: класс цели не меняется,
  * поведение живёт в обёртке.</p>
  *
+  * @param <T> Параметр типа
  * @since 1.0
  */
 public final class Aspected<T> {
