@@ -18,7 +18,6 @@ import java.math.BigDecimal;
  * @since 1.0
  */
 public class Account {
-
     /**
      * Значение {@code TYPE}.
      */
@@ -28,25 +27,25 @@ public class Account {
      * Идентификатор.
      */
     private final String id;
+
     /**
      * Владелец.
      */
-
     private String owner;
+
     /**
      * Баланс.
      */
-
     private BigDecimal balance;
+
     /**
      * Значение {@code blocked}.
      */
-
     protected boolean blocked;
+
     /**
      * Значение {@code cachedLabel}.
      */
-
     transient String cachedLabel;
 
     /**
@@ -93,6 +92,11 @@ public class Account {
         return this.blocked;
     }
 
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
+    static String describeType() {
+        return String.format("Счёт типа %s", TYPE);
+    }
+
     /**
      * Метод намеренно приватный: рефлексия умеет вызывать и такие.
      * @param fee Значение {@code fee}
@@ -106,9 +110,5 @@ public class Account {
     private void block(final String reason) {
         this.blocked = true;
         this.cachedLabel = reason;
-    }
-
-    static String describeType() {
-        return "Счёт типа " + TYPE;
     }
 }

@@ -5,6 +5,7 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m12.cycles;
 
+import java.util.Arrays;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -76,10 +77,11 @@ final class CircularDependencyTest {
     @DisplayName("оба бина зависят от общего третьего, и ни один — от другого")
     void sharesTheExtractedBean() {
         try (var context =
-                 new AnnotationConfigApplicationContext(CircularBeans.RefactoredConfig.class)) {
+                 new AnnotationConfigApplicationContext(                     CircularBeans.RefactoredConfig.class
+)) {
             MatcherAssert.assertThat(
                 "shared bean cannot appear in the context",
-                java.util.Arrays.asList(context.getBeanDefinitionNames()),
+                Arrays.asList(context.getBeanDefinitionNames()),
                 Matchers.hasItem("sharedRules")
             );
         }

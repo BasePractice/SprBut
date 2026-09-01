@@ -21,7 +21,7 @@ public final class SimpleGreeter implements Greeter {
 
     @Override
     public String greet(final String name) {
-        return "Привет, " + name;
+        return String.format("Привет, %s", name);
     }
 
     @Override

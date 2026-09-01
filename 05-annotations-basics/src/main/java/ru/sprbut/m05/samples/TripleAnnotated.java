@@ -22,14 +22,6 @@ import ru.sprbut.m05.declarations.Retentions;
 @Retentions.DefaultRetention
 @SuppressWarnings("unused")
 public class TripleAnnotated {
-
-    /**
-     * Открытый конструктор: экземпляр создаёт контейнер.
-     */
-    public TripleAnnotated() {
-        // нечего инициализировать
-    }
-
     /**
      * Поле.
      */
@@ -39,11 +31,20 @@ public class TripleAnnotated {
     private String field;
 
     /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    public TripleAnnotated() {
+        // нечего инициализировать
+    }
+
+    /**
      * Метод.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @Retentions.SourceLevel
     @Retentions.ClassLevel
     @Retentions.RuntimeLevel
     public void method() {
+        // тело намеренно пустое
     }
 }

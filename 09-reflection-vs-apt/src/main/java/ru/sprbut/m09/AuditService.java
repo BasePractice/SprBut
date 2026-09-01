@@ -29,14 +29,16 @@ public class AuditService {
      * @param event Событие
      * @return Записывает событие
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     public String record(final String event) {
-        return "записано: " + event;
+        return String.format("записано: %s", event);
     }
 
     /**
      * Число записей.
      * @return Число записей
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     public int size() {
         return 0;
     }

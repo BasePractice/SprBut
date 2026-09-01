@@ -27,6 +27,10 @@ public final class Components {
      */
     @MiniComponent
     public static class Repository {
+        /**
+         * Строки.
+         */
+        private final List<String> rows = new ArrayList<>();
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -34,11 +38,6 @@ public final class Components {
         public Repository() {
             // нечего инициализировать
         }
-
-        /**
-         * Строки.
-         */
-        private final List<String> rows = new ArrayList<>();
 
         /**
          * Сохранение.
@@ -75,6 +74,7 @@ public final class Components {
          * Момент времени.
          * @return Момент времени
          */
+        // @checkstyle NonStaticMethodCheck (3 lines)
         public String now() {
             return "2026-07-30";
         }
@@ -94,7 +94,6 @@ public final class Components {
         /**
          * Часы.
          */
-
         private final Clock clock;
 
         /**
@@ -194,6 +193,7 @@ public final class Components {
          * @param dependency Зависимость
          */
         public NeedsUnmanaged(final UnmanagedDependency dependency) {
+            // тело намеренно пустое
         }
     }
 
@@ -265,6 +265,7 @@ public final class Components {
          * @param beta Бета-зависимость
          */
         public AlphaService(final BetaService beta) {
+            // тело намеренно пустое
         }
     }
 
@@ -280,6 +281,7 @@ public final class Components {
          * @param alpha Альфа-зависимость
          */
         public BetaService(final AlphaService alpha) {
+            // тело намеренно пустое
         }
     }
 
@@ -297,6 +299,7 @@ public final class Components {
          * @param repository Репозиторий
          */
         public TwoConstructors(final Repository repository) {
+            // тело намеренно пустое
         }
 
         /**
@@ -305,6 +308,7 @@ public final class Components {
          * @param clock Часы
          */
         public TwoConstructors(final Repository repository, final Clock clock) {
+            // тело намеренно пустое
         }
     }
 }

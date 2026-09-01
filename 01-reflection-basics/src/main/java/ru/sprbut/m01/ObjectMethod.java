@@ -53,6 +53,7 @@ public final class ObjectMethod {
      * @param args Аргументы
      * @return Вызывает метод, игнорируя модификатор доступа
      */
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     public Object call(final Object... args) {
         final Method method = new Declared(this.target.getClass()).method(this.name, this.parameters);
         method.setAccessible(true);

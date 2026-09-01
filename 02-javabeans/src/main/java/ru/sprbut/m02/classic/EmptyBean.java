@@ -39,6 +39,7 @@ public final class EmptyBean {
      * Свежесозданный пустой экземпляр.
      * @return Свежесозданный пустой экземпляр
      */
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     public Object instance() {
         try {
             final Constructor<?> constructor = this.type.getDeclaredConstructor();

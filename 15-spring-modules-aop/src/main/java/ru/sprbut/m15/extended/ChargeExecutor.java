@@ -21,36 +21,21 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Service
 public class ChargeExecutor {
+    /**
+     * Число вызовов.
+     */
+    private final AtomicInteger executions = new AtomicInteger();
+
+    /**
+     * Значение {@code failuresBeforeSuccess}.
+     */
+    private volatile int failuresBeforeSuccess;
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
      */
     public ChargeExecutor() {
         // нечего инициализировать
-    }
-
-    /**
-     * Число вызовов.
-     */
-    private final AtomicInteger executions = new AtomicInteger();
-    /**
-     * Значение {@code failuresBeforeSuccess}.
-     */
-
-    private volatile int failuresBeforeSuccess;
-
-    /**
-     * Значение {@code execute}.
-     * @param orderId Порядок
-     * @return Значение {@code execute}
-     */
-    @Retryable(attempts = 3)
-    public String execute(final String orderId) {
-        final int call = this.executions.incrementAndGet();
-        if (call <= this.failuresBeforeSuccess) {
-            throw new IllegalStateException("сбой платежа №" + call);
-        }
-        return "оплачен " + orderId;
     }
 
     /**
@@ -75,5 +60,19 @@ public class ChargeExecutor {
     public void reset() {
         this.executions.set(0);
         this.failuresBeforeSuccess = 0;
+    }
+
+    /**
+     * Значение {@code execute}.
+     * @param orderId Порядок
+     * @return Значение {@code execute}
+     */
+    @Retryable(attempts = 3)
+    public String execute(final String orderId) {
+        final int call = this.executions.incrementAndGet();
+        if (call <= this.failuresBeforeSuccess) {
+            throw new IllegalStateException("сбой платежа №" + call);
+        }
+        return String.format("оплачен %s", orderId);
     }
 }

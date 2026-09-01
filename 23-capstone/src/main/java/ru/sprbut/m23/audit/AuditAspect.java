@@ -65,7 +65,7 @@ public final class AuditAspect {
      * @param point Точка
      * @return Имя операции из аннотации на методе <b>реализации</b>
      */
-    private String operation(final ProceedingJoinPoint point) {
+    private static String operation(final ProceedingJoinPoint point) {
         final MethodSignature signature = (MethodSignature) point.getSignature();
         final Method method = AopUtils.getMostSpecificMethod(
             signature.getMethod(), point.getTarget().getClass()

@@ -27,18 +27,18 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 1.0
  */
 public final class ProxyBeanMethods {
-
-    private ProxyBeanMethods() {
-    }
-
     /**
      * Считает, сколько объектов реально создано.
      */
     public static final AtomicInteger INSTANCES = new AtomicInteger();
 
+    private ProxyBeanMethods() {
+    }
+
     /**
      * Сброс состояния.
      */
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     public static void reset() {
         INSTANCES.set(0);
     }

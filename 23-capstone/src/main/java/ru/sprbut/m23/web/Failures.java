@@ -37,6 +37,7 @@ public final class Failures {
      * @param failure Ошибка
      * @return Отсутствующий элемент
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> missing(final IllegalArgumentException failure) {
@@ -48,6 +49,7 @@ public final class Failures {
      * @param failure Ошибка
      * @return Значение {@code conflict}
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> conflict(final IllegalStateException failure) {
@@ -59,6 +61,7 @@ public final class Failures {
      * @param failure Ошибка
      * @return Значение {@code invalid}
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> invalid(final MethodArgumentNotValidException failure) {

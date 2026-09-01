@@ -7,7 +7,10 @@ package ru.sprbut.m12;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import ru.sprbut.m12.domain.TaxService;
+import ru.sprbut.m12.injection.ConstructorInjected;
 import ru.sprbut.m12.jakarta.JakartaInjected;
+import ru.sprbut.m12.locator.ServiceLocatorDemo;
 
 /**
  * Конфигурация модуля: сканирует пакеты с примерами внедрения.
@@ -19,9 +22,9 @@ import ru.sprbut.m12.jakarta.JakartaInjected;
  */
 @Configuration
 @ComponentScan(basePackageClasses = {
-        ru.sprbut.m12.domain.TaxService.class,
-        ru.sprbut.m12.injection.ConstructorInjected.class,
-        ru.sprbut.m12.locator.ServiceLocatorDemo.class,
+        TaxService.class,
+        ConstructorInjected.class,
+        ServiceLocatorDemo.class,
         JakartaInjected.class
 })
 public class AppConfig {

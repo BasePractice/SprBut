@@ -67,7 +67,7 @@ public final class TaskService implements Tasks {
         if (this.repository.findByStatusOrderByCreatedDesc(TaskStatus.OPEN).size()
             >= this.settings.limit()) {
             throw new IllegalStateException(
-                "Открытых задач уже " + this.settings.limit() + ", лимит исчерпан"
+                String.format("Открытых задач уже %s, лимит исчерпан", this.settings.limit())
             );
         }
         return this.repository.save(new Task(title, Instant.now(this.clock)));

@@ -10,7 +10,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Comparator;
-
+import java.util.List;
 /**
  * Конструктор, выбранный под заданное число аргументов.
  *
@@ -22,7 +22,6 @@ import java.util.Comparator;
  * @since 1.0
  */
 public final class ChosenConstructor {
-
     /**
      * Тип.
      */
@@ -64,11 +63,26 @@ public final class ChosenConstructor {
     }
 
     /**
+     * Описание конструктора для отчёта.
+     * @return Описание конструктора для отчёта
+     */
+    public String text() {
+        final Constructor<?> chosen = this.constructor();
+        return chosen.getDeclaringClass().getSimpleName() + "("
+            + String.join(
+                ", ",
+                Arrays.stream(chosen.getParameterTypes()).map(Class::getSimpleName).toList()
+            )
+            + ")";
+    }
+
+    /**
      * Созданный этим конструктором объект.
      * @param args Аргументы
      * @return Созданный этим конструктором объект
      */
-    public Object instance(final java.util.List<String> args) {
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
+    public Object instance(final List<String> args) {
         final Constructor<?> chosen = this.constructor();
         final Class<?>[] parameters = chosen.getParameterTypes();
         final Object[] values = new Object[parameters.length];
@@ -83,20 +97,7 @@ public final class ChosenConstructor {
         }
     }
 
-    /**
-     * Описание конструктора для отчёта.
-     * @return Описание конструктора для отчёта
-     */
-    public String text() {
-        final Constructor<?> chosen = this.constructor();
-        return chosen.getDeclaringClass().getSimpleName() + "("
-            + String.join(
-                ", ",
-                Arrays.stream(chosen.getParameterTypes()).map(Class::getSimpleName).toList()
-            )
-            + ")";
-    }
-
+    // @checkstyle NonStaticMethodCheck (3 lines)
     private boolean fillable(final Constructor<?> candidate) {
         return Arrays.stream(candidate.getParameterTypes())
             .allMatch(parameter -> new Convertible(parameter).yes());

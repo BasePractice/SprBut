@@ -33,6 +33,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Configuration
 public class ScopeConfig {
+    /**
+     * Считает, сколько раз вообще создавался объект каждого типа.
+     */
+    public static final AtomicInteger SINGLETON_INSTANCES = new AtomicInteger();
+
+    /**
+     * Значение {@code PROTOTYPE_INSTANCES}.
+     */
+    public static final AtomicInteger PROTOTYPE_INSTANCES = new AtomicInteger();
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -42,21 +51,64 @@ public class ScopeConfig {
     }
 
     /**
-     * Считает, сколько раз вообще создавался объект каждого типа.
+     * Держатель.
+     * @param prototype Прототип
+     * @return Держатель
      */
-    public static final AtomicInteger SINGLETON_INSTANCES = new AtomicInteger();
-    /**
-     * Значение {@code PROTOTYPE_INSTANCES}.
-     */
+    @Bean
+    public HolderWithoutProxy holderWithoutProxy(final PrototypeBean prototype) {
+        return new HolderWithoutProxy(prototype);
+    }
 
-    public static final AtomicInteger PROTOTYPE_INSTANCES = new AtomicInteger();
+    /**
+     * Держатель.
+     * @param prototype Прототип
+     * @return Держатель
+     */
+    @Bean
+    public HolderWithProxy holderWithProxy(final ProxiedPrototypeBean prototype) {
+        return new HolderWithProxy(prototype);
+    }
 
     /**
      * Значение {@code resetCounters}.
      */
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     public static void resetCounters() {
         SINGLETON_INSTANCES.set(0);
         PROTOTYPE_INSTANCES.set(0);
+    }
+
+    /**
+     * Объект.
+     * @return Объект
+     */
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+    public SingletonBean singletonBean() {
+        return new SingletonBean();
+    }
+
+    /**
+     * Объект.
+     * @return Объект
+     */
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public PrototypeBean prototypeBean() {
+        return new PrototypeBean();
+    }
+
+    /**
+     * {@code proxyMode = TARGET_CLASS} — в место внедрения подставляется
+     * CGLIB-прокси, который на каждый вызов метода достаёт новый бин из контейнера.
+     * @return {@code proxyMode = TARGET_CLASS} — в место внедрения подставляется CGLIB-прокси, который на каждый вызов метода достаёт новый бин из контейнера
+     */
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
+    @Bean
+    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
+    public ProxiedPrototypeBean proxiedPrototypeBean() {
+        return new ProxiedPrototypeBean();
     }
 
     /**
@@ -192,56 +244,5 @@ public class ScopeConfig {
         public int serial() {
             return this.serial;
         }
-    }
-
-    /**
-     * Объект.
-     * @return Объект
-     */
-    @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-    public SingletonBean singletonBean() {
-        return new SingletonBean();
-    }
-
-    /**
-     * Объект.
-     * @return Объект
-     */
-    @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-    public PrototypeBean prototypeBean() {
-        return new PrototypeBean();
-    }
-
-    /**
-     * {@code proxyMode = TARGET_CLASS} — в место внедрения подставляется
-     * CGLIB-прокси, который на каждый вызов метода достаёт новый бин из контейнера.
-     * @return {@code proxyMode = TARGET_CLASS} — в место внедрения подставляется CGLIB-прокси, который на каждый вызов метода достаёт новый бин из контейнера
-     */
-    @Bean
-    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
-    public ProxiedPrototypeBean proxiedPrototypeBean() {
-        return new ProxiedPrototypeBean();
-    }
-
-    /**
-     * Держатель.
-     * @param prototype Прототип
-     * @return Держатель
-     */
-    @Bean
-    public HolderWithoutProxy holderWithoutProxy(final PrototypeBean prototype) {
-        return new HolderWithoutProxy(prototype);
-    }
-
-    /**
-     * Держатель.
-     * @param prototype Прототип
-     * @return Держатель
-     */
-    @Bean
-    public HolderWithProxy holderWithProxy(final ProxiedPrototypeBean prototype) {
-        return new HolderWithProxy(prototype);
     }
 }

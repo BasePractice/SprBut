@@ -19,13 +19,6 @@ import ru.sprbut.m14.LifecycleLog;
  */
 @DisplayName("Расширенный пример: шкала жизненного цикла с проверкой инвариантов")
 final class LifecycleTimelineTest {
-
-    private static LifecycleTimeline started() {
-        new LifecycleLog().clear();
-        new AnnotationConfigApplicationContext(LifecycleConfig.class).close();
-        return new LifecycleTimeline();
-    }
-
     @Test
     @DisplayName("журнал разбирается в шаги с номерами и фазами")
     void parsesLogIntoSteps() {
@@ -105,5 +98,11 @@ final class LifecycleTimelineTest {
             timeline.of("managedBean").size(),
             Matchers.greaterThan(timeline.of("prototypeWithDestroy").size())
         );
+    }
+
+    private static LifecycleTimeline started() {
+        new LifecycleLog().clear();
+        new AnnotationConfigApplicationContext(LifecycleConfig.class).close();
+        return new LifecycleTimeline();
     }
 }

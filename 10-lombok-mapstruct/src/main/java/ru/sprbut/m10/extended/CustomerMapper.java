@@ -76,6 +76,7 @@ public interface CustomerMapper {
      * @param birthDate Дата рождения
      * @return Возраст
      */
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     @Named("toAge")
     static int toAge(final LocalDate birthDate) {
         return birthDate == null ? 0 : Period.between(birthDate, REFERENCE_DATE).getYears();

@@ -14,6 +14,10 @@ import java.util.List;
  * @since 1.0
  */
 public class SmsSender implements NotificationSender {
+    /**
+     * Отправленные сообщения.
+     */
+    private final List<String> sent = new ArrayList<>();
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -21,11 +25,6 @@ public class SmsSender implements NotificationSender {
     public SmsSender() {
         // нечего инициализировать
     }
-
-    /**
-     * Отправленные сообщения.
-     */
-    private final List<String> sent = new ArrayList<>();
 
     @Override
     public void send(final String recipient, final String message) {

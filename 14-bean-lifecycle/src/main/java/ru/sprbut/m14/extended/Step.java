@@ -17,6 +17,6 @@ public record Step(int number, String phase, String bean) {
 
     @Override
     public String toString() {
-        return this.number + ". " + this.phase + " → " + this.bean;
+        return String.format("%s. %s → %s", this.number, this.phase, this.bean);
     }
 }

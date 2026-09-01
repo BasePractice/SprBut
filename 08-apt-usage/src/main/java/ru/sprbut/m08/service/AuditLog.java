@@ -18,6 +18,10 @@ import java.util.List;
  */
 @Registered("audit")
 public class AuditLog {
+    /**
+     * Записи.
+     */
+    private final List<String> entries = new ArrayList<>();
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -28,8 +32,11 @@ public class AuditLog {
 
     /**
      * Записи.
+     * @return Записи
      */
-    private final List<String> entries = new ArrayList<>();
+    public List<String> entries() {
+        return List.copyOf(this.entries);
+    }
 
     /**
      * Значение {@code record}.
@@ -38,13 +45,5 @@ public class AuditLog {
     @Todo("заменить на структурированное логирование")
     public void record(final String event) {
         this.entries.add(event);
-    }
-
-    /**
-     * Записи.
-     * @return Записи
-     */
-    public List<String> entries() {
-        return List.copyOf(this.entries);
     }
 }

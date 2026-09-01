@@ -16,7 +16,6 @@ package ru.sprbut.m06.extended;
  */
 @SuppressWarnings("unused")
 public class UserController {
-
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
      */
@@ -25,43 +24,55 @@ public class UserController {
     }
 
     /**
+     * Метод без аннотаций вовсе.
+     */
+    // @checkstyle NonStaticMethodCheck (3 lines)
+    public void plain() {
+        // тело намеренно пустое
+    }
+
+    /**
      * Прямая аннотация без всякой композиции — контрольный случай.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @RequestMapping(path = "/raw", method = HttpMethod.POST, produces = "text/plain")
     public void raw() {
+        // тело намеренно пустое
     }
 
     /**
      * Композиция первого уровня: путь приходит через {@code @AliasFor}.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @GetMapping("/users")
     public void list() {
+        // тело намеренно пустое
     }
 
     /**
      * Одноимённый элемент переопределяет мета-аннотацию без всякого алиаса.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @GetMapping(value = "/users/active", produces = {"application/json", "application/xml"})
     public void listActive() {
+        // тело намеренно пустое
     }
 
     /**
      * Композиция второго уровня: до {@code @RequestMapping} два шага.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @GetJson("/users/json")
     public void json() {
+        // тело намеренно пустое
     }
 
     /**
      * Алиас на несуществующий элемент — ошибка, которую видно только при чтении.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @BrokenMapping("/broken")
     public void broken() {
-    }
-
-    /**
-     * Метод без аннотаций вовсе.
-     */
-    public void plain() {
+        // тело намеренно пустое
     }
 }

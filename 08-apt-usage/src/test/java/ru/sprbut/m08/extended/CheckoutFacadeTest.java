@@ -38,17 +38,14 @@ final class CheckoutFacadeTest {
     /**
      * Заказы.
      */
-
     private OrderRepository orders;
     /**
      * Аудит.
      */
-
     private AuditLog audit;
     /**
      * Значение {@code facade}.
      */
-
     private CheckoutFacade facade;
 
     @BeforeEach
@@ -70,6 +67,7 @@ final class CheckoutFacadeTest {
         );
     }
 
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     @Test
     @DisplayName("Оформление заказа использует второй сгенерированный билдер")
     void placesOrder() {
@@ -82,6 +80,7 @@ final class CheckoutFacadeTest {
         );
     }
 
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     @Test
     @DisplayName("VIP получает скидку — бизнес-логика поверх сгенерированного кода")
     void vipGetsDiscount() {
@@ -94,6 +93,7 @@ final class CheckoutFacadeTest {
         );
     }
 
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     @Test
     @DisplayName("Номера заказов нумеруются подряд")
     void numbersOrdersSequentially() {
@@ -107,6 +107,7 @@ final class CheckoutFacadeTest {
         );
     }
 
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     @Test
     @DisplayName("Неизвестный покупатель отклоняется")
     void rejectsUnknownCustomer() {
@@ -120,6 +121,7 @@ final class CheckoutFacadeTest {
         );
     }
 
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     @Test
     @DisplayName("Аудит фиксирует все шаги")
     void auditTrailIsRecorded() {
@@ -132,6 +134,7 @@ final class CheckoutFacadeTest {
         );
     }
 
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     @Test
     @DisplayName("Конструктор без аргументов достаёт зависимости из сгенерированного реестра")
     void resolvesDependenciesFromGeneratedRegistry() {

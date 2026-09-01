@@ -5,12 +5,18 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m15;
 
+import java.lang.reflect.Proxy;
+import java.math.BigDecimal;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ru.sprbut.m15.aop.AopConfig;
 import ru.sprbut.m15.aop.AuditAspect;
@@ -18,10 +24,6 @@ import ru.sprbut.m15.aop.DiscountService;
 import ru.sprbut.m15.aop.PricingService;
 import ru.sprbut.m15.aop.StandardDiscountService;
 import ru.sprbut.m15.modules.SpringModuleMap;
-import java.math.BigDecimal;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
 
 /**
  * Слайды 119–126 (СХЕМЫ 8 и 9): модули Spring и AOP.
@@ -118,7 +120,6 @@ final class SpringModulesAndAopTest {
         /**
          * Значение {@code aspect}.
          */
-
         private AuditAspect aspect;
 
         @BeforeEach
@@ -181,7 +182,7 @@ final class SpringModulesAndAopTest {
             );
             MatcherAssert.assertThat(
                 "cannot verify that class with interface gets jdk proxy",
-                java.lang.reflect.Proxy.isProxyClass(bean.getClass()),
+                Proxy.isProxyClass(bean.getClass()),
                 Matchers.equalTo(true)
             );
         }
@@ -189,7 +190,7 @@ final class SpringModulesAndAopTest {
         @Test
         @DisplayName("JDK-прокси нельзя привести к классу реализации — частая ошибка")
         void jdkProxyIsNotTheImplementationClass() {
-            Assertions.assertThrows(org.springframework.beans.factory.NoSuchBeanDefinitionException.class, () -> this.context.getBean(StandardDiscountService.class));
+            Assertions.assertThrows(NoSuchBeanDefinitionException.class, () -> this.context.getBean(StandardDiscountService.class));
             MatcherAssert.assertThat(
                 "JDK proxy cannot avoid being the implementation class",
                 this.context.getBean(DiscountService.class) instanceof StandardDiscountService,

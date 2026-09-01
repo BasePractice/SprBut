@@ -71,7 +71,6 @@ public final class ComponentVsBean {
         /**
          * Значение {@code timeout}.
          */
-
         private final int timeout;
 
         /**
@@ -89,7 +88,7 @@ public final class ComponentVsBean {
          * @return Описание
          */
         public String describe() {
-            return "чужой класс: " + this.endpoint + " (" + this.timeout + " мс)";
+            return String.format("чужой класс: %s (%s мс)", this.endpoint, this.timeout);
         }
     }
 

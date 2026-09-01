@@ -19,15 +19,14 @@ import java.util.List;
  */
 @Service
 public class CatalogService {
-
     /**
      * Репозиторий.
      */
     private final ProductRepository repository;
+
     /**
      * Валюта.
      */
-
     private final String currency;
 
     /**
@@ -39,26 +38,6 @@ public class CatalogService {
                           @Value("${sprbut.catalog.currency:RUB}") String currency) {
         this.repository = repository;
         this.currency = currency;
-    }
-
-    /**
-     * Доступные элементы.
-     * @return Доступные элементы
-     */
-    @Transactional(readOnly = true)
-    public List<Product> available() {
-        return this.repository.findByAvailableTrue();
-    }
-
-    /**
-     * Артикул.
-     * @param sku Артикул
-     * @return Артикул
-     */
-    @Transactional(readOnly = true)
-    public Product bySku(final String sku) {
-        return this.repository.findBySku(sku)
-                .orElseThrow(() -> new ProductNotFoundException(sku));
     }
 
     /**
@@ -95,7 +74,27 @@ public class CatalogService {
      * @return Цена
      */
     public String priceTag(final Product product) {
-        return product.getPrice() + " " + this.currency;
+        return String.format("%s %s", product.getPrice(), this.currency);
+    }
+
+    /**
+     * Доступные элементы.
+     * @return Доступные элементы
+     */
+    @Transactional(readOnly = true)
+    public List<Product> available() {
+        return this.repository.findByAvailableTrue();
+    }
+
+    /**
+     * Артикул.
+     * @param sku Артикул
+     * @return Артикул
+     */
+    @Transactional(readOnly = true)
+    public Product bySku(final String sku) {
+        return this.repository.findBySku(sku)
+                .orElseThrow(() -> new ProductNotFoundException(sku));
     }
 
     /**

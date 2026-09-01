@@ -31,14 +31,6 @@ import java.math.BigDecimal;
  */
 @Component
 public class FieldInjected {
-
-    /**
-     * Открытый конструктор: экземпляр создаёт контейнер.
-     */
-    public FieldInjected() {
-        // нечего инициализировать
-    }
-
     /**
      * Сервис.
      */
@@ -50,6 +42,13 @@ public class FieldInjected {
      */
     @Autowired
     private DiscountService discountService;
+
+    /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    public FieldInjected() {
+        // нечего инициализировать
+    }
 
     /**
      * Итоговая сумма.

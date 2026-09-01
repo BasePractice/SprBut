@@ -26,13 +26,16 @@ public class Service {
     /**
      * Задан только обязательный элемент, остальные берутся из умолчаний.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @Operation(name = "минимум")
     public void withDefaults() {
+        // тело намеренно пустое
     }
 
     /**
      * Заданы все элементы всех допустимых типов.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @Operation(
         name = "полный",
         timeout = 5,
@@ -45,5 +48,6 @@ public class Service {
         allowed = {Isolation.READ_COMMITTED, Isolation.SERIALIZABLE}
     )
     public void withEverything() {
+        // тело намеренно пустое
     }
 }

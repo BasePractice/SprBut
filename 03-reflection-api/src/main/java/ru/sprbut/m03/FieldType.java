@@ -84,6 +84,7 @@ public final class FieldType {
         return this.field.getType().isPrimitive();
     }
 
+    // @checkstyle NonStaticMethodCheck (3 lines)
     private String name(final Type type) {
         return type instanceof Class<?> known ? known.getSimpleName() : type.getTypeName();
     }

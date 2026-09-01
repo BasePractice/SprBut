@@ -21,28 +21,25 @@ public class UserDto {
     /**
      * Имя.
      */
-
     private String firstName;
     /**
      * Имя.
      */
-
     private String lastName;
     /**
      * Возраст.
      */
-
     private int age;
     /**
      * Признак активности.
      */
-
     private boolean active;
 
     /**
      * Основной конструктор.
      */
     public UserDto() {
+        // тело намеренно пустое
     }
 
     /**

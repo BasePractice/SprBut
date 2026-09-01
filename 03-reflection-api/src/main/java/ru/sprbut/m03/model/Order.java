@@ -30,27 +30,22 @@ public class Order {
     /**
      * Клиент.
      */
-
     private String customer;
     /**
      * Итоговая сумма.
      */
-
     private BigDecimal total;
     /**
      * Значение {@code items}.
      */
-
     private List<String> items;
     /**
      * Значение {@code discounts}.
      */
-
     private Map<String, BigDecimal> discounts;
     /**
      * Значение {@code paid}.
      */
-
     private volatile boolean paid;
 
     /**
@@ -147,7 +142,7 @@ public class Order {
      */
     public BigDecimal addLines(final BigDecimal... amounts) {
         BigDecimal sum = this.total == null ? BigDecimal.ZERO : this.total;
-        for (BigDecimal amount : amounts) {
+        for (final BigDecimal amount : amounts) {
             sum = sum.add(amount);
         }
         this.total = sum;
@@ -174,7 +169,7 @@ public class Order {
     }
 
     private String internalTag() {
-        return "order-" + this.id;
+        return String.format("order-%s", this.id);
     }
 
     /**

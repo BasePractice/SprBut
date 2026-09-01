@@ -5,6 +5,8 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m13;
 
+import java.util.Arrays;
+import java.util.TimeZone;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -318,7 +320,7 @@ final class BeanAnnotationsTest {
             try (var context = new AnnotationConfigApplicationContext(ComponentVsBean.Config.class)) {
                 MatcherAssert.assertThat(
                     "cannot verify that bean method works for jdk classes",
-                    context.getBean(java.util.TimeZone.class).getID(),
+                    context.getBean(TimeZone.class).getID(),
                     Matchers.equalTo("Europe/Moscow")
                 );
             }
@@ -331,7 +333,7 @@ final class BeanAnnotationsTest {
                 // имя бина от @Component — от имени класса, от @Bean — от имени метода
                 MatcherAssert.assertThat(
                     "both styles cannot produce bean definitions",
-                    java.util.Arrays.asList(context.getBeanDefinitionNames()),
+                    Arrays.asList(context.getBeanDefinitionNames()),
                     Matchers.hasItems("thirdPartyClient", "applicationTimeZone")
                 );
             }

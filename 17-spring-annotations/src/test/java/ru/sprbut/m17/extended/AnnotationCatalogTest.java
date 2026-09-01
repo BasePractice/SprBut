@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
@@ -98,7 +99,7 @@ final class AnnotationCatalogTest {
     void explainsBaseAnnotation() {
         MatcherAssert.assertThat(
             "annotation without meta annotations cannot be called basic",
-            new Expanded(org.springframework.core.annotation.Order.class).explain(),
+            new Expanded(Order.class).explain(),
             Matchers.containsString("базовая аннотация")
         );
     }

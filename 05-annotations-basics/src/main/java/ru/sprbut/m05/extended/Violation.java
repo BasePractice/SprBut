@@ -21,6 +21,6 @@ public record Violation(String field, String message, Object rejected) {
 
     @Override
     public String toString() {
-        return this.field + ": " + this.message + " (было: " + this.rejected + ")";
+        return String.format("%s: %s (было: %s)", this.field, this.message, this.rejected);
     }
 }

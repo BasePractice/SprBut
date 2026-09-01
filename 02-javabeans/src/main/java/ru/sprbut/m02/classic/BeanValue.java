@@ -46,7 +46,7 @@ public final class BeanValue {
         final PropertyDescriptor described = this.described();
         if (described.getReadMethod() == null) {
             throw new IllegalArgumentException(
-                "Свойство '" + this.property + "' недоступно на чтение"
+                String.format("Свойство '%s' недоступно на чтение", this.property)
             );
         }
         return new Invoked(described.getReadMethod(), this.bean).value();
@@ -60,7 +60,7 @@ public final class BeanValue {
         final PropertyDescriptor described = this.described();
         if (described.getWriteMethod() == null) {
             throw new IllegalArgumentException(
-                "Свойство '" + this.property + "' доступно только на чтение"
+                String.format("Свойство '%s' доступно только на чтение", this.property)
             );
         }
         new Invoked(described.getWriteMethod(), this.bean).value(value);

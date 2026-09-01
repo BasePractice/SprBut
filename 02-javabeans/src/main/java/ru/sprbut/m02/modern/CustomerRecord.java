@@ -21,6 +21,12 @@ package ru.sprbut.m02.modern;
  * @since 1.0
  */
 public record CustomerRecord(String id, String firstName, String lastName, int age, boolean vip) {
+    /**
+     * Изменение состояния у неизменяемого объекта — это создание нового.
+     */
+    public CustomerRecord withVip(final boolean newVip) {
+        return new CustomerRecord(this.id, this.firstName, this.lastName, this.age, newVip);
+    }
 
     /**
      * Компактный конструктор: валидация выполняется один раз, при создании.
@@ -39,13 +45,6 @@ public record CustomerRecord(String id, String firstName, String lastName, int a
      * @return Имя
      */
     public String fullName() {
-        return this.firstName + " " + this.lastName;
-    }
-
-    /**
-     * Изменение состояния у неизменяемого объекта — это создание нового.
-     */
-    public CustomerRecord withVip(final boolean newVip) {
-        return new CustomerRecord(this.id, this.firstName, this.lastName, this.age, newVip);
+        return String.format("%s %s", this.firstName, this.lastName);
     }
 }

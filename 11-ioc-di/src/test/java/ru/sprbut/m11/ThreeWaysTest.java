@@ -93,7 +93,8 @@ final class ThreeWaysTest {
         void dependenciesAreInjectable() {
             final SmsSender sms = new SmsSender();
             final ManualOrderService service = new ManualOrderService(
-                    sms, new PriceCalculator(new BigDecimal("0.20")));
+                    sms, new PriceCalculator(                        new BigDecimal("0.20")
+));
             service.placeOrder("+79001234567", new BigDecimal("100"));
             MatcherAssert.assertThat(
                 "injected implementation cannot be swapped in one line",

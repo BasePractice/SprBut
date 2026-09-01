@@ -18,16 +18,6 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("Слайд 31: setAccessible и JPMS")
 final class DeepAccessTest {
-
-    @SuppressWarnings("unused")
-    private static final class Ours {
-
-        /**
-         * Секрет.
-         */
-        private String secret = "доступно";
-    }
-
     @Test
     @DisplayName("свой класс открыт всегда — ограничения JPMS про границы модулей")
     void opensOwnClass() {
@@ -106,5 +96,14 @@ final class DeepAccessTest {
             new DeepAccess(Ours.class, "nope").attempt().failure(),
             Matchers.equalTo("NoSuchFieldException")
         );
+    }
+
+    @SuppressWarnings("unused")
+    private static final class Ours {
+
+        /**
+         * Секрет.
+         */
+        private String secret = "доступно";
     }
 }

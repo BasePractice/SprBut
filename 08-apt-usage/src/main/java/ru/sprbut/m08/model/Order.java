@@ -21,6 +21,25 @@ import java.time.LocalDate;
  */
 @GenerateBuilder(suffix = "Maker")
 public class Order {
+    /**
+     * Номер.
+     */
+    private String number;
+
+    /**
+     * Идентификатор.
+     */
+    private String customerId;
+
+    /**
+     * Итоговая сумма.
+     */
+    private BigDecimal total;
+
+    /**
+     * Момент размещения.
+     */
+    private LocalDate placedOn;
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -28,32 +47,6 @@ public class Order {
     public Order() {
         // нечего инициализировать
     }
-
-    /**
-     * Номер.
-     */
-    private String number;
-    /**
-     * Идентификатор.
-     */
-
-    private String customerId;
-    /**
-     * Итоговая сумма.
-     */
-
-    private BigDecimal total;
-    /**
-     * Момент размещения.
-     */
-
-    private LocalDate placedOn;
-
-    /**
-     * Статус.
-     */
-    @Todo("перевести на enum статусов")
-    private String status;
 
     /**
      * Значение свойства {@code number}.
@@ -134,4 +127,10 @@ public class Order {
     public void setStatus(final String status) {
         this.status = status;
     }
+
+    /**
+     * Статус.
+     */
+    @Todo("перевести на enum статусов")
+    private String status;
 }

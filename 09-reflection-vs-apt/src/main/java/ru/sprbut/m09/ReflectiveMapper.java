@@ -6,12 +6,13 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m09;
 
-import ru.sprbut.m09.model.UserDto;
-import ru.sprbut.m09.model.UserEntity;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import ru.sprbut.m09.model.UserDto;
+import ru.sprbut.m09.model.UserEntity;
 
 /**
  * Слайд 73: «Reflection: runtime, гибко, медленно».
@@ -49,7 +50,7 @@ public class ReflectiveMapper implements UserMapper {
             return null;
         }
         final UserDto dto = new UserDto();
-        for (Map.Entry<Method, Method> step : this.plan.entrySet()) {
+        for (final Map.Entry<Method, Method> step : this.plan.entrySet()) {
             final Object value = invoke(step.getKey(), entity);
             invoke(step.getValue(), dto, value);
         }
@@ -73,7 +74,7 @@ public class ReflectiveMapper implements UserMapper {
      * Имя свойства.
      * @return Имя свойства
      */
-    public java.util.List<String> propertyNames() {
+    public List<String> propertyNames() {
         return this.plan.keySet().stream()
                 .map(m -> decapitalize(stripPrefix(m.getName())))
                 .sorted()
@@ -89,7 +90,7 @@ public class ReflectiveMapper implements UserMapper {
      */
     private static Map<Method, Method> buildPlan(final Class<?> source, final Class<?> target) {
         final Map<Method, Method> plan = new LinkedHashMap<>();
-        for (Method getter : source.getMethods()) {
+        for (final Method getter : source.getMethods()) {
             if (getter.getParameterCount() != 0 || getter.getDeclaringClass() == Object.class) {
                 continue;
             }

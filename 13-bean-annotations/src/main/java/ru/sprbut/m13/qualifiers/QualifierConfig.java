@@ -31,43 +31,11 @@ import java.util.Map;
  */
 @Configuration
 public class QualifierConfig {
-
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
      */
     public QualifierConfig() {
         // нечего инициализировать
-    }
-
-    /**
-     * Шлюз.
-     * @since 1.0
-     */
-    public interface PaymentGateway {
-        /**
-         * Значение {@code pay}.
-         * @param amount Сумма
-         * @return Значение {@code pay}
-         */
-        String pay(String amount);
-
-        /**
-         * Имя.
-         * @return Имя
-         */
-        String name();
-    }
-
-    /**
-     * Шлюз.
-     * @param name Имя
-     * @return Шлюз
-     */
-    public record NamedGateway(String name) implements PaymentGateway {
-        @Override
-        public String pay(final String amount) {
-            return this.name + ":" + amount;
-        }
     }
 
     /**
@@ -87,16 +55,6 @@ public class QualifierConfig {
     @Bean
     public PaymentGateway cashGateway() {
         return new NamedGateway("cash");
-    }
-
-    /**
-     * Шлюз.
-     * @return Шлюз
-     */
-    @Bean
-    @Qualifier("fast")
-    public PaymentGateway sbpGateway() {
-        return new NamedGateway("sbp");
     }
 
     /**
@@ -139,6 +97,47 @@ public class QualifierConfig {
     @Bean
     public GatewayRegistry gatewayRegistry(final List<PaymentGateway> all, final Map<String, PaymentGateway> byName) {
         return new GatewayRegistry(all, byName);
+    }
+
+    /**
+     * Шлюз.
+     * @return Шлюз
+     */
+    @Bean
+    @Qualifier("fast")
+    public PaymentGateway sbpGateway() {
+        return new NamedGateway("sbp");
+    }
+
+    /**
+     * Шлюз.
+     * @since 1.0
+     */
+    public interface PaymentGateway {
+        /**
+         * Значение {@code pay}.
+         * @param amount Сумма
+         * @return Значение {@code pay}
+         */
+        String pay(String amount);
+
+        /**
+         * Имя.
+         * @return Имя
+         */
+        String name();
+    }
+
+    /**
+     * Шлюз.
+     * @param name Имя
+     * @return Шлюз
+     */
+    public record NamedGateway(String name) implements PaymentGateway {
+        @Override
+        public String pay(final String amount) {
+            return String.format("%s:%s", this.name, amount);
+        }
     }
 
     /**

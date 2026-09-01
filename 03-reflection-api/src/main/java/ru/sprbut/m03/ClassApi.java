@@ -164,7 +164,7 @@ public final class ClassApi {
     }
 
     private void collect(final Class<?> from, final Set<String> sink) {
-        for (Class<?> each : from.getInterfaces()) {
+        for (final Class<?> each : from.getInterfaces()) {
             if (sink.add(each.getSimpleName())) {
                 this.collect(each, sink);
             }

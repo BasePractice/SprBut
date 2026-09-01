@@ -23,7 +23,6 @@ import java.lang.reflect.Field;
  * @since 1.0
  */
 public final class ObjectField {
-
     /**
      * Целевой объект.
      */
@@ -45,9 +44,18 @@ public final class ObjectField {
     }
 
     /**
+     * Объявление поля — найденное с подъёмом по иерархии наследования.
+     * @return Объявление поля — найденное с подъёмом по иерархии наследования
+     */
+    public Field declaration() {
+        return new Declared(this.target.getClass()).field(this.name);
+    }
+
+    /**
      * Значение поля.
      * @return Значение поля
      */
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     public Object value() {
         final Field field = this.declaration();
         field.setAccessible(true);
@@ -62,6 +70,7 @@ public final class ObjectField {
      * Записывает значение в поле в обход сеттера и модификатора доступа.
      * @param value Значение
      */
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     public void assign(final Object value) {
         final Field field = this.declaration();
         field.setAccessible(true);
@@ -70,13 +79,5 @@ public final class ObjectField {
         } catch (final IllegalAccessException denied) {
             throw new IllegalStateException("Не удалось записать поле " + this.name, denied);
         }
-    }
-
-    /**
-     * Объявление поля — найденное с подъёмом по иерархии наследования.
-     * @return Объявление поля — найденное с подъёмом по иерархии наследования
-     */
-    public Field declaration() {
-        return new Declared(this.target.getClass()).field(this.name);
     }
 }

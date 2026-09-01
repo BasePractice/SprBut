@@ -13,14 +13,6 @@ package ru.sprbut.m04;
  */
 @SuppressWarnings("unused")
 public class Counter {
-
-    /**
-     * Открытый конструктор: экземпляр создаёт контейнер.
-     */
-    public Counter() {
-        // нечего инициализировать
-    }
-
     /**
      * Значение.
      */
@@ -30,6 +22,13 @@ public class Counter {
      * Метка.
      */
     private String label = "счётчик";
+
+    /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    public Counter() {
+        // нечего инициализировать
+    }
 
     /**
      * Текущее значение.
@@ -58,6 +57,6 @@ public class Counter {
     }
 
     private String describe(final String prefix) {
-        return prefix + ": " + this.label + "=" + this.value;
+        return String.format("%s: %s=%s", prefix, this.label, this.value);
     }
 }

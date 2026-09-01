@@ -41,12 +41,13 @@ public final class AnnotationValues {
      */
     public Map<String, Object> values() {
         final Map<String, Object> collected = new LinkedHashMap<>();
-        for (Method element : this.annotation.annotationType().getDeclaredMethods()) {
+        for (final Method element : this.annotation.annotationType().getDeclaredMethods()) {
             collected.put(element.getName(), new Described(this.read(element)).text());
         }
         return Map.copyOf(collected);
     }
 
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     private Object read(final Method element) {
         try {
             element.setAccessible(true);

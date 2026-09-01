@@ -17,14 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 1.0
  */
 public final class RealPriceService implements PriceService {
-
-    /**
-     * Открытый конструктор: экземпляр создаёт контейнер.
-     */
-    public RealPriceService() {
-        // нечего инициализировать
-    }
-
     /**
      * Значение {@code prices}.
      */
@@ -35,27 +27,18 @@ public final class RealPriceService implements PriceService {
      */
     private final AtomicInteger attempts = new AtomicInteger();
 
+    /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    public RealPriceService() {
+        // нечего инициализировать
+    }
+
     @Override
     @Cached
     public int price(final String sku) {
         this.prices.incrementAndGet();
         return sku.length() * 10;
-    }
-
-    @Override
-    @Retry(attempts = 3)
-    @Timed
-    public int flaky() {
-        if (this.attempts.incrementAndGet() < 3) {
-            throw new IllegalStateException("временный сбой");
-        }
-        return 42;
-    }
-
-    @Override
-    @Stubbed("RUB")
-    public String currency() {
-        throw new AssertionError("цель не должна вызываться при @Stubbed");
     }
 
     @Override
@@ -75,5 +58,21 @@ public final class RealPriceService implements PriceService {
      */
     public int calls() {
         return this.prices.get();
+    }
+
+    @Override
+    @Retry(attempts = 3)
+    @Timed
+    public int flaky() {
+        if (this.attempts.incrementAndGet() < 3) {
+            throw new IllegalStateException("временный сбой");
+        }
+        return 42;
+    }
+
+    @Override
+    @Stubbed("RUB")
+    public String currency() {
+        throw new AssertionError("цель не должна вызываться при @Stubbed");
     }
 }

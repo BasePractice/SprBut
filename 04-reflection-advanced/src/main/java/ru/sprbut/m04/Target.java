@@ -26,6 +26,7 @@ public class Target {
      * @param second Второй элемент
      * @return Сумма двух чисел
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     public int add(final int first, final int second) {
         return first + second;
     }

@@ -23,14 +23,6 @@ import lombok.experimental.Accessors;
 @Getter
 @Setter
 public class Fluent {
-
-    /**
-     * Открытый конструктор: экземпляр создаёт контейнер.
-     */
-    public Fluent() {
-        // нечего инициализировать
-    }
-
     /**
      * Имя.
      */
@@ -40,4 +32,11 @@ public class Fluent {
      * Размер.
      */
     private int size;
+
+    /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    public Fluent() {
+        // нечего инициализировать
+    }
 }

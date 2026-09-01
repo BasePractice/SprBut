@@ -68,7 +68,7 @@ public final class RequiredHints {
      */
     public List<String> accessors() {
         final List<String> needed = new ArrayList<>();
-        for (String property : this.reflective.propertyNames()) {
+        for (final String property : this.reflective.propertyNames()) {
             final String suffix = Character.toUpperCase(property.charAt(0)) + property.substring(1);
             needed.add(UserEntity.class.getSimpleName() + "#get" + suffix);
             needed.add(UserDto.class.getSimpleName() + "#set" + suffix);

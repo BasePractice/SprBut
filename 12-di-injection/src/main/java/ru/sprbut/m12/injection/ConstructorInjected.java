@@ -37,7 +37,6 @@ public class ConstructorInjected {
     /**
      * Сервис.
      */
-
     private final DiscountService discountService;
 
     /**

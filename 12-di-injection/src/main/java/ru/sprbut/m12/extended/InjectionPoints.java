@@ -104,7 +104,7 @@ public final class InjectionPoints {
             || this.marked(element, Resource.class);
     }
 
-    private boolean marked(final AnnotatedElement element, final Class<? extends Annotation> annotation) {
+    private static boolean marked(final AnnotatedElement element, final Class<? extends Annotation> annotation) {
         return element.isAnnotationPresent(annotation);
     }
 }

@@ -20,6 +20,35 @@ import java.math.BigDecimal;
  */
 @GenerateBuilder
 public class Customer {
+    /**
+     * Идентификатор.
+     */
+    private String id;
+
+    /**
+     * Имя.
+     */
+    private String name;
+
+    /**
+     * Адрес почты.
+     */
+    private String email;
+
+    /**
+     * Возраст.
+     */
+    private int age;
+
+    /**
+     * Признак привилегированного клиента.
+     */
+    private boolean vip;
+
+    /**
+     * Баланс.
+     */
+    private BigDecimal balance;
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -27,36 +56,6 @@ public class Customer {
     public Customer() {
         // нечего инициализировать
     }
-
-    /**
-     * Идентификатор.
-     */
-    private String id;
-    /**
-     * Имя.
-     */
-
-    private String name;
-    /**
-     * Адрес почты.
-     */
-
-    private String email;
-    /**
-     * Возраст.
-     */
-
-    private int age;
-    /**
-     * Признак привилегированного клиента.
-     */
-
-    private boolean vip;
-    /**
-     * Баланс.
-     */
-
-    private BigDecimal balance;
 
     /**
      * Значение свойства {@code id}.

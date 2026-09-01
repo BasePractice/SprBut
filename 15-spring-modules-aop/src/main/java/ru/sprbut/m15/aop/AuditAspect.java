@@ -6,6 +6,9 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m15.aop;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
@@ -13,8 +16,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Слайды 121–126 (СХЕМА 9): «Прокси вокруг бина, класс не меняется».
@@ -32,6 +33,10 @@ import java.util.List;
 @Aspect
 @Component
 public class AuditAspect {
+    /**
+     * Журнал.
+     */
+    private final List<String> log = new ArrayList<>();
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -42,14 +47,26 @@ public class AuditAspect {
 
     /**
      * Журнал.
+     * @return Журнал
      */
-    private final List<String> log = new ArrayList<>();
+    public List<String> log() {
+        return List.copyOf(this.log);
+    }
+
+    /**
+     * Очистка.
+     */
+    public void clear() {
+        this.log.clear();
+    }
 
     /**
      * Именованный pointcut: выражение можно переиспользовать.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @Pointcut("execution(* ru.sprbut.m15.aop.*Service.*(..))")
     public void anyServiceMethod() {
+        // тело намеренно пустое
     }
 
     /**
@@ -57,7 +74,7 @@ public class AuditAspect {
      * @param joinPoint Значение {@code joinPoint}
      */
     @Before("anyServiceMethod()")
-    public void before(final org.aspectj.lang.JoinPoint joinPoint) {
+    public void before(final JoinPoint joinPoint) {
         this.log.add("before:" + joinPoint.getSignature().getName());
     }
 
@@ -88,20 +105,5 @@ public class AuditAspect {
     @AfterThrowing(pointcut = "anyServiceMethod()", throwing = "error")
     public void afterThrowing(final Throwable error) {
         this.log.add("afterThrowing:" + error.getClass().getSimpleName());
-    }
-
-    /**
-     * Журнал.
-     * @return Журнал
-     */
-    public List<String> log() {
-        return List.copyOf(this.log);
-    }
-
-    /**
-     * Очистка.
-     */
-    public void clear() {
-        this.log.clear();
     }
 }

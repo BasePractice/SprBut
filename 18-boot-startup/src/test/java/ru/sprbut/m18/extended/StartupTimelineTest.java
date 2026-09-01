@@ -18,13 +18,6 @@ import ru.sprbut.m18.StartupLog;
  */
 @DisplayName("Расширенный пример: СХЕМА 11 — восстановленная диаграмма запуска")
 final class StartupTimelineTest {
-
-    private static StartupTimeline started() {
-        new StartupLog().clear();
-        StartupApp.run().close();
-        return new StartupTimeline();
-    }
-
     @Test
     @DisplayName("фактическая последовательность восстанавливается из журнала")
     void restoresActualSequence() {
@@ -93,5 +86,11 @@ final class StartupTimelineTest {
             started().counts().isEmpty(),
             Matchers.equalTo(false)
         );
+    }
+
+    private static StartupTimeline started() {
+        new StartupLog().clear();
+        StartupApp.run().close();
+        return new StartupTimeline();
     }
 }

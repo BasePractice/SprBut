@@ -105,7 +105,7 @@ public final class AspectHandler implements InvocationHandler {
         } finally {
             if (measured) {
                 this.journal.record(
-                    "timed " + method.getName() + " " + (System.nanoTime() - started) + "ns"
+                    String.format("timed %s %sns", method.getName(), (System.nanoTime() - started))
                 );
             }
         }

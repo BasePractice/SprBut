@@ -22,6 +22,12 @@ import ru.sprbut.m05.declarations.Marker;
 @Level("класс")
 @SuppressWarnings("unused")
 public class Annotated {
+    /**
+     * Основной конструктор.
+     */
+    public Annotated() {
+        // тело намеренно пустое
+    }
 
     /**
      * Поле.
@@ -30,15 +36,10 @@ public class Annotated {
     private String field;
 
     /**
-     * Основной конструктор.
-     */
-    public Annotated() {
-    }
-
-    /**
      * Метод.
      * @param parameter Значение {@code parameter}
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @Marker
     @Level("метод")
     public void method(final String parameter) {

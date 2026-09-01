@@ -42,7 +42,7 @@ public final class RangeRule implements Rule {
         if (number.longValue() < range.min() || number.longValue() > range.max()) {
             return List.of(new Violation(
                 field.getName(),
-                range.message() + " [" + range.min() + ", " + range.max() + "]",
+                String.format("%s [%s, %s]", range.message(), range.min(), range.max()),
                 value
             ));
         }

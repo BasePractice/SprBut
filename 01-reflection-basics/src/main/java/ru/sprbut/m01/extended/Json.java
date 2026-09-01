@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * <b>Расширенный пример модуля 01.</b>
@@ -34,7 +35,6 @@ import java.util.stream.IntStream;
  * @since 1.0
  */
 public final class Json {
-
     /**
      * Значение.
      */
@@ -46,6 +46,16 @@ public final class Json {
      */
     public Json(final Object value) {
         this.value = value;
+    }
+
+    private static String array(final Stream<?> items) {
+        return items
+            .map(item -> new Json(item).text())
+            .collect(Collectors.joining(",", "[", "]"));
+    }
+
+    private static String pair(final String key, final Object nested) {
+        return '"' + new Escaped(key).text() + "\":" + new Json(nested).text();
     }
 
     /**
@@ -81,22 +91,7 @@ public final class Json {
         return this.object();
     }
 
-    private String object() {
-        return new SerializableFields(this.value.getClass()).list().stream()
-            .map(field -> this.pair(new PropertyName(field).text(), this.read(field)))
-            .collect(Collectors.joining(",", "{", "}"));
-    }
-
-    private String array(final java.util.stream.Stream<?> items) {
-        return items
-            .map(item -> new Json(item).text())
-            .collect(Collectors.joining(",", "[", "]"));
-    }
-
-    private String pair(final String key, final Object nested) {
-        return '"' + new Escaped(key).text() + "\":" + new Json(nested).text();
-    }
-
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     private Object read(final Field field) {
         field.setAccessible(true);
         try {
@@ -104,5 +99,11 @@ public final class Json {
         } catch (final IllegalAccessException denied) {
             throw new IllegalStateException("Поле " + field.getName() + " недоступно", denied);
         }
+    }
+
+    private String object() {
+        return new SerializableFields(this.value.getClass()).list().stream()
+            .map(field -> this.pair(new PropertyName(field).text(), this.read(field)))
+            .collect(Collectors.joining(",", "{", "}"));
     }
 }

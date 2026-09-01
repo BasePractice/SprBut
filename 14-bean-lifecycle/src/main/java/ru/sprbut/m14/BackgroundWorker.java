@@ -21,6 +21,10 @@ import org.springframework.context.SmartLifecycle;
  * @since 1.0
  */
 public class BackgroundWorker implements SmartLifecycle {
+    /**
+     * Значение {@code running}.
+     */
+    private volatile boolean running;
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -28,11 +32,6 @@ public class BackgroundWorker implements SmartLifecycle {
     public BackgroundWorker() {
         // нечего инициализировать
     }
-
-    /**
-     * Значение {@code running}.
-     */
-    private volatile boolean running;
 
     /**
      * Порядок запуска среди других SmartLifecycle: меньше — раньше.

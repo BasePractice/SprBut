@@ -23,6 +23,10 @@ import java.util.Optional;
  */
 @Registered("customers")
 public class CustomerRepository {
+    /**
+     * Хранилище.
+     */
+    private final Map<String, Customer> storage = new LinkedHashMap<>();
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -30,11 +34,6 @@ public class CustomerRepository {
     public CustomerRepository() {
         // нечего инициализировать
     }
-
-    /**
-     * Хранилище.
-     */
-    private final Map<String, Customer> storage = new LinkedHashMap<>();
 
     /**
      * Сохранение.

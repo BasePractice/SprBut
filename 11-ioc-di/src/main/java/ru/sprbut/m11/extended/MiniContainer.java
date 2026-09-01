@@ -64,7 +64,7 @@ public class MiniContainer {
      * @param componentClasses Значение {@code componentClasses}
      */
     public MiniContainer(final Class<?>... componentClasses) {
-        for (Class<?> type : componentClasses) {
+        for (final Class<?> type : componentClasses) {
             this.register(type);
         }
     }
@@ -82,8 +82,8 @@ public class MiniContainer {
         final String name = annotation.value().isBlank() ? defaultName(type) : annotation.value();
         final Class<?> previous = this.definitions.put(name, type);
         if (previous != null) {
-            throw new IllegalStateException("Имя бина '" + name + "' уже занято классом "
-                    + previous.getSimpleName());
+            throw new IllegalStateException(                "Имя бина '" + name + "' уже занято классом " + previous.getSimpleName()
+);
         }
     }
 
@@ -92,7 +92,7 @@ public class MiniContainer {
      * @return Создаёт все зарегистрированные бины сразу — как делает Spring для синглтонов
      */
     public MiniContainer refresh() {
-        for (String name : List.copyOf(this.definitions.keySet())) {
+        for (final String name : List.copyOf(this.definitions.keySet())) {
             this.getBean(name);
         }
         return this;
@@ -106,8 +106,8 @@ public class MiniContainer {
     public Object getBean(final String name) {
         final Class<?> type = this.definitions.get(name);
         if (type == null) {
-            throw new NoSuchBeanException("Нет бина с именем '" + name
-                    + "'; известны: " + this.definitions.keySet());
+            throw new NoSuchBeanException(                "Нет бина с именем '" + name + "'; известны: " + this.definitions.keySet()
+);
         }
         return this.instantiate(name, type);
     }
@@ -160,6 +160,7 @@ public class MiniContainer {
 
     // --- Создание -----------------------------------------------------------
 
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     private Object instantiate(final String name, final Class<?> type) {
         final Object existing = this.singletons.get(name);
         if (existing != null) {

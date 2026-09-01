@@ -44,7 +44,7 @@ public final class RecordColumn {
      * @return Имя колонки, если компонент помечен
      */
     public Optional<String> name() {
-        for (RecordComponent each : this.type.getRecordComponents()) {
+        for (final RecordComponent each : this.type.getRecordComponents()) {
             if (each.getName().equals(this.component)) {
                 return Optional.ofNullable(each.getAnnotation(Column.class)).map(Column::name);
             }

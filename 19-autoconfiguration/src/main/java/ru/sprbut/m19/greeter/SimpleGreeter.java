@@ -19,7 +19,6 @@ public class SimpleGreeter implements Greeter {
     /**
      * Громкое сообщение.
      */
-
     private final boolean shout;
 
     /**

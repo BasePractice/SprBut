@@ -38,31 +38,25 @@ public class CustomerEntity {
     /**
      * Имя.
      */
-
     private String firstName;
     /**
      * Имя.
      */
-
     private String lastName;
     /**
      * Дата рождения.
      */
-
     private LocalDate birthDate;
     /**
      * Баланс.
      */
-
     private BigDecimal balance;
     /**
      * Признак привилегированного клиента.
      */
-
     private boolean vip;
     /**
      * Внутренняя заметка.
      */
-
     private String internalNote;
 }

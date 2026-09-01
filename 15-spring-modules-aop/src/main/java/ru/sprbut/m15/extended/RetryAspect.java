@@ -32,6 +32,10 @@ import java.util.List;
 @Component
 @Order(1)
 public class RetryAspect {
+    /**
+     * Журнал.
+     */
+    private final List<String> log = new ArrayList<>();
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -42,8 +46,27 @@ public class RetryAspect {
 
     /**
      * Журнал.
+     * @return Журнал
      */
-    private final List<String> log = new ArrayList<>();
+    public List<String> log() {
+        return List.copyOf(this.log);
+    }
+
+    /**
+     * Очистка.
+     */
+    public void clear() {
+        this.log.clear();
+    }
+
+    /**
+     * Число попыток.
+     * @param method Метод
+     * @return Число попыток
+     */
+    public long attemptsOf(final String method) {
+        return this.log.stream().filter(e -> e.contains(":" + method + ":")).count();
+    }
 
     /**
      * Pointcut по аннотации, а не по имени метода: так аспект не зависит
@@ -69,29 +92,5 @@ public class RetryAspect {
         }
         this.log.add("exhausted:" + signature.getName());
         throw last;
-    }
-
-    /**
-     * Журнал.
-     * @return Журнал
-     */
-    public List<String> log() {
-        return List.copyOf(this.log);
-    }
-
-    /**
-     * Очистка.
-     */
-    public void clear() {
-        this.log.clear();
-    }
-
-    /**
-     * Число попыток.
-     * @param method Метод
-     * @return Число попыток
-     */
-    public long attemptsOf(final String method) {
-        return this.log.stream().filter(e -> e.contains(":" + method + ":")).count();
     }
 }

@@ -29,7 +29,6 @@ import java.util.List;
  * @since 1.0
  */
 public final class Validated {
-
     /**
      * Целевой объект.
      */
@@ -61,22 +60,6 @@ public final class Validated {
     }
 
     /**
-     * Итог проверки по всем ограничениям полей объекта и его суперклассов.
-     * @return Итог проверки по всем ограничениям полей объекта и его суперклассов
-     */
-    public Verdict verdict() {
-        final List<Violation> found = new ArrayList<>();
-        for (Field field : new ConstrainedFields(this.target.getClass()).list()) {
-            field.setAccessible(true);
-            final Object value = this.read(field);
-            for (Rule rule : this.rules) {
-                found.addAll(rule.check(field, value));
-            }
-        }
-        return new Verdict(found);
-    }
-
-    /**
      * Проверка в режиме «падать сразу»: удобна там, где продолжать
      * с некорректным объектом бессмысленно.
      */
@@ -85,6 +68,23 @@ public final class Validated {
         if (!verdict.valid()) {
             throw new ConstraintsViolated(verdict);
         }
+    }
+
+    /**
+     * Итог проверки по всем ограничениям полей объекта и его суперклассов.
+     * @return Итог проверки по всем ограничениям полей объекта и его суперклассов
+     */
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
+    public Verdict verdict() {
+        final List<Violation> found = new ArrayList<>();
+        for (final Field field : new ConstrainedFields(this.target.getClass()).list()) {
+            field.setAccessible(true);
+            final Object value = this.read(field);
+            for (final Rule rule : this.rules) {
+                found.addAll(rule.check(field, value));
+            }
+        }
+        return new Verdict(found);
     }
 
     private Object read(final Field field) {

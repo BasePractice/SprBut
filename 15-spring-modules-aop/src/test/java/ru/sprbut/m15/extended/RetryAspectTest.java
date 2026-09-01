@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -32,18 +33,15 @@ final class RetryAspectTest {
     /**
      * Значение {@code payments}.
      */
-
     private PaymentService payments;
     /**
      * Исполнитель.
      */
-
     private ChargeExecutor executor;
     /**
      * Значение {@code aspect}.
      * @since 1.0
      */
-
     private RetryAspect aspect;
 
     @BeforeEach
@@ -271,7 +269,7 @@ final class RetryAspectTest {
         void contextReturnsAProxy() {
             MatcherAssert.assertThat(
                 "cannot verify that context returns a proxy",
-                org.springframework.aop.support.AopUtils.isCglibProxy(payments),
+                AopUtils.isCglibProxy(payments),
                 Matchers.equalTo(true)
             );
             MatcherAssert.assertThat(

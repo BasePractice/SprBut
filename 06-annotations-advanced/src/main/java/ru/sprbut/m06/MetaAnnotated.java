@@ -75,7 +75,7 @@ public final class MetaAnnotated {
         final Class<? extends Annotation> target,
         final Set<Class<? extends Annotation>> visited
     ) {
-        for (Annotation each : annotations) {
+        for (final Annotation each : annotations) {
             final Class<? extends Annotation> candidate = each.annotationType();
             if (candidate.equals(target)) {
                 return true;
@@ -96,7 +96,7 @@ public final class MetaAnnotated {
         final Set<Class<? extends Annotation>> visited,
         final int depth
     ) {
-        for (Annotation each : annotations) {
+        for (final Annotation each : annotations) {
             final Class<? extends Annotation> candidate = each.annotationType();
             if (new Builtin(candidate).yes() || !visited.add(candidate)) {
                 continue;

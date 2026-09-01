@@ -60,6 +60,7 @@ public final class ProcessorRegistration {
      * Путь, по которому {@link ServiceLoader} ищет процессоры.
      * @return Путь, по которому {@link ServiceLoader} ищет процессоры
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     public String servicePath() {
         return "META-INF/services/javax.annotation.processing.Processor";
     }
@@ -90,7 +91,7 @@ public final class ProcessorRegistration {
      */
     public List<String> loaded() {
         final List<String> names = new ArrayList<>();
-        for (Processor each : ServiceLoader.load(Processor.class, this.loader)) {
+        for (final Processor each : ServiceLoader.load(Processor.class, this.loader)) {
             names.add(each.getClass().getName());
         }
         names.sort(Comparator.naturalOrder());
@@ -103,7 +104,7 @@ public final class ProcessorRegistration {
      * @return Какие аннотации объявляет процессор — по этому javac и решает, звать ли его
      */
     public List<String> supported(final String processor) {
-        for (Processor each : ServiceLoader.load(Processor.class, this.loader)) {
+        for (final Processor each : ServiceLoader.load(Processor.class, this.loader)) {
             if (each.getClass().getName().equals(processor)) {
                 return each.getSupportedAnnotationTypes().stream().sorted().toList();
             }
@@ -111,9 +112,10 @@ public final class ProcessorRegistration {
         throw new IllegalArgumentException("Процессор не зарегистрирован: " + processor);
     }
 
-    private List<String> lines(final URL resource) throws IOException {
+    private static List<String> lines(final URL resource) throws IOException {
         try (BufferedReader reader = new BufferedReader(
-            new InputStreamReader(resource.openStream(), StandardCharsets.UTF_8)
+            new InputStreamReader(                resource.openStream(), StandardCharsets.UTF_8
+)
         )) {
             return reader.lines()
                 .map(String::trim)

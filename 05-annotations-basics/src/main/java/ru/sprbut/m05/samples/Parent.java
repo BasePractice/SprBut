@@ -30,6 +30,7 @@ public class Parent {
      * Действие, помеченное аудитом.
      * @return Действие, помеченное аудитом
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @Audited(actor = "метод-родителя")
     public String action() {
         return "parent";

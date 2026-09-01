@@ -20,7 +20,6 @@ import java.util.Arrays;
  * @since 1.0
  */
 public final class Described {
-
     /**
      * Значение.
      */
@@ -32,6 +31,15 @@ public final class Described {
      */
     public Described(final Object value) {
         this.value = value;
+    }
+
+    private String array() {
+        final int length = Array.getLength(this.value);
+        final Object[] items = new Object[length];
+        for (int index = 0; index < length; index++) {
+            items[index] = new Described(Array.get(this.value, index)).text();
+        }
+        return Arrays.toString(items);
     }
 
     /**
@@ -52,14 +60,5 @@ public final class Described {
             return "@" + nested.annotationType().getSimpleName();
         }
         return this.value;
-    }
-
-    private String array() {
-        final int length = Array.getLength(this.value);
-        final Object[] items = new Object[length];
-        for (int index = 0; index < length; index++) {
-            items[index] = new Described(Array.get(this.value, index)).text();
-        }
-        return Arrays.toString(items);
     }
 }

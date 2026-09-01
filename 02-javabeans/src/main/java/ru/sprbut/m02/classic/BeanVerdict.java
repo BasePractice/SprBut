@@ -72,7 +72,7 @@ public final class BeanVerdict {
             found.add("нет публичного конструктора без параметров");
         }
         final BeanProperties properties = new BeanProperties(this.type);
-        for (String property : properties.writable()) {
+        for (final String property : properties.writable()) {
             if (properties.reader(property) == null) {
                 found.add("у свойства '" + property + "' есть setter, но нет getter");
             }
@@ -89,7 +89,7 @@ public final class BeanVerdict {
      * @return Первое требование соглашения: {@code public Xxx()}. Без него контейнер не сможет создать объект дефолтным способом
      */
     public boolean constructible() {
-        for (Constructor<?> candidate : this.type.getConstructors()) {
+        for (final Constructor<?> candidate : this.type.getConstructors()) {
             if (candidate.getParameterCount() == 0 && Modifier.isPublic(candidate.getModifiers())) {
                 return true;
             }

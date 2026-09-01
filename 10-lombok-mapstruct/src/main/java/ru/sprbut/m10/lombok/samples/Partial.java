@@ -21,6 +21,10 @@ import lombok.Setter;
 @Getter
 @Setter(AccessLevel.PROTECTED)
 public class Partial {
+    /**
+     * Значение {@code visible}.
+     */
+    private String visible;
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -30,21 +34,16 @@ public class Partial {
     }
 
     /**
-     * Значение {@code visible}.
-     */
-    private String visible;
-
-    /**
-     * Значение {@code hidden}.
-     */
-    @Getter(AccessLevel.NONE)
-    private String hidden = "не виден снаружи";
-
-    /**
      * Единственный способ прочитать поле, у которого геттер отключён.
      * @return Единственный способ прочитать поле, у которого геттер отключён
      */
     public String peekHidden() {
         return this.hidden;
     }
+
+    /**
+     * Значение {@code hidden}.
+     */
+    @Getter(AccessLevel.NONE)
+    private String hidden = "не виден снаружи";
 }

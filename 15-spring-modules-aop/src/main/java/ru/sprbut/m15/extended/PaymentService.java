@@ -36,25 +36,24 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Service
 public class PaymentService {
-
     /**
      * Число вызовов.
      */
     private final AtomicInteger executions = new AtomicInteger();
+
     /**
      * Значение {@code failuresBeforeSuccess}.
      */
-
     private volatile int failuresBeforeSuccess;
 
     /**
      * Ссылка на себя.
      */
     private final ObjectProvider<PaymentService> self;
+
     /**
      * Исполнитель.
      */
-
     private final ChargeExecutor executor;
 
     /**
@@ -67,20 +66,6 @@ public class PaymentService {
     public PaymentService(final ObjectProvider<PaymentService> self, final ChargeExecutor executor) {
         this.self = self;
         this.executor = executor;
-    }
-
-    /**
-     * Списание.
-     * @param orderId Порядок
-     * @return Списание
-     */
-    @Retryable(attempts = 3)
-    public String charge(final String orderId) {
-        final int call = this.executions.incrementAndGet();
-        if (call <= this.failuresBeforeSuccess) {
-            throw new IllegalStateException("сбой платежа №" + call);
-        }
-        return "оплачен " + orderId;
     }
 
     /**
@@ -106,6 +91,7 @@ public class PaymentService {
      * @param orderId Порядок
      * @return Обход 2: {@code AopContext} — требует {@code exposeProxy = true}
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     public String chargeViaAopContext(final String orderId) {
         return ((PaymentService) AopContext.currentProxy()).charge(orderId);
     }
@@ -141,5 +127,19 @@ public class PaymentService {
     public void reset() {
         this.executions.set(0);
         this.failuresBeforeSuccess = 0;
+    }
+
+    /**
+     * Списание.
+     * @param orderId Порядок
+     * @return Списание
+     */
+    @Retryable(attempts = 3)
+    public String charge(final String orderId) {
+        final int call = this.executions.incrementAndGet();
+        if (call <= this.failuresBeforeSuccess) {
+            throw new IllegalStateException("сбой платежа №" + call);
+        }
+        return String.format("оплачен %s", orderId);
     }
 }

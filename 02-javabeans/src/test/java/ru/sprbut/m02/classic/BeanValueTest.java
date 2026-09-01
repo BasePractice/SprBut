@@ -17,17 +17,6 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("Чтение и запись свойств по строковому имени")
 final class BeanValueTest {
-
-    private static CustomerBean customer() {
-        final CustomerBean bean = new CustomerBean();
-        bean.setId("C-1");
-        bean.setFirstName("Иван");
-        bean.setLastName("Петров");
-        bean.setAge(33);
-        bean.setVip(true);
-        return bean;
-    }
-
     @Test
     @DisplayName("свойство читается по имени, без знания класса при компиляции")
     void readsByName() {
@@ -104,5 +93,15 @@ final class BeanValueTest {
             ((CustomerBean) new EmptyBean(CustomerBean.class).instance()).getFirstName(),
             Matchers.nullValue()
         );
+    }
+
+    private static CustomerBean customer() {
+        final CustomerBean bean = new CustomerBean();
+        bean.setId("C-1");
+        bean.setFirstName("Иван");
+        bean.setLastName("Петров");
+        bean.setAge(33);
+        bean.setVip(true);
+        return bean;
     }
 }

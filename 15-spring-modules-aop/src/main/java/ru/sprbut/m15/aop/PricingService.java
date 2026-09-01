@@ -20,6 +20,10 @@ import java.math.BigDecimal;
  */
 @Service
 public class PricingService {
+    /**
+     * Число вызовов.
+     */
+    private int calls;
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -27,11 +31,6 @@ public class PricingService {
     public PricingService() {
         // нечего инициализировать
     }
-
-    /**
-     * Число вызовов.
-     */
-    private int calls;
 
     /**
      * Вычисление.

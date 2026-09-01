@@ -51,7 +51,7 @@ public final class Benchmark {
      */
     public Map<String, Long> timings(final int iterations) {
         final Map<String, Long> measured = new LinkedHashMap<>();
-        for (UserMapper mapper : this.mappers.list()) {
+        for (final UserMapper mapper : this.mappers.list()) {
             this.warmup(mapper, iterations / 10 + 1);
             final long started = System.nanoTime();
             for (int step = 0; step < iterations; step++) {

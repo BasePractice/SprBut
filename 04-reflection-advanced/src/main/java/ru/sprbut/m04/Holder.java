@@ -20,14 +20,6 @@ import java.util.Map;
  */
 @SuppressWarnings("unused")
 public class Holder<T extends Comparable<T>> {
-
-    /**
-     * Открытый конструктор: экземпляр создаёт контейнер.
-     */
-    public Holder() {
-        // нечего инициализировать
-    }
-
     /**
      * Имена.
      */
@@ -59,9 +51,17 @@ public class Holder<T extends Comparable<T>> {
     public String plain;
 
     /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    public Holder() {
+        // нечего инициализировать
+    }
+
+    /**
      * Метод, возвращающий обобщённый тип, — у него тоже есть своя сигнатура.
      * @return Метод, возвращающий обобщённый тип, — у него тоже есть своя сигнатура
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     public List<T> produce() {
         return List.of();
     }

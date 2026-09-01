@@ -35,6 +35,10 @@ import java.math.BigDecimal;
  */
 @Component
 public class ServiceLocatorDemo implements ApplicationContextAware {
+    /**
+     * Контекст.
+     */
+    private ApplicationContext context;
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -42,11 +46,6 @@ public class ServiceLocatorDemo implements ApplicationContextAware {
     public ServiceLocatorDemo() {
         // нечего инициализировать
     }
-
-    /**
-     * Контекст.
-     */
-    private ApplicationContext context;
 
     @Override
     public void setApplicationContext(final ApplicationContext context) throws BeansException {

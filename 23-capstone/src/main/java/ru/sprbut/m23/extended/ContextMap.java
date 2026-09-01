@@ -108,12 +108,13 @@ public final class ContextMap {
             .toList();
     }
 
+    // @checkstyle NonStaticMethodCheck (3 lines)
     private String operation(final Method method) {
         final Audited audited = method.getAnnotation(Audited.class);
         return audited.value().isBlank() ? method.getName() : audited.value();
     }
 
-    private boolean mine(final String type) {
+    private static boolean mine(final String type) {
         return type != null && type.startsWith("ru.sprbut.m23");
     }
 }

@@ -12,9 +12,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import ru.sprbut.m17.conditionals.ConditionalOnDemo;
 import ru.sprbut.m17.configuration.ProxyBeanMethods;
 import ru.sprbut.m17.stereotypes.Stereotypes;
@@ -34,12 +39,6 @@ final class SpringAnnotationsTest {
  */
     @DisplayName("Слайды 140–144: стереотипы")
     final class StereotypeScanning {
-
-        @Configuration
-        @ComponentScan(basePackageClasses = Stereotypes.class)
-        static class ScanConfig {
-        }
-
         @Test
         @DisplayName("Сканер находит все четыре стереотипа и не находит класс без аннотации")
         void scannerFindsStereotypes() {
@@ -64,7 +63,7 @@ final class SpringAnnotationsTest {
                     context.getBean(Stereotypes.WebController.class).role(),
                     Matchers.equalTo("controller")
                 );
-                Assertions.assertThrows(org.springframework.beans.factory.NoSuchBeanDefinitionException.class, () -> context.getBean(Stereotypes.NotAComponent.class));
+                Assertions.assertThrows(NoSuchBeanDefinitionException.class, () -> context.getBean(Stereotypes.NotAComponent.class));
             }
         }
 
@@ -73,19 +72,24 @@ final class SpringAnnotationsTest {
         void allStereotypesAreComponents() {
             MatcherAssert.assertThat(
                 "cannot verify that all stereotypes are components",
-                org.springframework.stereotype.Service.class .isAnnotationPresent(org.springframework.stereotype.Component.class),
+                Service.class .isAnnotationPresent(Component.class),
                 Matchers.equalTo(true)
             );
             MatcherAssert.assertThat(
                 "cannot verify that all stereotypes are components",
-                org.springframework.stereotype.Repository.class .isAnnotationPresent(org.springframework.stereotype.Component.class),
+                Repository.class .isAnnotationPresent(Component.class),
                 Matchers.equalTo(true)
             );
             MatcherAssert.assertThat(
                 "cannot verify that all stereotypes are components",
-                org.springframework.stereotype.Controller.class .isAnnotationPresent(org.springframework.stereotype.Component.class),
+                Controller.class .isAnnotationPresent(Component.class),
                 Matchers.equalTo(true)
             );
+        }
+
+        @Configuration
+        @ComponentScan(basePackageClasses = Stereotypes.class)
+        static class ScanConfig {
         }
     }
 
@@ -343,8 +347,8 @@ final class SpringAnnotationsTest {
         void userBeanWins() {
             try (var context = new AnnotationConfigApplicationContext()) {
                 // порядок важен: пользовательская конфигурация обрабатывается раньше
-                context.register(ConditionalOnDemo.UserConfig.class,
-                        ConditionalOnDemo.DefaultsConfig.class);
+                context.register(                    ConditionalOnDemo.UserConfig.class, ConditionalOnDemo.DefaultsConfig.class
+);
                 context.refresh();
                 MatcherAssert.assertThat(
                     "cannot verify that user bean wins",

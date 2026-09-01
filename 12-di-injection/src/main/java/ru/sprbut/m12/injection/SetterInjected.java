@@ -26,6 +26,15 @@ import java.math.BigDecimal;
  */
 @Component
 public class SetterInjected {
+    /**
+     * Сервис.
+     */
+    private TaxService taxService;
+
+    /**
+     * Сервис.
+     */
+    private DiscountService discountService;
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -35,31 +44,12 @@ public class SetterInjected {
     }
 
     /**
-     * Сервис.
-     */
-    private TaxService taxService;
-    /**
-     * Сервис.
-     */
-
-    private DiscountService discountService;
-
-    /**
      * Новое значение свойства {@code taxService}.
      * @param taxService Сервис
      */
     @Autowired
     public void setTaxService(final TaxService taxService) {
         this.taxService = taxService;
-    }
-
-    /**
-     * Необязательная зависимость: без неё объект тоже работоспособен.
-     * @param discountService Сервис
-     */
-    @Autowired(required = false)
-    public void setDiscountService(final DiscountService discountService) {
-        this.discountService = discountService;
     }
 
     /**
@@ -79,5 +69,14 @@ public class SetterInjected {
      */
     public boolean hasDiscountService() {
         return this.discountService != null;
+    }
+
+    /**
+     * Необязательная зависимость: без неё объект тоже работоспособен.
+     * @param discountService Сервис
+     */
+    @Autowired(required = false)
+    public void setDiscountService(final DiscountService discountService) {
+        this.discountService = discountService;
     }
 }

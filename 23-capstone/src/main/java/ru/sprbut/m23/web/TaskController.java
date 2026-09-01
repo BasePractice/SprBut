@@ -33,7 +33,6 @@ import ru.sprbut.m23.service.Tasks;
 @RestController
 @RequestMapping("/api/tasks")
 public final class TaskController {
-
     /**
      * Задачи.
      */
@@ -52,6 +51,16 @@ public final class TaskController {
     public TaskController(final Tasks tasks, final TaskViews views) {
         this.tasks = tasks;
         this.views = views;
+    }
+
+    /**
+     * Статус.
+     * @param status Статус
+     * @return Статус
+     */
+    @GetMapping
+    public List<TaskView> byStatus(final @RequestParam(defaultValue = "OPEN") TaskStatus status) {
+        return this.views.views(this.tasks.byStatus(status));
     }
 
     /**
@@ -83,15 +92,5 @@ public final class TaskController {
     @PostMapping("/{id}/finish")
     public TaskView finish(final @PathVariable long id) {
         return this.views.view(this.tasks.finish(id));
-    }
-
-    /**
-     * Статус.
-     * @param status Статус
-     * @return Статус
-     */
-    @GetMapping
-    public List<TaskView> byStatus(final @RequestParam(defaultValue = "OPEN") TaskStatus status) {
-        return this.views.views(this.tasks.byStatus(status));
     }
 }

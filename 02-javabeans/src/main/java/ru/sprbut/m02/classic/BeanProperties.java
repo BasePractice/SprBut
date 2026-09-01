@@ -43,7 +43,7 @@ public final class BeanProperties {
      */
     public List<String> readable() {
         final List<String> names = new ArrayList<>();
-        for (Method method : this.type.getMethods()) {
+        for (final Method method : this.type.getMethods()) {
             if (method.getDeclaringClass() == Object.class || method.getParameterCount() != 0) {
                 continue;
             }
@@ -64,7 +64,7 @@ public final class BeanProperties {
      */
     public List<String> writable() {
         final List<String> names = new ArrayList<>();
-        for (Method method : this.type.getMethods()) {
+        for (final Method method : this.type.getMethods()) {
             if (method.getParameterCount() == 1 && method.getName().startsWith("set")
                 && method.getName().length() > 3) {
                 names.add(new PropertyKey(method.getName().substring(3)).decapitalized());
@@ -81,7 +81,7 @@ public final class BeanProperties {
      */
     public Method reader(final String property) {
         final String suffix = new PropertyKey(property).capitalized();
-        for (String prefix : new String[]{"get", "is"}) {
+        for (final String prefix : new String[]{"get", "is"}) {
             try {
                 return this.type.getMethod(prefix + suffix);
             } catch (final NoSuchMethodException absent) {
@@ -91,7 +91,7 @@ public final class BeanProperties {
         return null;
     }
 
-    private boolean boolish(final Method method) {
+    private static boolean boolish(final Method method) {
         return method.getReturnType() == boolean.class || method.getReturnType() == Boolean.class;
     }
 }

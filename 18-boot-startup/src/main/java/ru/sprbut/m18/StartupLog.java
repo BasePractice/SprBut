@@ -20,18 +20,18 @@ import java.util.List;
  * @since 1.0
  */
 public final class StartupLog {
-
-    /**
-     * Открытый конструктор: экземпляр создаёт контейнер.
-     */
-    public StartupLog() {
-        // нечего инициализировать
-    }
-
     /**
      * Значение {@code EVENTS}.
      */
     private static final List<String> EVENTS = new ArrayList<>();
+
+    /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
+    public StartupLog() {
+        // нечего инициализировать
+    }
 
     /**
      * Записывает этап запуска.
@@ -44,6 +44,7 @@ public final class StartupLog {
     /**
      * Все записанные этапы по порядку.
      * @return Все записанные этапы по порядку
+     // @checkstyle NonStaticMethodCheck (3 lines)
      */
     public synchronized List<String> events() {
         return List.copyOf(EVENTS);
@@ -51,6 +52,7 @@ public final class StartupLog {
 
     /**
      * Очищает журнал перед новым прогоном.
+     // @checkstyle NonStaticMethodCheck (3 lines)
      */
     public synchronized void clear() {
         EVENTS.clear();
@@ -60,6 +62,7 @@ public final class StartupLog {
      * Порядковый номер этапа — по нему проверяется относительный порядок.
      * @param event Событие
      * @return Порядковый номер этапа — по нему проверяется относительный порядок
+     // @checkstyle NonStaticMethodCheck (3 lines)
      */
     public synchronized int indexOf(final String event) {
         return EVENTS.indexOf(event);
@@ -69,6 +72,7 @@ public final class StartupLog {
      * Случился ли этап вообще.
      * @param event Событие
      * @return Случился ли этап вообще
+     // @checkstyle NonStaticMethodCheck (3 lines)
      */
     public synchronized boolean has(final String event) {
         return EVENTS.contains(event);

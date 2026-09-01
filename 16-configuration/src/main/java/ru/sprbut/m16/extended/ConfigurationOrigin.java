@@ -70,7 +70,7 @@ public final class ConfigurationOrigin {
     public List<Origin> occurrences(final String key) {
         final List<Origin> found = new ArrayList<>();
         int priority = 0;
-        for (PropertySource<?> source : this.environment.getPropertySources()) {
+        for (final PropertySource<?> source : this.environment.getPropertySources()) {
             if (this.real(source)) {
                 if (source.containsProperty(key)) {
                     found.add(new Origin(source.getName(), source.getProperty(key), priority));
@@ -110,11 +110,11 @@ public final class ConfigurationOrigin {
      */
     public Map<String, Origin> effective(final String prefix) {
         final Map<String, Origin> collected = new LinkedHashMap<>();
-        for (PropertySource<?> source : this.environment.getPropertySources()) {
+        for (final PropertySource<?> source : this.environment.getPropertySources()) {
             if (!this.real(source) || !(source instanceof EnumerablePropertySource<?> enumerable)) {
                 continue;
             }
-            for (String name : enumerable.getPropertyNames()) {
+            for (final String name : enumerable.getPropertyNames()) {
                 if (name.startsWith(prefix)) {
                     collected.computeIfAbsent(name, key -> this.resolve(key).orElseThrow());
                 }
@@ -131,10 +131,10 @@ public final class ConfigurationOrigin {
     public String explain(final String key) {
         final List<Origin> found = this.occurrences(key);
         if (found.isEmpty()) {
-            return "'" + key + "' не найден ни в одном источнике";
+            return String.format("'%s' не найден ни в одном источнике", key);
         }
         final StringBuilder text = new StringBuilder(
-            "'" + key + "' = " + found.get(0).value() + " (из " + found.get(0).source() + ")"
+            String.format("'%s' = %s (из %s)", key, found.get(0).value(), found.get(0).source())
         );
         for (int index = 1; index < found.size(); index++) {
             text.append("\n  перекрыто: ").append(found.get(index).value())
@@ -143,6 +143,8 @@ public final class ConfigurationOrigin {
         return text.toString();
     }
 
+    // @checkstyle NonStaticMethodCheck (3 lines)
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     private boolean real(final PropertySource<?> source) {
         return !AGGREGATING.equals(source.getName());
     }

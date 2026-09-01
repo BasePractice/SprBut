@@ -42,6 +42,7 @@ public final class StaticField {
      * Значение статического поля.
      * @return Значение статического поля
      */
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     public Object value() {
         final Field field = new Declared(this.type).field(this.name);
         field.setAccessible(true);
@@ -49,7 +50,7 @@ public final class StaticField {
             return field.get(null);
         } catch (final IllegalAccessException denied) {
             throw new IllegalStateException(
-                "Не удалось прочитать статическое поле " + this.name, denied
+                String.format("Не удалось прочитать статическое поле %s", this.name, denied)
             );
         }
     }

@@ -45,17 +45,14 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
     /**
      * Объект.
      */
-
     private String beanName;
     /**
      * Объект.
      */
-
     private boolean beanFactoryInjected;
     /**
      * Контекст.
      */
-
     private boolean contextInjected;
 
     /**
@@ -94,6 +91,7 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
     /**
      * Шаг 5а: {@code @PostConstruct} вызывается раньше {@code afterPropertiesSet}.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @PostConstruct
     public void postConstruct() {
         LifecycleLog.record("5a-postConstruct:managedBean");
@@ -110,6 +108,7 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
     /**
      * Шаг 8а: {@code @PreDestroy} вызывается раньше {@code destroy}.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @PreDestroy
     public void preDestroy() {
         LifecycleLog.record("8a-preDestroy:managedBean");
@@ -164,6 +163,7 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
          * Имя.
          * @return Имя
          */
+        // @checkstyle NonStaticMethodCheck (3 lines)
         public String name() {
             return "зависимость";
         }

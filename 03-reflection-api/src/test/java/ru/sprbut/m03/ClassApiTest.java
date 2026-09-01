@@ -21,15 +21,6 @@ import ru.sprbut.m03.model.Order;
  */
 @DisplayName("СХЕМА 1: Class — центр карты Reflection API")
 final class ClassApiTest {
-
-    /**
-     * Значение {@code PAID}.
-     */
-    private enum Status { NEW, PAID }
-
-    private record Point(int x, int y) {
-    }
-
     @Test
     @DisplayName("из Class достаются поля")
     void listsFields() {
@@ -198,5 +189,13 @@ final class ClassApiTest {
             new ClassApi(Order.class).recordComponents(),
             Matchers.equalTo(List.of())
         );
+    }
+
+    /**
+     * Значение {@code PAID}.
+     */
+    private enum Status { NEW, PAID }
+
+    private record Point(int x, int y) {
     }
 }

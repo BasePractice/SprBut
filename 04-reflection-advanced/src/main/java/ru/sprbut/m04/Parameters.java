@@ -80,6 +80,7 @@ public final class Parameters {
             .toList();
     }
 
+    // @checkstyle NonStaticMethodCheck (3 lines)
     private String qualifier(final Parameter parameter) {
         final String named = parameter.getAnnotation(Injected.class).value();
         return named.isBlank() ? parameter.getName() : named;

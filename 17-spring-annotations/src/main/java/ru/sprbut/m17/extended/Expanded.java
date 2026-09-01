@@ -53,7 +53,7 @@ public final class Expanded {
                 continue;
             }
             found.add("@" + current.getSimpleName());
-            for (Annotation meta : current.getAnnotations()) {
+            for (final Annotation meta : current.getAnnotations()) {
                 queue.add(meta.annotationType());
             }
         }
@@ -86,12 +86,12 @@ public final class Expanded {
     public String explain() {
         final List<String> parts = this.parts();
         if (parts.isEmpty()) {
-            return "@" + this.annotation.getSimpleName() + " — базовая аннотация";
+            return String.format("@%s — базовая аннотация", this.annotation.getSimpleName());
         }
         return "@" + this.annotation.getSimpleName() + " = " + String.join(" + ", parts);
     }
 
-    private boolean builtin(final Class<? extends Annotation> type) {
+    private static boolean builtin(final Class<? extends Annotation> type) {
         return type.getName().startsWith("java.lang.annotation.")
             || type.getName().startsWith("jdk.internal.");
     }

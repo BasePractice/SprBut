@@ -170,6 +170,10 @@ public final class CircularBeans {
      * @since 1.0
      */
     public static class Gamma {
+        /**
+         * Дельта-зависимость.
+         */
+        private Delta delta;
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -177,11 +181,6 @@ public final class CircularBeans {
         public Gamma() {
             // нечего инициализировать
         }
-
-        /**
-         * Дельта-зависимость.
-         */
-        private Delta delta;
 
         /**
          * Новое значение: дельта-зависимость.
@@ -206,6 +205,10 @@ public final class CircularBeans {
      * @since 1.0
      */
     public static class Delta {
+        /**
+         * Гамма-зависимость.
+         */
+        private Gamma gamma;
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -213,11 +216,6 @@ public final class CircularBeans {
         public Delta() {
             // нечего инициализировать
         }
-
-        /**
-         * Гамма-зависимость.
-         */
-        private Gamma gamma;
 
         /**
          * Новое значение: гамма-зависимость.

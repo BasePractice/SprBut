@@ -82,7 +82,8 @@ public final class Argument {
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException(
                 "'" + this.raw + "' не входит в "
-                    + Arrays.toString(this.target.getEnumConstants())
+                    + Arrays.toString(                        this.target.getEnumConstants()
+)
             ));
     }
 }

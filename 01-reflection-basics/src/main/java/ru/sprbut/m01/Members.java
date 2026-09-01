@@ -11,6 +11,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Слайд 6: «Определить модификаторы доступа полей, методов».
@@ -91,7 +92,7 @@ public final class Members {
             .toList();
     }
 
-    private List<String> names(final java.util.stream.Stream<Field> fields) {
+    private static List<String> names(final Stream<Field> fields) {
         return fields
             .filter(field -> !field.isSynthetic())
             .map(Field::getName)

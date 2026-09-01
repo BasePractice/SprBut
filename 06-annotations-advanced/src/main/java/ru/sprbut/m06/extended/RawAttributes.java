@@ -39,7 +39,7 @@ public final class RawAttributes {
      */
     public Map<String, Object> map() {
         final Map<String, Object> collected = new LinkedHashMap<>();
-        for (Method element : this.annotation.annotationType().getDeclaredMethods()) {
+        for (final Method element : this.annotation.annotationType().getDeclaredMethods()) {
             collected.put(element.getName(), this.value(element));
         }
         return collected;
@@ -50,6 +50,7 @@ public final class RawAttributes {
      * @param element Элемент
      * @return Значение одного элемента
      */
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     public Object value(final Method element) {
         try {
             element.setAccessible(true);

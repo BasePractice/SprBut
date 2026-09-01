@@ -64,7 +64,6 @@ final class ObjectFieldTest {
                 super("S-1", "Сидоров", BigDecimal.TEN);
             }
         }
-
         MatcherAssert.assertThat(
             "field lookup cannot climb up to the parent class",
             new ObjectField(new Savings(), "owner").declaration().getDeclaringClass(),

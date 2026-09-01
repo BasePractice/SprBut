@@ -57,7 +57,7 @@ public final class TypeUse {
         return List.of();
     }
 
-    private List<String> names(final AnnotatedType type) {
+    private static List<String> names(final AnnotatedType type) {
         return Arrays.stream(type.getAnnotations())
             .map(annotation -> annotation.annotationType().getSimpleName())
             .toList();

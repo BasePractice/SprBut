@@ -37,7 +37,7 @@ public final class MatchesRule implements Rule {
         }
         final List<Violation> found = new ArrayList<>();
         final String text = String.valueOf(value);
-        for (Matches each : patterns) {
+        for (final Matches each : patterns) {
             try {
                 if (!Pattern.matches(each.regex(), text)) {
                     found.add(new Violation(

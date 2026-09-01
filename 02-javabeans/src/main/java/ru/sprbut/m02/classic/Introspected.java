@@ -102,7 +102,7 @@ public final class Introspected {
             return Arrays.asList(info.getPropertyDescriptors());
         } catch (final IntrospectionException failure) {
             throw new IllegalStateException(
-                "Introspector не смог разобрать " + this.type.getName(), failure
+                String.format("Introspector не смог разобрать %s", this.type.getName(), failure)
             );
         }
     }

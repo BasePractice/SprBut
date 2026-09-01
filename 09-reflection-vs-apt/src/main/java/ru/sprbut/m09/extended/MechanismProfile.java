@@ -43,10 +43,9 @@ public record MechanismProfile(String name,
             false,
             false,
             false,
-            List.of("@Autowired: поиск и внедрение зависимостей",
-                    "@Value: чтение конфигурации в поля",
-                    "@EventListener: вызов методов-слушателей",
-                    "разбор аннотаций при старте контекста"));
+            List.of(                "@Autowired: поиск и внедрение зависимостей", "@Value: чтение конфигурации в поля",
+                "@EventListener: вызов методов-слушателей", "разбор аннотаций при старте контекста"
+));
 
     /**
      * Слайд 74: «APT: compile-time, только генерация, быстро».
@@ -58,9 +57,10 @@ public record MechanismProfile(String name,
             true,
             true,
             true,
-            List.of("spring-boot-configuration-processor: метаданные @ConfigurationProperties",
-                    "Spring AOT: генерация кода контекста при сборке",
-                    "MapStruct и Lombok в прикладном коде"));
+            List.of(                "spring-boot-configuration-processor: метаданные @ConfigurationProperties",
+                "Spring AOT: генерация кода контекста при сборке",
+                "MapStruct и Lombok в прикладном коде"
+));
 
     /**
      * Слайд 75: «Байткод (CGLIB, ByteBuddy): и то, и другое».
@@ -72,14 +72,15 @@ public record MechanismProfile(String name,
             true,
             false,
             false,
-            List.of("CGLIB-прокси для бинов без интерфейса",
-                    "@Transactional и @Cacheable через прокси",
-                    "@Configuration: перехват вызовов @Bean-методов"));
+            List.of(                "CGLIB-прокси для бинов без интерфейса", "@Transactional и @Cacheable через прокси",
+                "@Configuration: перехват вызовов @Bean-методов"
+));
 
     /**
      * Все элементы.
      * @return Все элементы
      */
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     public static List<MechanismProfile> all() {
         return List.of(REFLECTION, APT, BYTECODE);
     }

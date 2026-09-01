@@ -20,33 +20,29 @@ public class UserEntity {
     /**
      * Имя.
      */
-
     private String firstName;
     /**
      * Имя.
      */
-
     private String lastName;
     /**
      * Возраст.
      */
-
     private int age;
     /**
      * Признак активности.
      */
-
     private boolean active;
     /**
      * Внутренняя заметка.
      */
-
     private String internalNote;
 
     /**
      * Основной конструктор.
      */
     public UserEntity() {
+        // тело намеренно пустое
     }
 
     /**

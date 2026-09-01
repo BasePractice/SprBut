@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.ApplicationContext;
+import ru.sprbut.m23.web.TaskController;
 
 @DataJpaTest
 /**
@@ -75,7 +76,7 @@ final class TaskRepositoryTest {
     void dontLoadWebLayer() {
         MatcherAssert.assertThat(
             "JPA slice cannot leave the controllers out of the context",
-            this.context.getBeanNamesForType(ru.sprbut.m23.web.TaskController.class).length,
+            this.context.getBeanNamesForType(TaskController.class).length,
             Matchers.equalTo(0)
         );
     }

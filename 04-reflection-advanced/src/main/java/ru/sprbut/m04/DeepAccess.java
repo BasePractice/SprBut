@@ -47,6 +47,7 @@ public final class DeepAccess {
      * Результат попытки: успех либо имя и текст исключения.
      * @return Результат попытки: успех либо имя и текст исключения
      */
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     public AccessAttempt attempt() {
         try {
             final Field found = this.type.getDeclaredField(this.field);

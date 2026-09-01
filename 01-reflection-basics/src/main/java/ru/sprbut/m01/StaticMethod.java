@@ -51,6 +51,7 @@ public final class StaticMethod {
      * @param args Аргументы
      * @return Вызывает статический метод, игнорируя модификатор доступа
      */
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     public Object call(final Object... args) {
         final Method method = new Declared(this.type).method(this.name, this.parameters);
         method.setAccessible(true);

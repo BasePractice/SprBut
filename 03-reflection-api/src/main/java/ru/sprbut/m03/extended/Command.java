@@ -52,7 +52,7 @@ public final class Command {
         final int hash = this.text.indexOf('#');
         if (hash < 0) {
             throw new IllegalArgumentException(
-                "Ожидался формат 'Класс#метод(...)', получено: " + this.text
+                String.format("Ожидался формат 'Класс#метод(...)', получено: %s", this.text)
             );
         }
         final Spec target = new Spec(this.text.substring(0, hash).trim());
@@ -68,7 +68,7 @@ public final class Command {
         );
     }
 
-    private Class<?> type(final String name) {
+    private static Class<?> type(final String name) {
         try {
             return Class.forName(name);
         } catch (final ClassNotFoundException absent) {

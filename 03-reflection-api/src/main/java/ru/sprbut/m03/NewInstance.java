@@ -46,11 +46,13 @@ public final class NewInstance {
      * Созданный объект.
      * @return Созданный объект
      */
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     public Object object() {
         final Constructor<?> chosen = new Constructors(this.type).matching(this.args)
             .orElseThrow(() -> new IllegalArgumentException(
                 "Нет конструктора " + this.type.getSimpleName()
-                    + " под аргументы " + Arrays.toString(this.args)
+                    + " под аргументы " + Arrays.toString(                        this.args
+)
             ));
         chosen.setAccessible(true);
         try {

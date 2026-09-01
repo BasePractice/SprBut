@@ -21,18 +21,18 @@ import java.util.List;
  * @since 1.0
  */
 public final class LifecycleLog {
-
-    /**
-     * Открытый конструктор: экземпляр создаёт контейнер.
-     */
-    public LifecycleLog() {
-        // нечего инициализировать
-    }
-
     /**
      * Значение {@code EVENTS}.
      */
     private static final List<String> EVENTS = new ArrayList<>();
+
+    /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
+    public LifecycleLog() {
+        // нечего инициализировать
+    }
 
     /**
      * Записывает этап.
@@ -45,6 +45,7 @@ public final class LifecycleLog {
     /**
      * Все записанные этапы по порядку.
      * @return Все записанные этапы по порядку
+     // @checkstyle NonStaticMethodCheck (3 lines)
      */
     public synchronized List<String> events() {
         return List.copyOf(EVENTS);
@@ -52,6 +53,7 @@ public final class LifecycleLog {
 
     /**
      * Очищает журнал перед новым прогоном.
+     // @checkstyle NonStaticMethodCheck (3 lines)
      */
     public synchronized void clear() {
         EVENTS.clear();
@@ -61,6 +63,7 @@ public final class LifecycleLog {
      * Только события конкретного бина.
      * @param bean Объект
      * @return Только события конкретного бина
+     // @checkstyle NonStaticMethodCheck (3 lines)
      */
     public synchronized List<String> of(final String bean) {
         return EVENTS.stream().filter(event -> event.endsWith(":" + bean)).toList();
@@ -70,6 +73,7 @@ public final class LifecycleLog {
      * Порядковый номер события — по нему проверяется относительный порядок шагов.
      * @param event Событие
      * @return Порядковый номер события — по нему проверяется относительный порядок шагов
+     // @checkstyle NonStaticMethodCheck (3 lines)
      */
     public synchronized int indexOf(final String event) {
         return EVENTS.indexOf(event);

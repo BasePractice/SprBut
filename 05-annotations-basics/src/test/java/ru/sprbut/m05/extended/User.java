@@ -16,27 +16,6 @@ package ru.sprbut.m05.extended;
  */
 @SuppressWarnings("unused")
 public final class User extends BaseEntity {
-
-    /**
-     * Логин.
-     */
-    @NotBlank
-    @MaxLength(10)
-    private final String login;
-
-    /**
-     * Возраст.
-     */
-    @Range(min = 18, max = 120, message = "возраст вне диапазона")
-    private final int age;
-
-    /**
-     * Адрес почты.
-     */
-    @Matches(regex = ".*@.*", message = "не похоже на почту")
-    @Matches(regex = ".*\\.[a-z]+", message = "нет доменной зоны")
-    private final String email;
-
     /**
      * Невидимый элемент.
      */
@@ -76,4 +55,24 @@ public final class User extends BaseEntity {
         this.invisible = invisible;
         this.free = free;
     }
+
+    /**
+     * Логин.
+     */
+    @NotBlank
+    @MaxLength(10)
+    private final String login;
+
+    /**
+     * Возраст.
+     */
+    @Range(min = 18, max = 120, message = "возраст вне диапазона")
+    private final int age;
+
+    /**
+     * Адрес почты.
+     */
+    @Matches(regex = ".*@.*", message = "не похоже на почту")
+    @Matches(regex = ".*\\.[a-z]+", message = "нет доменной зоны")
+    private final String email;
 }

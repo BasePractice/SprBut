@@ -20,20 +20,11 @@ import org.junit.jupiter.api.io.TempDir;
  */
 @DisplayName("Слайд 60: процессор-анализатор, который ничего не генерирует")
 final class TodoProcessorTest {
-
     /**
      * Рабочий каталог.
      */
     @TempDir
     private Path workDir;
-
-    private CompilationHarness.Result compile(final String code) {
-        return CompilationHarness.compile(
-            this.workDir,
-            List.of(new CompilationHarness.Source("demo.Service", code)),
-            new TodoProcessor()
-        );
-    }
 
     @Test
     @DisplayName("непроходящий TODO сборку не роняет")
@@ -44,10 +35,10 @@ final class TodoProcessorTest {
                 package demo;
                 import ru.sprbut.m07.api.Todo;
                 public class Service {
-                    @Todo("вынести в конфигурацию")
-                    private int timeout = 30;
                     public void run() {
                     }
+                    @Todo("вынести в конфигурацию")
+                    private int timeout = 30;
                 }
                 """).success(),
             Matchers.equalTo(true)
@@ -155,4 +146,13 @@ final class TodoProcessorTest {
             Matchers.emptyIterable()
         );
     }
+
+    private CompilationHarness.Result compile(final String code) {
+        return CompilationHarness.compile(
+            this.workDir,
+            List.of(new CompilationHarness.Source("demo.Service", code)),
+            new TodoProcessor()
+        );
+    }
+
 }

@@ -6,6 +6,10 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m08.extended;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 import ru.sprbut.m08.generated.ModuleRegistry;
 import ru.sprbut.m08.model.Customer;
 import ru.sprbut.m08.model.CustomerBuilder;
@@ -14,9 +18,6 @@ import ru.sprbut.m08.model.OrderMaker;
 import ru.sprbut.m08.service.AuditLog;
 import ru.sprbut.m08.service.CustomerRepository;
 import ru.sprbut.m08.service.OrderRepository;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
 
 /**
  * <b>Расширенный пример модуля 08.</b>
@@ -49,12 +50,10 @@ public final class CheckoutFacade {
     /**
      * Заказы.
      */
-
     private final OrderRepository orders;
     /**
      * Аудит.
      */
-
     private final AuditLog audit;
 
     /**
@@ -151,7 +150,7 @@ public final class CheckoutFacade {
      * Что вообще есть в сгенерированном реестре.
      * @return Что вообще есть в сгенерированном реестре
      */
-    public static java.util.Set<String> registeredNames() {
+    public static Set<String> registeredNames() {
         return ModuleRegistry.names();
     }
 }

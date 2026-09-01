@@ -56,7 +56,7 @@ public final class HierarchyMerged<A extends Annotation> {
                 return found;
             }
         }
-        for (Class<?> contract : this.interfaces(this.type)) {
+        for (final Class<?> contract : this.interfaces(this.type)) {
             final Optional<Merged> found = new MergedAnnotation<>(contract, this.target)
                 .search(contract.getDeclaredAnnotations());
             if (found.isPresent()) {
@@ -71,7 +71,7 @@ public final class HierarchyMerged<A extends Annotation> {
         for (Class<?> current = from;
              current != null && current != Object.class;
              current = current.getSuperclass()) {
-            for (Class<?> contract : current.getInterfaces()) {
+            for (final Class<?> contract : current.getInterfaces()) {
                 if (!collected.contains(contract)) {
                     collected.add(contract);
                     collected.addAll(this.interfaces(contract));

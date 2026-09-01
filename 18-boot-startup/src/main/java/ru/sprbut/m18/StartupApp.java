@@ -6,9 +6,11 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m18;
 
+import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+import ru.sprbut.failing.FailingConfig;
 
 /**
  * Слайды 156–157: {@code BootstrapContext} и {@code ApplicationContext}.
@@ -49,7 +51,7 @@ public class StartupApp {
      */
     public static ConfigurableApplicationContext run(final String... args) {
         final SpringApplication application = new SpringApplication(StartupApp.class);
-        application.setBannerMode(org.springframework.boot.Banner.Mode.OFF);
+        application.setBannerMode(Banner.Mode.OFF);
         application.addListeners(
                 new StartupListeners.Starting(),
                 new StartupListeners.EnvironmentPrepared(),
@@ -69,8 +71,8 @@ public class StartupApp {
      */
     public static void runFailing(final String... args) {
         final SpringApplication application =
-                new SpringApplication(ru.sprbut.failing.FailingConfig.class);
-        application.setBannerMode(org.springframework.boot.Banner.Mode.OFF);
+                new SpringApplication(FailingConfig.class);
+        application.setBannerMode(Banner.Mode.OFF);
         application.addListeners(new StartupListeners.Ready(), new StartupListeners.Failed());
         application.run(args);
     }

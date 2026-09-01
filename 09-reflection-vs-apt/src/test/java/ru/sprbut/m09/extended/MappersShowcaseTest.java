@@ -17,11 +17,6 @@ import ru.sprbut.m09.model.UserEntity;
  */
 @DisplayName("Расширенный пример: СХЕМА 4 — compile-time против runtime")
 final class MappersShowcaseTest {
-
-    private static UserEntity entity() {
-        return new UserEntity("U-1", "Иван", "Иванов", 42, true);
-    }
-
     @Test
     @DisplayName("механизм не меняет поведение — только свойства")
     void agreeOnResult() {
@@ -100,5 +95,9 @@ final class MappersShowcaseTest {
             new RequiredHints().byMapper().get("BytecodeMapper"),
             Matchers.hasSize(1)
         );
+    }
+
+    private static UserEntity entity() {
+        return new UserEntity("U-1", "Иван", "Иванов", 42, true);
     }
 }

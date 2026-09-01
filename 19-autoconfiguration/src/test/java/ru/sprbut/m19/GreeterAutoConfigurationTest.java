@@ -6,11 +6,15 @@
 // @checkstyle NonStaticMethodCheck disable
 package ru.sprbut.m19;
 
+import java.nio.charset.StandardCharsets;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,7 +51,8 @@ final class GreeterAutoConfigurationTest {
             runner.run(context -> {
                 Assertions.assertThat(context).hasSingleBean(Greeter.class);
                 Assertions.assertThat(context.getBean(Greeter.class).greet("Мир"))
-                        .isEqualTo("Привет, Мир!");
+                        .isEqualTo(                            "Привет, Мир!"
+);
             });
         }
 
@@ -58,7 +63,8 @@ final class GreeterAutoConfigurationTest {
                             "sprbut.greeter.template=Здравствуйте, {name}",
                             "sprbut.greeter.shout=true")
                     .run(context -> Assertions.assertThat(context.getBean(Greeter.class).greet("Иван"))
-                            .isEqualTo("ЗДРАВСТВУЙТЕ, ИВАН"));
+                            .isEqualTo(                                "ЗДРАВСТВУЙТЕ, ИВАН"
+));
         }
 
         @Test
@@ -92,8 +98,8 @@ final class GreeterAutoConfigurationTest {
         @Test
         @DisplayName("@ConditionalOnClass: без нужного класса автоконфигурация не применяется")
         void requiresTheLibraryOnClasspath() {
-            runner.withClassLoader(new org.springframework.boot.test.context.FilteredClassLoader(
-                            Greeter.class))
+            runner.withClassLoader(                new FilteredClassLoader(Greeter.class)
+)
                     .run(context -> Assertions.assertThat(context).doesNotHaveBean("greeter"));
         }
     }
@@ -105,33 +111,14 @@ final class GreeterAutoConfigurationTest {
  */
     @DisplayName("Слайд 177: свой бин переопределяет автоконфигурацию")
     final class UserBeanWins {
-
-        @Configuration
-        static class UserConfig {
-
-            @Bean
-            Greeter greeter() {
-                return new Greeter() {
-                    @Override
-                    public String greet(final String name) {
-                        return "Здарова, " + name;
-                    }
-
-                    @Override
-                    public String flavour() {
-                        return "пользовательский";
-                    }
-                };
-            }
-        }
-
         @Test
         @DisplayName("@ConditionalOnMissingBean уступает пользовательскому бину")
         void autoConfigurationBacksOff() {
             runner.withUserConfiguration(UserConfig.class).run(context -> {
                 Assertions.assertThat(context).hasSingleBean(Greeter.class);
                 Assertions.assertThat(context.getBean(Greeter.class).flavour()).isEqualTo("пользовательский");
-                Assertions.assertThat(context.getBean(Greeter.class).greet("Мир")).isEqualTo("Здарова, Мир");
+                Assertions.assertThat(                    context.getBean(Greeter.class).greet("Мир")
+).isEqualTo("Здарова, Мир");
             });
         }
 
@@ -141,7 +128,27 @@ final class GreeterAutoConfigurationTest {
             runner.withUserConfiguration(UserConfig.class)
                     .withPropertyValues("sprbut.greeter.template=неважно")
                     .run(context -> Assertions.assertThat(context.getBean(GreeterProperties.class).getTemplate())
-                            .isEqualTo("неважно"));
+                            .isEqualTo(                                "неважно"
+));
+        }
+
+        @Configuration
+        static class UserConfig {
+
+            @Bean
+            Greeter greeter() {
+                return new Greeter() {
+                    @Override
+                    public String greet(final String name) {
+                        return String.format("Здарова, %s", name);
+                    }
+
+                    @Override
+                    public String flavour() {
+                        return "пользовательский";
+                    }
+                };
+            }
         }
     }
 
@@ -156,11 +163,11 @@ final class GreeterAutoConfigurationTest {
         @Test
         @DisplayName("Файл регистрации существует и содержит нашу автоконфигурацию")
         void importsFileListsTheAutoConfiguration() throws Exception {
-            final var url = getClass().getClassLoader().getResource(
-                    "META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports");
+            final var url = getClass().getClassLoader().getResource(                "META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports"
+);
             Assertions.assertThat(url).isNotNull();
-            Assertions.assertThat(new String(url.openStream().readAllBytes(),
-                    java.nio.charset.StandardCharsets.UTF_8))
+            Assertions.assertThat(                new String(url.openStream().readAllBytes(), StandardCharsets.UTF_8)
+)
                     .contains("ru.sprbut.m19.autoconfigure.GreeterAutoConfiguration");
         }
 
@@ -168,10 +175,10 @@ final class GreeterAutoConfigurationTest {
         @DisplayName("@AutoConfiguration — это @Configuration(proxyBeanMethods = false)")
         void autoConfigurationIsALiteConfiguration() {
             final var annotation = GreeterAutoConfiguration.class
-                    .getAnnotation(org.springframework.boot.autoconfigure.AutoConfiguration.class);
+                    .getAnnotation(AutoConfiguration.class);
             Assertions.assertThat(annotation).isNotNull();
-            Assertions.assertThat(GreeterAutoConfiguration.class.isAnnotationPresent(
-                    org.springframework.boot.autoconfigure.condition.ConditionalOnClass.class))
+            Assertions.assertThat(                GreeterAutoConfiguration.class.isAnnotationPresent(ConditionalOnClass.class)
+)
                     .isTrue();
         }
     }

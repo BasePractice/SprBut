@@ -5,6 +5,7 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m04;
 
+import java.util.ArrayList;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -45,7 +46,7 @@ final class LoadedClassTest {
         MatcherAssert.assertThat(
             "class named by string cannot be loaded",
             new LoadedClass("java.util.ArrayList").type(),
-            Matchers.sameInstance(java.util.ArrayList.class)
+            Matchers.sameInstance(ArrayList.class)
         );
     }
 
@@ -64,7 +65,7 @@ final class LoadedClassTest {
         MatcherAssert.assertThat(
             "dormant loading cannot yield the same class",
             new LoadedClass("java.util.ArrayList").dormant(getClass().getClassLoader()),
-            Matchers.sameInstance(java.util.ArrayList.class)
+            Matchers.sameInstance(ArrayList.class)
         );
     }
 

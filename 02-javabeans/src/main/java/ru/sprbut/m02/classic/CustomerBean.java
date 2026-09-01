@@ -34,28 +34,25 @@ public class CustomerBean implements Serializable {
     /**
      * Имя.
      */
-
     private String firstName;
     /**
      * Имя.
      */
-
     private String lastName;
     /**
      * Возраст.
      */
-
     private int age;
     /**
      * Признак привилегированного клиента.
      */
-
     private boolean vip;
 
     /**
      * Публичный конструктор без параметров — обязательное требование соглашения.
      */
     public CustomerBean() {
+        // тело намеренно пустое
     }
 
     /**
@@ -145,7 +142,7 @@ public class CustomerBean implements Serializable {
      * @return Вычисляемое свойство: геттер без поля. Introspector всё равно увидит свойство {@code fullName} — свойство определяется методами, а не полями
      */
     public String getFullName() {
-        return this.firstName + " " + this.lastName;
+        return String.format("%s %s", this.firstName, this.lastName);
     }
 
     @Override

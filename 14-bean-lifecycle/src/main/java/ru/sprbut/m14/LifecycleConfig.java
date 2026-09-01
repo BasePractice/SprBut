@@ -7,8 +7,10 @@
 // @checkstyle NonStaticMethodCheck disable
 package ru.sprbut.m14;
 
+import jakarta.annotation.PreDestroy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 /**
  * Конфигурация, поднимающая все участники жизненного цикла разом.
@@ -78,7 +80,7 @@ public class LifecycleConfig {
      * @return Слайд 101 напоминал: prototype-бины контейнер не уничтожает
      */
     @Bean
-    @org.springframework.context.annotation.Scope("prototype")
+    @Scope("prototype")
     public PrototypeWithDestroy prototypeWithDestroy() {
         return new PrototypeWithDestroy();
     }
@@ -99,7 +101,7 @@ public class LifecycleConfig {
         /**
          * Значение {@code preDestroy}.
          */
-        @jakarta.annotation.PreDestroy
+        @PreDestroy
         public void preDestroy() {
             LifecycleLog.record("8a-preDestroy:prototypeWithDestroy");
         }

@@ -32,34 +32,8 @@ import java.time.Instant;
 @Entity
 @Table(name = "tasks")
 public class Task {
-
-    /**
-     * Идентификатор.
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    /**
-     * Название.
-     */
-    @Column(nullable = false)
-    private String title;
-
-    /**
-     * Статус.
-     */
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TaskStatus status;
-
-    /**
-     * Момент создания.
-     */
-    @Column(nullable = false)
-    private Instant created;
-
     protected Task() {
+        // тело намеренно пустое
     }
 
     /**
@@ -119,10 +93,36 @@ public class Task {
         this.move(TaskStatus.DONE);
     }
 
+    /**
+     * Идентификатор.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /**
+     * Название.
+     */
+    @Column(nullable = false)
+    private String title;
+
+    /**
+     * Статус.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TaskStatus status;
+
+    /**
+     * Момент создания.
+     */
+    @Column(nullable = false)
+    private Instant created;
+
     private void move(final TaskStatus next) {
         if (!next.reachableFrom(this.status)) {
             throw new IllegalStateException(
-                "Задача в состоянии " + this.status + " не переходит в " + next
+                String.format("Задача в состоянии %s не переходит в %s", this.status, next)
             );
         }
         this.status = next;

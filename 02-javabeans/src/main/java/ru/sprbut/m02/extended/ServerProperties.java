@@ -9,6 +9,7 @@ package ru.sprbut.m02.extended;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import ru.sprbut.m02.classic.BeanMap;
 
 /**
  * Классический JavaBean в его самой типичной роли — держатель конфигурации.
@@ -20,53 +21,48 @@ import java.time.LocalDate;
  * @since 1.0
  */
 public class ServerProperties implements Serializable {
-
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Значение {@code Mode}.
-     */
-    public enum Mode { DEV, STAGE, PROD }
 
     /**
      * Узел.
      */
     private String host = "localhost";
+
     /**
      * Порт.
      */
-
     private int port = 8080;
+
     /**
      * Признак включённого TLS.
      */
-
     private boolean sslEnabled;
+
     /**
      * Таймаут в миллисекундах.
      */
-
     private long timeoutMillis = 5_000L;
+
     /**
      * Режим.
      */
-
     private Mode mode = Mode.DEV;
+
     /**
      * Предел.
      */
-
     private BigDecimal rateLimit = BigDecimal.ZERO;
+
     /**
      * Срок действия.
      */
-
     private LocalDate validUntil;
 
     /**
      * Основной конструктор.
      */
     public ServerProperties() {
+        // тело намеренно пустое
     }
 
     /**
@@ -194,6 +190,11 @@ public class ServerProperties implements Serializable {
 
     @Override
     public String toString() {
-        return "ServerProperties" + new ru.sprbut.m02.classic.BeanMap(this).text();
+        return "ServerProperties" + new BeanMap(this).text();
     }
+
+    /**
+     * Значение {@code Mode}.
+     */
+    public enum Mode { DEV, STAGE, PROD }
 }

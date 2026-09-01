@@ -59,7 +59,7 @@ public final class ChosenMethod {
     public Method method() {
         final List<Method> candidates = new ArrayList<>();
         for (Class<?> current = this.type; current != null; current = current.getSuperclass()) {
-            for (Method candidate : current.getDeclaredMethods()) {
+            for (final Method candidate : current.getDeclaredMethods()) {
                 if (candidate.getName().equals(this.name)
                     && !candidate.isBridge()
                     && !candidate.isSynthetic()
@@ -114,6 +114,7 @@ public final class ChosenMethod {
      * @param instance Экземпляр
      * @return Результат вызова метода на этом объекте
      */
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     public Object result(final Object instance) {
         final Method chosen = this.method();
         chosen.setAccessible(true);

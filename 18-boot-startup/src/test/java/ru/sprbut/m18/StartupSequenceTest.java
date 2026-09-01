@@ -16,14 +16,6 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("Слайды 156–172 (СХЕМА 11): последовательность запуска Spring Boot")
 final class StartupSequenceTest {
-
-    private static StartupLog started(final String... args) {
-        final StartupLog log = new StartupLog();
-        log.clear();
-        StartupApp.run(args).close();
-        return log;
-    }
-
     @Test
     @DisplayName("запуск начинается с ApplicationStartingEvent")
     void startsWithStartingEvent() {
@@ -101,5 +93,12 @@ final class StartupSequenceTest {
                 Matchers.equalTo(true)
             );
         }
+    }
+
+    private static StartupLog started(final String... args) {
+        final StartupLog log = new StartupLog();
+        log.clear();
+        StartupApp.run(args).close();
+        return log;
     }
 }

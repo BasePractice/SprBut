@@ -45,7 +45,7 @@ public final class SerializableFields {
         for (Class<?> current = this.type;
              current != null && current != Object.class;
              current = current.getSuperclass()) {
-            for (Field field : current.getDeclaredFields()) {
+            for (final Field field : current.getDeclaredFields()) {
                 if (this.serializable(field)) {
                     selected.add(field);
                 }
@@ -54,7 +54,7 @@ public final class SerializableFields {
         return List.copyOf(selected);
     }
 
-    private boolean serializable(final Field field) {
+    private static boolean serializable(final Field field) {
         return !field.isSynthetic()
             && !Modifier.isStatic(field.getModifiers())
             && !Modifier.isTransient(field.getModifiers())

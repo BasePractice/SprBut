@@ -41,7 +41,7 @@ public final class BeanMap {
     public Map<String, Object> values() {
         final Map<String, Object> collected = new LinkedHashMap<>();
         final Introspected introspected = new Introspected(this.bean.getClass());
-        for (String name : introspected.names()) {
+        for (final String name : introspected.names()) {
             final PropertyDescriptor described = introspected.descriptor(name).orElseThrow();
             if (described.getReadMethod() != null) {
                 collected.put(name, new Invoked(described.getReadMethod(), this.bean).value());

@@ -48,7 +48,7 @@ public final class AnnotationMembers {
      */
     public Map<String, Object> defaults() {
         final Map<String, Object> collected = new LinkedHashMap<>();
-        for (Method element : this.annotation.getDeclaredMethods()) {
+        for (final Method element : this.annotation.getDeclaredMethods()) {
             if (element.getDefaultValue() != null) {
                 collected.put(element.getName(), new Described(element.getDefaultValue()).text());
             }

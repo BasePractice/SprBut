@@ -6,6 +6,7 @@
 package ru.sprbut.m03.extended;
 
 import java.math.BigDecimal;
+import java.time.temporal.ChronoUnit;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -161,8 +162,8 @@ final class CommandTest {
     void convertsEnumIgnoringCase() {
         MatcherAssert.assertThat(
             "enum argument cannot be read case insensitively",
-            new Argument("days", java.time.temporal.ChronoUnit.class).value(),
-            Matchers.equalTo(java.time.temporal.ChronoUnit.DAYS)
+            new Argument("days", ChronoUnit.class).value(),
+            Matchers.equalTo(ChronoUnit.DAYS)
         );
     }
 

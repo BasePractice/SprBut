@@ -72,7 +72,7 @@ public final class BoundBean<T> {
         final Introspected introspected = new Introspected(this.type);
         final List<String> bound = new ArrayList<>();
         final List<String> ignored = new ArrayList<>();
-        for (Map.Entry<String, String> entry : this.values.entrySet()) {
+        for (final Map.Entry<String, String> entry : this.values.entrySet()) {
             final String property = new PropertyKey(entry.getKey()).camelCase();
             final PropertyDescriptor described = introspected.descriptor(property).orElse(null);
             if (described == null || described.getWriteMethod() == null) {

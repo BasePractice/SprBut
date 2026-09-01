@@ -53,6 +53,7 @@ public final class Stereotypes {
          * Роль.
          * @return Роль
          */
+        // @checkstyle NonStaticMethodCheck (3 lines)
         public String role() {
             return "component";
         }
@@ -76,6 +77,7 @@ public final class Stereotypes {
          * Роль.
          * @return Роль
          */
+        // @checkstyle NonStaticMethodCheck (3 lines)
         public String role() {
             return "service";
         }
@@ -101,6 +103,7 @@ public final class Stereotypes {
          * Роль.
          * @return Роль
          */
+        // @checkstyle NonStaticMethodCheck (3 lines)
         public String role() {
             return "repository";
         }
@@ -124,6 +127,7 @@ public final class Stereotypes {
          * Роль.
          * @return Роль
          */
+        // @checkstyle NonStaticMethodCheck (3 lines)
         public String role() {
             return "controller";
         }
@@ -146,6 +150,7 @@ public final class Stereotypes {
          * Роль.
          * @return Роль
          */
+        // @checkstyle NonStaticMethodCheck (3 lines)
         public String role() {
             return "не бин";
         }

@@ -27,12 +27,39 @@ import java.lang.reflect.Proxy;
  * @since 1.0
  */
 public class AuditBeanPostProcessor implements BeanPostProcessor {
-
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
      */
     public AuditBeanPostProcessor() {
         // нечего инициализировать
+    }
+
+    @Override
+    public Object postProcessBeforeInitialization(final @NonNull Object bean, final @NonNull String beanName) throws BeansException {
+        if (bean instanceof ManagedBean || bean instanceof AuditableBean) {
+            LifecycleLog.record("4-bpp-before:" + beanName);
+        }
+        return bean;
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(final @NonNull Object bean, final @NonNull String beanName) throws BeansException {
+        if (bean instanceof ManagedBean) {
+            LifecycleLog.record("6-bpp-after:" + beanName);
+            return bean;
+        }
+        if (bean instanceof Auditable auditable) {
+            LifecycleLog.record("6-bpp-after:" + beanName);
+            // Подмена объекта: в контейнер попадёт прокси, а не оригинал
+            return Proxy.newProxyInstance(
+                    bean.getClass().getClassLoader(),
+                    new Class<?>[]{Auditable.class},
+                    (proxy, method, args) -> {
+                        final Object result = method.invoke(auditable, args);
+                        return "describe".equals(method.getName()) ? result + " (через прокси)" : result;
+                    });
+        }
+        return bean;
     }
 
     /**
@@ -64,33 +91,5 @@ public class AuditBeanPostProcessor implements BeanPostProcessor {
         public String describe() {
             return "оригинал";
         }
-    }
-
-    @Override
-    public Object postProcessBeforeInitialization(final @NonNull Object bean, final @NonNull String beanName) throws BeansException {
-        if (bean instanceof ManagedBean || bean instanceof AuditableBean) {
-            LifecycleLog.record("4-bpp-before:" + beanName);
-        }
-        return bean;
-    }
-
-    @Override
-    public Object postProcessAfterInitialization(final @NonNull Object bean, final @NonNull String beanName) throws BeansException {
-        if (bean instanceof ManagedBean) {
-            LifecycleLog.record("6-bpp-after:" + beanName);
-            return bean;
-        }
-        if (bean instanceof Auditable auditable) {
-            LifecycleLog.record("6-bpp-after:" + beanName);
-            // Подмена объекта: в контейнер попадёт прокси, а не оригинал
-            return Proxy.newProxyInstance(
-                    bean.getClass().getClassLoader(),
-                    new Class<?>[]{Auditable.class},
-                    (proxy, method, args) -> {
-                        final Object result = method.invoke(auditable, args);
-                        return "describe".equals(method.getName()) ? result + " (через прокси)" : result;
-                    });
-        }
-        return bean;
     }
 }

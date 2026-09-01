@@ -44,7 +44,7 @@ public final class ConstrainedFields {
         for (Class<?> current = this.type;
              current != null && current != Object.class;
              current = current.getSuperclass()) {
-            for (Field field : current.getDeclaredFields()) {
+            for (final Field field : current.getDeclaredFields()) {
                 if (!field.isSynthetic() && !Modifier.isStatic(field.getModifiers())) {
                     found.add(field);
                 }

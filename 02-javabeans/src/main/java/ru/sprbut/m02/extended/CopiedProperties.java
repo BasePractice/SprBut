@@ -51,7 +51,7 @@ public final class CopiedProperties {
     public List<String> list() {
         final List<String> copied = new ArrayList<>();
         final Introspected from = new Introspected(this.source.getClass());
-        for (PropertyDescriptor into : new Introspected(this.target.getClass()).descriptors()) {
+        for (final PropertyDescriptor into : new Introspected(this.target.getClass()).descriptors()) {
             if (into.getWriteMethod() == null || "class".equals(into.getName())) {
                 continue;
             }

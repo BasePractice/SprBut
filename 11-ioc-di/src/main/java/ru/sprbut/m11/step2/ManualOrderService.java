@@ -37,7 +37,6 @@ public class ManualOrderService {
     /**
      * Калькулятор.
      */
-
     private final PriceCalculator calculator;
 
     /**

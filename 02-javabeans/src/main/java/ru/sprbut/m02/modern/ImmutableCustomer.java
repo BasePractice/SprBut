@@ -28,27 +28,22 @@ public final class ImmutableCustomer {
     /**
      * Имя.
      */
-
     private final String firstName;
     /**
      * Имя.
      */
-
     private final String lastName;
     /**
      * Возраст.
      */
-
     private final int age;
     /**
      * Признак привилегированного клиента.
      */
-
     private final boolean vip;
     /**
      * Метки.
      */
-
     private final List<String> tags;
 
     private ImmutableCustomer(final Builder builder) {
@@ -161,6 +156,35 @@ public final class ImmutableCustomer {
      * @since 1.0
      */
     public static final class Builder {
+        /**
+         * Идентификатор.
+         */
+        private String id;
+
+        /**
+         * Имя.
+         */
+        private String firstName;
+
+        /**
+         * Имя.
+         */
+        private String lastName;
+
+        /**
+         * Возраст.
+         */
+        private int age;
+
+        /**
+         * Признак привилегированного клиента.
+         */
+        private boolean vip;
+
+        /**
+         * Метки.
+         */
+        private List<String> tags = List.of();
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -168,36 +192,6 @@ public final class ImmutableCustomer {
         public Builder() {
             // нечего инициализировать
         }
-
-        /**
-         * Идентификатор.
-         */
-        private String id;
-        /**
-         * Имя.
-         */
-
-        private String firstName;
-        /**
-         * Имя.
-         */
-
-        private String lastName;
-        /**
-         * Возраст.
-         */
-
-        private int age;
-        /**
-         * Признак привилегированного клиента.
-         */
-
-        private boolean vip;
-        /**
-         * Метки.
-         */
-
-        private List<String> tags = List.of();
 
         /**
          * Идентификатор.

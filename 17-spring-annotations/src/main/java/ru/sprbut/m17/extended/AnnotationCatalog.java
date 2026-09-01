@@ -71,7 +71,7 @@ public final class AnnotationCatalog {
      */
     public Map<String, Set<String>> all() {
         final Map<String, Set<String>> catalog = new LinkedHashMap<>();
-        for (Class<? extends Annotation> annotation : this.annotations) {
+        for (final Class<? extends Annotation> annotation : this.annotations) {
             catalog.put("@" + annotation.getSimpleName(), new Expanded(annotation).names());
         }
         return Map.copyOf(catalog);
@@ -83,7 +83,7 @@ public final class AnnotationCatalog {
      */
     public List<String> stereotypes() {
         final List<String> found = new ArrayList<>();
-        for (Class<? extends Annotation> annotation : this.annotations) {
+        for (final Class<? extends Annotation> annotation : this.annotations) {
             if (new Expanded(annotation).stereotype()) {
                 found.add("@" + annotation.getSimpleName());
             }

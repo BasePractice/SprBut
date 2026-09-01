@@ -37,6 +37,10 @@ import java.util.List;
  */
 @Configuration
 public class ConditionalConfig {
+    /**
+     * Порядок фактического создания бинов — заполняется конструкторами.
+     */
+    public static final List<String> CREATED = new ArrayList<>();
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -46,48 +50,30 @@ public class ConditionalConfig {
     }
 
     /**
-     * Порядок фактического создания бинов — заполняется конструкторами.
+     * Создаётся не при старте, а при первом {@code getBean}.
+     * @return Создаётся не при старте, а при первом {@code getBean}
      */
-    public static final List<String> CREATED = new ArrayList<>();
+    @Bean
+    @Lazy
+    public Marker lazyBean() {
+        return new Marker("lazyBean");
+    }
+
+    /**
+     * Инициализатор схемы.
+     * @return Инициализатор схемы
+     */
+    @Bean
+    public Marker schemaInitializer() {
+        return new Marker("schemaInitializer");
+    }
 
     /**
      * Сброс состояния.
      */
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     public static void reset() {
         CREATED.clear();
-    }
-
-    /**
-     * Значение {@code Marker}.
-     * @since 1.0
-     */
-    public static class Marker {
-        /**
-         * Основной конструктор.
-         * @param name Имя
-         */
-        public Marker(final String name) {
-            CREATED.add(name);
-        }
-    }
-
-    /**
-     * Своё условие: бин создаётся, только если задано системное свойство.
-     * @since 1.0
-     */
-    public static class OnPropertyCondition implements Condition {
-
-        /**
-         * Открытый конструктор: экземпляр создаёт контейнер.
-         */
-        public OnPropertyCondition() {
-            // нечего инициализировать
-        }
-
-        @Override
-        public boolean matches(final ConditionContext context, final AnnotatedTypeMetadata metadata) {
-            return "true".equals(context.getEnvironment().getProperty("sprbut.feature.enabled"));
-        }
     }
 
     /**
@@ -121,32 +107,47 @@ public class ConditionalConfig {
     }
 
     /**
-     * Создаётся не при старте, а при первом {@code getBean}.
-     * @return Создаётся не при старте, а при первом {@code getBean}
-     */
-    @Bean
-    @Lazy
-    public Marker lazyBean() {
-        return new Marker("lazyBean");
-    }
-
-    /**
-     * Инициализатор схемы.
-     * @return Инициализатор схемы
-     */
-    @Bean
-    public Marker schemaInitializer() {
-        return new Marker("schemaInitializer");
-    }
-
-    /**
      * Зависимости в коде нет, но порядок важен. {@code @DependsOn} — единственный
      * способ его выразить.
      * @return Зависимости в коде нет, но порядок важен. {@code @DependsOn} — единственный способ его выразить
      */
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     @Bean
     @DependsOn("schemaInitializer")
     public Marker cacheWarmer() {
         return new Marker("cacheWarmer");
+    }
+
+    /**
+     * Значение {@code Marker}.
+     * @since 1.0
+     */
+    public static class Marker {
+        /**
+         * Основной конструктор.
+         * @param name Имя
+         */
+        public Marker(final String name) {
+            CREATED.add(name);
+        }
+    }
+
+    /**
+     * Своё условие: бин создаётся, только если задано системное свойство.
+     * @since 1.0
+     */
+    public static class OnPropertyCondition implements Condition {
+
+        /**
+         * Открытый конструктор: экземпляр создаёт контейнер.
+         */
+        public OnPropertyCondition() {
+            // нечего инициализировать
+        }
+
+        @Override
+        public boolean matches(final ConditionContext context, final AnnotatedTypeMetadata metadata) {
+            return "true".equals(context.getEnvironment().getProperty("sprbut.feature.enabled"));
+        }
     }
 }

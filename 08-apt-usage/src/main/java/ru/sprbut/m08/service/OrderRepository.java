@@ -18,6 +18,10 @@ import java.util.List;
  */
 @Registered
 public class OrderRepository {
+    /**
+     * Заказы.
+     */
+    private final List<Order> orders = new ArrayList<>();
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -25,11 +29,6 @@ public class OrderRepository {
     public OrderRepository() {
         // нечего инициализировать
     }
-
-    /**
-     * Заказы.
-     */
-    private final List<Order> orders = new ArrayList<>();
 
     /**
      * Сохранение.

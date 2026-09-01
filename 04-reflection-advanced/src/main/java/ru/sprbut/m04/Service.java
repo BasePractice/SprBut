@@ -42,6 +42,7 @@ public final class Service {
      * @param label Метка
      * @param millis Значение {@code millis}
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     public void configure(final @Injected("timeout") long millis, final String label) {
         // параметры разбираются рефлексией, тело здесь роли не играет
     }

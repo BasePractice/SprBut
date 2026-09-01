@@ -54,7 +54,7 @@ final class BeanPropertiesTest {
         MatcherAssert.assertThat(
             "reader cannot be found by the property name",
             new BeanProperties(CustomerBean.class).reader("firstName").getName(),
-            org.hamcrest.Matchers.equalTo("getFirstName")
+            Matchers.equalTo("getFirstName")
         );
     }
 

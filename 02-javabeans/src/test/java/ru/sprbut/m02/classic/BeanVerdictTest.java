@@ -19,60 +19,6 @@ import ru.sprbut.m02.modern.ImmutableCustomer;
  */
 @DisplayName("Слайды 12–16: проверка соглашения JavaBeans")
 final class BeanVerdictTest {
-
-    @SuppressWarnings("unused")
-    private static final class NoDefaultCtor implements Serializable {
-
-        /**
-         * Имя.
-         * @since 1.0
-         */
-        private String name;
-
-        NoDefaultCtor(final String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return this.name;
-        }
-
-        public void setName(final String name) {
-            this.name = name;
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public static final class SetterWithoutGetter implements Serializable {
-
-        /**
-         * Секрет.
-         * @since 1.0
-         */
-        private String secret;
-
-        public void setSecret(final String secret) {
-            this.secret = secret;
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public static final class NotSerializable {
-
-        /**
-         * Имя.
-         */
-        private String name;
-
-        public String getName() {
-            return this.name;
-        }
-
-        public void setName(final String name) {
-            this.name = name;
-        }
-    }
-
     @Test
     @DisplayName("классический бин выполняет все четыре пункта соглашения")
     void acceptsClassicBean() {
@@ -141,5 +87,58 @@ final class BeanVerdictTest {
             new BeanVerdict(ImmutableCustomer.class).constructible(),
             Matchers.equalTo(false)
         );
+    }
+
+    @SuppressWarnings("unused")
+    private static final class NoDefaultCtor implements Serializable {
+
+        /**
+         * Имя.
+         * @since 1.0
+         */
+        private String name;
+
+        NoDefaultCtor(final String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static final class SetterWithoutGetter implements Serializable {
+
+        /**
+         * Секрет.
+         * @since 1.0
+         */
+        private String secret;
+
+        public void setSecret(final String secret) {
+            this.secret = secret;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static final class NotSerializable {
+
+        /**
+         * Имя.
+         */
+        private String name;
+
+        public String getName() {
+            return this.name;
+        }
+
+        public void setName(final String name) {
+            this.name = name;
+        }
     }
 }

@@ -18,14 +18,6 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public class Holder<@Comparablish T> {
-
-    /**
-     * Открытый конструктор: экземпляр создаёт контейнер.
-     */
-    public Holder() {
-        // нечего инициализировать
-    }
-
     /**
      * Аннотация стоит на самом типе поля.
      */
@@ -40,4 +32,11 @@ public class Holder<@Comparablish T> {
      * Поле без аннотаций — отрицательный контроль.
      */
     public List<String> plain;
+
+    /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    public Holder() {
+        // нечего инициализировать
+    }
 }

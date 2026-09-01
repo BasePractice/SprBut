@@ -19,6 +19,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @since 1.0
  */
 public final class Intercepted {
+    /**
+     * Значение {@code ENTRIES}.
+     */
+    private static final List<String> ENTRIES = new CopyOnWriteArrayList<>();
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -28,14 +32,10 @@ public final class Intercepted {
     }
 
     /**
-     * Значение {@code ENTRIES}.
-     */
-    private static final List<String> ENTRIES = new CopyOnWriteArrayList<>();
-
-    /**
      * Добавляет запись о перехваченном вызове.
      * @param entry Значение {@code entry}
      */
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     public static void add(final String entry) {
         ENTRIES.add(entry);
     }
@@ -43,6 +43,8 @@ public final class Intercepted {
     /**
      * Очищает журнал.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     public void clear() {
         ENTRIES.clear();
     }
@@ -51,6 +53,8 @@ public final class Intercepted {
      * Снимок журнала.
      * @return Снимок журнала
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     public List<String> entries() {
         return List.copyOf(ENTRIES);
     }

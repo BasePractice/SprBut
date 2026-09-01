@@ -17,7 +17,6 @@ package ru.sprbut.m02.classic;
  * @since 1.0
  */
 public final class PropertyKey {
-
     /**
      * Исходное значение.
      */
@@ -29,6 +28,25 @@ public final class PropertyKey {
      */
     public PropertyKey(final String raw) {
         this.raw = raw;
+    }
+
+    /**
+     * Ключ конфигурации в имя свойства: {@code first-name} и {@code first_name}
+     * одинаково становятся {@code firstName}.
+     * @return Ключ конфигурации в имя свойства: {@code first-name} и {@code first_name} одинаково становятся {@code firstName}
+     */
+    public String camelCase() {
+        if (this.raw.indexOf('-') < 0 && this.raw.indexOf('_') < 0) {
+            return this.raw;
+        }
+        final String[] parts = this.raw.split("[-_]");
+        final StringBuilder joined = new StringBuilder(parts[0]);
+        for (int index = 1; index < parts.length; index++) {
+            if (!parts[index].isEmpty()) {
+                joined.append(new PropertyKey(parts[index]).capitalized());
+            }
+        }
+        return joined.toString();
     }
 
     /**
@@ -50,24 +68,5 @@ public final class PropertyKey {
      */
     public String capitalized() {
         return Character.toUpperCase(this.raw.charAt(0)) + this.raw.substring(1);
-    }
-
-    /**
-     * Ключ конфигурации в имя свойства: {@code first-name} и {@code first_name}
-     * одинаково становятся {@code firstName}.
-     * @return Ключ конфигурации в имя свойства: {@code first-name} и {@code first_name} одинаково становятся {@code firstName}
-     */
-    public String camelCase() {
-        if (this.raw.indexOf('-') < 0 && this.raw.indexOf('_') < 0) {
-            return this.raw;
-        }
-        final String[] parts = this.raw.split("[-_]");
-        final StringBuilder joined = new StringBuilder(parts[0]);
-        for (int index = 1; index < parts.length; index++) {
-            if (!parts[index].isEmpty()) {
-                joined.append(new PropertyKey(parts[index]).capitalized());
-            }
-        }
-        return joined.toString();
     }
 }

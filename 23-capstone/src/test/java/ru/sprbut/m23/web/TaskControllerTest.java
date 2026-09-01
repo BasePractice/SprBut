@@ -52,7 +52,7 @@ final class TaskControllerTest {
     void answersCreatedOnNewTask() throws Exception {
         BDDMockito.given(this.tasks.open(ArgumentMatchers.anyString()))
             .willReturn(new Task("проверить срез", Instant.parse("2026-07-30T10:00:00Z")));
-        BDDMockito.given(this.views.view(org.mockito.ArgumentMatchers.any()))
+        BDDMockito.given(this.views.view(ArgumentMatchers.any()))
             .willReturn(TaskView.builder().id(1L).title("проверить срез").status("OPEN").build());
         this.http.perform(
                 MockMvcRequestBuilders.post("/api/tasks")

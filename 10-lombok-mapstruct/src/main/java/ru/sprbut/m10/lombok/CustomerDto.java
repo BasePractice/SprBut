@@ -31,21 +31,17 @@ public class CustomerDto {
     /**
      * Имя.
      */
-
     String fullName;
     /**
      * Возраст.
      */
-
     int age;
     /**
      * Баланс.
      */
-
     BigDecimal balance;
     /**
      * Статус.
      */
-
     String status;
 }

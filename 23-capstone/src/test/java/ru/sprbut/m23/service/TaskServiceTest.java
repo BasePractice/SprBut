@@ -6,6 +6,7 @@
 // @checkstyle NonStaticMethodCheck disable
 package ru.sprbut.m23.service;
 
+import java.lang.reflect.Proxy;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -32,21 +33,6 @@ import ru.sprbut.m23.domain.TaskStatus;
  */
 @DisplayName("Сервисный слой: полный контекст с зафиксированным временем")
 final class TaskServiceTest {
-
-    /**
-     * Часы подменяются собственным бином: {@code @ConditionalOnMissingBean}
-     * в конфигурации отступает, и время в тесте перестаёт быть случайным.
-     * @since 1.0
-     */
-    @TestConfiguration
-    static class FixedClock {
-
-        @Bean
-        Clock clock() {
-            return Clock.fixed(Instant.parse("2026-07-30T10:15:30Z"), ZoneOffset.UTC);
-        }
-    }
-
     /**
      * Задачи.
      */
@@ -142,8 +128,22 @@ final class TaskServiceTest {
     void arrivesAsJdkProxy() {
         MatcherAssert.assertThat(
             "service with an interface cannot arrive as a JDK proxy",
-            java.lang.reflect.Proxy.isProxyClass(this.tasks.getClass()),
+            Proxy.isProxyClass(this.tasks.getClass()),
             Matchers.equalTo(true)
         );
+    }
+
+    /**
+     * Часы подменяются собственным бином: {@code @ConditionalOnMissingBean}
+     * в конфигурации отступает, и время в тесте перестаёт быть случайным.
+     * @since 1.0
+     */
+    @TestConfiguration
+    static class FixedClock {
+
+        @Bean
+        Clock clock() {
+            return Clock.fixed(Instant.parse("2026-07-30T10:15:30Z"), ZoneOffset.UTC);
+        }
     }
 }

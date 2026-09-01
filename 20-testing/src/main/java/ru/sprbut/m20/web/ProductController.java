@@ -28,7 +28,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
-
     /**
      * Каталог.
      */
@@ -52,16 +51,6 @@ public class ProductController {
     }
 
     /**
-     * Единственный элемент.
-     * @param sku Артикул
-     * @return Единственный элемент
-     */
-    @GetMapping("/{sku}")
-    public ProductView one(final @PathVariable String sku) {
-        return ProductView.of(this.catalog.bySku(sku));
-    }
-
-    /**
      * Создание.
      * @param request Запрос
      * @return Создание
@@ -73,10 +62,21 @@ public class ProductController {
     }
 
     /**
+     * Единственный элемент.
+     * @param sku Артикул
+     * @return Единственный элемент
+     */
+    @GetMapping("/{sku}")
+    public ProductView one(final @PathVariable String sku) {
+        return ProductView.of(this.catalog.bySku(sku));
+    }
+
+    /**
      * Отсутствующий элемент.
      * @param e Событие
      * @return Отсутствующий элемент
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @ExceptionHandler(CatalogService.ProductNotFoundException.class)
     public ResponseEntity<String> notFound(final CatalogService.ProductNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -87,6 +87,7 @@ public class ProductController {
      * @param e Событие
      * @return Запрос
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> badRequest(final IllegalArgumentException e) {
         return ResponseEntity.badRequest().body(e.getMessage());
@@ -103,8 +104,8 @@ public class ProductController {
          * @return Источник
          */
         public static ProductView of(final Product product) {
-            return new ProductView(product.getSku(), product.getName(),
-                    product.getPrice(), product.isAvailable());
+            return new ProductView(                product.getSku(), product.getName(), product.getPrice(), product.isAvailable()
+);
         }
     }
 

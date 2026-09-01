@@ -22,34 +22,6 @@ import ru.sprbut.m01.extended.JsonProperty;
  */
 @DisplayName("Слайд 9: чтение аннотаций через рефлексию")
 final class AnnotationsTest {
-
-    @Retention(RetentionPolicy.SOURCE)
-    @Target(ElementType.FIELD)
-    private @interface SourceOnly {
-    }
-
-    @SuppressWarnings("unused")
-    private static final class Sample {
-
-        /**
-         * Идентификатор.
-         */
-        @JsonProperty("account_id")
-        @JsonIgnore
-        String id;
-
-        /**
-         * Обычный вариант.
-         */
-        String plain;
-
-        /**
-         * Невидимый элемент.
-         */
-        @SourceOnly
-        String invisible;
-    }
-
     @Test
     @DisplayName("isAnnotationPresent проверяет наличие аннотации")
     void detectsPresentAnnotation() {
@@ -111,5 +83,31 @@ final class AnnotationsTest {
             new Annotations(JsonProperty.class).has(Retention.class),
             Matchers.equalTo(true)
         );
+    }
+
+    @Retention(RetentionPolicy.SOURCE)
+    @Target(ElementType.FIELD)
+    private @interface SourceOnly {
+    }
+
+    @SuppressWarnings("unused")
+    private static final class Sample {
+        /**
+         * Обычный вариант.
+         */
+        String plain;
+
+        /**
+         * Невидимый элемент.
+         */
+        @SourceOnly
+        String invisible;
+
+        /**
+         * Идентификатор.
+         */
+        @JsonProperty("account_id")
+        @JsonIgnore
+        String id;
     }
 }

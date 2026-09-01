@@ -82,7 +82,7 @@ public final class MergedAnnotation<A extends Annotation> {
     Optional<Merged> search(final Annotation[] roots) {
         final Deque<Step> queue = new ArrayDeque<>();
         final Set<Class<? extends Annotation>> visited = new HashSet<>();
-        for (Annotation each : roots) {
+        for (final Annotation each : roots) {
             if (!new Builtin(each.annotationType()).yes()) {
                 queue.add(new Step(each, List.of()));
             }
@@ -98,7 +98,7 @@ public final class MergedAnnotation<A extends Annotation> {
             if (type.equals(this.target)) {
                 return Optional.of(this.merged(path));
             }
-            for (Annotation meta : type.getAnnotations()) {
+            for (final Annotation meta : type.getAnnotations()) {
                 if (!new Builtin(meta.annotationType()).yes()) {
                     queue.add(new Step(meta, path));
                 }
@@ -139,7 +139,7 @@ public final class MergedAnnotation<A extends Annotation> {
      */
     private void override(final Annotation source, final Map<String, Object> attributes) {
         final RawAttributes raw = new RawAttributes(source);
-        for (Method element : source.annotationType().getDeclaredMethods()) {
+        for (final Method element : source.annotationType().getDeclaredMethods()) {
             final Object value = raw.value(element);
             final AliasFor alias = element.getAnnotation(AliasFor.class);
             if (alias != null && alias.annotation().equals(this.target)) {

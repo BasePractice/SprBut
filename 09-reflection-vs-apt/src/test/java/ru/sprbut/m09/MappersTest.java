@@ -18,11 +18,6 @@ import ru.sprbut.m09.model.UserEntity;
  */
 @DisplayName("Слайды 73–75: три механизма, один результат")
 final class MappersTest {
-
-    private static UserEntity entity() {
-        return new UserEntity("U-1", "Иван", "Иванов", 42, true);
-    }
-
     @Test
     @DisplayName("рефлексия выводит правила маппинга из метаданных, а не из кода")
     void discoversRulesItself() {
@@ -154,5 +149,9 @@ final class MappersTest {
             dto.isActive(),
             Matchers.equalTo(true)
         );
+    }
+
+    private static UserEntity entity() {
+        return new UserEntity("U-1", "Иван", "Иванов", 42, true);
     }
 }

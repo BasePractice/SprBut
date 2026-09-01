@@ -6,6 +6,7 @@
 package ru.sprbut.m01.extended;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.hamcrest.MatcherAssert;
@@ -19,89 +20,6 @@ import org.junit.jupiter.api.Test;
  */
 @DisplayName("Расширенный пример: JSON-сериализатор целиком на рефлексии")
 final class JsonTest {
-
-    /**
-     * Значение {@code BLOCKED}.
-     * @since 1.0
-     */
-    private enum Status { ACTIVE, BLOCKED }
-
-    @SuppressWarnings("unused")
-    private static class Base {
-
-        /**
-         * Поле.
-         * @since 1.0
-         */
-        private final String baseField = "база";
-    }
-
-    @SuppressWarnings("unused")
-    private static final class Customer extends Base {
-
-        /**
-         * Значение {@code CONST}.
-         */
-        static final String CONST = "не сериализуется";
-
-        /**
-         * Идентификатор.
-         */
-        @JsonProperty("customer_id")
-        private final String id = "C-1";
-
-        /**
-         * Имя.
-         */
-        private final String name = "Пётр";
-
-        /**
-         * Возраст.
-         */
-        private final int age = 30;
-
-        /**
-         * Признак активности.
-         */
-        private final boolean active = true;
-
-        /**
-         * Статус.
-         */
-        private final Status status = Status.ACTIVE;
-
-        /**
-         * Метки.
-         */
-        private final List<String> tags = List.of("vip", "new");
-
-        /**
-         * Значение {@code scores}.
-         */
-        private final int[] scores = {5, 7};
-
-        /**
-         * Значение {@code extra}.
-         */
-        private final Map<String, String> extra = Map.of("city", "Москва");
-
-        /**
-         * Значение {@code comment}.
-         */
-        private final String comment = null;
-
-        /**
-         * Секрет.
-         */
-        @JsonIgnore
-        private final String secret = "пароль";
-
-        /**
-         * Значение {@code cache}.
-         */
-        private transient String cache = "временное";
-    }
-
     @Test
     @DisplayName("static, transient и @JsonIgnore из выборки отбрасываются")
     void skipsExcludedFields() {
@@ -140,7 +58,7 @@ final class JsonTest {
         MatcherAssert.assertThat(
             "annotation cannot rename the JSON key",
             new PropertyName(
-                java.util.Arrays.stream(Customer.class.getDeclaredFields())
+                Arrays.stream(Customer.class.getDeclaredFields())
                     .filter(field -> "id".equals(field.getName()))
                     .findFirst()
                     .orElseThrow()
@@ -155,7 +73,7 @@ final class JsonTest {
         MatcherAssert.assertThat(
             "plain field cannot keep its own name as the key",
             new PropertyName(
-                java.util.Arrays.stream(Customer.class.getDeclaredFields())
+                Arrays.stream(Customer.class.getDeclaredFields())
                     .filter(field -> "name".equals(field.getName()))
                     .findFirst()
                     .orElseThrow()
@@ -265,9 +183,90 @@ final class JsonTest {
     void writesEmptyObject() {
         MatcherAssert.assertThat(
             "field free object cannot yield an empty JSON object",
-            new Json(new Object() {
-            }).text(),
+            new Json(                new Object() { }
+).text(),
             Matchers.equalTo("{}")
         );
+    }
+
+    /**
+     * Значение {@code BLOCKED}.
+     * @since 1.0
+     */
+    private enum Status { ACTIVE, BLOCKED }
+
+    @SuppressWarnings("unused")
+    private static class Base {
+
+        /**
+         * Поле.
+         * @since 1.0
+         */
+        private final String baseField = "база";
+    }
+
+    @SuppressWarnings("unused")
+    private static final class Customer extends Base {
+        /**
+         * Значение {@code CONST}.
+         */
+        static final String CONST = "не сериализуется";
+
+        /**
+         * Имя.
+         */
+        private final String name = "Пётр";
+
+        /**
+         * Возраст.
+         */
+        private final int age = 30;
+
+        /**
+         * Признак активности.
+         */
+        private final boolean active = true;
+
+        /**
+         * Статус.
+         */
+        private final Status status = Status.ACTIVE;
+
+        /**
+         * Метки.
+         */
+        private final List<String> tags = List.of("vip", "new");
+
+        /**
+         * Значение {@code scores}.
+         */
+        private final int[] scores = {5, 7};
+
+        /**
+         * Значение {@code extra}.
+         */
+        private final Map<String, String> extra = Map.of("city", "Москва");
+
+        /**
+         * Значение {@code comment}.
+         */
+        private final String comment = null;
+
+        /**
+         * Секрет.
+         */
+        @JsonIgnore
+        private final String secret = "пароль";
+
+        /**
+         * Значение {@code cache}.
+         */
+        private transient String cache = "временное";
+
+        /**
+         * Идентификатор.
+         */
+        @JsonProperty("customer_id")
+        private final String id = "C-1";
     }
 }

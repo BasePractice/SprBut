@@ -60,6 +60,7 @@ public final class TargetMethod {
      * а не на каждом вызове, как у {@code Method.invoke}.
      * @return Хэндл для быстрого вызова: доступ проверяется один раз, при создании, а не на каждом вызове, как у {@code Method.invoke}
      */
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     public MethodHandle handle() {
         try {
             final Method implementation = this.method();
@@ -67,7 +68,7 @@ public final class TargetMethod {
             return MethodHandles.lookup().unreflect(implementation);
         } catch (final ReflectiveOperationException denied) {
             throw new IllegalStateException(
-                "Не удалось получить хэндл для " + this.declared.getName(), denied
+                String.format("Не удалось получить хэндл для %s", this.declared.getName(), denied)
             );
         }
     }

@@ -72,7 +72,7 @@ public final class HierarchySearch<A extends Annotation> {
                 return found;
             }
         }
-        for (Class<?> contract : this.type.getInterfaces()) {
+        for (final Class<?> contract : this.type.getInterfaces()) {
             final Optional<A> found = this.declaredOn(contract, method, parameters);
             if (found.isPresent()) {
                 return found;

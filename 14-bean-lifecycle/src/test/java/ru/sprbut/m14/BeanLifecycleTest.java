@@ -17,14 +17,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
  */
 @DisplayName("Слайд 118 (СХЕМА 7): восемь шагов жизненного цикла бина")
 final class BeanLifecycleTest {
-
-    private static LifecycleLog started() {
-        final LifecycleLog log = new LifecycleLog();
-        log.clear();
-        new AnnotationConfigApplicationContext(LifecycleConfig.class).close();
-        return log;
-    }
-
     @Test
     @DisplayName("шаги проходятся в порядке, объявленном контрактом контейнера")
     void keepsDeclaredOrder() {
@@ -142,5 +134,12 @@ final class BeanLifecycleTest {
             started().of("prototypeWithDestroy").contains("8a-preDestroy:prototypeWithDestroy"),
             Matchers.equalTo(false)
         );
+    }
+
+    private static LifecycleLog started() {
+        final LifecycleLog log = new LifecycleLog();
+        log.clear();
+        new AnnotationConfigApplicationContext(LifecycleConfig.class).close();
+        return log;
     }
 }

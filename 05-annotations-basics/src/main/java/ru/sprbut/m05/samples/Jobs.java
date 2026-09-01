@@ -29,31 +29,39 @@ public class Jobs {
     /**
      * Без расписания вовсе.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     public void notScheduled() {
+        // тело намеренно пустое
     }
 
     /**
      * Одно вхождение — в байткоде лежит сама аннотация.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @Schedule(cron = "0 0 * * * *")
     public void hourly() {
+        // тело намеренно пустое
     }
 
     /**
      * Два вхождения — в байткоде остаётся только контейнер.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @Schedule(cron = "0 0 3 * * *", zone = "Europe/Moscow")
     @Schedule(cron = "0 0 15 * * *", zone = "Europe/Moscow")
     public void twiceADay() {
+        // тело намеренно пустое
     }
 
     /**
      * Контейнер можно указать и вручную — результат тот же.
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     @Schedules({
         @Schedule(cron = "0 */5 * * * *"),
         @Schedule(cron = "0 */10 * * * *")
     })
     public void explicitContainer() {
+        // тело намеренно пустое
     }
 }

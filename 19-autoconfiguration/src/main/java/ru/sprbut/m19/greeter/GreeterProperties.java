@@ -21,14 +21,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @ConfigurationProperties(prefix = "sprbut.greeter")
 public class GreeterProperties {
-
-    /**
-     * Открытый конструктор: экземпляр создаёт контейнер.
-     */
-    public GreeterProperties() {
-        // нечего инициализировать
-    }
-
     /**
      * Шаблон приветствия; {@code {name}} подставляется.
      */
@@ -43,6 +35,13 @@ public class GreeterProperties {
      * Включён ли стартер вообще.
      */
     private boolean enabled = true;
+
+    /**
+     * Открытый конструктор: экземпляр создаёт контейнер.
+     */
+    public GreeterProperties() {
+        // нечего инициализировать
+    }
 
     /**
      * Значение: шаблон.

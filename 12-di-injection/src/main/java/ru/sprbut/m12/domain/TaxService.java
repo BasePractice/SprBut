@@ -29,6 +29,7 @@ public class TaxService {
      * @param net Сумма без налога
      * @return Начисление НДС
      */
+    // @checkstyle NonStaticMethodCheck (3 lines)
     public BigDecimal applyVat(final BigDecimal net) {
         return net.multiply(new BigDecimal("1.20")).setScale(2, RoundingMode.HALF_UP);
     }

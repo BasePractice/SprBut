@@ -27,6 +27,16 @@ import java.math.BigDecimal;
  * @since 1.0
  */
 public class HardcodedOrderService {
+    // Зависимости создаются внутри. Снаружи на них никак не повлиять.
+    /**
+     * Отправитель.
+     */
+    private final EmailSender sender = new EmailSender();
+
+    /**
+     * Калькулятор.
+     */
+    private final PriceCalculator calculator = new PriceCalculator(new BigDecimal("0.20"));
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -34,17 +44,6 @@ public class HardcodedOrderService {
     public HardcodedOrderService() {
         // нечего инициализировать
     }
-
-    // Зависимости создаются внутри. Снаружи на них никак не повлиять.
-    /**
-     * Отправитель.
-     */
-    private final EmailSender sender = new EmailSender();
-    /**
-     * Калькулятор.
-     */
-
-    private final PriceCalculator calculator = new PriceCalculator(new BigDecimal("0.20"));
 
     /**
      * Порядок.

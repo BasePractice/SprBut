@@ -38,18 +38,18 @@ import java.util.List;
  * @since 1.0
  */
 public final class TransactionalDemo {
-
-    private TransactionalDemo() {
-    }
-
     /**
      * Журнал операций менеджера транзакций.
      */
     public static final List<String> LOG = new ArrayList<>();
 
+    private TransactionalDemo() {
+    }
+
     /**
      * Сброс состояния.
      */
+    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     public static void reset() {
         LOG.clear();
     }
@@ -91,7 +91,6 @@ public final class TransactionalDemo {
      */
     @Service
     public static class OrderService {
-
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
          */
@@ -129,15 +128,6 @@ public final class TransactionalDemo {
         }
 
         /**
-         * Явное указание откатываться и на checked-исключениях.
-         */
-        @Transactional(rollbackFor = Exception.class)
-        public void failCheckedWithRollback() throws Exception {
-            LOG.add("work");
-            throw new Exception("проверяемое исключение");
-        }
-
-        /**
          * Метод без аннотации — транзакции не будет.
          * @param order Порядок
          * @return Метод без аннотации — транзакции не будет
@@ -154,6 +144,15 @@ public final class TransactionalDemo {
          */
         public String saveViaThis(final String order) {
             return this.save(order);
+        }
+
+        /**
+         * Явное указание откатываться и на checked-исключениях.
+         */
+        @Transactional(rollbackFor = Exception.class)
+        public void failCheckedWithRollback() throws Exception {
+            LOG.add("work");
+            throw new Exception("проверяемое исключение");
         }
     }
 
