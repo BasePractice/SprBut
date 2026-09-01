@@ -82,11 +82,13 @@ final class StartupSequenceTest {
 
     @Test
     @DisplayName("неудачный запуск даёт ApplicationFailedEvent вместо Ready")
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     void reportsFailureInsteadOfReady() {
         final StartupLog log = new StartupLog();
         log.clear();
         try {
             StartupApp.runFailing();
+        // @checkstyle IllegalCatchCheck (3 lines)
         } catch (final RuntimeException expected) {
             MatcherAssert.assertThat(
                 "failed startup cannot publish the failure event",

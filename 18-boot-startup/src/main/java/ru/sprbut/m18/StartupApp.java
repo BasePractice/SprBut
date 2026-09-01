@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// класс приложения обязан быть инстанцируемым: контейнер видит в нём
+// конфигурацию, а не утилиту с одним main
+// @checkstyle HideUtilityClassConstructorCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m18;
 
@@ -46,38 +49,35 @@ public class StartupApp {
      * {@code ApplicationEnvironmentPreparedEvent} нельзя объявить бинами:
      * контекста в этот момент ещё не существует. Их регистрируют либо здесь,
      * либо в {@code META-INF/spring.factories}.</p>
+     *
      * @param args Аргументы
      * @return Запуск с ручной регистрацией ранних слушателей
      */
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
     public static ConfigurableApplicationContext run(final String... args) {
         final SpringApplication application = new SpringApplication(StartupApp.class);
-        application.setBannerMode(
-            Banner.Mode.OFF
-        );
+        application.setBannerMode(Banner.Mode.OFF);
         application.addListeners(
-                new StartupListeners.Starting(),
-                new StartupListeners.EnvironmentPrepared(),
-                new StartupListeners.ContextInitialized(),
-                new StartupListeners.Prepared(),
-                new StartupListeners.Refreshed(),
-                new StartupListeners.Started(),
-                new StartupListeners.Ready(),
-                new StartupListeners.Failed());
+            new StartupListeners.Starting(),
+            new StartupListeners.EnvironmentPrepared(),
+            new StartupListeners.ContextInitialized(),
+            new StartupListeners.Prepared(),
+            new StartupListeners.Refreshed(),
+            new StartupListeners.Started(),
+            new StartupListeners.Ready(),
+            new StartupListeners.Failed()
+        );
         application.addInitializers(new StartupHooks.MarkerInitializer());
         return application.run(args);
     }
 
     /**
-     * Вариант запуска, который падает на создании бина — чтобы увидеть ApplicationFailedEvent.
+     * Вариант запуска, который падает на создании бина.
      * @param args Аргументы
      */
-    public static void runFailing(
-        final String... args
-    ) {
-        final SpringApplication application =
-                new SpringApplication(
-                    FailingConfig.class
-                );
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
+    public static void runFailing(final String... args) {
+        final SpringApplication application = new SpringApplication(FailingConfig.class);
         application.setBannerMode(Banner.Mode.OFF);
         application.addListeners(new StartupListeners.Ready(), new StartupListeners.Failed());
         application.run(args);

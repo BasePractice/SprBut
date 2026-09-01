@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// журнал общий для всех этапов запуска: только так виден их порядок
+// @checkstyle NonStaticMethodCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m18;
 
@@ -19,17 +21,17 @@ import java.util.List;
  *
  * @since 1.0
  */
+@SuppressWarnings({"PMD.ProhibitPublicStaticMethods", "PMD.AvoidSynchronizedStatement"})
 public final class StartupLog {
 
     /**
-     * Значение {@code EVENTS}.
+     * Записанные этапы запуска.
      */
     private static final List<String> EVENTS = new ArrayList<>(0);
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
      */
-    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     public StartupLog() {
         // нечего инициализировать
     }
@@ -38,45 +40,46 @@ public final class StartupLog {
      * Записывает этап запуска.
      * @param event Событие
      */
-    public static synchronized void record(final String event) {
-
-        EVENTS.add(event);
+    public static void record(final String event) {
+        synchronized (StartupLog.EVENTS) {
+            StartupLog.EVENTS.add(event);
+        }
     }
 
     /**
      * Все записанные этапы по порядку.
      * @return Все записанные этапы по порядку
-     // @checkstyle NonStaticMethodCheck (3 lines)
      */
-    public synchronized List<String> events() {
-        return List.copyOf(EVENTS);
+    public List<String> events() {
+        synchronized (StartupLog.EVENTS) {
+            return List.copyOf(StartupLog.EVENTS);
+        }
     }
 
     /**
      * Очищает журнал перед новым прогоном.
-     // @checkstyle NonStaticMethodCheck (3 lines)
      */
-    public synchronized void clear() {
-        EVENTS.clear();
+    public void clear() {
+        synchronized (StartupLog.EVENTS) {
+            StartupLog.EVENTS.clear();
+        }
     }
 
     /**
      * Порядковый номер этапа — по нему проверяется относительный порядок.
      * @param event Событие
-     * @return Порядковый номер этапа — по нему проверяется относительный порядок
-     // @checkstyle NonStaticMethodCheck (3 lines)
+     * @return Порядковый номер этапа
      */
-    public synchronized int indexOf(final String event) {
-        return EVENTS.indexOf(event);
+    public int indexOf(final String event) {
+        return this.events().indexOf(event);
     }
 
     /**
      * Случился ли этап вообще.
      * @param event Событие
      * @return Случился ли этап вообще
-     // @checkstyle NonStaticMethodCheck (3 lines)
      */
-    public synchronized boolean has(final String event) {
-        return EVENTS.contains(event);
+    public boolean has(final String event) {
+        return this.events().contains(event);
     }
 }

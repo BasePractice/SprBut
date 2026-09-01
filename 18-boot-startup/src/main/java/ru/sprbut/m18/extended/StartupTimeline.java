@@ -6,17 +6,17 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m18.extended;
 
-import ru.sprbut.m18.StartupLog;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import ru.sprbut.m18.StartupLog;
 
 /**
  * <b>Расширенный пример модуля 18.</b>
  *
  * <p>Восстановление последовательности запуска — прямая реализация СХЕМЫ 11
- * (слайд 172, «sequence-диаграмма: run() → события → ApplicationReadyEvent»).</p>
+ * (слайд 172, «sequence-диаграмма: run() ведёт к события ведёт к ApplicationReadyEvent»).</p>
  *
  * <p>Главная практическая ценность — {@link #whereToHook}: справочник «что уже
  * готово в каждой точке». Без него выбор места для своего кода превращается
@@ -48,52 +48,53 @@ public final class StartupTimeline {
     }
 
     /**
-     * Канонический порядок точек расширения при запуске: что уже готово и что здесь принято делать.
-     * @return Канонический порядок точек расширения при запуске: что уже готово и что здесь принято делать
+     * Канонический порядок точек расширения при запуске.
+     * @return Канонический порядок точек расширения
+     * @checkstyle NonStaticMethodCheck (4 lines)
      */
-    // @checkstyle NonStaticMethodCheck (3 lines)
     public List<HookPoint> whereToHook() {
         return List.of(
-                new HookPoint(
-                    1, "ApplicationStartingEvent", "ничего: ни Environment, ни контекста",
-                    "инициализация логирования"
-                ),
-                new HookPoint(
-                    2, "ApplicationEnvironmentPreparedEvent", "Environment собран, контекста нет",
-                    "добавить свой источник настроек, включить профиль"
-                ),
-                new HookPoint(
-                    3, "ApplicationContextInitializer", "контекст создан, но пуст",
-                    "программная настройка контекста до загрузки бинов"
-                ),
-                new HookPoint(
-                    4, "ApplicationContextInitializedEvent",
-                    "инициализаторы отработали, определений бинов ещё нет", "ранняя диагностика"
-                ),
-                new HookPoint(
-                    5, "ApplicationPreparedEvent", "определения бинов загружены, объектов нет",
-                    "последний момент правки BeanDefinition"
-                ),
-                new HookPoint(
-                    6, "BeanFactoryPostProcessor", "все определения бинов на руках",
-                    "переопределить или добавить определение бина"
-                ),
-                new HookPoint(
-                    7, "ContextRefreshedEvent", "все синглтоны созданы, контекст поднят",
-                    "проверки целостности, прогрев кэшей"
-                ),
-                new HookPoint(
-                    8, "ApplicationStartedEvent", "контекст поднят, раннеры ещё не выполнялись",
-                    "метрики времени старта"
-                ),
-                new HookPoint(
-                    9, "ApplicationRunner / CommandLineRunner", "приложение работоспособно",
-                    "разовые задачи при старте, миграции, загрузка справочников"
-                ),
-                new HookPoint(
-                    10, "ApplicationReadyEvent", "готово всё, включая раннеры",
-                    "сообщить, что приложение принимает нагрузку"
-                ));
+            new HookPoint(
+                1, "ApplicationStartingEvent", "ничего: ни Environment, ни контекста",
+                "инициализация логирования"
+            ),
+            new HookPoint(
+                2, "ApplicationEnvironmentPreparedEvent", "Environment собран, контекста нет",
+                "добавить свой источник настроек, включить профиль"
+            ),
+            new HookPoint(
+                3, "ApplicationContextInitializer", "контекст создан, но пуст",
+                "программная настройка контекста до загрузки бинов"
+            ),
+            new HookPoint(
+                4, "ApplicationContextInitializedEvent",
+                "инициализаторы отработали, определений бинов ещё нет", "ранняя диагностика"
+            ),
+            new HookPoint(
+                5, "ApplicationPreparedEvent", "определения бинов загружены, объектов нет",
+                "последний момент правки BeanDefinition"
+            ),
+            new HookPoint(
+                6, "BeanFactoryPostProcessor", "все определения бинов на руках",
+                "переопределить или добавить определение бина"
+            ),
+            new HookPoint(
+                7, "ContextRefreshedEvent", "все синглтоны созданы, контекст поднят",
+                "проверки целостности, прогрев кэшей"
+            ),
+            new HookPoint(
+                8, "ApplicationStartedEvent", "контекст поднят, раннеры ещё не выполнялись",
+                "метрики времени старта"
+            ),
+            new HookPoint(
+                9, "ApplicationRunner / CommandLineRunner", "приложение работоспособно",
+                "разовые задачи при старте, миграции, загрузка справочников"
+            ),
+            new HookPoint(
+                10, "ApplicationReadyEvent", "готово всё, включая раннеры",
+                "сообщить, что приложение принимает нагрузку"
+            )
+        );
     }
 
     /**
@@ -102,7 +103,9 @@ public final class StartupTimeline {
      * @return Перехватчик
      */
     public Optional<HookPoint> hook(final String name) {
-        return this.whereToHook().stream().filter(point -> point.name().startsWith(name)).findFirst();
+        return this.whereToHook().stream()
+            .filter(point -> point.name().startsWith(name))
+            .findFirst();
     }
 
     /**
@@ -111,11 +114,9 @@ public final class StartupTimeline {
      */
     public List<String> actualSequence() {
         return this.log.events().stream()
-                .map(
-                    this::phaseOf
-                )
-                .distinct()
-                .toList();
+            .map(StartupTimeline::phaseOf)
+            .distinct()
+            .toList();
     }
 
     /**
@@ -124,39 +125,41 @@ public final class StartupTimeline {
      */
     public List<Integer> actualOrder() {
         return this.log.events().stream()
-                .map(
-                    this::orderOf
-                )
-                .filter(order -> order > 0)
+            .map(StartupTimeline::orderOf)
+            .filter(order -> order > 0)
                 .distinct()
                 .toList();
     }
 
     /**
      * Не нарушен ли порядок: номера шагов должны только возрастать.
-     * @return Не нарушен ли порядок: номера шагов должны только возрастать
+     * @return Признак того, что порядок шагов не нарушен
      */
     public boolean isOrdered() {
         final List<Integer> order = this.actualOrder();
-        for (int i = 1; i < order.size(); i++) {
-            if (order.get(i) < order.get(i - 1)) {
-                return false;
+        boolean sorted = true;
+        for (int index = 1; index < order.size(); index += 1) {
+            if (order.get(index) < order.get(index - 1)) {
+                sorted = false;
+                break;
             }
         }
-        return true;
+        return sorted;
     }
 
     /**
      * Наглядная диаграмма — то, что стоит распечатать при разборе старта.
-     * @return Наглядная диаграмма — то, что стоит распечатать при разборе старта
+     * @return Наглядная диаграмма запуска
      */
     public String render() {
-        final StringBuilder sb = new StringBuilder("SpringApplication.run()\n");
+        final StringBuilder text = new StringBuilder(120).append(
+            String.format("SpringApplication.run()%n")
+        );
         for (final String event : this.log.events()) {
-            sb.append("  │ ").append(event).append('\n');
+            text.append("  | ").append(event).append(String.format("%n"));
         }
-        sb.append("  ▼ приложение готово");
-        return sb.toString();
+        text.append("  v приложение готово");
+        return text.toString();
     }
 
     /**
@@ -165,30 +168,40 @@ public final class StartupTimeline {
      */
     public Map<String, Long> counts() {
         final Map<String, Long> counts = new LinkedHashMap<>();
-        this.log.events().forEach(event -> counts.merge(this.phaseOf(event), 1L, Long::sum));
+        this.log.events()
+            .forEach(event -> counts.merge(StartupTimeline.phaseOf(event), 1L, Long::sum));
         return counts;
     }
 
-    // @checkstyle NonStaticMethodCheck (3 lines)
-    private String phaseOf(final String event) {
+    private static String phaseOf(final String event) {
         final int dash = event.indexOf('-');
-        final String tail = dash < 0 ? event : event.substring(dash + 1);
+        final String tail;
+        if (dash < 0) {
+            tail = event;
+        } else {
+            tail = event.substring(dash + 1);
+        }
         final int colon = tail.indexOf(':');
-        return colon < 0 ? tail : tail.substring(0, colon);
+        final String phase;
+        if (colon < 0) {
+            phase = tail;
+        } else {
+            phase = tail.substring(0, colon);
+        }
+        return phase;
     }
 
-    /**
-     * Номер шага — <b>все</b> ведущие цифры, а не первая.
-     * Иначе «10-ApplicationReadyEvent» превратился бы в шаг 1 и встал в начало.
-     * @param event Событие
-     * @return Номер шага — <b>все</b> ведущие цифры, а не первая
-     */
-    // @checkstyle NonStaticMethodCheck (3 lines)
-    private int orderOf(final String event) {
+    private static int orderOf(final String event) {
         int end = 0;
         while (end < event.length() && Character.isDigit(event.charAt(end))) {
-            end++;
+            end += 1;
         }
-        return end == 0 ? -1 : Integer.parseInt(event.substring(0, end));
+        final int order;
+        if (end == 0) {
+            order = -1;
+        } else {
+            order = Integer.parseInt(event.substring(0, end));
+        }
+        return order;
     }
 }

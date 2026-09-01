@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
+// слушатели и хуки собраны в одном файле по этапам запуска — так виден
+// их порядок, ради которого модуль и написан
+// @checkstyle ProhibitStaticNestedClassesCheck disable
 package ru.sprbut.m18;
 
 import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
@@ -17,7 +21,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.lang.NonNull;
 
 /**
- * Слайды 158–172 (СХЕМА 11): «run() → события → ApplicationReadyEvent».
+ * Слайды 158–172 (СХЕМА 11): «run() ведёт к события ведёт к ApplicationReadyEvent».
  *
  * <p>Событий много, и различаются они тем, <b>что к этому моменту уже готово</b>.
  * Это и есть ответ на вопрос «куда вешать свой код»:
@@ -42,14 +46,27 @@ import org.springframework.lang.NonNull;
  */
 public final class StartupListeners {
 
-    private StartupListeners() {
+    /**
+     * Открытый конструктор: класс существует ради вложенных слушателей.
+     */
+    public StartupListeners() {
+        // состояния у набора нет
+    }
+
+    /**
+     * Имя набора слушателей — точка входа, чтобы класс не остался без методов.
+     * @return Название набора
+     * @checkstyle NonStaticMethodCheck (4 lines)
+     */
+    public String name() {
+        return "startup-listeners";
     }
 
     /**
      * Самое раннее событие: нет ни Environment, ни контекста.
      * @since 1.0
      */
-    public static class Starting implements ApplicationListener<ApplicationStartingEvent> {
+    public static final class Starting implements ApplicationListener<ApplicationStartingEvent> {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -68,8 +85,8 @@ public final class StartupListeners {
      * Environment готов — можно добавить свой источник настроек.
      * @since 1.0
      */
-    public static class EnvironmentPrepared
-            implements ApplicationListener<ApplicationEnvironmentPreparedEvent> {
+    public static final class EnvironmentPrepared
+        implements ApplicationListener<ApplicationEnvironmentPreparedEvent> {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -80,13 +97,13 @@ public final class StartupListeners {
 
         @Override
         public void onApplicationEvent(final @NonNull ApplicationEnvironmentPreparedEvent event) {
+            StartupLog.record("2-ApplicationEnvironmentPreparedEvent");
             StartupLog.record(
-                "2-ApplicationEnvironmentPreparedEvent"
+                String.format(
+                    "2-env-has-property:%s",
+                    event.getEnvironment().containsProperty("sprbut.startup.marker")
+                )
             );
-            StartupLog.record("2-env-has-property:"
-                    + event.getEnvironment().containsProperty(
-                        "sprbut.startup.marker"
-                    ));
         }
     }
 
@@ -94,8 +111,8 @@ public final class StartupListeners {
      * Контекст создан, инициализаторы отработали, бинов ещё нет.
      * @since 1.0
      */
-    public static class ContextInitialized
-            implements ApplicationListener<ApplicationContextInitializedEvent> {
+    public static final class ContextInitialized
+        implements ApplicationListener<ApplicationContextInitializedEvent> {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -114,7 +131,7 @@ public final class StartupListeners {
      * Определения бинов загружены — последний шанс их изменить.
      * @since 1.0
      */
-    public static class Prepared implements ApplicationListener<ApplicationPreparedEvent> {
+    public static final class Prepared implements ApplicationListener<ApplicationPreparedEvent> {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -133,7 +150,7 @@ public final class StartupListeners {
      * refresh() завершён: все синглтоны созданы.
      * @since 1.0
      */
-    public static class Refreshed implements ApplicationListener<ContextRefreshedEvent> {
+    public static final class Refreshed implements ApplicationListener<ContextRefreshedEvent> {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -152,7 +169,7 @@ public final class StartupListeners {
      * Контекст поднят, но раннеры ещё не выполнялись.
      * @since 1.0
      */
-    public static class Started implements ApplicationListener<ApplicationStartedEvent> {
+    public static final class Started implements ApplicationListener<ApplicationStartedEvent> {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -171,7 +188,7 @@ public final class StartupListeners {
      * Всё готово, включая раннеры. Финал последовательности.
      * @since 1.0
      */
-    public static class Ready implements ApplicationListener<ApplicationReadyEvent> {
+    public static final class Ready implements ApplicationListener<ApplicationReadyEvent> {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -190,7 +207,7 @@ public final class StartupListeners {
      * Запуск не удался — единственное событие, которое отменяет остальные.
      * @since 1.0
      */
-    public static class Failed implements ApplicationListener<ApplicationFailedEvent> {
+    public static final class Failed implements ApplicationListener<ApplicationFailedEvent> {
 
         /**
          * Открытый конструктор: экземпляр создаёт контейнер.
@@ -200,11 +217,12 @@ public final class StartupListeners {
         }
 
         @Override
-        public void onApplicationEvent(
-            final @NonNull ApplicationFailedEvent event
-        ) {
+        public void onApplicationEvent(final @NonNull ApplicationFailedEvent event) {
             StartupLog.record(
-                "x-ApplicationFailedEvent:" + event.getException().getClass().getSimpleName()
+                String.format(
+                    "x-ApplicationFailedEvent:%s",
+                    event.getException().getClass().getSimpleName()
+                )
             );
         }
     }

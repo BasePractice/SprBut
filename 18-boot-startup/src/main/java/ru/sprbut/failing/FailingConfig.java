@@ -4,7 +4,6 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
-// @checkstyle NonStaticMethodCheck disable
 package ru.sprbut.failing;
 
 import org.springframework.context.annotation.Bean;
