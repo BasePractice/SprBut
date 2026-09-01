@@ -2,6 +2,7 @@ package ru.sprbut.m14;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.lang.NonNull;
 
 import java.lang.reflect.Proxy;
 
@@ -35,7 +36,7 @@ public class AuditBeanPostProcessor implements BeanPostProcessor {
     }
 
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessBeforeInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
         if (bean instanceof ManagedBean || bean instanceof AuditableBean) {
             LifecycleLog.record("4-bpp-before:" + beanName);
         }
@@ -43,7 +44,7 @@ public class AuditBeanPostProcessor implements BeanPostProcessor {
     }
 
     @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
         if (bean instanceof ManagedBean) {
             LifecycleLog.record("6-bpp-after:" + beanName);
             return bean;

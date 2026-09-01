@@ -10,6 +10,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.lang.NonNull;
 
 /**
  * Бин, реализующий <b>все</b> точки расширения жизненного цикла сразу —
@@ -46,19 +47,19 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
 
     /** Шаг 3: *Aware-интерфейсы. Контейнер отдаёт бину сведения о себе. */
     @Override
-    public void setBeanName(String name) {
+    public void setBeanName(@NonNull String name) {
         this.beanName = name;
         LifecycleLog.record("3-aware-beanName:managedBean");
     }
 
     @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+    public void setBeanFactory(@NonNull BeanFactory beanFactory) throws BeansException {
         this.beanFactoryInjected = beanFactory != null;
         LifecycleLog.record("3-aware-beanFactory:managedBean");
     }
 
     @Override
-    public void setApplicationContext(ApplicationContext context) throws BeansException {
+    public void setApplicationContext(@NonNull ApplicationContext context) throws BeansException {
         this.contextInjected = context != null;
         LifecycleLog.record("3-aware-applicationContext:managedBean");
     }
