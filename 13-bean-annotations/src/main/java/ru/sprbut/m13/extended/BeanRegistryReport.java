@@ -51,7 +51,7 @@ public final class BeanRegistryReport {
     public List<Entry> entries() {
         final ConfigurableListableBeanFactory beans = this.context.getBeanFactory();
         final List<Entry> collected = new ArrayList<>();
-        for (final String name : beans.getBeanDefinitionNames()) {
+        for (String name : beans.getBeanDefinitionNames()) {
             final BeanDefinition definition = beans.getBeanDefinition(name);
             final Class<?> type = beans.getType(name);
             collected.add(new Entry(
@@ -63,8 +63,7 @@ public final class BeanRegistryReport {
                 beans.containsSingleton(name),
                 definition.getDependsOn() == null
                     ? List.of()
-                    : Arrays.asList(definition.getDependsOn()
-)
+                    : Arrays.asList(definition.getDependsOn())
             ));
         }
         collected.sort(Comparator.comparing(Entry::name));
@@ -113,7 +112,7 @@ public final class BeanRegistryReport {
             .map(Entry::name)
             .toList();
         if (primary.size() == 1) {
-            return String.format("@Primary: %s из %s", primary.get(0), candidates);
+            return "@Primary: " + primary.get(0) + " из " + candidates;
         }
         if (primary.size() > 1) {
             return "несколько @Primary " + primary + " → NoUniqueBeanDefinitionException";
@@ -128,7 +127,7 @@ public final class BeanRegistryReport {
      */
     public Map<String, Long> scopes() {
         final Map<String, Long> summary = new LinkedHashMap<>();
-        for (final Entry entry : this.application()) {
+        for (Entry entry : this.application()) {
             summary.merge(
                 entry.scope().isEmpty() ? BeanDefinition.SCOPE_SINGLETON : entry.scope(),
                 1L,

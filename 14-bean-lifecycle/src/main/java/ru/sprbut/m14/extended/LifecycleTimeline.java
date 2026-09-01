@@ -54,14 +54,13 @@ public final class LifecycleTimeline {
      */
     public List<Step> steps() {
         final List<Step> steps = new ArrayList<>();
-        for (final String event : this.log.events()) {
+        for (String event : this.log.events()) {
             final int colon = event.indexOf(':');
             final String left = event.substring(0, colon);
             steps.add(new Step(
                 Character.getNumericValue(left.charAt(0)),
                 left.substring(left.indexOf('-') + 1),
-                event.substring(colon + 1
-)
+                event.substring(colon + 1)
             ));
         }
         return List.copyOf(steps);
@@ -83,7 +82,7 @@ public final class LifecycleTimeline {
      */
     public String render(final String bean) {
         final StringBuilder text = new StringBuilder("Жизненный цикл '").append(bean).append("':\n");
-        for (final Step step : this.of(bean)) {
+        for (Step step : this.of(bean)) {
             text.append("  ").append(step).append('\n');
         }
         return text.toString();
@@ -106,8 +105,7 @@ public final class LifecycleTimeline {
             if (steps.get(index).number() < steps.get(index - 1).number()) {
                 found.add(new Violation(
                     "порядок шагов",
-                    steps.get(index
-) + " выполнен после " + steps.get(index - 1)
+                    steps.get(index) + " выполнен после " + steps.get(index - 1)
                 ));
             }
         }
@@ -127,7 +125,7 @@ public final class LifecycleTimeline {
      */
     public Map<String, Integer> summary() {
         final Map<String, Integer> counts = new LinkedHashMap<>();
-        for (final Step step : this.steps()) {
+        for (Step step : this.steps()) {
             counts.merge(step.bean(), 1, Integer::sum);
         }
         return Map.copyOf(counts);
@@ -152,14 +150,13 @@ public final class LifecycleTimeline {
         }
         if (first > second) {
             sink.add(new Violation(
-                String.format("%s перед %s", earlier, later),
-                String.format("%s на позиции %s, %s на %s", earlier, first, later, second
-)
+                earlier + " перед " + later,
+                earlier + " на позиции " + first + ", " + later + " на " + second
             ));
         }
     }
 
-    private static int position(final List<Step> steps, final String phase) {
+    private int position(final List<Step> steps, final String phase) {
         for (int index = 0; index < steps.size(); index++) {
             if (steps.get(index).phase().equals(phase)) {
                 return index;

@@ -5,13 +5,6 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m08;
 
-import java.lang.reflect.Method;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Arrays;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,6 +15,11 @@ import ru.sprbut.m08.model.Order;
 import ru.sprbut.m08.model.OrderMaker;
 import ru.sprbut.m08.service.CustomerRepository;
 import ru.sprbut.m08.service.OrderRepository;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 
 /**
  * Тест сам по себе — доказательство работы APT: он импортирует классы,
@@ -122,10 +120,10 @@ final class GeneratedCodeTest {
         void staticFieldsAreSkipped() {
             MatcherAssert.assertThat(
                 "static field cannot stay out of the generated builder",
-                Arrays.stream(CustomerBuilder.class.getDeclaredMethods())
-                    .map(Method::getName).toList(),
-                Matchers.containsInAnyOrder("create", "build", "id", "name", "email", "age", "vip", "balance"
-)
+                java.util.Arrays.stream(CustomerBuilder.class.getDeclaredMethods())
+                    .map(java.lang.reflect.Method::getName).toList(),
+                Matchers.containsInAnyOrder("create", "build", "id", "name", "email",
+                    "age", "vip", "balance")
             );
         }
     }

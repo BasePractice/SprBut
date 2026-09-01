@@ -68,7 +68,6 @@ public final class Convertible {
      * Умеет ли движок построить значение этого типа из строки.
      * @return Умеет ли движок построить значение этого типа из строки
      */
-    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     public boolean yes() {
         return this.type.isEnum() || RULES.containsKey(this.type);
     }

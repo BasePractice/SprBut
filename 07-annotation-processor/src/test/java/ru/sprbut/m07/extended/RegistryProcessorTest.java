@@ -5,18 +5,17 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m07.extended;
 
-import java.lang.reflect.InvocationTargetException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import ru.sprbut.m07.CompilationHarness;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import ru.sprbut.m07.CompilationHarness;
 
 /**
  * Расширенный пример: compile-time реестр вместо сканирования classpath.
@@ -24,6 +23,12 @@ import ru.sprbut.m07.CompilationHarness;
  */
 @DisplayName("Расширенный пример: compile-time реестр вместо сканирования classpath")
 final class RegistryProcessorTest {
+
+    /**
+     * Рабочий каталог.
+     */
+    @TempDir
+    private Path workDir;
 
     /**
      * Значение {@code REPO}.
@@ -36,7 +41,6 @@ final class RegistryProcessorTest {
 
                     @Registered
                     public class UserRepository {
-
                         public String find() { return "пользователь"; }
                     }
                     """);
@@ -53,12 +57,10 @@ final class RegistryProcessorTest {
 
                     @Registered("users")
                     public class UserService {
-
                         public String describe() { return "сервис"; }
                     }
                     """);
 
-    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     private CompilationHarness.Result compile(final List<CompilationHarness.Source> sources, final String... options) {
         return CompilationHarness.compile(RegistryProcessorTest.this.workDir, sources, new RegistryProcessor(), options);
     }
@@ -127,9 +129,9 @@ final class RegistryProcessorTest {
         @Test
         @DisplayName("Опции процессора -A меняют пакет и имя генерируемого класса")
         void supportsProcessorOptions() {
-            final CompilationHarness.Result result = compile(List.of(REPO), "-A" + RegistryProcessor.PACKAGE_OPTION + "=demo.gen",
-                String.format("-A%s=Beans", RegistryProcessor.CLASS_OPTION)
-);
+            final CompilationHarness.Result result = compile(List.of(REPO),
+                    "-A" + RegistryProcessor.PACKAGE_OPTION + "=demo.gen",
+                    "-A" + RegistryProcessor.CLASS_OPTION + "=Beans");
             MatcherAssert.assertThat(
                 "processor options cannot change the generated class name",
                 result.generatedSources(),
@@ -210,7 +212,7 @@ final class RegistryProcessorTest {
             MatcherAssert.assertThat(
                 "unknown name cannot be reported clearly",
                 Assertions.assertThrows(
-                    InvocationTargetException.class,
+                    java.lang.reflect.InvocationTargetException.class,
                     () -> registry.getMethod("create", String.class).invoke(null, "нет-такого")
                 ).getCause().getMessage(),
                 Matchers.equalTo("В реестре нет записи: нет-такого")
@@ -271,13 +273,13 @@ final class RegistryProcessorTest {
                     new CompilationHarness.Source("demo.A", """
                             package demo;
                             import ru.sprbut.m07.api.Registered;
-                            @Registered("dup"
-) public class A {} """),
+                            @Registered("dup") public class A {}
+                            """),
                     new CompilationHarness.Source("demo.B", """
                             package demo;
                             import ru.sprbut.m07.api.Registered;
-                            @Registered("dup"
-) public class B {} """)));
+                            @Registered("dup") public class B {}
+                            """)));
             MatcherAssert.assertThat(
                 "duplicate name cannot fail the build instead of overwriting silently",
                 result.errors().stream().anyMatch(m -> m.contains("уже занято")),
@@ -310,7 +312,6 @@ final class RegistryProcessorTest {
                             package demo;
                             import ru.sprbut.m07.api.Registered;
                             @Registered public class NeedsArgs {
-
                                 public NeedsArgs(String name) {}
                             }
                             """)),
@@ -322,11 +323,4 @@ final class RegistryProcessorTest {
             );
         }
     }
-
-    /**
-     * Рабочий каталог.
-     */
-    @TempDir
-    private Path workDir;
-
 }

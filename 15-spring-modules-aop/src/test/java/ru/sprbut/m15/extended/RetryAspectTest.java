@@ -13,7 +13,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -33,15 +32,18 @@ final class RetryAspectTest {
     /**
      * Значение {@code payments}.
      */
+
     private PaymentService payments;
     /**
      * Исполнитель.
      */
+
     private ChargeExecutor executor;
     /**
      * Значение {@code aspect}.
      * @since 1.0
      */
+
     private RetryAspect aspect;
 
     @BeforeEach
@@ -100,7 +102,7 @@ final class RetryAspectTest {
             MatcherAssert.assertThat(
                 "cannot verify that retries until success",
                 aspect.log(),
-                Matchers.contains("fail:charge:попытка1", "fail:charge:попытка2", "success:charge:попытка3")
+                Matchers.contains( "fail:charge:попытка1", "fail:charge:попытка2", "success:charge:попытка3")
             );
         }
 
@@ -236,7 +238,6 @@ final class RetryAspectTest {
         @DisplayName("Без exposeProxy обход через AopContext падает — флаг не бесплатный")
         void aopContextNeedsExposeProxy() {
             try (var plain = new AnnotationConfigApplicationContext(PlainConfig.class)) {
-
                 final PaymentService service = plain.getBean(PaymentService.class);
                 MatcherAssert.assertThat(
                     "cannot verify that aop context needs expose proxy",
@@ -270,7 +271,7 @@ final class RetryAspectTest {
         void contextReturnsAProxy() {
             MatcherAssert.assertThat(
                 "cannot verify that context returns a proxy",
-                AopUtils.isCglibProxy(payments),
+                org.springframework.aop.support.AopUtils.isCglibProxy(payments),
                 Matchers.equalTo(true)
             );
             MatcherAssert.assertThat(

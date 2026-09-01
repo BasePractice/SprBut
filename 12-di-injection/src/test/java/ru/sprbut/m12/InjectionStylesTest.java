@@ -5,19 +5,11 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m12;
 
-import java.lang.reflect.Modifier;
-import java.math.BigDecimal;
-import java.util.Arrays;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ru.sprbut.m12.domain.DiscountService;
 import ru.sprbut.m12.domain.TaxService;
@@ -26,6 +18,10 @@ import ru.sprbut.m12.injection.FieldInjected;
 import ru.sprbut.m12.injection.SetterInjected;
 import ru.sprbut.m12.jakarta.JakartaInjected;
 import ru.sprbut.m12.locator.ServiceLocatorDemo;
+import java.math.BigDecimal;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 
 /**
  * Слайды 91–96 (СХЕМА 6): три способа внедрения рядом.
@@ -45,7 +41,6 @@ final class InjectionStylesTest {
         this.context = new AnnotationConfigApplicationContext(AppConfig.class);
     }
 
-    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     @AfterEach
     void tearDown() {
         this.context.close();
@@ -66,17 +61,17 @@ final class InjectionStylesTest {
             MatcherAssert.assertThat(
                 "cannot verify that results are identical",
                 context.getBean(ConstructorInjected.class).total(net, true),
-                Matchers.comparesEqualTo(new BigDecimal("108.00"))
+                Matchers.comparesEqualTo(new java.math.BigDecimal("108.00"))
             );
             MatcherAssert.assertThat(
                 "cannot verify that results are identical",
                 context.getBean(SetterInjected.class).total(net, true),
-                Matchers.comparesEqualTo(new BigDecimal("108.00"))
+                Matchers.comparesEqualTo(new java.math.BigDecimal("108.00"))
             );
             MatcherAssert.assertThat(
                 "cannot verify that results are identical",
                 context.getBean(FieldInjected.class).total(net, true),
-                Matchers.comparesEqualTo(new BigDecimal("108.00"))
+                Matchers.comparesEqualTo(new java.math.BigDecimal("108.00"))
             );
         }
     }
@@ -97,7 +92,7 @@ final class InjectionStylesTest {
             MatcherAssert.assertThat(
                 "cannot verify that testable without container",
                 service.total(new BigDecimal("100"), false),
-                Matchers.comparesEqualTo(new BigDecimal("120.00"))
+                Matchers.comparesEqualTo(new java.math.BigDecimal("120.00"))
             );
         }
 
@@ -106,7 +101,7 @@ final class InjectionStylesTest {
         void fieldsAreFinal() {
             MatcherAssert.assertThat(
                 "cannot verify that fields are final",
-                Arrays.stream(ConstructorInjected.class.getDeclaredFields()).allMatch(f -> Modifier.isFinal(f.getModifiers())),
+                java.util.Arrays.stream(ConstructorInjected.class.getDeclaredFields()).allMatch(f -> java.lang.reflect.Modifier.isFinal(f.getModifiers())),
                 Matchers.equalTo(true)
             );
         }
@@ -126,7 +121,7 @@ final class InjectionStylesTest {
         void autowiredIsOptionalOnSingleConstructor() {
             MatcherAssert.assertThat(
                 "cannot verify that autowired is optional on single constructor",
-                ConstructorInjected.class.getDeclaredConstructors()[0] .isAnnotationPresent(Autowired.class),
+                ConstructorInjected.class.getDeclaredConstructors()[0] .isAnnotationPresent(org.springframework.beans.factory.annotation.Autowired.class),
                 Matchers.equalTo(false)
             );
             MatcherAssert.assertThat(
@@ -165,7 +160,7 @@ final class InjectionStylesTest {
             MatcherAssert.assertThat(
                 "cannot verify that only reflection can fill the fields",
                 service.total(new BigDecimal("100"), false),
-                Matchers.comparesEqualTo(new BigDecimal("120.00"))
+                Matchers.comparesEqualTo(new java.math.BigDecimal("120.00"))
             );
         }
 
@@ -184,7 +179,7 @@ final class InjectionStylesTest {
         void fieldsCannotBeFinal() {
             MatcherAssert.assertThat(
                 "cannot verify that fields cannot be final",
-                Arrays.stream(FieldInjected.class.getDeclaredFields()).anyMatch(f -> Modifier.isFinal(f.getModifiers())),
+                java.util.Arrays.stream(FieldInjected.class.getDeclaredFields()).anyMatch(f -> java.lang.reflect.Modifier.isFinal(f.getModifiers())),
                 Matchers.equalTo(false)
             );
         }
@@ -213,7 +208,7 @@ final class InjectionStylesTest {
                 MatcherAssert.assertThat(
                     "cannot verify that optional dependency may be absent",
                     service.total(new BigDecimal("100"), true),
-                    Matchers.comparesEqualTo(new BigDecimal("120.00"))
+                    Matchers.comparesEqualTo(new java.math.BigDecimal("120.00"))
                 );
             }
         }
@@ -237,7 +232,7 @@ final class InjectionStylesTest {
             MatcherAssert.assertThat(
                 "cannot verify that object is invalid between new and setter",
                 service.total(new BigDecimal("100"), false),
-                Matchers.comparesEqualTo(new BigDecimal("120.00"))
+                Matchers.comparesEqualTo(new java.math.BigDecimal("120.00"))
             );
         }
     }
@@ -257,7 +252,7 @@ final class InjectionStylesTest {
             MatcherAssert.assertThat(
                 "cannot verify that it works but hides dependencies",
                 demo.total(new BigDecimal("100")),
-                Matchers.comparesEqualTo(new BigDecimal("120.00"))
+                Matchers.comparesEqualTo(new java.math.BigDecimal("120.00"))
             );
             MatcherAssert.assertThat(
                 "service locator cannot hide its dependencies from the constructor",
@@ -283,7 +278,7 @@ final class InjectionStylesTest {
         void errorsSurfaceLate() {
             final ServiceLocatorDemo demo = context.getBean(ServiceLocatorDemo.class);
             // контекст поднялся успешно, хотя такого бина нет
-            Assertions.assertThrows(NoSuchBeanDefinitionException.class, () -> demo.lookup("несуществующийБин"));
+            Assertions.assertThrows(org.springframework.beans.factory.NoSuchBeanDefinitionException.class, () -> demo.lookup("несуществующийБин"));
         }
     }
 
@@ -302,7 +297,7 @@ final class InjectionStylesTest {
             MatcherAssert.assertThat(
                 "cannot verify that jakarta annotations are supported",
                 service.total(new BigDecimal("100"), true),
-                Matchers.comparesEqualTo(new BigDecimal("108.00"))
+                Matchers.comparesEqualTo(new java.math.BigDecimal("108.00"))
             );
         }
 
@@ -324,7 +319,7 @@ final class InjectionStylesTest {
         @Test
         @DisplayName("Класс переносим: он не зависит от аннотаций Spring")
         void classIsPortable() {
-            final boolean usesSpringAnnotations = Arrays.stream(JakartaInjected.class.getAnnotations())
+            final boolean usesSpringAnnotations = java.util.Arrays.stream(JakartaInjected.class.getAnnotations())
                     .anyMatch(a -> a.annotationType().getName().startsWith("org.springframework"));
             MatcherAssert.assertThat(
                 "portable class cannot stay free of Spring annotations",

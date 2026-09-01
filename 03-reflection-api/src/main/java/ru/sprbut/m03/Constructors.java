@@ -92,11 +92,11 @@ public final class Constructors {
         return Arrays.stream(this.type.getDeclaredConstructors())
             .filter(candidate -> this.fits(candidate.getParameterTypes(), args))
             .min(Comparator.comparingInt(
-                candidate -> Modifier.isPublic(candidate.getModifiers()
-) ? 0 : 1));
+                candidate -> Modifier.isPublic(candidate.getModifiers()) ? 0 : 1
+            ));
     }
 
-    private static boolean fits(final Class<?>[] parameters, final Object[] args) {
+    private boolean fits(final Class<?>[] parameters, final Object[] args) {
         if (parameters.length != args.length) {
             return false;
         }

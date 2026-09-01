@@ -5,18 +5,16 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m10.extended;
 
-import java.lang.reflect.Proxy;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import ru.sprbut.m10.lombok.CustomerDto;
+import ru.sprbut.m10.lombok.CustomerEntity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
-import ru.sprbut.m10.lombok.CustomerDto;
-import ru.sprbut.m10.lombok.CustomerEntity;
 
 /**
  * Расширенный пример: MapStruct поверх Lombok.
@@ -32,10 +30,8 @@ final class CustomerMapperTest {
     private final CustomerMapper mapper = CustomerMapper.INSTANCE;
 
     private CustomerEntity entity() {
-        return new CustomerEntity(
-            "C-1", "Иван", "Иванов", LocalDate.of(1984, 3, 15), new BigDecimal("100.00"), true,
-            "служебное"
-        );
+        return new CustomerEntity("C-1", "Иван", "Иванов",
+                LocalDate.of(1984, 3, 15), new BigDecimal("100.00"), true, "служебное");
     }
 
     @Nested
@@ -98,7 +94,7 @@ final class CustomerMapperTest {
             MatcherAssert.assertThat(
                 "missing value cannot fall back to the default",
                 mapper.toDto(noBalance).getBalance(),
-                Matchers.comparesEqualTo(new BigDecimal("0"))
+                Matchers.comparesEqualTo(new java.math.BigDecimal("0"))
             );
         }
 
@@ -165,7 +161,7 @@ final class CustomerMapperTest {
         void generatedClassIsNotAProxy() {
             MatcherAssert.assertThat(
                 "generated mapper cannot avoid being a proxy",
-                Proxy.isProxyClass(mapper.getClass()),
+                java.lang.reflect.Proxy.isProxyClass(mapper.getClass()),
                 Matchers.equalTo(false)
             );
             MatcherAssert.assertThat(
@@ -178,8 +174,8 @@ final class CustomerMapperTest {
         @Test
         @DisplayName("Mappers.getMapper создаёт новый экземпляр на каждый вызов — кэшировать надо самому")
         void mappersFactoryCreatesNewInstances() {
-            final CustomerMapper first = Mappers.getMapper(CustomerMapper.class);
-            final CustomerMapper second = Mappers.getMapper(CustomerMapper.class);
+            final CustomerMapper first = org.mapstruct.factory.Mappers.getMapper(CustomerMapper.class);
+            final CustomerMapper second = org.mapstruct.factory.Mappers.getMapper(CustomerMapper.class);
             MatcherAssert.assertThat(
                 "spring managed mapper cannot differ from the standalone one",
                 first,

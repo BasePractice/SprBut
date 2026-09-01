@@ -6,13 +6,12 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m19.extended;
 
-import java.util.ArrayList;
+import org.springframework.boot.autoconfigure.condition.ConditionEvaluationReport;
+import org.springframework.context.ConfigurableApplicationContext;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.boot.autoconfigure.condition.ConditionEvaluationReport;
-import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * <b>Расширенный пример модуля 19.</b>
@@ -46,6 +45,10 @@ public final class ConditionReport {
      */
     public ConditionReport(final ConfigurableApplicationContext context) {
         this.context = context;
+    }
+
+    private ConditionEvaluationReport evaluated() {
+        return ConditionEvaluationReport.get(this.context.getBeanFactory());
     }
 
     /**
@@ -83,12 +86,10 @@ public final class ConditionReport {
             if (!source.contains(nameFragment)) {
                 return;
             }
-            final List<String> reasons = new ArrayList<>();
+            final List<String> reasons = new java.util.ArrayList<>();
             outcomes.forEach(outcome -> reasons.add(
-                    (outcome.getOutcome().isMatch() ? "✓ " : "✗ "
-) + outcome.getOutcome().getMessage()));
-            result.put(source, new ConditionEntry(source, outcomes.isFullMatch(), reasons)
-);
+                    (outcome.getOutcome().isMatch() ? "✓ " : "✗ ") + outcome.getOutcome().getMessage()));
+            result.put(source, new ConditionEntry(source, outcomes.isFullMatch(), reasons));
         });
         return result;
     }
@@ -141,13 +142,8 @@ public final class ConditionReport {
         entries.forEach((source, entry) -> {
             sb.append("  ").append(entry.matched() ? "ПРИМЕНЕНА" : "ПРОПУЩЕНА")
                     .append(": ").append(source).append('\n');
-            entry.reasons().forEach(reason -> sb.append("      ").append(reason).append('\n')
-);
+            entry.reasons().forEach(reason -> sb.append("      ").append(reason).append('\n'));
         });
         return sb.toString();
-    }
-
-    private ConditionEvaluationReport evaluated() {
-        return ConditionEvaluationReport.get(this.context.getBeanFactory());
     }
 }

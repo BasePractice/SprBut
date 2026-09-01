@@ -5,7 +5,6 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m12.cycles;
 
-import java.util.Arrays;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -38,7 +37,6 @@ final class CircularDependencyTest {
     @DisplayName("@Lazy разрывает цикл: вместо бина подставляется прокси")
     void lazyBreaksTheCycle() {
         try (var context = new AnnotationConfigApplicationContext(CircularBeans.LazyConfig.class)) {
-
             final CircularBeans.Alpha alpha = context.getBean(CircularBeans.Alpha.class);
             MatcherAssert.assertThat(
                 "lazy proxy cannot break the cycle",
@@ -52,7 +50,6 @@ final class CircularDependencyTest {
     @DisplayName("Цикл через сеттеры разрешается, но объекты временно неполны")
     void setterCycleIsResolvable() {
         try (var context = new AnnotationConfigApplicationContext(CircularBeans.SetterCycleConfig.class)) {
-
             final CircularBeans.Gamma gamma = context.getBean(CircularBeans.Gamma.class);
             final CircularBeans.Delta delta = context.getBean(CircularBeans.Delta.class);
             MatcherAssert.assertThat(
@@ -67,7 +64,6 @@ final class CircularDependencyTest {
     @DisplayName("Правильное решение — третий бин: цикла нет вовсе")
     void extractingAThirdBeanRemovesTheCycle() {
         try (var context = new AnnotationConfigApplicationContext(CircularBeans.RefactoredConfig.class)) {
-
             MatcherAssert.assertThat(
                 "extracted third bean cannot remove the cycle",
                 context.getBean(CircularBeans.Epsilon.class).describe(),
@@ -80,11 +76,10 @@ final class CircularDependencyTest {
     @DisplayName("оба бина зависят от общего третьего, и ни один — от другого")
     void sharesTheExtractedBean() {
         try (var context =
-                 new AnnotationConfigApplicationContext(CircularBeans.RefactoredConfig.class
-)) {
+                 new AnnotationConfigApplicationContext(CircularBeans.RefactoredConfig.class)) {
             MatcherAssert.assertThat(
                 "shared bean cannot appear in the context",
-                Arrays.asList(context.getBeanDefinitionNames()),
+                java.util.Arrays.asList(context.getBeanDefinitionNames()),
                 Matchers.hasItem("sharedRules")
             );
         }
@@ -94,7 +89,6 @@ final class CircularDependencyTest {
     @DisplayName("@Lazy — обход симптома: прокси приходит вместо настоящего объекта")
     void lazyInjectsAProxy() {
         try (var context = new AnnotationConfigApplicationContext(CircularBeans.LazyConfig.class)) {
-
             final CircularBeans.Alpha alpha = context.getBean(CircularBeans.Alpha.class);
             // сам alpha — обычный бин, но beta внутри него подменена прокси
             MatcherAssert.assertThat(

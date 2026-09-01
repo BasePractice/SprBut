@@ -5,18 +5,9 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m20;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.BDDMockito;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -27,8 +18,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import ru.sprbut.m20.domain.CatalogService;
@@ -36,6 +25,15 @@ import ru.sprbut.m20.domain.Product;
 import ru.sprbut.m20.domain.ProductRepository;
 import ru.sprbut.m20.web.ProductController;
 import tools.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
+import java.util.List;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
+import org.mockito.ArgumentMatchers;
+import org.mockito.BDDMockito;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @DisplayName("Слайды 180–185 (СХЕМА 13): срезы поднимают разный объём контекста")
 final class SliceTests {
@@ -231,8 +229,7 @@ final class SliceTests {
         @DisplayName("GET возвращает список из мока")
         void getReturnsList() throws Exception {
             BDDMockito.given(this.catalog.available()).willReturn(
-                    List.of(new Product("SKU-1", "Кофемолка", new BigDecimal("4990.00"))
-));
+                    List.of(new Product("SKU-1", "Кофемолка", new BigDecimal("4990.00"))));
             this.mockMvc.perform(MockMvcRequestBuilders.get("/api/products"))
                     .andExpect(MockMvcResultMatchers.status().isOk())
                     .andExpect(MockMvcResultMatchers.jsonPath("$[0].sku").value("SKU-1"))
@@ -255,12 +252,10 @@ final class SliceTests {
             BDDMockito.given(this.catalog.add(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
                     .willReturn(new Product("SKU-2", "Чайник", new BigDecimal("2990.00")));
             final var request = new ProductController.CreateRequest(
-                    "SKU-2", "Чайник", new BigDecimal("2990.00"
-));
+                    "SKU-2", "Чайник", new BigDecimal("2990.00"));
             this.mockMvc.perform(MockMvcRequestBuilders.post("/api/products")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(this.objectMapper.writeValueAsString(request)
-))
+                            .content(this.objectMapper.writeValueAsString(request)))
                     .andExpect(MockMvcResultMatchers.status().isCreated())
                     .andExpect(MockMvcResultMatchers.jsonPath("$.sku").value("SKU-2"));
         }
@@ -319,8 +314,7 @@ final class SliceTests {
         @DisplayName("Сериализация даёт ожидаемый JSON")
         void serialises() throws Exception {
             final var view = new ProductController.ProductView(
-                    "SKU-1", "Кофемолка", new BigDecimal("4990.00"
-), true);
+                    "SKU-1", "Кофемолка", new BigDecimal("4990.00"), true);
             MatcherAssert.assertThat(
                 "serialisation cannot produce the expected JSON",
                 this.json.write(view).getJson(),
@@ -341,7 +335,7 @@ final class SliceTests {
             MatcherAssert.assertThat(
                 "cannot verify that deserialises",
                 parsed.price(),
-                Matchers.comparesEqualTo(new BigDecimal("4990.00"))
+                Matchers.comparesEqualTo(new java.math.BigDecimal("4990.00"))
             );
         }
     }
@@ -350,14 +344,13 @@ final class SliceTests {
     @DisplayName("Без Spring вовсе — самый быстрый тест")
     final class PlainUnitTest {
 
-        // @checkstyle NonStaticMethodCheck (3 lines)
         @Test
         @DisplayName("Сервис тестируется обычным new, если зависимости внедрены конструктором")
         void serviceIsTestableWithoutSpring() {
-            final ProductRepository fakeRepository = Mockito.mock(ProductRepository.class);
+            final ProductRepository fakeRepository = org.mockito.Mockito.mock(ProductRepository.class);
             BDDMockito.given(fakeRepository.findBySku("SKU-1"))
-                    .willReturn(Optional.of(new Product("SKU-1", "Кофемолка", new BigDecimal("4990.00")))
-);
+                    .willReturn(java.util.Optional.of(
+                            new Product("SKU-1", "Кофемолка", new BigDecimal("4990.00"))));
             final CatalogService service = new CatalogService(fakeRepository, "EUR");
             MatcherAssert.assertThat(
                 "cannot verify that service is testable without spring",
@@ -366,11 +359,10 @@ final class SliceTests {
             );
         }
 
-        // @checkstyle NonStaticMethodCheck (3 lines)
         @Test
         @DisplayName("Контроллер тоже: MockMvc умеет работать standalone")
         void controllerIsTestableStandalone() throws Exception {
-            final CatalogService catalog = Mockito.mock(CatalogService.class);
+            final CatalogService catalog = org.mockito.Mockito.mock(CatalogService.class);
             BDDMockito.given(catalog.available()).willReturn(List.of());
             final MockMvc standalone = MockMvcBuilders
                     .standaloneSetup(new ProductController(catalog))
@@ -386,7 +378,6 @@ final class SliceTests {
      * @since 1.0
      */
     interface WebContextAware {
-
         WebApplicationContext context();
     }
 }

@@ -25,8 +25,7 @@ final class BeanRegistryReportTest {
     @DisplayName("отчёт перечисляет прикладные бины")
     void listsApplicationBeans() {
         try (AnnotationConfigApplicationContext context =
-                 new AnnotationConfigApplicationContext(ScopeConfig.class
-)) {
+                 new AnnotationConfigApplicationContext(ScopeConfig.class)) {
             MatcherAssert.assertThat(
                 "report cannot list the application beans",
                 new BeanRegistryReport(context).application().stream().map(Entry::name).toList(),
@@ -39,8 +38,7 @@ final class BeanRegistryReportTest {
     @DisplayName("инфраструктура Spring в прикладной отчёт не попадает")
     void hidesSpringInfrastructure() {
         try (AnnotationConfigApplicationContext context =
-                 new AnnotationConfigApplicationContext(ScopeConfig.class
-)) {
+                 new AnnotationConfigApplicationContext(ScopeConfig.class)) {
             MatcherAssert.assertThat(
                 "Spring internals cannot stay out of the application report",
                 new BeanRegistryReport(context).application().stream().map(Entry::name).toList(),
@@ -53,8 +51,7 @@ final class BeanRegistryReportTest {
     @DisplayName("сводка по скоупам считает прототипы отдельно")
     void countsScopes() {
         try (AnnotationConfigApplicationContext context =
-                 new AnnotationConfigApplicationContext(ScopeConfig.class
-)) {
+                 new AnnotationConfigApplicationContext(ScopeConfig.class)) {
             MatcherAssert.assertThat(
                 "scope summary cannot count the prototypes",
                 new BeanRegistryReport(context).scopes(),
@@ -67,12 +64,11 @@ final class BeanRegistryReportTest {
     @DisplayName("«почему внедрился не тот бин» — отчёт называет @Primary")
     void explainsPrimaryWinner() {
         try (AnnotationConfigApplicationContext context =
-                 new AnnotationConfigApplicationContext(QualifierConfig.class
-)) {
+                 new AnnotationConfigApplicationContext(QualifierConfig.class)) {
             MatcherAssert.assertThat(
                 "report cannot explain the primary winner",
                 new BeanRegistryReport(context).resolution(
-                    QualifierConfig.PaymentGateway.class
+                    ru.sprbut.m13.qualifiers.QualifierConfig.PaymentGateway.class
                 ),
                 Matchers.containsString("@Primary")
             );
@@ -83,8 +79,7 @@ final class BeanRegistryReportTest {
     @DisplayName("«кандидатов нет» — отчёт называет будущее исключение")
     void predictsMissingBean() {
         try (AnnotationConfigApplicationContext context =
-                 new AnnotationConfigApplicationContext(ScopeConfig.class
-)) {
+                 new AnnotationConfigApplicationContext(ScopeConfig.class)) {
             MatcherAssert.assertThat(
                 "report cannot predict NoSuchBeanDefinitionException",
                 new BeanRegistryReport(context).resolution(LocalDate.class),
@@ -97,8 +92,7 @@ final class BeanRegistryReportTest {
     @DisplayName("прототип в отчёте числится несозданным — экземпляров у него нет")
     void reportsPrototypeAsPending() {
         try (AnnotationConfigApplicationContext context =
-                 new AnnotationConfigApplicationContext(ScopeConfig.class
-)) {
+                 new AnnotationConfigApplicationContext(ScopeConfig.class)) {
             MatcherAssert.assertThat(
                 "prototype cannot be reported as pending",
                 new BeanRegistryReport(context).pending(),
