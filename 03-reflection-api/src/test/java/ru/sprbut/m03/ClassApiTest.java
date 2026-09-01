@@ -193,9 +193,21 @@ final class ClassApiTest {
     }
 
     /**
-     * Значение {@code PAID}.
+     * Статусы заказа — фикстура для чтения констант enum.
+     * @since 1.0
      */
-    private enum Status { NEW, PAID }
+    private enum Status {
+
+        /**
+         * Новый заказ.
+         */
+        NEW,
+
+        /**
+         * Оплаченный заказ.
+         */
+        PAID
+    }
 
     private record Point(int x, int y) {
     }

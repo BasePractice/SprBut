@@ -38,10 +38,13 @@ public final class Spec {
      */
     public String name() {
         final int open = this.raw.indexOf('(');
+        final String name;
         if (open < 0) {
-            return this.raw;
+            name = this.raw;
+        } else {
+            name = this.raw.substring(0, open).trim();
         }
-        return this.raw.substring(0, open).trim();
+        return name;
     }
 
     /**
@@ -50,16 +53,27 @@ public final class Spec {
      */
     public List<String> args() {
         final int open = this.raw.indexOf('(');
+        final List<String> args;
         if (open < 0) {
-            return List.of();
+            args = List.of();
+        } else {
+            if (!this.raw.endsWith(")")) {
+                throw new IllegalArgumentException(
+                    String.format("Не закрыта скобка в: %s", this.raw)
+                );
+            }
+            args = Spec.split(this.raw.substring(open + 1, this.raw.length() - 1).trim());
         }
-        if (!this.raw.endsWith(")")) {
-            throw new IllegalArgumentException("Не закрыта скобка в: " + this.raw);
-        }
-        final String inside = this.raw.substring(open + 1, this.raw.length() - 1).trim();
+        return args;
+    }
+
+    private static List<String> split(final String inside) {
+        final List<String> args;
         if (inside.isEmpty()) {
-            return List.of();
+            args = List.of();
+        } else {
+            args = Arrays.stream(inside.split(",")).map(String::trim).toList();
         }
-        return Arrays.stream(inside.split(",")).map(String::trim).toList();
+        return args;
     }
 }

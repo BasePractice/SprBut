@@ -37,12 +37,18 @@ public final class Unwrapped {
      * @return Исключение, которое бросил сам вызванный код
      */
     public RuntimeException cause() {
-        final Throwable thrown = this.failure instanceof InvocationTargetException wrapper
-            ? wrapper.getCause()
-            : this.failure;
-        if (thrown instanceof RuntimeException unchecked) {
-            return unchecked;
+        final Throwable thrown;
+        if (this.failure instanceof InvocationTargetException wrapper) {
+            thrown = wrapper.getCause();
+        } else {
+            thrown = this.failure;
         }
-        return new CommandFailed(thrown.getMessage(), thrown);
+        final RuntimeException real;
+        if (thrown instanceof RuntimeException unchecked) {
+            real = unchecked;
+        } else {
+            real = new CommandFailed(thrown.getMessage(), thrown);
+        }
+        return real;
     }
 }

@@ -11,6 +11,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+
 /**
  * Конструктор, выбранный под заданное число аргументов.
  *
@@ -50,21 +51,24 @@ public final class ChosenConstructor {
     public Constructor<?> constructor() {
         if (Modifier.isAbstract(this.type.getModifiers()) || this.type.isInterface()) {
             throw new IllegalArgumentException(
-                "Нельзя создать экземпляр " + this.type.getSimpleName() + ": это абстрактный тип"
+                String.format(
+                    "Нельзя создать экземпляр %s: это абстрактный тип",
+                    this.type.getSimpleName()
+                )
             );
         }
         return Arrays.stream(this.type.getDeclaredConstructors())
             .filter(candidate -> candidate.getParameterCount() == this.arity)
             .filter(this::fillable)
-            .min(
-                Comparator.comparingInt(
-                    candidate -> new AccessRank(candidate).value()
+            .min(Comparator.comparingInt(candidate -> new AccessRank(candidate).value()))
+            .orElseThrow(
+                () -> new IllegalArgumentException(
+                    String.format(
+                        "У %s нет пригодного конструктора с %s аргументами",
+                        this.type.getSimpleName(), this.arity
+                    )
                 )
-            )
-            .orElseThrow(() -> new IllegalArgumentException(
-                "У " + this.type.getSimpleName() + " нет пригодного конструктора с "
-                    + this.arity + " аргументами"
-            ));
+            );
     }
 
     /**
@@ -73,12 +77,14 @@ public final class ChosenConstructor {
      */
     public String text() {
         final Constructor<?> chosen = this.constructor();
-        return chosen.getDeclaringClass().getSimpleName() + "("
-            + String.join(
+        return String.format(
+            "%s(%s)",
+            chosen.getDeclaringClass().getSimpleName(),
+            String.join(
                 ", ",
                 Arrays.stream(chosen.getParameterTypes()).map(Class::getSimpleName).toList()
             )
-            + ")";
+        );
     }
 
     /**
@@ -91,7 +97,7 @@ public final class ChosenConstructor {
         final Constructor<?> chosen = this.constructor();
         final Class<?>[] parameters = chosen.getParameterTypes();
         final Object[] values = new Object[parameters.length];
-        for (int index = 0; index < parameters.length; index++) {
+        for (int index = 0; index < parameters.length; index += 1) {
             values[index] = new Argument(args.get(index), parameters[index]).value();
         }
         chosen.setAccessible(true);

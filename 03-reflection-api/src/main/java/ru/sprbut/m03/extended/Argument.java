@@ -45,12 +45,20 @@ public final class Argument {
      * @return Значение нужного типа
      */
     public Object value() {
+        final Object value;
         if ("null".equals(this.raw)) {
-            return this.empty();
+            value = this.empty();
+        } else if (this.target.isEnum()) {
+            value = this.constant();
+        } else {
+            value = this.converted();
         }
-        if (this.target.isEnum()) {
-            return this.constant();
-        }
+        return value;
+    }
+
+    // @checkstyle IllegalCatchCheck (18 lines)
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
+    private Object converted() {
         final Function<String, Object> rule = Convertible.RULES.get(this.target);
         if (rule == null) {
             throw new IllegalArgumentException(
@@ -61,7 +69,9 @@ public final class Argument {
             return rule.apply(this.raw);
         } catch (final RuntimeException malformed) {
             throw new IllegalArgumentException(
-                "Значение '" + this.raw + "' не приводится к " + this.target.getSimpleName(),
+                String.format(
+                    "Значение '%s' не приводится к %s", this.raw, this.target.getSimpleName()
+                ),
                 malformed
             );
         }
@@ -70,7 +80,9 @@ public final class Argument {
     private Object empty() {
         if (this.target.isPrimitive()) {
             throw new IllegalArgumentException(
-                "null нельзя передать в примитивный параметр " + this.target.getSimpleName()
+                String.format(
+                    "null нельзя передать в примитивный параметр %s", this.target.getSimpleName()
+                )
             );
         }
         return null;
@@ -78,15 +90,15 @@ public final class Argument {
 
     private Object constant() {
         return Arrays.stream(this.target.getEnumConstants())
-            .filter(
-                candidate -> ((Enum<?>) candidate).name().equalsIgnoreCase(this.raw)
-            )
+            .filter(candidate -> ((Enum<?>) candidate).name().equalsIgnoreCase(this.raw))
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException(
-                "'" + this.raw + "' не входит в "
-                    + Arrays.toString(
-                        this.target.getEnumConstants()
+            .orElseThrow(
+                () -> new IllegalArgumentException(
+                    String.format(
+                        "'%s' не входит в %s",
+                        this.raw, Arrays.toString(this.target.getEnumConstants())
                     )
-            ));
+                )
+            );
     }
 }

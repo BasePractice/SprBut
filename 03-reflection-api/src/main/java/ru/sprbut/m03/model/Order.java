@@ -3,12 +3,18 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// витрина для Reflection API: поля всех видов, перегруженные конструкторы,
+// приватный метод и вложенное исключение — всё это здесь предмет разбора
+// @checkstyle HiddenFieldCheck disable
+// @checkstyle ProhibitStaticNestedClassesCheck disable
+// @checkstyle ConstructorsOrderCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m03.model;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Подопытный класс для карты Reflection API (СХЕМА 1, слайд 27).
@@ -16,6 +22,12 @@ import java.util.Map;
  * всё то, что умеют разбирать {@code Field}, {@code Method} и {@code Constructor}.
  * @since 1.0
  */
+@SuppressWarnings({
+    "PMD.DataClass",
+    "PMD.UnusedPrivateMethod",
+    "PMD.OnlyOneConstructorShouldDoInitialization",
+    "PMD.AvoidSynchronizedAtMethodLevel"
+})
 public class Order {
 
     /**
@@ -27,22 +39,27 @@ public class Order {
      * Идентификатор.
      */
     private final String id;
+
     /**
      * Клиент.
      */
     private String customer;
+
     /**
      * Итоговая сумма.
      */
     private BigDecimal total;
+
     /**
      * Значение {@code items}.
      */
     private List<String> items;
+
     /**
      * Значение {@code discounts}.
      */
     private Map<String, BigDecimal> discounts;
+
     /**
      * Значение {@code paid}.
      */
@@ -137,11 +154,11 @@ public class Order {
 
     /**
      * Метод с varargs — в рефлексии это параметр-массив плюс флаг {@code isVarArgs}.
-     * @param amounts Значение {@code amounts}
-     * @return Метод с varargs — в рефлексии это параметр-массив плюс флаг {@code isVarArgs}
+     * @param amounts Суммы строк заказа
+     * @return Новая итоговая сумма
      */
     public BigDecimal addLines(final BigDecimal... amounts) {
-        BigDecimal sum = this.total == null ? BigDecimal.ZERO : this.total;
+        BigDecimal sum = Objects.requireNonNullElse(this.total, BigDecimal.ZERO);
         for (final BigDecimal amount : amounts) {
             sum = sum.add(amount);
         }
@@ -153,9 +170,11 @@ public class Order {
      * Метод с объявленным checked-исключением.
      * @param amount Сумма
      */
-    public void pay(final BigDecimal amount) throws PaymentException {
+    public void pay(final BigDecimal amount) throws Order.PaymentException {
         if (this.total == null || amount.compareTo(this.total) < 0) {
-            throw new PaymentException("Недостаточная сумма: " + amount + " < " + this.total);
+            throw new Order.PaymentException(
+                String.format("Недостаточная сумма: %s < %s", amount, this.total)
+            );
         }
         this.paid = true;
     }
@@ -173,10 +192,10 @@ public class Order {
     }
 
     /**
-     * Значение {@code PaymentException}.
+     * Checked-исключение, объявленное в сигнатуре {@code pay}.
      * @since 1.0
      */
-    public static class PaymentException extends Exception {
+    public static final class PaymentException extends Exception {
 
         /**
          * Основной конструктор.

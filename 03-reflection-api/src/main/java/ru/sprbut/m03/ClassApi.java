@@ -25,6 +25,7 @@ import java.util.TreeSet;
  *
  * @since 1.0
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public final class ClassApi {
 
     /**
@@ -104,7 +105,7 @@ public final class ClassApi {
     /**
      * Все интерфейсы, включая унаследованные, — по ним фреймворки решают,
      * подходит ли бин под тип зависимости.
-     * @return Все интерфейсы, включая унаследованные, — по ним фреймворки решают, подходит ли бин под тип зависимости
+     * @return Все интерфейсы, включая унаследованные
      */
     public List<String> allInterfaces() {
         final Set<String> collected = new TreeSet<>();
@@ -119,7 +120,8 @@ public final class ClassApi {
      *
      * <p>{@code isAssignableFrom} читается наоборот, чем кажется:
      * {@code Number.class.isAssignableFrom(Integer.class)} — истина.</p>
-     * @param actual Значение {@code actual}
+     *
+     * @param actual Проверяемый тип
      * @return Может ли переменная этого типа хранить значение другого
      */
     public boolean canHold(final Class<?> actual) {
@@ -128,15 +130,18 @@ public final class ClassApi {
 
     /**
      * Компоненты record — отдельная сущность API, появившаяся в Java 16.
-     * @return Компоненты record — отдельная сущность API, появившаяся в Java 16
+     * @return Компоненты record
      */
     public List<String> recordComponents() {
-        if (!this.type.isRecord()) {
-            return List.of();
+        final List<String> found;
+        if (this.type.isRecord()) {
+            found = Arrays.stream(this.type.getRecordComponents())
+                .map(RecordComponent::getName)
+                .toList();
+        } else {
+            found = List.of();
         }
-        return Arrays.stream(this.type.getRecordComponents())
-            .map(RecordComponent::getName)
-            .toList();
+        return found;
     }
 
     /**
@@ -145,10 +150,13 @@ public final class ClassApi {
      */
     public List<String> enumConstants() {
         final Object[] constants = this.type.getEnumConstants();
+        final List<String> found;
         if (constants == null) {
-            return List.of();
+            found = List.of();
+        } else {
+            found = Arrays.stream(constants).map(String::valueOf).toList();
         }
-        return Arrays.stream(constants).map(String::valueOf).toList();
+        return found;
     }
 
     /**
@@ -156,6 +164,7 @@ public final class ClassApi {
      *
      * <p>Массив создаётся не конструктором, а фабрикой {@link Array} — отдельная
      * ветка API, которую легко упустить.</p>
+     *
      * @param length Длина
      * @return Новый массив этого типа элементов
      */

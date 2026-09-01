@@ -33,21 +33,25 @@ public final class Boxed {
     /**
      * Тип-обёртка для примитива; для ссылочного типа — он сам.
      * @return Тип-обёртка для примитива; для ссылочного типа — он сам
+     * @checkstyle CyclomaticComplexityCheck (20 lines)
      */
     public Class<?> type() {
-        if (!this.type.isPrimitive()) {
-            return this.type;
+        final Class<?> boxed;
+        if (this.type.isPrimitive()) {
+            boxed = switch (this.type.getName()) {
+                case "int" -> Integer.class;
+                case "long" -> Long.class;
+                case "double" -> Double.class;
+                case "float" -> Float.class;
+                case "short" -> Short.class;
+                case "byte" -> Byte.class;
+                case "char" -> Character.class;
+                case "boolean" -> Boolean.class;
+                case null, default -> Void.class;
+            };
+        } else {
+            boxed = this.type;
         }
-        return switch (this.type.getName()) {
-            case "int" -> Integer.class;
-            case "long" -> Long.class;
-            case "double" -> Double.class;
-            case "float" -> Float.class;
-            case "short" -> Short.class;
-            case "byte" -> Byte.class;
-            case "char" -> Character.class;
-            case "boolean" -> Boolean.class;
-            default -> Void.class;
-        };
+        return boxed;
     }
 }

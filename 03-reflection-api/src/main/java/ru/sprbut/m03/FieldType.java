@@ -60,12 +60,15 @@ public final class FieldType {
      * @return Фактические типы-аргументы: для {@code Map<String, BigDecimal>} — оба
      */
     public List<String> arguments() {
+        final List<String> found;
         if (this.field.getGenericType() instanceof ParameterizedType parameterized) {
-            return Arrays.stream(parameterized.getActualTypeArguments())
-                .map(this::name)
+            found = Arrays.stream(parameterized.getActualTypeArguments())
+                .map(FieldType::name)
                 .toList();
+        } else {
+            found = List.of();
         }
-        return List.of();
+        return found;
     }
 
     /**
@@ -84,8 +87,13 @@ public final class FieldType {
         return this.field.getType().isPrimitive();
     }
 
-    // @checkstyle NonStaticMethodCheck (3 lines)
-    private String name(final Type type) {
-        return type instanceof Class<?> known ? known.getSimpleName() : type.getTypeName();
+    private static String name(final Type type) {
+        final String shown;
+        if (type instanceof Class<?> known) {
+            shown = known.getSimpleName();
+        } else {
+            shown = type.getTypeName();
+        }
+        return shown;
     }
 }

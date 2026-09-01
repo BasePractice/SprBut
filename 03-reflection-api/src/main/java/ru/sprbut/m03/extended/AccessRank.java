@@ -39,15 +39,16 @@ public final class AccessRank {
      */
     public int value() {
         final int mask = this.member.getModifiers();
+        final int rank;
         if (Modifier.isPublic(mask)) {
-            return 0;
+            rank = 0;
+        } else if (Modifier.isProtected(mask)) {
+            rank = 1;
+        } else if (Modifier.isPrivate(mask)) {
+            rank = 3;
+        } else {
+            rank = 2;
         }
-        if (Modifier.isProtected(mask)) {
-            return 1;
-        }
-        if (Modifier.isPrivate(mask)) {
-            return 3;
-        }
-        return 2;
+        return rank;
     }
 }

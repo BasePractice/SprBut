@@ -52,15 +52,7 @@ public final class Flags {
      */
     public List<String> names() {
         final List<String> found = new ArrayList<>(0);
-        if (Modifier.isPublic(this.mask)) {
-            found.add("public");
-        }
-        if (Modifier.isProtected(this.mask)) {
-            found.add("protected");
-        }
-        if (Modifier.isPrivate(this.mask)) {
-            found.add("private");
-        }
+        Flags.access(this.mask, found);
         if (Modifier.isStatic(this.mask)) {
             found.add("static");
         }
@@ -87,7 +79,7 @@ public final class Flags {
 
     /**
      * Ровно то, что печатает {@code javap}: модификаторы в каноническом порядке.
-     * @return Ровно то, что печатает {@code javap}: модификаторы в каноническом порядке
+     * @return Модификаторы в каноническом порядке
      */
     public String text() {
         return Modifier.toString(this.mask);
@@ -95,7 +87,7 @@ public final class Flags {
 
     /**
      * Package-private — отсутствие public, protected и private одновременно.
-     * @return Package-private — отсутствие public, protected и private одновременно
+     * @return Признак package-private
      */
     public boolean packagePrivate() {
         return !Modifier.isPublic(this.mask)
@@ -117,5 +109,17 @@ public final class Flags {
      */
     public boolean validForField() {
         return (this.mask & Modifier.fieldModifiers()) == this.mask;
+    }
+
+    private static void access(final int mask, final List<String> found) {
+        if (Modifier.isPublic(mask)) {
+            found.add("public");
+        }
+        if (Modifier.isProtected(mask)) {
+            found.add("protected");
+        }
+        if (Modifier.isPrivate(mask)) {
+            found.add("private");
+        }
     }
 }

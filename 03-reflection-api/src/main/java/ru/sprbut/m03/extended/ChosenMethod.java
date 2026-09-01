@@ -42,9 +42,13 @@ public final class ChosenMethod {
 
     /**
      * Основной конструктор.
+     *
+     * <p>Копия списка аргументов снимается здесь: объект обязан быть неизменяемым.</p>
+     *
      * @param type Тип
      * @param name Имя
      * @param args Аргументы
+     * @checkstyle ConstructorsCodeFreeCheck (6 lines)
      */
     public ChosenMethod(final Class<?> type, final String name, final List<String> args) {
         this.type = type;
@@ -70,15 +74,17 @@ public final class ChosenMethod {
         }
         return candidates.stream()
             .min(
-                Comparator.comparingInt((Method each) -> each.isVarArgs() ? 1 : 0)
-                    .thenComparingInt(
-                        each -> new AccessRank(each).value()
-                    )
+                Comparator.comparingInt(ChosenMethod::spread)
+                    .thenComparingInt(each -> new AccessRank(each).value())
             )
-            .orElseThrow(() -> new IllegalArgumentException(
-                "У " + this.type.getSimpleName() + " нет метода '" + this.name
-                    + "' с " + this.args.size() + " аргументами"
-            ));
+            .orElseThrow(
+                () -> new IllegalArgumentException(
+                    String.format(
+                        "У %s нет метода '%s' с %s аргументами",
+                        this.type.getSimpleName(), this.name, this.args.size()
+                    )
+                )
+            );
     }
 
     /**
@@ -86,28 +92,32 @@ public final class ChosenMethod {
      *
      * <p>Хвост varargs упаковывается через {@link Array#newInstance}: обычным
      * {@code new} это сделать нельзя, тип элемента известен только в runtime.</p>
+     *
      * @return Аргументы, приведённые к типам параметров
      */
     public Object[] arguments() {
         final Method chosen = this.method();
         final Class<?>[] parameters = chosen.getParameterTypes();
         final Object[] values = new Object[parameters.length];
-        if (!chosen.isVarArgs()) {
-            for (int index = 0; index < parameters.length; index++) {
-                values[index] = new Argument(this.args.get(index), parameters[index]).value();
-            }
-            return values;
+        final int fixed;
+        if (chosen.isVarArgs()) {
+            fixed = parameters.length - 1;
+        } else {
+            fixed = parameters.length;
         }
-        final int fixed = parameters.length - 1;
-        for (int index = 0; index < fixed; index++) {
+        for (int index = 0; index < fixed; index += 1) {
             values[index] = new Argument(this.args.get(index), parameters[index]).value();
         }
-        final Class<?> component = parameters[fixed].getComponentType();
-        final Object tail = Array.newInstance(component, this.args.size() - fixed);
-        for (int index = 0; index < this.args.size() - fixed; index++) {
-            Array.set(tail, index, new Argument(this.args.get(fixed + index), component).value());
+        if (chosen.isVarArgs()) {
+            final Class<?> component = parameters[fixed].getComponentType();
+            final Object tail = Array.newInstance(component, this.args.size() - fixed);
+            for (int index = 0; index < this.args.size() - fixed; index += 1) {
+                Array.set(
+                    tail, index, new Argument(this.args.get(fixed + index), component).value()
+                );
+            }
+            values[fixed] = tail;
         }
-        values[fixed] = tail;
         return values;
     }
 
@@ -121,19 +131,35 @@ public final class ChosenMethod {
         final Method chosen = this.method();
         chosen.setAccessible(true);
         try {
-            return chosen.invoke(
-                Modifier.isStatic(chosen.getModifiers()) ? null : instance,
-                this.arguments()
-            );
+            final Object target;
+            if (Modifier.isStatic(chosen.getModifiers())) {
+                target = null;
+            } else {
+                target = instance;
+            }
+            return chosen.invoke(target, this.arguments());
         } catch (final ReflectiveOperationException failure) {
             throw new Unwrapped(failure).cause();
         }
     }
 
-    private boolean fits(final Method candidate) {
-        if (candidate.isVarArgs()) {
-            return this.args.size() >= candidate.getParameterCount() - 1;
+    private static int spread(final Method each) {
+        final int rank;
+        if (each.isVarArgs()) {
+            rank = 1;
+        } else {
+            rank = 0;
         }
-        return candidate.getParameterCount() == this.args.size();
+        return rank;
+    }
+
+    private boolean fits(final Method candidate) {
+        final boolean suits;
+        if (candidate.isVarArgs()) {
+            suits = this.args.size() >= candidate.getParameterCount() - 1;
+        } else {
+            suits = candidate.getParameterCount() == this.args.size();
+        }
+        return suits;
     }
 }

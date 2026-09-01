@@ -64,11 +64,13 @@ public final class Constructors {
      * @return Конструктор без параметров, если он есть
      */
     public Optional<Constructor<?>> noArg() {
+        Optional<Constructor<?>> found;
         try {
-            return Optional.of(this.type.getDeclaredConstructor());
+            found = Optional.of(this.type.getDeclaredConstructor());
         } catch (final NoSuchMethodException absent) {
-            return Optional.empty();
+            found = Optional.empty();
         }
+        return found;
     }
 
     /**
@@ -86,36 +88,34 @@ public final class Constructors {
      * и совместимость типов с учётом автобоксинга. При равном соответствии
      * предпочитается более доступный.
      * @param args Аргументы
-     * @return Конструктор, подходящий под конкретные аргументы: сравниваются количество и совместимость типов с учётом автобоксинга. При равном соответствии предпочитается более доступный
+     * @return Конструктор, подходящий под конкретные аргументы
      */
     public Optional<Constructor<?>> matching(final Object... args) {
         return Arrays.stream(this.type.getDeclaredConstructors())
-            .filter(
-                candidate -> this.fits(
-                    candidate.getParameterTypes(), args
-                )
-            )
-            .min(Comparator.comparingInt(
-                candidate -> Modifier.isPublic(
-                    candidate.getModifiers()
-                ) ? 0 : 1));
+            .filter(candidate -> Constructors.fits(candidate.getParameterTypes(), args))
+            .min(Comparator.comparingInt(Constructors::rank));
     }
 
+    private static int rank(final Constructor<?> candidate) {
+        final int rank;
+        if (Modifier.isPublic(candidate.getModifiers())) {
+            rank = 0;
+        } else {
+            rank = 1;
+        }
+        return rank;
+    }
+
+    @SuppressWarnings("PMD.UseVarargs")
     private static boolean fits(final Class<?>[] parameters, final Object[] args) {
-        if (parameters.length != args.length) {
-            return false;
-        }
-        for (int index = 0; index < parameters.length; index++) {
+        boolean suits = parameters.length == args.length;
+        for (int index = 0; suits && index < parameters.length; index += 1) {
             if (args[index] == null) {
-                if (parameters[index].isPrimitive()) {
-                    return false;
-                }
-                continue;
-            }
-            if (!new Boxed(parameters[index]).type().isInstance(args[index])) {
-                return false;
+                suits = !parameters[index].isPrimitive();
+            } else {
+                suits = new Boxed(parameters[index]).type().isInstance(args[index]);
             }
         }
-        return true;
+        return suits;
     }
 }

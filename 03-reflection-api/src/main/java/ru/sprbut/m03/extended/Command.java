@@ -57,7 +57,7 @@ public final class Command {
         }
         final Spec target = new Spec(this.text.substring(0, hash).trim());
         final Spec call = new Spec(this.text.substring(hash + 1).trim());
-        final Class<?> type = this.type(target.name());
+        final Class<?> type = Command.type(target.name());
         final ChosenConstructor chosen = new ChosenConstructor(type, target.args().size());
         final ChosenMethod method = new ChosenMethod(type, call.name(), call.args());
         return new Invocation(
@@ -72,7 +72,9 @@ public final class Command {
         try {
             return Class.forName(name);
         } catch (final ClassNotFoundException absent) {
-            throw new IllegalArgumentException("Класс не найден: " + name, absent);
+            throw new IllegalArgumentException(
+                String.format("Класс не найден: %s", name), absent
+            );
         }
     }
 }

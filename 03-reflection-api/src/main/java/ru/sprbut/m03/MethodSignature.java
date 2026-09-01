@@ -65,7 +65,7 @@ public final class MethodSignature {
      * Имена параметров — но только если класс скомпилирован с флагом
      * {@code -parameters}. Иначе здесь будут {@code arg0}, {@code arg1};
      * в этом проекте флаг включён в корневом {@code pom.xml}.
-     * @return Имена параметров — но только если класс скомпилирован с флагом {@code -parameters}. Иначе здесь будут {@code arg0}, {@code arg1}; в этом проекте флаг включён в корневом {@code pom.xml}
+     * @return Имена параметров
      */
     public List<String> parameterNames() {
         return Arrays.stream(this.method.getParameters())
@@ -86,7 +86,7 @@ public final class MethodSignature {
     /**
      * Переменное число аргументов. В байткоде это обычный параметр-массив
      * плюс отдельный флаг, поэтому {@code getParameterTypes()} покажет массив.
-     * @return Переменное число аргументов. В байткоде это обычный параметр-массив плюс отдельный флаг, поэтому {@code getParameterTypes()} покажет массив
+     * @return Признак переменного числа аргументов
      */
     public boolean varargs() {
         return this.method.isVarArgs();
@@ -114,7 +114,11 @@ public final class MethodSignature {
      * @return Компактная подпись — для сообщений об ошибках и логов
      */
     public String text() {
-        return this.method.getReturnType().getSimpleName() + " " + this.method.getName()
-            + "(" + String.join(", ", this.parameterTypes()) + ")";
+        return String.format(
+            "%s %s(%s)",
+            this.method.getReturnType().getSimpleName(),
+            this.method.getName(),
+            String.join(", ", this.parameterTypes())
+        );
     }
 }

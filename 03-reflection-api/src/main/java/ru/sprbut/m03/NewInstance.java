@@ -48,34 +48,30 @@ public final class NewInstance {
      */
     @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     public Object object() {
-        final Constructor<?> chosen = new Constructors(
-            this.type
-        ).matching(
-            this.args
-        )
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Нет конструктора " + this.type.getSimpleName()
-                    + " под аргументы " + Arrays.toString(
-                        this.args
+        final Constructor<?> chosen = new Constructors(this.type).matching(this.args)
+            .orElseThrow(
+                () -> new IllegalArgumentException(
+                    String.format(
+                        "Нет конструктора %s под аргументы %s",
+                        this.type.getSimpleName(), Arrays.toString(this.args)
                     )
-            ));
+                )
+            );
         chosen.setAccessible(true);
         try {
             return chosen.newInstance(this.args);
-        } catch (final InstantiationException abstractType) {
+        } catch (final InstantiationException nope) {
             throw new IllegalStateException(
-                "Нельзя создать экземпляр " + this.type.getSimpleName()
-                    + " — абстрактный класс или интерфейс",
-                abstractType
+                String.format(
+                    "Нельзя создать экземпляр %s — абстрактный класс или интерфейс",
+                    this.type.getSimpleName()
+                ),
+                nope
             );
         } catch (final IllegalAccessException denied) {
             throw new IllegalStateException("Нет доступа к конструктору", denied);
         } catch (final InvocationTargetException wrapped) {
-            final Throwable cause = wrapped.getCause();
-            if (cause instanceof RuntimeException unchecked) {
-                throw unchecked;
-            }
-            throw new IllegalStateException(cause);
+            throw new IllegalStateException(wrapped.getCause().getMessage(), wrapped);
         }
     }
 }

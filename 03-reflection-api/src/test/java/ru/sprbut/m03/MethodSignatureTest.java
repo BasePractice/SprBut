@@ -44,7 +44,8 @@ final class MethodSignatureTest {
     void readsParameterTypes() throws NoSuchMethodException {
         MatcherAssert.assertThat(
             "parameter types cannot be listed in declaration order",
-            new MethodSignature(Order.class.getMethod("setCustomer", String.class)).parameterTypes(),
+            new MethodSignature(Order.class.getMethod("setCustomer", String.class))
+                .parameterTypes(),
             Matchers.contains("String")
         );
     }
@@ -54,7 +55,8 @@ final class MethodSignatureTest {
     void readsParameterNames() throws NoSuchMethodException {
         MatcherAssert.assertThat(
             "parameter names cannot survive compilation",
-            new MethodSignature(Order.class.getMethod("setCustomer", String.class)).parameterNames(),
+            new MethodSignature(Order.class.getMethod("setCustomer", String.class))
+                .parameterNames(),
             Matchers.contains("customer")
         );
     }

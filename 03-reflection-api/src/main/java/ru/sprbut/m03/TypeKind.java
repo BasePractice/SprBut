@@ -35,24 +35,22 @@ public final class TypeKind {
      * @return Одно из: primitive, array, enum, annotation, interface, record, class
      */
     public String name() {
+        final String kind;
         if (this.type.isPrimitive()) {
-            return "primitive";
+            kind = "primitive";
+        } else if (this.type.isArray()) {
+            kind = "array";
+        } else if (this.type.isEnum()) {
+            kind = "enum";
+        } else if (this.type.isAnnotation()) {
+            kind = "annotation";
+        } else if (this.type.isInterface()) {
+            kind = "interface";
+        } else if (this.type.isRecord()) {
+            kind = "record";
+        } else {
+            kind = "class";
         }
-        if (this.type.isArray()) {
-            return "array";
-        }
-        if (this.type.isEnum()) {
-            return "enum";
-        }
-        if (this.type.isAnnotation()) {
-            return "annotation";
-        }
-        if (this.type.isInterface()) {
-            return "interface";
-        }
-        if (this.type.isRecord()) {
-            return "record";
-        }
-        return "class";
+        return kind;
     }
 }
