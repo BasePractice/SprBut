@@ -47,7 +47,9 @@ public final class EmptyBean {
             return constructor.newInstance();
         } catch (final ReflectiveOperationException failure) {
             throw new IllegalStateException(
-                "Не удалось создать " + this.type.getName() + " конструктором без параметров",
+                String.format(
+                    "Не удалось создать %s конструктором без параметров", this.type.getName()
+                ),
                 failure
             );
         }

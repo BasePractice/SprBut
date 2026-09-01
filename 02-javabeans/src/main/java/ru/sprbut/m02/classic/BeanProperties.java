@@ -45,14 +45,14 @@ public final class BeanProperties {
         final List<String> names = new ArrayList<>(0);
         for (final Method method : this.type.getMethods()) {
             if (method.getDeclaringClass() == Object.class || method.getParameterCount() != 0) {
-
                 continue;
             }
             final String name = method.getName();
-            if (name.startsWith("get") && name.length() > 3 && method.getReturnType() != void.class) {
-
+            if (name.startsWith("get") && name.length() > 3
+                && method.getReturnType() != void.class) {
                 names.add(new PropertyKey(name.substring(3)).decapitalized());
-            } else if (name.startsWith("is") && name.length() > 2 && this.boolish(method)) {
+            } else if (name.startsWith("is") && name.length() > 2
+                && BeanProperties.boolish(method)) {
                 names.add(new PropertyKey(name.substring(2)).decapitalized());
             }
         }
@@ -83,14 +83,17 @@ public final class BeanProperties {
      */
     public Method reader(final String property) {
         final String suffix = new PropertyKey(property).capitalized();
+        Method found = null;
         for (final String prefix : new String[]{"get", "is"}) {
-            try {
-                return this.type.getMethod(prefix + suffix);
-            } catch (final NoSuchMethodException absent) {
-                continue;
+            if (found == null) {
+                try {
+                    found = this.type.getMethod(String.format("%s%s", prefix, suffix));
+                } catch (final NoSuchMethodException absent) {
+                    continue;
+                }
             }
         }
-        return null;
+        return found;
     }
 
     private static boolean boolish(final Method method) {

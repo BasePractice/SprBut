@@ -4,6 +4,14 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
+// тема раздела — те же свойства JavaBeans, но в неизменяемом виде: имена
+// свойств и одноимённые параметры builder-методов заданы предметной областью
+// @checkstyle MemberNameCheck disable
+// @checkstyle ParameterNameCheck disable
+// @checkstyle HiddenFieldCheck disable
+// Builder живёт рядом с тем, что собирает: раздел показывает именно пару
+// @checkstyle ProhibitStaticNestedClassesCheck disable
+// @checkstyle QualifyInnerClassCheck disable
 package ru.sprbut.m02.modern;
 
 import java.util.List;
@@ -25,59 +33,64 @@ public final class ImmutableCustomer {
      * Идентификатор.
      */
     private final String id;
+
     /**
      * Имя.
      */
     private final String firstName;
+
     /**
      * Имя.
      */
     private final String lastName;
+
     /**
      * Возраст.
      */
     private final int age;
+
     /**
      * Признак привилегированного клиента.
      */
     private final boolean vip;
+
     /**
      * Метки.
      */
     private final List<String> tags;
 
+    // защитная копия меток: снаружи изменить список после сборки уже нельзя
+    // @checkstyle ConstructorsCodeFreeCheck (8 lines)
     private ImmutableCustomer(final Builder builder) {
         this.id = Objects.requireNonNull(builder.id, "id обязателен");
         this.firstName = builder.firstName;
         this.lastName = builder.lastName;
         this.age = builder.age;
         this.vip = builder.vip;
-        // Защитная копия: снаружи изменить список после сборки уже нельзя
         this.tags = List.copyOf(builder.tags);
     }
 
     /**
-     * Значение {@code builder}.
-     * @return Значение {@code builder}
+     * Новый пустой builder.
+     * @return Новый пустой builder
      */
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
     public static Builder builder() {
         return new Builder();
     }
 
     /**
      * «Изменение» неизменяемого объекта: builder, предзаполненный текущими значениями.
-     * @return «Изменение» неизменяемого объекта: builder, предзаполненный текущими значениями
+     * @return Builder, предзаполненный текущими значениями
      */
     public Builder toBuilder() {
         return new Builder()
-                .id(
-                    this.id
-                )
-                .firstName(this.firstName)
-                .lastName(this.lastName)
-                .age(this.age)
-                .vip(this.vip)
-                .tags(this.tags);
+            .id(this.id)
+            .firstName(this.firstName)
+            .lastName(this.lastName)
+            .age(this.age)
+            .vip(this.vip)
+            .tags(this.tags);
     }
 
     /**
@@ -129,20 +142,21 @@ public final class ImmutableCustomer {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
+    public boolean equals(final Object other) {
+        final boolean same;
+        if (this == other) {
+            same = true;
+        } else if (other instanceof ImmutableCustomer customer) {
+            same = this.age == customer.age
+                && this.vip == customer.vip
+                && Objects.equals(this.id, customer.id)
+                && Objects.equals(this.firstName, customer.firstName)
+                && Objects.equals(this.lastName, customer.lastName)
+                && Objects.equals(this.tags, customer.tags);
+        } else {
+            same = false;
         }
-        if (!(o instanceof ImmutableCustomer other)) {
-            return false;
-        }
-        return this.age == other.age && this.vip == other.vip
-                && Objects.equals(
-                    this.id, other.id
-                )
-                && Objects.equals(this.firstName, other.firstName)
-                && Objects.equals(this.lastName, other.lastName)
-                && Objects.equals(this.tags, other.tags);
+        return same;
     }
 
     @Override
@@ -152,13 +166,16 @@ public final class ImmutableCustomer {
 
     @Override
     public String toString() {
-        return "ImmutableCustomer{this.id=" + this.id + ", fullName=" + this.firstName + " " + this.lastName + "}";
+        return String.format(
+            "ImmutableCustomer{id=%s, fullName=%s %s}", this.id, this.firstName, this.lastName
+        );
     }
 
     /**
      * Классический Builder: изменяемый только он, результат — неизменяем.
      * @since 1.0
      */
+    @SuppressWarnings("PMD.ConstructorShouldDoInitialization")
     public static final class Builder {
 
         /**
@@ -235,7 +252,9 @@ public final class ImmutableCustomer {
          */
         public Builder age(final int age) {
             if (age < 0) {
-                throw new IllegalArgumentException("Возраст не может быть отрицательным: " + age);
+                throw new IllegalArgumentException(
+                    String.format("Возраст не может быть отрицательным: %d", age)
+                );
             }
             this.age = age;
             return this;
@@ -257,13 +276,17 @@ public final class ImmutableCustomer {
          * @return Метки
          */
         public Builder tags(final List<String> tags) {
-            this.tags = tags == null ? List.of() : tags;
+            if (tags == null) {
+                this.tags = List.of();
+            } else {
+                this.tags = tags;
+            }
             return this;
         }
 
         /**
-         * Значение {@code build}.
-         * @return Значение {@code build}
+         * Собранный неизменяемый объект.
+         * @return Собранный неизменяемый объект
          */
         public ImmutableCustomer build() {
             return new ImmutableCustomer(this);

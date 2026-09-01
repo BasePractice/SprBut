@@ -70,7 +70,9 @@ public final class BeanValue {
         return new Introspected(this.bean.getClass())
             .descriptor(this.property)
             .orElseThrow(
-                () -> new IllegalArgumentException("Нет свойства '" + this.property + "'")
+                () -> new IllegalArgumentException(
+                    String.format("Нет свойства '%s'", this.property)
+                )
             );
     }
 }

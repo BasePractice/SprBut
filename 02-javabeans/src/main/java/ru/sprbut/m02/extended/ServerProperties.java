@@ -4,6 +4,12 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
+// тема раздела — JavaBean как держатель конфигурации: имена свойств
+// и одноимённые параметры сеттеров задаёт спецификация, по ним же
+// биндер находит соответствие
+// @checkstyle MemberNameCheck disable
+// @checkstyle ParameterNameCheck disable
+// @checkstyle HiddenFieldCheck disable
 package ru.sprbut.m02.extended;
 
 import java.io.Serializable;
@@ -13,15 +19,23 @@ import ru.sprbut.m02.classic.BeanMap;
 
 /**
  * Классический JavaBean в его самой типичной роли — держатель конфигурации.
- * Заполняется {@link BeanBinder} из карты «ключ → строка».
+ * Заполняется {@link BeanBinder} из карты, где ключу отвечает строка.
  *
  * <p>Это ровно та форма, которую в Spring Boot имеет класс с
  * {@code @ConfigurationProperties(prefix = "server")} (модуль 16).</p>
  *
  * @since 1.0
  */
+// держатель конфигурации намеренно состоит из одних свойств:
+// это ровно та форма, которую биндер умеет заполнять
+@SuppressWarnings({
+    "PMD.DataClass", "PMD.TooManyMethods", "PMD.ConstructorShouldDoInitialization"
+})
 public class ServerProperties implements Serializable {
 
+    /**
+     * Версия для сериализации.
+     */
     private static final long serialVersionUID = 1L;
 
     /**
@@ -96,7 +110,9 @@ public class ServerProperties implements Serializable {
      */
     public void setPort(final int port) {
         if (port < 1 || port > 65_535) {
-            throw new IllegalArgumentException("Порт вне диапазона 1..65535: " + port);
+            throw new IllegalArgumentException(
+                String.format("Порт вне диапазона 1..65535: %d", port)
+            );
         }
         this.port = port;
     }
@@ -183,19 +199,42 @@ public class ServerProperties implements Serializable {
 
     /**
      * Вычисляемое свойство: только чтение, биндер его не трогает.
-     * @return Вычисляемое свойство: только чтение, биндер его не трогает
+     * @return Базовый адрес, собранный из остальных свойств
      */
     public String getBaseUrl() {
-        return (this.sslEnabled ? "https://" : "http://") + this.host + ":" + this.port;
+        final String scheme;
+        if (this.sslEnabled) {
+            scheme = "https";
+        } else {
+            scheme = "http";
+        }
+        return String.format("%s://%s:%d", scheme, this.host, this.port);
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return String.format("ServerProperties%s", new BeanMap(this).text());
     }
 
     /**
-     * Значение {@code Mode}.
+     * Режим работы сервера.
+     * @since 1.0
      */
-    public enum Mode { DEV, STAGE, PROD }
+    public enum Mode {
+
+        /**
+         * Разработка.
+         */
+        DEV,
+
+        /**
+         * Предпродакшн.
+         */
+        STAGE,
+
+        /**
+         * Промышленная эксплуатация.
+         */
+        PROD
+    }
 }

@@ -4,6 +4,9 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
+// исключение любого типа при разборе строки означает одно и то же:
+// значение не приводится к целевому типу
+// @checkstyle IllegalCatchCheck disable
 package ru.sprbut.m02.extended;
 
 import java.math.BigDecimal;
@@ -77,40 +80,56 @@ public final class Converted {
      * Значение нужного типа.
      * @return Значение нужного типа
      */
-    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     public Object value() {
+        final Object converted;
         if (this.target.isEnum()) {
-            return this.constant();
+            converted = this.constant();
+        } else {
+            converted = this.applied();
         }
-        final Function<String, Object> rule = RULES.get(this.target);
+        return converted;
+    }
+
+    // применение готового правила: исключение любого типа означает одно —
+    // строка не приводится к целевому типу
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
+    private Object applied() {
+        final Function<String, Object> rule = Converted.RULES.get(this.target);
         if (rule == null) {
             throw new IllegalArgumentException(
-                "Свойство '" + this.property + "': нет конвертера для типа "
-                    + this.target.getSimpleName()
+                String.format(
+                    "Свойство '%s': нет конвертера для типа %s",
+                    this.property, this.target.getSimpleName()
+                )
             );
         }
+        final Object converted;
         try {
-            return rule.apply(this.raw);
+            converted = rule.apply(this.raw);
         } catch (final RuntimeException malformed) {
             throw new IllegalArgumentException(
-                "Свойство '" + this.property + "': значение '" + this.raw
-                    + "' не приводится к " + this.target.getSimpleName(),
+                String.format(
+                    "Свойство '%s': значение '%s' не приводится к %s",
+                    this.property, this.raw, this.target.getSimpleName()
+                ),
                 malformed
             );
         }
+        return converted;
     }
 
     private Object constant() {
         return Arrays.stream(this.target.getEnumConstants())
-            .filter(
-                candidate -> ((Enum<?>) candidate).name().equalsIgnoreCase(this.raw)
-            )
+            .filter(candidate -> ((Enum<?>) candidate).name().equalsIgnoreCase(this.raw))
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException(
-                "Свойство '" + this.property + "': '" + this.raw + "' не входит в "
-                    + Arrays.toString(
-                        this.target.getEnumConstants()
+            .orElseThrow(
+                () -> new IllegalArgumentException(
+                    String.format(
+                        "Свойство '%s': '%s' не входит в %s",
+                        this.property, this.raw,
+                        Arrays.toString(this.target.getEnumConstants())
                     )
-            ));
+                )
+            );
     }
 }

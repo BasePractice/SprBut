@@ -74,11 +74,12 @@ public final class BeanVerdict {
         final BeanProperties properties = new BeanProperties(this.type);
         for (final String property : properties.writable()) {
             if (properties.reader(property) == null) {
-                found.add("у свойства '" + property + "' есть setter, но нет getter");
+                found.add(
+                    String.format("у свойства '%s' есть setter, но нет getter", property)
+                );
             }
         }
         if (this.serializable && !Serializable.class.isAssignableFrom(this.type)) {
-
             found.add("класс не реализует Serializable");
         }
         return List.copyOf(found);
@@ -87,14 +88,15 @@ public final class BeanVerdict {
     /**
      * Первое требование соглашения: {@code public Xxx()}. Без него контейнер
      * не сможет создать объект дефолтным способом.
-     * @return Первое требование соглашения: {@code public Xxx()}. Без него контейнер не сможет создать объект дефолтным способом
+     * @return Признак того, что у класса есть публичный конструктор без параметров
      */
     public boolean constructible() {
+        boolean found = false;
         for (final Constructor<?> candidate : this.type.getConstructors()) {
-            if (candidate.getParameterCount() == 0 && Modifier.isPublic(candidate.getModifiers())) {
-                return true;
-            }
+            found = found
+                || candidate.getParameterCount() == 0
+                && Modifier.isPublic(candidate.getModifiers());
         }
-        return false;
+        return found;
     }
 }

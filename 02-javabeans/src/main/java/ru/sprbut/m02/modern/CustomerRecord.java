@@ -18,18 +18,16 @@ package ru.sprbut.m02.modern;
  * {@link java.beans.Introspector} не увидит у него ни одного свойства, и
  * старый код, рассчитанный на соглашение, с record работать не будет.</p>
  *
- * @param age Параметр типа
- * @param firstName Параметр типа
+ * @param id Идентификатор
+ * @param firstName Имя
+ * @param lastName Фамилия
+ * @param age Возраст
+ * @param vip Признак привилегированного клиента
  * @since 1.0
  */
-public record CustomerRecord(String id, String firstName, String lastName, int age, boolean vip) {
-
-    /**
-     * Изменение состояния у неизменяемого объекта — это создание нового.
-     */
-    public CustomerRecord withVip(final boolean newVip) {
-        return new CustomerRecord(this.id, this.firstName, this.lastName, this.age, newVip);
-    }
+public record CustomerRecord(
+    String id, String firstName, String lastName, int age, boolean vip
+) {
 
     /**
      * Компактный конструктор: валидация выполняется один раз, при создании.
@@ -39,8 +37,20 @@ public record CustomerRecord(String id, String firstName, String lastName, int a
             throw new IllegalArgumentException("id обязателен");
         }
         if (age < 0) {
-            throw new IllegalArgumentException("Возраст не может быть отрицательным: " + age);
+            throw new IllegalArgumentException(
+                String.format("Возраст не может быть отрицательным: %d", age)
+            );
         }
+    }
+
+    /**
+     * Изменение состояния у неизменяемого объекта — это создание нового.
+     * @param vip Новый признак привилегированного клиента
+     * @return Новый объект с изменённым признаком
+     * @checkstyle HiddenFieldCheck (3 lines)
+     */
+    public CustomerRecord withVip(final boolean vip) {
+        return new CustomerRecord(this.id, this.firstName, this.lastName, this.age, vip);
     }
 
     /**

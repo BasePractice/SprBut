@@ -6,7 +6,6 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m02.classic;
 
-import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -98,11 +97,11 @@ public final class Introspected {
      */
     public List<PropertyDescriptor> descriptors() {
         try {
-            final BeanInfo info = Introspector.getBeanInfo(this.type);
-            return Arrays.asList(info.getPropertyDescriptors());
+            return Arrays.asList(Introspector.getBeanInfo(this.type).getPropertyDescriptors());
         } catch (final IntrospectionException failure) {
             throw new IllegalStateException(
-                String.format("Introspector не смог разобрать %s", this.type.getName(), failure)
+                String.format("Introspector не смог разобрать %s", this.type.getName()),
+                failure
             );
         }
     }

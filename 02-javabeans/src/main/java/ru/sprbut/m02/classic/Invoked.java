@@ -44,17 +44,22 @@ public final class Invoked {
      * @param args Аргументы
      * @return Возвращённое методом значение
      */
+    // unchecked-исключение цели пробрасывается как есть: подменять его
+    // обёрткой значит скрывать настоящую причину от вызывающего кода
+    @SuppressWarnings("PMD.PreserveStackTrace")
     public Object value(final Object... args) {
         try {
             return this.method.invoke(this.target, args);
         } catch (final IllegalAccessException denied) {
-            throw new IllegalStateException("Нет доступа к " + this.method.getName(), denied);
+            throw new IllegalStateException(
+                String.format("Нет доступа к %s", this.method.getName()), denied
+            );
         } catch (final InvocationTargetException wrapped) {
             final Throwable cause = wrapped.getCause();
             if (cause instanceof RuntimeException unchecked) {
                 throw unchecked;
             }
-            throw new IllegalStateException(cause);
+            throw new IllegalStateException(cause.getMessage(), cause);
         }
     }
 }

@@ -28,7 +28,10 @@ final class BoundBeanTest {
     void convertsNumber() {
         MatcherAssert.assertThat(
             "string value cannot become an int property",
-            new BoundBean<>(ServerProperties.class, Map.of("port", "8443")).result().bean().getPort(),
+            new BoundBean<>(ServerProperties.class, Map.of("port", "8443"))
+                .result()
+                .bean()
+                .getPort(),
             Matchers.equalTo(8443)
         );
     }

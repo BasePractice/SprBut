@@ -19,7 +19,8 @@ import ru.sprbut.m02.classic.PropertyKey;
 /**
  * <b>Расширенный пример модуля 02.</b>
  *
- * <p>Мини-биндер конфигурации: заполняет JavaBean из плоской карты «ключ → строка»,
+ * <p>Мини-биндер конфигурации: заполняет JavaBean из плоской карты,
+ * где ключу отвечает строка,
  * ровно как {@code @ConfigurationProperties} заполняет объект из
  * {@code application.yaml}. Именно ради этого сценария соглашение JavaBeans
  * и существует — контейнеру нужен конструктор без параметров, чтобы создать
@@ -50,6 +51,7 @@ public final class BoundBean<T> {
      * @param type Тип
      * @param values Значения
      */
+    // @checkstyle ConstructorsCodeFreeCheck (4 lines)
     public BoundBean(final Class<T> type, final Map<String, String> values) {
         this.type = type;
         this.values = Map.copyOf(values);
@@ -57,7 +59,6 @@ public final class BoundBean<T> {
 
     /**
      * Заполненный объект вместе с отчётом о привязке.
-     * @throws IllegalArgumentException если класс не подчиняется соглашению JavaBeans
      * @return Заполненный объект вместе с отчётом о привязке
      */
     @SuppressWarnings("unchecked")
@@ -65,8 +66,10 @@ public final class BoundBean<T> {
         final BeanVerdict verdict = new BeanVerdict(this.type);
         if (!verdict.valid()) {
             throw new IllegalArgumentException(
-                this.type.getSimpleName() + " не является JavaBean: "
-                    + String.join("; ", verdict.violations())
+                String.format(
+                    "%s не является JavaBean: %s",
+                    this.type.getSimpleName(), String.join("; ", verdict.violations())
+                )
             );
         }
         final T bean = (T) new EmptyBean(this.type).instance();

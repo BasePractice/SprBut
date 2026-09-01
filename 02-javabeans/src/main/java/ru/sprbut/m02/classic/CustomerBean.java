@@ -4,6 +4,11 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
+// тема раздела — спецификация JavaBeans: имена свойств и одноимённые
+// параметры сеттеров задаются ею, а не нашим стилем
+// @checkstyle MemberNameCheck disable
+// @checkstyle ParameterNameCheck disable
+// @checkstyle HiddenFieldCheck disable
 package ru.sprbut.m02.classic;
 
 import java.io.Serializable;
@@ -23,26 +28,36 @@ import java.util.Objects;
  *
  * @since 1.0
  */
+// бин намеренно состоит из одних свойств: раздел показывает,
+// во что обходится шаблонный код классического JavaBean
+@SuppressWarnings({"PMD.DataClass", "PMD.TooManyMethods"})
 public class CustomerBean implements Serializable {
 
+    /**
+     * Версия для сериализации.
+     */
     private static final long serialVersionUID = 1L;
 
     /**
      * Идентификатор.
      */
     private String id;
+
     /**
      * Имя.
      */
     private String firstName;
+
     /**
      * Имя.
      */
     private String lastName;
+
     /**
      * Возраст.
      */
     private int age;
+
     /**
      * Признак привилегированного клиента.
      */
@@ -139,35 +154,39 @@ public class CustomerBean implements Serializable {
     /**
      * Вычисляемое свойство: геттер без поля. Introspector всё равно увидит
      * свойство {@code fullName} — свойство определяется методами, а не полями.
-     * @return Вычисляемое свойство: геттер без поля. Introspector всё равно увидит свойство {@code fullName} — свойство определяется методами, а не полями
+     * @return Полное имя, собранное из двух свойств
      */
     public String getFullName() {
         return String.format("%s %s", this.firstName, this.lastName);
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
+    public final boolean equals(final Object other) {
+        final boolean same;
+        if (this == other) {
+            same = true;
+        } else if (other instanceof CustomerBean bean) {
+            same = this.age == bean.age
+                && this.vip == bean.vip
+                && Objects.equals(this.id, bean.id)
+                && Objects.equals(this.firstName, bean.firstName)
+                && Objects.equals(this.lastName, bean.lastName);
+        } else {
+            same = false;
         }
-        if (!(o instanceof CustomerBean other)) {
-            return false;
-        }
-        return this.age == other.age
-                && this.vip == other.vip
-                && Objects.equals(this.id, other.id)
-                && Objects.equals(this.firstName, other.firstName)
-                && Objects.equals(this.lastName, other.lastName);
+        return same;
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return Objects.hash(this.id, this.firstName, this.lastName, this.age, this.vip);
     }
 
     @Override
-    public String toString() {
-        return "CustomerBean{this.id=" + this.id + ", this.firstName=" + this.firstName + ", this.lastName=" + this.lastName
-                + ", this.age=" + this.age + ", this.vip=" + this.vip + "}";
+    public final String toString() {
+        return String.format(
+            "CustomerBean{id=%s, firstName=%s, lastName=%s, age=%s, vip=%s}",
+            this.id, this.firstName, this.lastName, this.age, this.vip
+        );
     }
 }

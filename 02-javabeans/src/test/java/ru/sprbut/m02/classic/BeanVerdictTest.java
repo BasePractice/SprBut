@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// образцы для проверки соглашения JavaBeans: публичные геттеры и сеттеры
+// с одноимёнными параметрами — это и есть то, что проверяет BeanVerdict
+// @checkstyle HiddenFieldCheck disable
 package ru.sprbut.m02.classic;
 
 import java.io.Serializable;
@@ -90,7 +93,7 @@ final class BeanVerdictTest {
         );
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings("PMD.PublicMemberInNonPublicType")
     private static final class NoDefaultCtor implements Serializable {
 
         /**
@@ -112,7 +115,7 @@ final class BeanVerdictTest {
         }
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "PMD.PublicMemberInNonPublicType"})
     public static final class SetterWithoutGetter implements Serializable {
 
         /**
@@ -126,7 +129,7 @@ final class BeanVerdictTest {
         }
     }
 
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "PMD.PublicMemberInNonPublicType"})
     public static final class NotSerializable {
 
         /**
