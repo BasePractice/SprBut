@@ -33,9 +33,31 @@ import java.time.Instant;
 @Table(name = "tasks")
 public class Task {
 
-    protected Task() {
-        // тело намеренно пустое
-    }
+    /**
+     * Идентификатор.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /**
+     * Название.
+     */
+    @Column(nullable = false)
+    private String title;
+
+    /**
+     * Статус.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TaskStatus status;
+
+    /**
+     * Момент создания.
+     */
+    @Column(nullable = false)
+    private Instant created;
 
     /**
      * Основной конструктор.
@@ -46,6 +68,13 @@ public class Task {
         this.title = title;
         this.status = TaskStatus.OPEN;
         this.created = created;
+    }
+
+    // JPA требует конструктор без аргументов, и делегировать основному он
+    // не может: сущность рождается пустой, поля заполняет провайдер
+    // @checkstyle ConstructorsOrderCheck (4 lines)
+    protected Task() {
+        // тело намеренно пустое
     }
 
     /**
@@ -93,32 +122,6 @@ public class Task {
     public void finish() {
         this.move(TaskStatus.DONE);
     }
-
-    /**
-     * Идентификатор.
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    /**
-     * Название.
-     */
-    @Column(nullable = false)
-    private String title;
-
-    /**
-     * Статус.
-     */
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TaskStatus status;
-
-    /**
-     * Момент создания.
-     */
-    @Column(nullable = false)
-    private Instant created;
 
     private void move(final TaskStatus next) {
         if (!next.reachableFrom(this.status)) {

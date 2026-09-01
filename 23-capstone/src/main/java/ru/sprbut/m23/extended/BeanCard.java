@@ -17,6 +17,7 @@ import java.util.List;
  *
  * @since 1.0
  */
+@SuppressWarnings("PMD.DataClass")
 public final class BeanCard {
 
     /**
@@ -41,12 +42,17 @@ public final class BeanCard {
 
     /**
      * Основной конструктор.
+     *
+     * <p>Копия списка операций снимается здесь: карточка обязана быть неизменяемой.</p>
+     *
      * @param name Имя
      * @param type Тип
      * @param scope Область видимости
-     * @param audited Значение {@code audited}
+     * @param audited Имена аудируемых операций
+     * @checkstyle ConstructorsCodeFreeCheck (8 lines)
      */
-    public BeanCard(final String name, final String type, final String scope, final List<String> audited) {
+    public BeanCard(final String name, final String type, final String scope,
+        final List<String> audited) {
         this.name = name;
         this.type = type;
         this.scope = scope;

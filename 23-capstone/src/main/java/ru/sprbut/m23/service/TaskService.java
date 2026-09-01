@@ -54,7 +54,8 @@ public final class TaskService implements Tasks {
      * @param settings Настройки
      * @param clock Часы
      */
-    public TaskService(final TaskRepository repository, final TrackerProperties settings, final Clock clock) {
+    public TaskService(final TaskRepository repository, final TrackerProperties settings,
+        final Clock clock) {
         this.repository = repository;
         this.settings = settings;
         this.clock = clock;
@@ -99,7 +100,9 @@ public final class TaskService implements Tasks {
 
     private Task task(final long id) {
         return this.repository.findById(id).orElseThrow(
-            () -> new IllegalArgumentException("Задачи " + id + " не существует")
+            () -> new IllegalArgumentException(
+                String.format("Задачи %s не существует", id)
+            )
         );
     }
 }

@@ -42,12 +42,12 @@ final class TrackerPropertiesTest {
         );
     }
 
+    /**
+     * значения из application.yaml.
+     * @since 1.0
+     */
     @Nested
     @SpringBootTest
-/**
- * значения из application.yaml.
- * @since 1.0
- */
     @DisplayName("значения из application.yaml")
     final class FromFile {
 
@@ -69,13 +69,13 @@ final class TrackerPropertiesTest {
         }
     }
 
+    /**
+     * профиль demo.
+     * @since 1.0
+     */
     @Nested
     @SpringBootTest
     @ActiveProfiles("demo")
-/**
- * профиль demo.
- * @since 1.0
- */
     @DisplayName("профиль demo")
     final class FromProfile {
 
@@ -97,14 +97,14 @@ final class TrackerPropertiesTest {
         }
     }
 
+    /**
+     * явное свойство поверх профиля.
+     * @since 1.0
+     */
     @Nested
     @SpringBootTest
     @ActiveProfiles("demo")
     @TestPropertySource(properties = "tracker.limit=42")
-/**
- * явное свойство поверх профиля.
- * @since 1.0
- */
     @DisplayName("явное свойство поверх профиля")
     final class FromProperty {
 

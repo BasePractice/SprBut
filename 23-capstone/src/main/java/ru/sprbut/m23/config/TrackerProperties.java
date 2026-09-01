@@ -6,6 +6,7 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m23.config;
 
+import java.util.Objects;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -42,14 +43,19 @@ public final class TrackerProperties {
 
     /**
      * Основной конструктор.
+     *
+     * <p>Значения по умолчанию подставляются прямо здесь: свойства могут
+     * прийти пустыми, а объект обязан родиться готовым.</p>
+     *
      * @param title Название
      * @param limit Предел
      * @param audit Аудит
+     * @checkstyle ConstructorsCodeFreeCheck (8 lines)
      */
     public TrackerProperties(final String title, final Integer limit, final Boolean audit) {
-        this.title = title == null ? "SprBut Tracker" : title;
-        this.limit = limit == null ? 100 : limit;
-        this.audit = audit == null || audit;
+        this.title = Objects.requireNonNullElse(title, "SprBut Tracker");
+        this.limit = Objects.requireNonNullElse(limit, 100);
+        this.audit = Objects.requireNonNullElse(audit, Boolean.TRUE);
     }
 
     /**

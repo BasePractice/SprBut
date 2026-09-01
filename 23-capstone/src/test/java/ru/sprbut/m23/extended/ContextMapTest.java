@@ -12,11 +12,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
 /**
  * Расширенный итог: приложение объясняет само себя.
  * @since 1.0
  */
+@SpringBootTest
 @DisplayName("Расширенный итог: приложение объясняет само себя")
 final class ContextMapTest {
 
@@ -32,7 +32,11 @@ final class ContextMapTest {
         MatcherAssert.assertThat(
             "context map cannot skip the Spring internals",
             this.map.cards().stream().map(BeanCard::type).toList(),
-            Matchers.not(Matchers.hasItem("org.springframework.context.annotation.ConfigurationClassPostProcessor"))
+            Matchers.not(
+                Matchers.hasItem(
+                    "org.springframework.context.annotation.ConfigurationClassPostProcessor"
+                )
+            )
         );
     }
 

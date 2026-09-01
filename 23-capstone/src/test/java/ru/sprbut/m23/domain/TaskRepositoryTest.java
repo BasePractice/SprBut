@@ -15,11 +15,11 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.ApplicationContext;
 import ru.sprbut.m23.web.TaskController;
 
-@DataJpaTest
 /**
  * Срез @DataJpaTest: только JPA, без веба и аспектов.
  * @since 1.0
  */
+@DataJpaTest
 @DisplayName("Срез @DataJpaTest: только JPA, без веба и аспектов")
 final class TaskRepositoryTest {
 

@@ -70,12 +70,12 @@ final class ConfigurationBindingTest {
         }
     }
 
+    /**
+     * @ConfigurationProperties: типизированная группа настроек.
+     * @since 1.0
+     */
     @Nested
     @SpringBootTest
-/**
- * @ConfigurationProperties: типизированная группа настроек.
- * @since 1.0
- */
     @DisplayName("@ConfigurationProperties: типизированная группа настроек")
     final class Binding {
 
@@ -173,13 +173,13 @@ final class ConfigurationBindingTest {
         }
     }
 
+    /**
+     * Слайд 138: профили — application-{profile}.yaml.
+     * @since 1.0
+     */
     @Nested
     @SpringBootTest
     @ActiveProfiles("prod")
-/**
- * Слайд 138: профили — application-{profile}.yaml.
- * @since 1.0
- */
     @DisplayName("Слайд 138: профили — application-{profile}.yaml")
     final class Profiles {
 
@@ -256,12 +256,12 @@ final class ConfigurationBindingTest {
         }
     }
 
+    /**
+     * Слайд 137: @Value.
+     * @since 1.0
+     */
     @Nested
     @SpringBootTest
-/**
- * Слайд 137: @Value.
- * @since 1.0
- */
     @DisplayName("Слайд 137: @Value")
     final class ValueAnnotation {
 

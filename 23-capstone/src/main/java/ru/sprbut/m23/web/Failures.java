@@ -69,7 +69,7 @@ public final class Failures {
             "error",
             failure.getBindingResult().getFieldErrors().stream()
                 .findFirst()
-                .map(field -> field.getField() + ": " + field.getDefaultMessage())
+                .map(field -> String.format("%s: %s", field.getField(), field.getDefaultMessage()))
                 .orElse("некорректный запрос")
         );
     }

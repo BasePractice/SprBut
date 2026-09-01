@@ -31,7 +31,6 @@ import ru.sprbut.m23.domain.Task;
  * @since 1.0
  */
 @Mapper(componentModel = "spring")
-@SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface TaskViews {
 
     /**

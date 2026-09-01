@@ -47,6 +47,6 @@ public final class TrackerRunner implements ApplicationRunner {
 
     @Override
     public void run(final ApplicationArguments args) {
-        this.trail.record("startup:" + this.settings.title());
+        this.trail.record(String.format("startup:%s", this.settings.title()));
     }
 }

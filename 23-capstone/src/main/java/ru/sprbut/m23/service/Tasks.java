@@ -19,7 +19,6 @@ import ru.sprbut.m23.domain.TaskStatus;
  *
  * @since 1.0
  */
-@SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface Tasks {
 
     /**

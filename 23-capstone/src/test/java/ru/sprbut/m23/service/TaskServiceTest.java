@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
-// @checkstyle NonStaticMethodCheck disable
 package ru.sprbut.m23.service;
 
 import java.lang.reflect.Proxy;
@@ -24,13 +23,13 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.sprbut.m23.audit.AuditTrail;
 import ru.sprbut.m23.domain.TaskStatus;
 
-@SpringBootTest
-@TestPropertySource(properties = "tracker.limit=2")
-@Transactional
 /**
  * Сервисный слой: полный контекст с зафиксированным временем.
  * @since 1.0
  */
+@SpringBootTest
+@TestPropertySource(properties = "tracker.limit=2")
+@Transactional
 @DisplayName("Сервисный слой: полный контекст с зафиксированным временем")
 final class TaskServiceTest {
 
@@ -74,7 +73,9 @@ final class TaskServiceTest {
         this.tasks.open("вторая");
         MatcherAssert.assertThat(
             "configured limit cannot stop the third task",
-            Assertions.assertThrows(IllegalStateException.class, () -> this.tasks.open("третья")).getMessage(),
+            Assertions.assertThrows(
+                IllegalStateException.class, () -> this.tasks.open("третья")
+            ).getMessage(),
             Matchers.containsString("лимит")
         );
     }
@@ -84,7 +85,9 @@ final class TaskServiceTest {
     void dontStartUnknownTask() {
         MatcherAssert.assertThat(
             "unknown task cannot be reported as missing",
-            Assertions.assertThrows(IllegalArgumentException.class, () -> this.tasks.start(4242L)).getMessage(),
+            Assertions.assertThrows(
+                IllegalArgumentException.class, () -> this.tasks.start(4242L)
+            ).getMessage(),
             Matchers.containsString("4242")
         );
     }
@@ -140,6 +143,7 @@ final class TaskServiceTest {
      * @since 1.0
      */
     @TestConfiguration
+    @SuppressWarnings("PMD.JUnitTestClassShouldBeFinal")
     static class FixedClock {
 
         @Bean

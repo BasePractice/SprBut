@@ -58,7 +58,7 @@ public final class ContextMap {
     public List<BeanCard> cards() {
         final ConfigurableListableBeanFactory beans = this.context.getBeanFactory();
         return Arrays.stream(beans.getBeanDefinitionNames())
-            .filter(name -> this.mine(beans.getBeanDefinition(name).getBeanClassName()))
+            .filter(name -> ContextMap.mine(beans.getBeanDefinition(name).getBeanClassName()))
             .map(name -> this.card(name, beans))
             .toList();
     }
@@ -79,39 +79,46 @@ public final class ContextMap {
      */
     public String proxy(final String name) {
         final Object bean = this.context.getBean(name);
+        final String kind;
         if (AopUtils.isJdkDynamicProxy(bean)) {
-            return "jdk";
+            kind = "jdk";
+        } else if (AopUtils.isCglibProxy(bean)) {
+            kind = "cglib";
+        } else {
+            kind = "none";
         }
-        if (AopUtils.isCglibProxy(bean)) {
-            return "cglib";
-        }
-        return "none";
+        return kind;
     }
 
     private BeanCard card(final String name, final ConfigurableListableBeanFactory beans) {
         final Class<?> type = AopProxyUtils.ultimateTargetClass(this.context.getBean(name));
-        return new BeanCard(
-            name,
-            type.getName(),
-            beans.getBeanDefinition(name).getScope().isEmpty()
-                ? "singleton"
-                : beans.getBeanDefinition(name).getScope(),
-            this.audited(type)
-        );
+        final String scope = beans.getBeanDefinition(name).getScope();
+        final String named;
+        if (scope.isEmpty()) {
+            named = "singleton";
+        } else {
+            named = scope;
+        }
+        return new BeanCard(name, type.getName(), named, ContextMap.audited(type));
     }
 
-    private List<String> audited(final Class<?> type) {
+    private static List<String> audited(final Class<?> type) {
         return Arrays.stream(type.getDeclaredMethods())
             .filter(method -> method.isAnnotationPresent(Audited.class))
-            .map(this::operation)
+            .map(ContextMap::operation)
             .sorted()
             .toList();
     }
 
-    // @checkstyle NonStaticMethodCheck (3 lines)
-    private String operation(final Method method) {
+    private static String operation(final Method method) {
         final Audited audited = method.getAnnotation(Audited.class);
-        return audited.value().isBlank() ? method.getName() : audited.value();
+        final String name;
+        if (audited.value().isBlank()) {
+            name = method.getName();
+        } else {
+            name = audited.value();
+        }
+        return name;
     }
 
     private static boolean mine(final String type) {

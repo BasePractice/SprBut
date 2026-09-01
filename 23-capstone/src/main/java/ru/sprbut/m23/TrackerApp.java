@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// класс приложения обязан быть инстанцируемым: контейнер видит в нём
+// конфигурацию, а не утилиту с одним main
+// @checkstyle HideUtilityClassConstructorCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m23;
 
@@ -30,7 +33,7 @@ import ru.sprbut.m23.aot.TrackerHints;
 @SpringBootApplication
 @ConfigurationPropertiesScan
 @ImportRuntimeHints(TrackerHints.class)
-public class TrackerApp {
+public final class TrackerApp {
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.

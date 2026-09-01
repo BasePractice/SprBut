@@ -45,35 +45,32 @@ public final class AuditAspect {
 
     /**
      * Записывает операцию после её успешного выполнения.
-     * @param point Точка
-     * @return Записывает операцию после её успешного выполнения
+     * Совет вокруг обязан объявлять {@code Throwable}: сигнатуру диктует
+     * контракт {@code ProceedingJoinPoint.proceed}.
+     * @param point Точка соединения
+     * @return Результат работы целевого метода
+     * @throws Throwable Если целевой метод завершился ошибкой
+     * @checkstyle IllegalThrowsCheck (6 lines)
      */
     @Around("@annotation(ru.sprbut.m23.audit.Audited)")
     public Object around(final ProceedingJoinPoint point) throws Throwable {
         final Object result = point.proceed();
-        this.trail.record(this.operation(point));
+        this.trail.record(AuditAspect.operation(point));
         return result;
     }
 
-    /**
-     * Имя операции из аннотации на методе <b>реализации</b>.
-     *
-     * <p>Ловушка JDK-прокси: {@code MethodSignature.getMethod()} отдаёт метод
-     * интерфейса, где никакой аннотации нет. Без
-     * {@code getMostSpecificMethod} аспект молча писал бы в журнал имена
-     * методов вместо заданных имён операций.</p>
-     * @param point Точка
-     * @return Имя операции из аннотации на методе <b>реализации</b>
-     */
     private static String operation(final ProceedingJoinPoint point) {
-        final MethodSignature signature = (MethodSignature) point.getSignature();
         final Method method = AopUtils.getMostSpecificMethod(
-            signature.getMethod(), point.getTarget().getClass()
+            ((MethodSignature) point.getSignature()).getMethod(),
+            point.getTarget().getClass()
         );
         final Audited audited = method.getAnnotation(Audited.class);
+        final String name;
         if (audited == null || audited.value().isBlank()) {
-            return method.getName();
+            name = method.getName();
+        } else {
+            name = audited.value();
         }
-        return audited.value();
+        return name;
     }
 }

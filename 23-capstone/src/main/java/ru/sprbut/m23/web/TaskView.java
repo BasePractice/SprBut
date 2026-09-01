@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// @Value делает поля private final; в исходнике они package-private,
+// и это ровно то сравнение с record, ради которого класс здесь
+// @checkstyle VisibilityModifierCheck disable
 // @checkstyle ImplicitConstructorCheck disable
 package ru.sprbut.m23.web;
 

@@ -22,12 +22,12 @@ import org.springframework.test.context.TestPropertySource;
 @DisplayName("Расширенный пример: СХЕМА 10 — откуда взялось значение")
 final class ConfigurationOriginTest {
 
+    /**
+     * стек источников.
+     * @since 1.0
+     */
     @Nested
     @SpringBootTest
-/**
- * стек источников.
- * @since 1.0
- */
     @DisplayName("стек источников")
     final class Stack {
 
@@ -90,13 +90,13 @@ final class ConfigurationOriginTest {
         }
     }
 
+    /**
+     * перекрытие значений.
+     * @since 1.0
+     */
     @Nested
     @SpringBootTest
     @TestPropertySource(properties = "sprbut.server.host=inline.example.com")
-/**
- * перекрытие значений.
- * @since 1.0
- */
     @DisplayName("перекрытие значений")
     final class Overriding {
 
