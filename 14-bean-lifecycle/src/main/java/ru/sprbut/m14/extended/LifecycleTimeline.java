@@ -56,16 +56,14 @@ public final class LifecycleTimeline {
         final List<Step> steps = new ArrayList<>(0);
         for (final String event : this.log.events()) {
             final int colon = event.indexOf(':');
-            final String left = event.substring(
-                0, colon
-            );
-            steps.add(new Step(
-                Character.getNumericValue(left.charAt(0)),
-                left.substring(left.indexOf('-') + 1),
-                event.substring(
-                    colon + 1
+            final String left = event.substring(0, colon);
+            steps.add(
+                new Step(
+                    Character.getNumericValue(left.charAt(0)),
+                    left.substring(left.indexOf('-') + 1),
+                    event.substring(colon + 1)
                 )
-            ));
+            );
         }
         return List.copyOf(steps);
     }
@@ -85,9 +83,11 @@ public final class LifecycleTimeline {
      * @return Наглядная шкала — то, что имеет смысл распечатать при отладке
      */
     public String render(final String bean) {
-        final StringBuilder text = new StringBuilder("Жизненный цикл '").append(bean).append("':\n");
+        final StringBuilder text = new StringBuilder(
+            String.format("Жизненный цикл '%s':%n", bean)
+        );
         for (final Step step : this.of(bean)) {
-            text.append("  ").append(step).append('\n');
+            text.append("  ").append(step).append(String.format("%n"));
         }
         return text.toString();
     }
@@ -95,41 +95,38 @@ public final class LifecycleTimeline {
     /**
      * Нарушения контракта контейнера; пустой список означает, что порядок верен.
      * @param bean Объект
-     * @return Нарушения контракта контейнера; пустой список означает, что порядок верен
+     * @return Нарушения контракта контейнера
      */
     public List<Violation> violations(final String bean) {
         final List<Step> steps = this.of(bean);
+        final List<Violation> found = new ArrayList<>(0);
         if (steps.isEmpty()) {
-            return List.of(
-                new Violation("нет данных", "бин '" + bean + "' не встречается в журнале")
+            found.add(
+                new Violation(
+                    "нет данных",
+                    String.format("бин '%s' не встречается в журнале", bean)
+                )
             );
         }
-        final List<Violation> found = new ArrayList<>(0);
-        for (int index = 1; index < steps.size(); index++) {
-            if (
-                steps.get(
-                    index
-                ).number() < steps.get(
-                    index - 1
-                ).number()
-            ) {
-                found.add(new Violation(
-                    "порядок шагов",
-                    steps.get(
-                        index
-                    ) + " выполнен после " + steps.get(
-                        index - 1
+        for (int index = 1; index < steps.size(); index += 1) {
+            if (steps.get(index).number() < steps.get(index - 1).number()) {
+                found.add(
+                    new Violation(
+                        "порядок шагов",
+                        String.format(
+                            "%s выполнен после %s", steps.get(index), steps.get(index - 1)
+                        )
                     )
-                ));
+                );
             }
         }
-        this.precedes(steps, "constructor", "dependencies", found);
-        this.precedes(steps, "dependencies", "aware-beanName", found);
-        this.precedes(steps, "aware-applicationContext", "bpp-before", found);
-        this.precedes(steps, "bpp-before", "postConstruct", found);
-        this.precedes(steps, "postConstruct", "afterPropertiesSet", found);
-        this.precedes(steps, "afterPropertiesSet", "bpp-after", found);
-        this.precedes(steps, "preDestroy", "destroy", found);
+        LifecycleTimeline.precedes(steps, "constructor", "dependencies", found);
+        LifecycleTimeline.precedes(steps, "dependencies", "aware-beanName", found);
+        LifecycleTimeline.precedes(steps, "aware-applicationContext", "bpp-before", found);
+        LifecycleTimeline.precedes(steps, "bpp-before", "postConstruct", found);
+        LifecycleTimeline.precedes(steps, "postConstruct", "afterPropertiesSet", found);
+        LifecycleTimeline.precedes(steps, "afterPropertiesSet", "bpp-after", found);
+        LifecycleTimeline.precedes(steps, "preDestroy", "destroy", found);
         return List.copyOf(found);
     }
 
@@ -156,30 +153,30 @@ public final class LifecycleTimeline {
         );
     }
 
-    private void precedes(final List<Step> steps, final String earlier, final String later, final List<Violation> sink) {
-        final int first = this.position(steps, earlier);
-        final int second = this.position(steps, later);
-        if (first < 0 || second < 0) {
-            return;
-        }
-        if (
-            first > second
-        ) {
-            sink.add(new Violation(
-                String.format("%s перед %s", earlier, later),
-                String.format(
-                    "%s на позиции %s, %s на %s", earlier, first, later, second
+    private static void precedes(final List<Step> steps, final String earlier,
+        final String later, final List<Violation> sink) {
+        final int first = LifecycleTimeline.position(steps, earlier);
+        final int second = LifecycleTimeline.position(steps, later);
+        if (first >= 0 && second >= 0 && first > second) {
+            sink.add(
+                new Violation(
+                    String.format("%s перед %s", earlier, later),
+                    String.format(
+                        "%s на позиции %s, %s на %s", earlier, first, later, second
+                    )
                 )
-            ));
+            );
         }
     }
 
     private static int position(final List<Step> steps, final String phase) {
-        for (int index = 0; index < steps.size(); index++) {
+        int found = -1;
+        for (int index = 0; index < steps.size(); index += 1) {
             if (steps.get(index).phase().equals(phase)) {
-                return index;
+                found = index;
+                break;
             }
         }
-        return -1;
+        return found;
     }
 }

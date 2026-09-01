@@ -3,6 +3,12 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// имена полей и параметров идут от контрактов *Aware, менять их нельзя;
+// запись в журнал прямо из конструктора и есть шаг 1 жизненного цикла
+// @checkstyle MemberNameCheck disable
+// @checkstyle ParameterNameCheck disable
+// @checkstyle ConstructorsCodeFreeCheck disable
+// @checkstyle ProhibitStaticNestedClassesCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m14;
 
@@ -35,23 +41,30 @@ import org.springframework.lang.NonNull;
  * и {@code @PreDestroy} предпочтительнее, потому что не привязывают класс к Spring.
  * @since 1.0
  */
-public class ManagedBean implements BeanNameAware, BeanFactoryAware, ApplicationContextAware,
-        InitializingBean, DisposableBean {
+@SuppressWarnings({
+    "PMD.LongVariable",
+    "PMD.ConstructorOnlyInitializesOrCallOtherConstructors"
+})
+public final class ManagedBean implements BeanNameAware, BeanFactoryAware,
+    ApplicationContextAware, InitializingBean, DisposableBean {
 
     /**
      * Зависимость.
      */
     private final Dependency dependency;
+
     /**
-     * Объект.
+     * Имя бина, полученное от контейнера.
      */
     private String beanName;
+
     /**
-     * Объект.
+     * Признак того, что фабрика бинов внедрена.
      */
     private boolean beanFactoryInjected;
+
     /**
-     * Контекст.
+     * Признак того, что контекст внедрён.
      */
     private boolean contextInjected;
 
@@ -67,9 +80,6 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
         }
     }
 
-    /**
-     * Шаг 3: *Aware-интерфейсы. Контейнер отдаёт бину сведения о себе.
-     */
     @Override
     public void setBeanName(final @NonNull String name) {
         this.beanName = name;
@@ -77,29 +87,28 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
     }
 
     @Override
-    public void setBeanFactory(final @NonNull BeanFactory beanFactory) throws BeansException {
+    public void setBeanFactory(final @NonNull BeanFactory beanFactory)
+        throws BeansException {
         this.beanFactoryInjected = beanFactory != null;
         LifecycleLog.record("3-aware-beanFactory:managedBean");
     }
 
     @Override
-    public void setApplicationContext(final @NonNull ApplicationContext context) throws BeansException {
+    public void setApplicationContext(final @NonNull ApplicationContext context)
+        throws BeansException {
         this.contextInjected = context != null;
         LifecycleLog.record("3-aware-applicationContext:managedBean");
     }
 
     /**
      * Шаг 5а: {@code @PostConstruct} вызывается раньше {@code afterPropertiesSet}.
+     * @checkstyle NonStaticMethodCheck (4 lines)
      */
-    // @checkstyle NonStaticMethodCheck (3 lines)
     @PostConstruct
     public void postConstruct() {
         LifecycleLog.record("5a-postConstruct:managedBean");
     }
 
-    /**
-     * Шаг 5б: контракт {@link InitializingBean}.
-     */
     @Override
     public void afterPropertiesSet() {
         LifecycleLog.record("5b-afterPropertiesSet:managedBean");
@@ -107,40 +116,37 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
 
     /**
      * Шаг 8а: {@code @PreDestroy} вызывается раньше {@code destroy}.
+     * @checkstyle NonStaticMethodCheck (4 lines)
      */
-    // @checkstyle NonStaticMethodCheck (3 lines)
     @PreDestroy
     public void preDestroy() {
         LifecycleLog.record("8a-preDestroy:managedBean");
     }
 
-    /**
-     * Шаг 8б: контракт {@link DisposableBean}.
-     */
     @Override
     public void destroy() {
         LifecycleLog.record("8b-destroy:managedBean");
     }
 
     /**
-     * Объект.
-     * @return Объект
+     * Имя бина, полученное от контейнера.
+     * @return Имя бина
      */
     public String beanName() {
         return this.beanName;
     }
 
     /**
-     * Значение {@code fullyAware}.
-     * @return Значение {@code fullyAware}
+     * Все ли *Aware-интерфейсы отработали.
+     * @return Признак того, что бин получил все сведения о контейнере
      */
     public boolean fullyAware() {
         return this.beanName != null && this.beanFactoryInjected && this.contextInjected;
     }
 
     /**
-     * Работа.
-     * @return Работа
+     * Полезная работа бина.
+     * @return Отчёт о работе
      */
     public String work() {
         return String.format("работаю с %s", this.dependency.name());
@@ -150,7 +156,7 @@ public class ManagedBean implements BeanNameAware, BeanFactoryAware, Application
      * Простая зависимость, чтобы шаг 2 был не гипотетическим.
      * @since 1.0
      */
-    public static class Dependency {
+    public static final class Dependency {
 
         /**
          * Основной конструктор.

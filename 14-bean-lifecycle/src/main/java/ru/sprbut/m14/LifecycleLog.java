@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// журнал общий для всех бинов модуля: только так видно порядок этапов
+// у разных объектов, поэтому он статический и синхронизированный
+// @checkstyle NonStaticMethodCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m14;
 
@@ -20,17 +23,17 @@ import java.util.List;
  *
  * @since 1.0
  */
+@SuppressWarnings({"PMD.ProhibitPublicStaticMethods", "PMD.AvoidSynchronizedStatement"})
 public final class LifecycleLog {
 
     /**
-     * Значение {@code EVENTS}.
+     * Записанные этапы, общие для всех бинов модуля.
      */
     private static final List<String> EVENTS = new ArrayList<>(0);
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
      */
-    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
     public LifecycleLog() {
         // нечего инициализировать
     }
@@ -39,45 +42,48 @@ public final class LifecycleLog {
      * Записывает этап.
      * @param event Событие
      */
-    public static synchronized void record(final String event) {
-
-        EVENTS.add(event);
+    public static void record(final String event) {
+        synchronized (LifecycleLog.EVENTS) {
+            LifecycleLog.EVENTS.add(event);
+        }
     }
 
     /**
      * Все записанные этапы по порядку.
      * @return Все записанные этапы по порядку
-     // @checkstyle NonStaticMethodCheck (3 lines)
      */
-    public synchronized List<String> events() {
-        return List.copyOf(EVENTS);
+    public List<String> events() {
+        synchronized (LifecycleLog.EVENTS) {
+            return List.copyOf(LifecycleLog.EVENTS);
+        }
     }
 
     /**
      * Очищает журнал перед новым прогоном.
-     // @checkstyle NonStaticMethodCheck (3 lines)
      */
-    public synchronized void clear() {
-        EVENTS.clear();
+    public void clear() {
+        synchronized (LifecycleLog.EVENTS) {
+            LifecycleLog.EVENTS.clear();
+        }
     }
 
     /**
      * Только события конкретного бина.
      * @param bean Объект
-     * @return Только события конкретного бина
-     // @checkstyle NonStaticMethodCheck (3 lines)
+     * @return События конкретного бина
      */
-    public synchronized List<String> of(final String bean) {
-        return EVENTS.stream().filter(event -> event.endsWith(":" + bean)).toList();
+    public List<String> of(final String bean) {
+        return this.events().stream()
+            .filter(event -> event.endsWith(String.format(":%s", bean)))
+            .toList();
     }
 
     /**
      * Порядковый номер события — по нему проверяется относительный порядок шагов.
      * @param event Событие
-     * @return Порядковый номер события — по нему проверяется относительный порядок шагов
-     // @checkstyle NonStaticMethodCheck (3 lines)
+     * @return Порядковый номер события
      */
-    public synchronized int indexOf(final String event) {
-        return EVENTS.indexOf(event);
+    public int indexOf(final String event) {
+        return this.events().indexOf(event);
     }
 }

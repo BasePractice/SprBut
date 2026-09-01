@@ -20,7 +20,7 @@ import org.springframework.context.SmartLifecycle;
  *
  * @since 1.0
  */
-public class BackgroundWorker implements SmartLifecycle {
+public final class BackgroundWorker implements SmartLifecycle {
 
     /**
      * Значение {@code running}.
@@ -34,17 +34,11 @@ public class BackgroundWorker implements SmartLifecycle {
         // нечего инициализировать
     }
 
-    /**
-     * Порядок запуска среди других SmartLifecycle: меньше — раньше.
-     */
     @Override
     public int getPhase() {
         return 0;
     }
 
-    /**
-     * {@code true} — контейнер запустит сам, при готовности контекста.
-     */
     @Override
     public boolean isAutoStartup() {
         return true;
