@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * Веб-слой. На нём показывается срез {@code @WebMvcTest}: поднимается только
- * MVC-инфраструктура, а {@link CatalogService} подменяется {@code @MockBean}.
+ * MVC-инфраструктура, а {@link CatalogService} подменяется {@code @MockitoBean}.
  */
 @RestController
 @RequestMapping("/api/products")

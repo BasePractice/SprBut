@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Сервисный слой. В тестах контроллера он подменяется {@code @MockBean},
+ * Сервисный слой. В тестах контроллера он подменяется {@code @MockitoBean},
  * а в тестах сервиса — работает по-настоящему.
  */
 @Service

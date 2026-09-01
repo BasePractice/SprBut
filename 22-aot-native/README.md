@@ -12,6 +12,10 @@
 > Spring Boot 3.x, минимум Java 17. `javax.*` переехал в `jakarta.*`.
 > `jakarta.annotation.PostConstruct`. `javax.annotation.processing` не переименован.
 
+Практикум собран на Spring Boot 4.1 и Java 25: минимум для Boot 4 — Java 17,
+переезд `javax.*` → `jakarta.*` остался в прошлом, а Jackson поднялся до третьей
+версии и переехал из `com.fasterxml.jackson` в `tools.jackson`.
+
 Это единственный модуль курса, где рефлексия из решения превращается в проблему.
 
 ## Примеры

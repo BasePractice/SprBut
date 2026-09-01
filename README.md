@@ -43,7 +43,7 @@
 | 17 | [spring-annotations](17-spring-annotations/) | Стереотипы, `@Configuration`, условия | Каталог с раскрытием композиций |
 | 18 | [boot-startup](18-boot-startup/) | Последовательность запуска Boot | Восстановление таймлайна старта |
 | 19 | [autoconfiguration](19-autoconfiguration/) | Стартеры, `imports`, условия | Программный отчёт об условиях |
-| 20 | [testing](20-testing/) | `@SpringBootTest`, срезы, `@MockBean` | Один функционал четырьмя способами |
+| 20 | [testing](20-testing/) | `@SpringBootTest`, срезы, `@MockitoBean` | Один функционал четырьмя способами |
 | 21 | [common-mistakes](21-common-mistakes/) | Пять типичных ошибок контейнера | Диагност падений в духе `FailureAnalyzer` |
 | 22 | [aot-native](22-aot-native/) | AOT, native image, `javax` → `jakarta` | Аудит готовности к native image |
 | 23 | [capstone](23-capstone/) | **Итоговое задание: SprBut Tracker** | **Карта контейнера: приложение о самом себе** |
@@ -64,7 +64,7 @@ annotation processor — на 07–09, IoC и DI — на 11–14, аннота�
 
 ## Сборка
 
-Требуется **JDK 17** и Maven 3.9+.
+Требуется **JDK 25** и Maven 3.9+. Стек — Spring Boot 4.1.
 
 ```bash
 mvn test                      # все модули
