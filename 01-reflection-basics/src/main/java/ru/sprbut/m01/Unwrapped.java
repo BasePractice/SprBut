@@ -38,9 +38,12 @@ public final class Unwrapped {
      */
     public RuntimeException cause() {
         final Throwable thrown = this.wrapper.getCause();
+        final RuntimeException real;
         if (thrown instanceof RuntimeException unchecked) {
-            return unchecked;
+            real = unchecked;
+        } else {
+            real = new IllegalStateException(thrown);
         }
-        return new IllegalStateException(thrown);
+        return real;
     }
 }

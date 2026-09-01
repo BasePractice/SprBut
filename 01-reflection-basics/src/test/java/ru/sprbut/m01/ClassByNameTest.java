@@ -30,7 +30,7 @@ final class ClassByNameTest {
     }
 
     @Test
-    @DisplayName("несуществующее имя даёт ClassNotFoundException — связь через строку не проверяется компилятором")
+    @DisplayName("несуществующее имя даёт ClassNotFoundException: строку компилятор не проверит")
     void dontLoadUnknownClass() {
         Assertions.assertThrows(
             ClassNotFoundException.class,

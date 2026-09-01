@@ -94,11 +94,12 @@ final class ClassMetadataTest {
 
     @Test
     @DisplayName("Class — единственный объект на загруженный класс")
+    @SuppressWarnings("PMD.InstantiationToGetClass")
     void keepsSingleClassObject() {
         MatcherAssert.assertThat(
             "two ways of getting Class cannot lead to the same object",
-            new Account("ACC-3", "Сидоров", BigDecimal.TEN).getClass(),
-            Matchers.sameInstance(Account.class)
+            Account.class,
+            Matchers.sameInstance(new Account("ACC-3", "Сидоров", BigDecimal.TEN).getClass())
         );
     }
 

@@ -51,7 +51,8 @@ public final class Annotations {
 
     /**
      * Аннотация, если она есть.
-     * @param type Тип
+     * @param type Тип аннотации
+     * @param <A> Тип аннотации
      * @return Аннотация, если она есть
      */
     public <A extends Annotation> Optional<A> find(final Class<A> type) {

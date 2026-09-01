@@ -99,8 +99,10 @@ public final class ClassMetadata {
     public boolean instantiable() {
         return !this.type.isInterface()
             && !Modifier.isAbstract(this.type.getModifiers())
-            && !this.type.isPrimitive()
-            && !this.type.isEnum()
-            && !this.type.isArray();
+            && !this.special();
+    }
+
+    private boolean special() {
+        return this.type.isPrimitive() || this.type.isEnum() || this.type.isArray();
     }
 }

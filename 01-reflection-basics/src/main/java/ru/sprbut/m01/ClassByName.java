@@ -33,8 +33,8 @@ public final class ClassByName {
 
     /**
      * Загруженный класс.
-     * @throws ClassNotFoundException если классу неоткуда взяться в classpath
      * @return Загруженный класс
+     * @throws ClassNotFoundException Если классу неоткуда взяться в classpath
      */
     public Class<?> type() throws ClassNotFoundException {
         return Class.forName(this.name);

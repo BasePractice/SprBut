@@ -3,6 +3,11 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// витрина для рефлексии: поля всех видимостей и приватные методы,
+// которые вызываются только через Reflection API
+// @checkstyle VisibilityModifierCheck disable
+// @checkstyle MemberNameCheck disable
+// @checkstyle DeclarationOrderCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m01.model;
 
@@ -17,6 +22,7 @@ import java.math.BigDecimal;
  *
  * @since 1.0
  */
+@SuppressWarnings({"PMD.UnusedPrivateMethod", "PMD.DataClass", "PMD.ImmutableField"})
 public class Account {
 
     /**
@@ -98,11 +104,6 @@ public class Account {
         return String.format("Счёт типа %s", TYPE);
     }
 
-    /**
-     * Метод намеренно приватный: рефлексия умеет вызывать и такие.
-     * @param fee Значение {@code fee}
-     * @return Метод намеренно приватный: рефлексия умеет вызывать и такие
-     */
     private BigDecimal applyFee(final BigDecimal fee) {
         this.balance = this.balance.subtract(fee);
         return this.balance;

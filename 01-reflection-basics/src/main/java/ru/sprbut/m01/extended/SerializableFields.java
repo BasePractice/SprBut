@@ -42,14 +42,14 @@ public final class SerializableFields {
      */
     public List<Field> list() {
         final List<Field> selected = new ArrayList<>(0);
-        for (Class<?> current = this.type;
-             current != null && current != Object.class;
-             current = current.getSuperclass()) {
+        Class<?> current = this.type;
+        while (current != null && current != Object.class) {
             for (final Field field : current.getDeclaredFields()) {
-                if (this.serializable(field)) {
+                if (SerializableFields.serializable(field)) {
                     selected.add(field);
                 }
             }
+            current = current.getSuperclass();
         }
         return List.copyOf(selected);
     }

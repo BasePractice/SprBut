@@ -63,7 +63,9 @@ public final class ObjectField {
         try {
             return field.get(this.target);
         } catch (final IllegalAccessException denied) {
-            throw new IllegalStateException("Не удалось прочитать поле " + this.name, denied);
+            throw new IllegalStateException(
+                String.format("Не удалось прочитать поле %s", this.name), denied
+            );
         }
     }
 
@@ -78,7 +80,9 @@ public final class ObjectField {
         try {
             field.set(this.target, value);
         } catch (final IllegalAccessException denied) {
-            throw new IllegalStateException("Не удалось записать поле " + this.name, denied);
+            throw new IllegalStateException(
+                String.format("Не удалось записать поле %s", this.name), denied
+            );
         }
     }
 }

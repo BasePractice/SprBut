@@ -58,7 +58,9 @@ public final class StaticMethod {
         try {
             return method.invoke(null, args);
         } catch (final IllegalAccessException denied) {
-            throw new IllegalStateException("Нет доступа к методу " + this.name, denied);
+            throw new IllegalStateException(
+                String.format("Нет доступа к методу %s", this.name), denied
+            );
         } catch (final InvocationTargetException wrapped) {
             throw new Unwrapped(wrapped).cause();
         }

@@ -32,7 +32,10 @@ public final class Escaped {
 
     /**
      * Экранированный текст.
+     * Подстановка «\n» и «\r» здесь буквальная: это escape-последовательности
+     * самого JSON, а не перевод строки в выводе.
      * @return Экранированный текст
+     * @checkstyle ProhibitLineSeparatorInStringsCheck (10 lines)
      */
     public String text() {
         return this.raw

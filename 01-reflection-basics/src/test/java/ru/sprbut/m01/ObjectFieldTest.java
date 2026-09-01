@@ -59,15 +59,11 @@ final class ObjectFieldTest {
     @Test
     @DisplayName("поиск поля поднимается по иерархии наследования")
     void findsInheritedField() {
-        final class Savings extends Account {
-
-            Savings() {
-                super("S-1", "Сидоров", BigDecimal.TEN);
-            }
-        }
         MatcherAssert.assertThat(
             "field lookup cannot climb up to the parent class",
-            new ObjectField(new Savings(), "owner").declaration().getDeclaringClass(),
+            new ObjectField(new ObjectFieldTest.Savings(), "owner")
+                .declaration()
+                .getDeclaringClass(),
             Matchers.equalTo(Account.class)
         );
     }
@@ -85,5 +81,16 @@ final class ObjectFieldTest {
             ).getMessage(),
             Matchers.containsString("nope")
         );
+    }
+
+    /**
+     * Наследник счёта: на нём видно, что поиск поля поднимается к родителю.
+     * @since 1.0
+     */
+    private static final class Savings extends Account {
+
+        Savings() {
+            super("S-1", "Сидоров", BigDecimal.TEN);
+        }
     }
 }

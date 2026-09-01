@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// фикстура существует ради полей, которые читает рефлексия
+// @checkstyle VisibilityModifierCheck disable
 package ru.sprbut.m01;
 
 import java.lang.annotation.ElementType;
@@ -51,7 +53,9 @@ final class AnnotationsTest {
     void dontFailOnMissingAnnotation() {
         MatcherAssert.assertThat(
             "missing annotation cannot yield an empty optional",
-            new Annotations(new Declared(Sample.class).field("plain")).find(JsonProperty.class).isEmpty(),
+            new Annotations(new Declared(Sample.class).field("plain"))
+                .find(JsonProperty.class)
+                .isEmpty(),
             Matchers.equalTo(true)
         );
     }

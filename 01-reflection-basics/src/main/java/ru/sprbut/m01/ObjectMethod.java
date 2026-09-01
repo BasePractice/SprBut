@@ -55,12 +55,15 @@ public final class ObjectMethod {
      */
     @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     public Object call(final Object... args) {
-        final Method method = new Declared(this.target.getClass()).method(this.name, this.parameters);
+        final Method method = new Declared(this.target.getClass())
+            .method(this.name, this.parameters);
         method.setAccessible(true);
         try {
             return method.invoke(this.target, args);
         } catch (final IllegalAccessException denied) {
-            throw new IllegalStateException("Нет доступа к методу " + this.name, denied);
+            throw new IllegalStateException(
+                String.format("Нет доступа к методу %s", this.name), denied
+            );
         } catch (final InvocationTargetException wrapped) {
             throw new Unwrapped(wrapped).cause();
         }

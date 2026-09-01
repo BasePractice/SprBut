@@ -49,6 +49,49 @@ public final class Json {
         this.value = value;
     }
 
+    /**
+     * Текст JSON для этого значения.
+     * @return Текст JSON для этого значения
+     */
+    public String text() {
+        final String json;
+        if (this.value == null) {
+            json = "null";
+        } else if (this.value instanceof CharSequence
+            || this.value instanceof Character
+            || this.value instanceof Enum<?>) {
+            json = String.format("\"%s\"", new Escaped(this.value.toString()).text());
+        } else if (this.value instanceof Number || this.value instanceof Boolean) {
+            json = this.value.toString();
+        } else if (this.value instanceof Collection<?> items) {
+            json = Json.array(items.stream());
+        } else if (this.value.getClass().isArray()) {
+            json = Json.array(
+                IntStream.range(0, Array.getLength(this.value))
+                    .mapToObj(index -> Array.get(this.value, index))
+            );
+        } else if (this.value instanceof Map<?, ?> entries) {
+            json = entries.entrySet().stream()
+                .map(entry -> Json.pair(String.valueOf(entry.getKey()), entry.getValue()))
+                .collect(Collectors.joining(",", "{", "}"));
+        } else {
+            json = this.object();
+        }
+        return json;
+    }
+
+    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
+    private Object read(final Field field) {
+        field.setAccessible(true);
+        try {
+            return field.get(this.value);
+        } catch (final IllegalAccessException denied) {
+            throw new IllegalStateException(
+                String.format("Поле %s недоступно", field.getName()), denied
+            );
+        }
+    }
+
     private static String array(final Stream<?> items) {
         return items
             .map(item -> new Json(item).text())
@@ -59,52 +102,9 @@ public final class Json {
         return String.format("%s%s\":%s", '"', new Escaped(key).text(), new Json(nested).text());
     }
 
-    /**
-     * Текст JSON для этого значения.
-     * @return Текст JSON для этого значения
-     */
-    public String text() {
-        if (this.value == null) {
-            return "null";
-        }
-        if (this.value instanceof CharSequence
-            || this.value instanceof Character
-            || this.value instanceof Enum<?>) {
-            return '"' + new Escaped(this.value.toString()).text() + '"';
-        }
-        if (this.value instanceof Number || this.value instanceof Boolean) {
-            return this.value.toString();
-        }
-        if (this.value instanceof Collection<?> items) {
-            return this.array(items.stream());
-        }
-        if (this.value.getClass().isArray()) {
-            return this.array(
-                IntStream.range(0, Array.getLength(this.value))
-                    .mapToObj(index -> Array.get(this.value, index))
-            );
-        }
-        if (this.value instanceof Map<?, ?> entries) {
-            return entries.entrySet().stream()
-                .map(entry -> this.pair(String.valueOf(entry.getKey()), entry.getValue()))
-                .collect(Collectors.joining(",", "{", "}"));
-        }
-        return this.object();
-    }
-
-    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
-    private Object read(final Field field) {
-        field.setAccessible(true);
-        try {
-            return field.get(this.value);
-        } catch (final IllegalAccessException denied) {
-            throw new IllegalStateException("Поле " + field.getName() + " недоступно", denied);
-        }
-    }
-
     private String object() {
         return new SerializableFields(this.value.getClass()).list().stream()
-            .map(field -> this.pair(new PropertyName(field).text(), this.read(field)))
+            .map(field -> Json.pair(new PropertyName(field).text(), this.read(field)))
             .collect(Collectors.joining(",", "{", "}"));
     }
 }

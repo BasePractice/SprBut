@@ -38,9 +38,12 @@ public final class PropertyName {
      */
     public String text() {
         final JsonProperty renamed = this.field.getAnnotation(JsonProperty.class);
-        if (renamed != null && !renamed.value().isBlank()) {
-            return renamed.value();
+        final String key;
+        if (renamed == null || renamed.value().isBlank()) {
+            key = this.field.getName();
+        } else {
+            key = renamed.value();
         }
-        return this.field.getName();
+        return key;
     }
 }

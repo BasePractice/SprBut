@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// фикстуры существуют ради полей, которые читает рефлексия:
+// обращений к ним в коде нет и быть не должно
+// @checkstyle ConstantUsageCheck disable
+// @checkstyle MemberNameCheck disable
 package ru.sprbut.m01.extended;
 
 import java.lang.reflect.Field;
@@ -88,7 +92,7 @@ final class JsonTest {
     void writesScalars() {
         MatcherAssert.assertThat(
             "scalar values cannot be written with the right quoting",
-            new Json(new Customer()).text(),
+            new Json(new JsonTest.Customer()).text(),
             Matchers.containsString("\"name\":\"Пётр\",\"age\":30")
         );
     }
@@ -98,7 +102,7 @@ final class JsonTest {
     void writesEnumAsString() {
         MatcherAssert.assertThat(
             "enum cannot be written as its own name",
-            new Json(new Customer()).text(),
+            new Json(new JsonTest.Customer()).text(),
             Matchers.containsString("\"status\":\"ACTIVE\"")
         );
     }
@@ -108,7 +112,7 @@ final class JsonTest {
     void writesCollectionAsArray() {
         MatcherAssert.assertThat(
             "collection cannot become a JSON array",
-            new Json(new Customer()).text(),
+            new Json(new JsonTest.Customer()).text(),
             Matchers.containsString("\"tags\":[\"vip\",\"new\"]")
         );
     }
@@ -118,7 +122,7 @@ final class JsonTest {
     void writesPrimitiveArray() {
         MatcherAssert.assertThat(
             "primitive array cannot become a JSON array",
-            new Json(new Customer()).text(),
+            new Json(new JsonTest.Customer()).text(),
             Matchers.containsString("\"scores\":[5,7]")
         );
     }
@@ -128,7 +132,7 @@ final class JsonTest {
     void writesMapAsObject() {
         MatcherAssert.assertThat(
             "map cannot become a nested object",
-            new Json(new Customer()).text(),
+            new Json(new JsonTest.Customer()).text(),
             Matchers.containsString("\"extra\":{\"city\":\"Москва\"}")
         );
     }
@@ -138,7 +142,7 @@ final class JsonTest {
     void writesNullField() {
         MatcherAssert.assertThat(
             "null field cannot be written as a literal",
-            new Json(new Customer()).text(),
+            new Json(new JsonTest.Customer()).text(),
             Matchers.containsString("\"comment\":null")
         );
     }
@@ -160,8 +164,10 @@ final class JsonTest {
         }
         MatcherAssert.assertThat(
             "special characters cannot be escaped",
-            new Json(new Note("он сказал \"да\"\nи ушёл")).text(),
-            Matchers.equalTo("{\"text\":\"он сказал \\\"да\\\"\\nи ушёл\"}")
+            new Json(new Note(String.format("он сказал \"да\"%nи ушёл"))).text(),
+            Matchers.equalTo(
+                String.format("{\"text\":\"он сказал \\\"да\\\"\\%sи ушёл\"}", "n")
+            )
         );
     }
 
@@ -197,9 +203,24 @@ final class JsonTest {
      * Значение {@code BLOCKED}.
      * @since 1.0
      */
-    private enum Status { ACTIVE, BLOCKED }
+    private enum Status {
 
-    @SuppressWarnings("unused")
+        /**
+         * Активная запись.
+         */
+        ACTIVE,
+
+        /**
+         * Заблокированная запись.
+         */
+        BLOCKED
+    }
+
+    /**
+     * Родитель фикстуры: показывает подъём по иерархии полей.
+     * @since 1.0
+     */
+    @SuppressWarnings({"unused", "PMD.JUnitTestClassShouldBeFinal"})
     private static class Base {
 
         /**
@@ -210,7 +231,7 @@ final class JsonTest {
     }
 
     @SuppressWarnings("unused")
-    private static final class Customer extends Base {
+    private static final class Customer extends JsonTest.Base {
 
         /**
          * Значение {@code CONST}.
@@ -266,7 +287,7 @@ final class JsonTest {
         /**
          * Значение {@code cache}.
          */
-        private transient String cache = "временное";
+        private final transient String cache = "временное";
 
         /**
          * Идентификатор.

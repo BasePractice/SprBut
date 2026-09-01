@@ -47,7 +47,7 @@ public final class Members {
      * @return Имена полей, объявленных прямо в этом классе, включая приватные
      */
     public List<String> declaredFields() {
-        return this.names(Arrays.stream(this.type.getDeclaredFields()));
+        return Members.names(Arrays.stream(this.type.getDeclaredFields()));
     }
 
     /**
@@ -55,7 +55,7 @@ public final class Members {
      * @return Только публичные поля — включая унаследованные от родителей
      */
     public List<String> publicFields() {
-        return this.names(Arrays.stream(this.type.getFields()));
+        return Members.names(Arrays.stream(this.type.getFields()));
     }
 
     /**
@@ -63,7 +63,7 @@ public final class Members {
      * @return Приватные поля этого класса — те, к которым нет доступа без рефлексии
      */
     public List<String> privateFields() {
-        return this.names(
+        return Members.names(
             Arrays.stream(this.type.getDeclaredFields())
                 .filter(field -> Modifier.isPrivate(field.getModifiers()))
         );
@@ -74,7 +74,7 @@ public final class Members {
      * @return Статические поля — их значение читается без экземпляра
      */
     public List<String> staticFields() {
-        return this.names(
+        return Members.names(
             Arrays.stream(this.type.getDeclaredFields())
                 .filter(field -> Modifier.isStatic(field.getModifiers()))
         );
