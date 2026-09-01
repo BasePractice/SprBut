@@ -6,11 +6,11 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m12.injection;
 
+import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.sprbut.m12.domain.DiscountService;
 import ru.sprbut.m12.domain.TaxService;
-import java.math.BigDecimal;
 
 /**
  * Слайд 93: «Внедрение в поле мешает тестам без контейнера».
@@ -36,13 +36,13 @@ public class FieldInjected {
      * Сервис.
      */
     @Autowired
-    private TaxService taxService;
+    private TaxService taxes;
 
     /**
      * Сервис.
      */
     @Autowired
-    private DiscountService discountService;
+    private DiscountService discounts;
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -58,6 +58,6 @@ public class FieldInjected {
      * @return Итоговая сумма
      */
     public BigDecimal total(final BigDecimal net, final boolean vip) {
-        return this.discountService.apply(this.taxService.applyVat(net), vip);
+        return this.discounts.apply(this.taxes.applyVat(net), vip);
     }
 }

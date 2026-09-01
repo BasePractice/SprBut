@@ -9,9 +9,9 @@ package ru.sprbut.m12.jakarta;
 import jakarta.annotation.Resource;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import java.math.BigDecimal;
 import ru.sprbut.m12.domain.DiscountService;
 import ru.sprbut.m12.domain.TaxService;
-import java.math.BigDecimal;
 
 /**
  * Слайд 96: «jakarta: {@code @Inject}, {@code @Named}, {@code @Resource}».
@@ -37,21 +37,21 @@ public class JakartaInjected {
     /**
      * Сервис.
      */
-    private final TaxService taxService;
+    private final TaxService taxes;
 
     /**
-     * {@code @Resource} ищет по имени поля — здесь это {@code discountService}.
+     * {@code @Resource} ищет по имени поля — здесь это {@code discounts}.
      */
     @Resource
-    private DiscountService discountService;
+    private DiscountService discounts;
 
     /**
      * Значение {@code JakartaInjected}.
-     * @param taxService Сервис
+     * @param taxes Сервис
      */
     @Inject
-    public JakartaInjected(final TaxService taxService) {
-        this.taxService = taxService;
+    public JakartaInjected(final TaxService taxes) {
+        this.taxes = taxes;
     }
 
     /**
@@ -61,6 +61,6 @@ public class JakartaInjected {
      * @return Итоговая сумма
      */
     public BigDecimal total(final BigDecimal net, final boolean vip) {
-        return this.discountService.apply(this.taxService.applyVat(net), vip);
+        return this.discounts.apply(this.taxes.applyVat(net), vip);
     }
 }

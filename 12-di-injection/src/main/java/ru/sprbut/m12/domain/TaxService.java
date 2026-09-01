@@ -6,9 +6,9 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m12.domain;
 
-import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import org.springframework.stereotype.Component;
 
 /**
  * Простая зависимость, которую будут внедрять тремя способами.

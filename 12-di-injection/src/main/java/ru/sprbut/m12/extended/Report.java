@@ -47,6 +47,12 @@ public record Report(
      * Основной способ внедрения — первый найденный.
      */
     public Style primary() {
-        return this.styles.isEmpty() ? Style.NONE : this.styles.get(0);
+        final Style style;
+        if (this.styles.isEmpty()) {
+            style = Style.NONE;
+        } else {
+            style = this.styles.get(0);
+        }
+        return style;
     }
 }

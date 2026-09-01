@@ -6,10 +6,10 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m12.injection;
 
+import java.math.BigDecimal;
 import org.springframework.stereotype.Component;
 import ru.sprbut.m12.domain.DiscountService;
 import ru.sprbut.m12.domain.TaxService;
-import java.math.BigDecimal;
 
 /**
  * Слайды 91–92: «Через конструктор» и «Конструктор предпочтителен:
@@ -33,20 +33,21 @@ public class ConstructorInjected {
     /**
      * Сервис.
      */
-    private final TaxService taxService;
+    private final TaxService taxes;
+
     /**
      * Сервис.
      */
-    private final DiscountService discountService;
+    private final DiscountService discounts;
 
     /**
      * Основной конструктор.
-     * @param taxService Сервис
-     * @param discountService Сервис
+     * @param taxes Сервис
+     * @param discounts Сервис
      */
-    public ConstructorInjected(final TaxService taxService, final DiscountService discountService) {
-        this.taxService = taxService;
-        this.discountService = discountService;
+    public ConstructorInjected(final TaxService taxes, final DiscountService discounts) {
+        this.taxes = taxes;
+        this.discounts = discounts;
     }
 
     /**
@@ -56,6 +57,6 @@ public class ConstructorInjected {
      * @return Итоговая сумма
      */
     public BigDecimal total(final BigDecimal net, final boolean vip) {
-        return this.discountService.apply(this.taxService.applyVat(net), vip);
+        return this.discounts.apply(this.taxes.applyVat(net), vip);
     }
 }

@@ -6,12 +6,12 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m12.locator;
 
+import java.math.BigDecimal;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import ru.sprbut.m12.domain.TaxService;
-import java.math.BigDecimal;
 
 /**
  * Слайд 95: «Service Locator — антипаттерн».
@@ -48,8 +48,11 @@ public class ServiceLocatorDemo implements ApplicationContextAware {
         // нечего инициализировать
     }
 
+    // имя параметра задано контрактом ApplicationContextAware
+    // @checkstyle HiddenFieldCheck (5 lines)
     @Override
-    public void setApplicationContext(final ApplicationContext context) throws BeansException {
+    public final void setApplicationContext(final ApplicationContext context)
+        throws BeansException {
         this.context = context;
     }
 
@@ -59,17 +62,16 @@ public class ServiceLocatorDemo implements ApplicationContextAware {
      * @return Зависимость достаётся вручную, в момент вызова
      */
     public BigDecimal total(final BigDecimal net) {
-        final TaxService taxService = this.context.getBean(TaxService.class);
-        return taxService.applyVat(net);
+        return this.context.getBean(TaxService.class).applyVat(net);
     }
 
     /**
      * Ошибка вылезет только здесь, а не при старте контекста.
-     * @param beanName Объект
-     * @return Ошибка вылезет только здесь, а не при старте контекста
+     * @param bean Имя бина
+     * @return Бин, найденный по имени уже во время работы
      */
-    public Object lookup(final String beanName) {
-        return this.context.getBean(beanName);
+    public Object lookup(final String bean) {
+        return this.context.getBean(bean);
     }
 
     /**

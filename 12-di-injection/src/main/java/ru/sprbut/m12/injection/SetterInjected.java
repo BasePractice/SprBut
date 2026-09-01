@@ -4,13 +4,16 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
+// тема раздела — внедрение через сеттеры: параметр сеттера одноимён полю,
+// именно такую пару «поле — сеттер» ищет контейнер
+// @checkstyle HiddenFieldCheck disable
 package ru.sprbut.m12.injection;
 
+import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.sprbut.m12.domain.DiscountService;
 import ru.sprbut.m12.domain.TaxService;
-import java.math.BigDecimal;
 
 /**
  * Слайд 91: «Через сеттер».
@@ -30,12 +33,12 @@ public class SetterInjected {
     /**
      * Сервис.
      */
-    private TaxService taxService;
+    private TaxService taxes;
 
     /**
      * Сервис.
      */
-    private DiscountService discountService;
+    private DiscountService discounts;
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
@@ -45,12 +48,12 @@ public class SetterInjected {
     }
 
     /**
-     * Новое значение свойства {@code taxService}.
-     * @param taxService Сервис
+     * Новое значение свойства {@code taxes}.
+     * @param taxes Сервис
      */
     @Autowired
-    public void setTaxService(final TaxService taxService) {
-        this.taxService = taxService;
+    public void setTaxService(final TaxService taxes) {
+        this.taxes = taxes;
     }
 
     /**
@@ -60,24 +63,30 @@ public class SetterInjected {
      * @return Итоговая сумма
      */
     public BigDecimal total(final BigDecimal net, final boolean vip) {
-        final BigDecimal withVat = this.taxService.applyVat(net);
-        return this.discountService == null ? withVat : this.discountService.apply(withVat, vip);
+        final BigDecimal vat = this.taxes.applyVat(net);
+        final BigDecimal total;
+        if (this.discounts == null) {
+            total = vat;
+        } else {
+            total = this.discounts.apply(vat, vip);
+        }
+        return total;
     }
 
     /**
-     * Значение свойства {@code discountService}.
-     * @return Значение свойства {@code discountService}
+     * Значение свойства {@code discounts}.
+     * @return Значение свойства {@code discounts}
      */
     public boolean hasDiscountService() {
-        return this.discountService != null;
+        return this.discounts != null;
     }
 
     /**
      * Необязательная зависимость: без неё объект тоже работоспособен.
-     * @param discountService Сервис
+     * @param discounts Сервис
      */
     @Autowired(required = false)
-    public void setDiscountService(final DiscountService discountService) {
-        this.discountService = discountService;
+    public void setDiscountService(final DiscountService discounts) {
+        this.discounts = discounts;
     }
 }

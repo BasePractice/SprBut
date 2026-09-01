@@ -5,6 +5,7 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m12;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -35,8 +36,11 @@ import ru.sprbut.m12.locator.ServiceLocatorDemo;
 final class InjectionStylesTest {
 
     /**
-     * Контекст.
+     * Контекст один на весь класс: все сценарии сравнивают способы внедрения
+     * в одном и том же контейнере, поднимать его заново на каждый тест значит
+     * сравнивать разные контейнеры.
      * @since 1.0
+     * @checkstyle ProhibitFieldsInTestClassesCheck (3 lines)
      */
     private AnnotationConfigApplicationContext context;
 
@@ -45,7 +49,6 @@ final class InjectionStylesTest {
         this.context = new AnnotationConfigApplicationContext(AppConfig.class);
     }
 
-    @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
     @AfterEach
     void tearDown() {
         this.context.close();
@@ -60,22 +63,37 @@ final class InjectionStylesTest {
     final class Equivalence {
 
         @Test
-        @DisplayName("Результат не зависит от способа внедрения")
-        void resultsAreIdentical() {
-            final BigDecimal net = new BigDecimal("100");
+        @DisplayName("Внедрение через конструктор даёт тот же результат")
+        void constructorInjectionGivesTheResult() {
             MatcherAssert.assertThat(
-                "cannot verify that results are identical",
-                InjectionStylesTest.this.context.getBean(ConstructorInjected.class).total(net, true),
+                "constructor injection cannot give the same result",
+                InjectionStylesTest.this.context
+                    .getBean(ConstructorInjected.class)
+                    .total(new BigDecimal("100"), true),
                 Matchers.comparesEqualTo(new BigDecimal("108.00"))
             );
+        }
+
+        @Test
+        @DisplayName("Внедрение через сеттер даёт тот же результат")
+        void setterInjectionGivesTheResult() {
             MatcherAssert.assertThat(
-                "cannot verify that results are identical",
-                InjectionStylesTest.this.context.getBean(SetterInjected.class).total(net, true),
+                "setter injection cannot give the same result",
+                InjectionStylesTest.this.context
+                    .getBean(SetterInjected.class)
+                    .total(new BigDecimal("100"), true),
                 Matchers.comparesEqualTo(new BigDecimal("108.00"))
             );
+        }
+
+        @Test
+        @DisplayName("Внедрение в поле даёт тот же результат")
+        void fieldInjectionGivesTheResult() {
             MatcherAssert.assertThat(
-                "cannot verify that results are identical",
-                InjectionStylesTest.this.context.getBean(FieldInjected.class).total(net, true),
+                "field injection cannot give the same result",
+                InjectionStylesTest.this.context
+                    .getBean(FieldInjected.class)
+                    .total(new BigDecimal("100"), true),
                 Matchers.comparesEqualTo(new BigDecimal("108.00"))
             );
         }
@@ -92,12 +110,10 @@ final class InjectionStylesTest {
         @Test
         @DisplayName("Класс собирается обычным new — тест не требует контейнера вовсе")
         void testableWithoutContainer() {
-            final ConstructorInjected service = new ConstructorInjected(
-                new TaxService(), new DiscountService()
-            );
             MatcherAssert.assertThat(
                 "cannot verify that testable without container",
-                service.total(new BigDecimal("100"), false),
+                new ConstructorInjected(new TaxService(), new DiscountService())
+                    .total(new BigDecimal("100"), false),
                 Matchers.comparesEqualTo(new BigDecimal("120.00"))
             );
         }
@@ -107,7 +123,8 @@ final class InjectionStylesTest {
         void fieldsAreFinal() {
             MatcherAssert.assertThat(
                 "cannot verify that fields are final",
-                Arrays.stream(ConstructorInjected.class.getDeclaredFields()).allMatch(f -> Modifier.isFinal(f.getModifiers())),
+                Arrays.stream(ConstructorInjected.class.getDeclaredFields())
+                    .allMatch(field -> Modifier.isFinal(field.getModifiers())),
                 Matchers.equalTo(true)
             );
         }
@@ -127,11 +144,17 @@ final class InjectionStylesTest {
         void autowiredIsOptionalOnSingleConstructor() {
             MatcherAssert.assertThat(
                 "cannot verify that autowired is optional on single constructor",
-                ConstructorInjected.class.getDeclaredConstructors()[0] .isAnnotationPresent(Autowired.class),
+                ConstructorInjected.class.getDeclaredConstructors()[0]
+                    .isAnnotationPresent(Autowired.class),
                 Matchers.equalTo(false)
             );
+        }
+
+        @Test
+        @DisplayName("и бин всё равно собирается контейнером")
+        void beanIsAssembledWithoutAutowired() {
             MatcherAssert.assertThat(
-                "cannot verify that autowired is optional on single constructor",
+                "bean cannot be assembled without the annotation",
                 InjectionStylesTest.this.context.getBean(ConstructorInjected.class),
                 Matchers.notNullValue()
             );
@@ -150,17 +173,20 @@ final class InjectionStylesTest {
         @DisplayName("Собранный руками объект падает: поля остались null")
         void newInstanceIsBroken() {
             final FieldInjected service = new FieldInjected();
-            Assertions.assertThrows(NullPointerException.class, () -> service.total(new BigDecimal("100"), false));
+            Assertions.assertThrows(
+                NullPointerException.class, () -> service.total(new BigDecimal("100"), false)
+            );
         }
 
         @Test
         @DisplayName("Единственный способ подставить зависимости без контейнера — рефлексия")
+        @SuppressWarnings("PMD.AvoidAccessibilityAlteration")
         void onlyReflectionCanFillTheFields() throws Exception {
             final FieldInjected service = new FieldInjected();
-            final var field = FieldInjected.class.getDeclaredField("taxService");
+            final Field field = FieldInjected.class.getDeclaredField("taxes");
             field.setAccessible(true);
             field.set(service, new TaxService());
-            final var discount = FieldInjected.class.getDeclaredField("discountService");
+            final Field discount = FieldInjected.class.getDeclaredField("discounts");
             discount.setAccessible(true);
             discount.set(service, new DiscountService());
             MatcherAssert.assertThat(
@@ -185,7 +211,8 @@ final class InjectionStylesTest {
         void fieldsCannotBeFinal() {
             MatcherAssert.assertThat(
                 "cannot verify that fields cannot be final",
-                Arrays.stream(FieldInjected.class.getDeclaredFields()).anyMatch(f -> Modifier.isFinal(f.getModifiers())),
+                Arrays.stream(FieldInjected.class.getDeclaredFields())
+                    .anyMatch(field -> Modifier.isFinal(field.getModifiers())),
                 Matchers.equalTo(false)
             );
         }
@@ -202,18 +229,32 @@ final class InjectionStylesTest {
         @Test
         @DisplayName("@Autowired(required = false) оставляет поле пустым, если бина нет")
         void optionalDependencyMayBeAbsent() {
-            try (var minimal = new AnnotationConfigApplicationContext()) {
+            try (
+                AnnotationConfigApplicationContext minimal =
+                    new AnnotationConfigApplicationContext()
+            ) {
                 minimal.register(TaxService.class, SetterInjected.class);
                 minimal.refresh();
-                final SetterInjected service = minimal.getBean(SetterInjected.class);
                 MatcherAssert.assertThat(
                     "cannot verify that optional dependency may be absent",
-                    service.hasDiscountService(),
+                    minimal.getBean(SetterInjected.class).hasDiscountService(),
                     Matchers.equalTo(false)
                 );
+            }
+        }
+
+        @Test
+        @DisplayName("без необязательной зависимости объект всё равно считает")
+        void worksWithoutTheOptionalDependency() {
+            try (
+                AnnotationConfigApplicationContext minimal =
+                    new AnnotationConfigApplicationContext()
+            ) {
+                minimal.register(TaxService.class, SetterInjected.class);
+                minimal.refresh();
                 MatcherAssert.assertThat(
-                    "cannot verify that optional dependency may be absent",
-                    service.total(new BigDecimal("100"), true),
+                    "object cannot work without the optional dependency",
+                    minimal.getBean(SetterInjected.class).total(new BigDecimal("100"), true),
                     Matchers.comparesEqualTo(new BigDecimal("120.00"))
                 );
             }
@@ -224,7 +265,9 @@ final class InjectionStylesTest {
         void optionalDependencyIsInjectedWhenPresent() {
             MatcherAssert.assertThat(
                 "cannot verify that optional dependency is injected when present",
-                InjectionStylesTest.this.context.getBean(SetterInjected.class).hasDiscountService(),
+                InjectionStylesTest.this.context
+                    .getBean(SetterInjected.class)
+                    .hasDiscountService(),
                 Matchers.equalTo(true)
             );
         }
@@ -233,10 +276,18 @@ final class InjectionStylesTest {
         @DisplayName("Между new и вызовом сеттера объект невалиден")
         void objectIsInvalidBetweenNewAndSetter() {
             final SetterInjected service = new SetterInjected();
-            Assertions.assertThrows(NullPointerException.class, () -> service.total(BigDecimal.TEN, false));
+            Assertions.assertThrows(
+                NullPointerException.class, () -> service.total(BigDecimal.TEN, false)
+            );
+        }
+
+        @Test
+        @DisplayName("после вызова сеттера объект становится рабочим")
+        void objectBecomesUsableAfterTheSetter() {
+            final SetterInjected service = new SetterInjected();
             service.setTaxService(new TaxService());
             MatcherAssert.assertThat(
-                "cannot verify that object is invalid between new and setter",
+                "object cannot become usable after the setter",
                 service.total(new BigDecimal("100"), false),
                 Matchers.comparesEqualTo(new BigDecimal("120.00"))
             );
@@ -254,12 +305,18 @@ final class InjectionStylesTest {
         @Test
         @DisplayName("Работает, но зависимость достаётся вручную из контейнера")
         void itWorksButHidesDependencies() {
-            final ServiceLocatorDemo demo = InjectionStylesTest.this.context.getBean(ServiceLocatorDemo.class);
             MatcherAssert.assertThat(
                 "cannot verify that it works but hides dependencies",
-                demo.total(new BigDecimal("100")),
+                InjectionStylesTest.this.context
+                    .getBean(ServiceLocatorDemo.class)
+                    .total(new BigDecimal("100")),
                 Matchers.comparesEqualTo(new BigDecimal("120.00"))
             );
+        }
+
+        @Test
+        @DisplayName("зависимостей не видно в конструкторе — он пустой")
+        void hidesDependenciesFromTheConstructor() {
             MatcherAssert.assertThat(
                 "service locator cannot hide its dependencies from the constructor",
                 ServiceLocatorDemo.class.getDeclaredConstructors()[0].getParameterCount(),
@@ -270,21 +327,30 @@ final class InjectionStylesTest {
         @Test
         @DisplayName("Вне контейнера класс неработоспособен в принципе")
         void uselessOutsideTheContainer() {
-            final ServiceLocatorDemo standalone = new ServiceLocatorDemo();
             MatcherAssert.assertThat(
                 "cannot verify that useless outside the container",
-                standalone.worksWithoutContainer(),
+                new ServiceLocatorDemo().worksWithoutContainer(),
                 Matchers.equalTo(false)
             );
-            Assertions.assertThrows(NullPointerException.class, () -> standalone.total(BigDecimal.TEN));
+        }
+
+        @Test
+        @DisplayName("вне контейнера любой вызов падает")
+        void failsOutsideTheContainer() {
+            final ServiceLocatorDemo standalone = new ServiceLocatorDemo();
+            Assertions.assertThrows(
+                NullPointerException.class, () -> standalone.total(BigDecimal.TEN)
+            );
         }
 
         @Test
         @DisplayName("Ошибка «нет бина» вылезает при вызове метода, а не при старте")
         void errorsSurfaceLate() {
-            final ServiceLocatorDemo demo = InjectionStylesTest.this.context.getBean(ServiceLocatorDemo.class);
-            // контекст поднялся успешно, хотя такого бина нет
-            Assertions.assertThrows(NoSuchBeanDefinitionException.class, () -> demo.lookup("несуществующийБин"));
+            final ServiceLocatorDemo demo =
+                InjectionStylesTest.this.context.getBean(ServiceLocatorDemo.class);
+            Assertions.assertThrows(
+                NoSuchBeanDefinitionException.class, () -> demo.lookup("несуществующийБин")
+            );
         }
     }
 
@@ -299,10 +365,11 @@ final class InjectionStylesTest {
         @Test
         @DisplayName("@Inject работает как @Autowired, @Resource — как @Resource")
         void jakartaAnnotationsAreSupported() {
-            final JakartaInjected service = InjectionStylesTest.this.context.getBean(JakartaInjected.class);
             MatcherAssert.assertThat(
                 "cannot verify that jakarta annotations are supported",
-                service.total(new BigDecimal("100"), true),
+                InjectionStylesTest.this.context
+                    .getBean(JakartaInjected.class)
+                    .total(new BigDecimal("100"), true),
                 Matchers.comparesEqualTo(new BigDecimal("108.00"))
             );
         }
@@ -315,8 +382,13 @@ final class InjectionStylesTest {
                 InjectionStylesTest.this.context.containsBean("jakartaService"),
                 Matchers.equalTo(true)
             );
+        }
+
+        @Test
+        @DisplayName("под этим именем лежит именно наш класс")
+        void namedBeanHasTheRightType() {
             MatcherAssert.assertThat(
-                "cannot verify that named sets the bean name",
+                "named bean cannot have the declared type",
                 InjectionStylesTest.this.context.getBean("jakartaService"),
                 Matchers.instanceOf(JakartaInjected.class)
             );
@@ -325,15 +397,11 @@ final class InjectionStylesTest {
         @Test
         @DisplayName("Класс переносим: он не зависит от аннотаций Spring")
         void classIsPortable() {
-            final boolean usesSpringAnnotations = Arrays.stream(
-                JakartaInjected.class.getAnnotations()
-            )
-                    .anyMatch(
-                        a -> a.annotationType().getName().startsWith("org.springframework")
-                    );
             MatcherAssert.assertThat(
                 "portable class cannot stay free of Spring annotations",
-                usesSpringAnnotations,
+                Arrays.stream(JakartaInjected.class.getAnnotations())
+                    .map(marker -> marker.annotationType().getName())
+                    .anyMatch(name -> name.startsWith("org.springframework")),
                 Matchers.equalTo(false)
             );
         }

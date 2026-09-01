@@ -6,9 +6,9 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m12.domain;
 
-import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import org.springframework.stereotype.Component;
 
 /**
  * Вторая зависимость — чтобы у сервиса их было больше одной.
@@ -31,13 +31,13 @@ public class DiscountService {
      * @return Применение
      */
     // @checkstyle NonStaticMethodCheck (3 lines)
-    public BigDecimal apply(
-        final BigDecimal amount, final boolean vip
-    ) {
-        return vip
-                ? amount.multiply(
-                    new BigDecimal("0.9")
-                ).setScale(2, RoundingMode.HALF_UP)
-                : amount;
+    public BigDecimal apply(final BigDecimal amount, final boolean vip) {
+        final BigDecimal price;
+        if (vip) {
+            price = amount.multiply(new BigDecimal("0.9")).setScale(2, RoundingMode.HALF_UP);
+        } else {
+            price = amount;
+        }
+        return price;
     }
 }

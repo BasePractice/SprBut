@@ -5,6 +5,14 @@
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
 // @checkstyle NonStaticMethodCheck disable
+// тема раздела — циклические зависимости: участники цикла и три конфигурации
+// (сломанная, с @Lazy и переработанная) должны читаться подряд, в отдельных
+// файлах сравнение теряется
+// @checkstyle ProhibitStaticNestedClassesCheck disable
+// @checkstyle QualifyInnerClassCheck disable
+// сеттеры участников цикла принимают одноимённое с полем значение —
+// именно так их вызывает контейнер
+// @checkstyle HiddenFieldCheck disable
 package ru.sprbut.m12.cycles;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +37,7 @@ import org.springframework.context.annotation.Lazy;
  *
  * @since 1.0
  */
+@SuppressWarnings("PMD.MissingStaticMethodInNonInstantiatableClass")
 public final class CircularBeans {
 
     private CircularBeans() {
@@ -71,8 +80,10 @@ public final class CircularBeans {
     public static class Beta {
 
         /**
-         * Альфа-зависимость.
+         * Альфа-зависимость: она никогда не читается — важен сам факт,
+         * что контейнер обязан её подставить, и цикл на этом замыкается.
          */
+        @SuppressWarnings("PMD.UnusedPrivateField")
         private final Alpha alpha;
 
         /**
@@ -147,10 +158,10 @@ public final class CircularBeans {
          * {@code @Lazy} на параметре: сюда придёт прокси, а настоящий {@code Beta}
          * будет получен из контейнера при первом вызове его метода.
          * @param beta Бета-зависимость
-         * @return {@code @Lazy} на параметре: сюда придёт прокси, а настоящий {@code Beta} будет получен из контейнера при первом вызове его метода
+         * @return Альфа, собранная на прокси вместо настоящей беты
          */
         @Bean
-        public Alpha alpha(final @Lazy Beta beta) {
+        public Alpha alpha(@Lazy final Beta beta) {
             return new Alpha(beta);
         }
 

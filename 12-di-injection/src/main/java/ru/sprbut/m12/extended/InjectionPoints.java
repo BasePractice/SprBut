@@ -49,17 +49,21 @@ public final class InjectionPoints {
      *
      * <p>Правило Spring: если конструктор один, он и используется — аннотация
      * не нужна. Если их несколько, нужен явный {@code @Autowired}.</p>
+     *
      * @return Конструктор, который выберет контейнер
      */
     public Constructor<?> constructor() {
         final Constructor<?>[] declared = this.type.getDeclaredConstructors();
+        final Constructor<?> chosen;
         if (declared.length == 1) {
-            return declared[0];
+            chosen = declared[0];
+        } else {
+            chosen = Arrays.stream(declared)
+                .filter(InjectionPoints::injected)
+                .findFirst()
+                .orElse(null);
         }
-        return Arrays.stream(declared)
-            .filter(this::injected)
-            .findFirst()
-            .orElse(null);
+        return chosen;
     }
 
     /**
@@ -68,10 +72,12 @@ public final class InjectionPoints {
      */
     public List<Field> fields() {
         final List<Field> found = new ArrayList<>(0);
-        for (Class<?> current = this.type;
-             current != null && current != Object.class;
-             current = current.getSuperclass()) {
-            Arrays.stream(current.getDeclaredFields()).filter(this::injected).forEach(found::add);
+        Class<?> current = this.type;
+        while (current != null && current != Object.class) {
+            Arrays.stream(current.getDeclaredFields())
+                .filter(InjectionPoints::injected)
+                .forEach(found::add);
+            current = current.getSuperclass();
         }
         return List.copyOf(found);
     }
@@ -83,7 +89,7 @@ public final class InjectionPoints {
     public List<Method> setters() {
         return Arrays.stream(this.type.getDeclaredMethods())
             .filter(method -> method.getParameterCount() == 1)
-            .filter(this::injected)
+            .filter(InjectionPoints::injected)
             .sorted(Comparator.comparing(Method::getName))
             .toList();
     }
@@ -98,13 +104,15 @@ public final class InjectionPoints {
             .allMatch(field -> Modifier.isFinal(field.getModifiers()));
     }
 
-    private boolean injected(final AnnotatedElement element) {
-        return this.marked(element, Autowired.class)
-            || this.marked(element, Inject.class)
-            || this.marked(element, Resource.class);
+    private static boolean injected(final AnnotatedElement element) {
+        return InjectionPoints.marked(element, Autowired.class)
+            || InjectionPoints.marked(element, Inject.class)
+            || InjectionPoints.marked(element, Resource.class);
     }
 
-    private static boolean marked(final AnnotatedElement element, final Class<? extends Annotation> annotation) {
+    private static boolean marked(
+        final AnnotatedElement element, final Class<? extends Annotation> annotation
+    ) {
         return element.isAnnotationPresent(annotation);
     }
 }

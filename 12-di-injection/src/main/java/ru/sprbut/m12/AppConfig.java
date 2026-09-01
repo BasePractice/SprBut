@@ -21,12 +21,14 @@ import ru.sprbut.m12.locator.ServiceLocatorDemo;
  * @since 1.0
  */
 @Configuration
-@ComponentScan(basePackageClasses = {
+@ComponentScan(
+    basePackageClasses = {
         TaxService.class,
         ConstructorInjected.class,
         ServiceLocatorDemo.class,
         JakartaInjected.class
-})
+    }
+)
 public class AppConfig {
 
     /**

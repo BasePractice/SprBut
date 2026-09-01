@@ -73,6 +73,35 @@ public final class InjectionAudit {
         final List<Style> styles = new ArrayList<>(0);
         final List<String> dependencies = new ArrayList<>(0);
         final List<String> warnings = new ArrayList<>(0);
+        InjectionAudit.byConstructor(points, styles, dependencies);
+        InjectionAudit.byField(points, styles, dependencies, warnings);
+        InjectionAudit.bySetter(points, styles, dependencies);
+        final boolean locator = ApplicationContextAware.class.isAssignableFrom(this.type);
+        if (locator) {
+            styles.add(Style.SERVICE_LOCATOR);
+            warnings.add(
+                String.format(
+                    "%s%s",
+                    "Service Locator: класс сам ходит за зависимостями в контейнер, ",
+                    "они не видны в API и не подменяются в тесте"
+                )
+            );
+        }
+        this.summarize(points, styles, dependencies, warnings, locator);
+        return new Report(
+            this.type,
+            styles,
+            dependencies,
+            styles.contains(Style.CONSTRUCTOR) && !styles.contains(Style.FIELD) && !locator,
+            points.immutable(),
+            warnings
+        );
+    }
+
+    // внедрение через конструктор: зависимости видны в сигнатуре
+    private static void byConstructor(
+        final InjectionPoints points, final List<Style> styles, final List<String> dependencies
+    ) {
         final Constructor<?> injectable = points.constructor();
         if (injectable != null && injectable.getParameterCount() > 0) {
             styles.add(Style.CONSTRUCTOR);
@@ -80,15 +109,32 @@ public final class InjectionAudit {
                 .map(Class::getSimpleName)
                 .forEach(dependencies::add);
         }
+    }
+
+    // внедрение в поле: собрать объект обычным new уже нельзя
+    private static void byField(
+        final InjectionPoints points, final List<Style> styles,
+        final List<String> dependencies, final List<String> warnings
+    ) {
         final List<Field> fields = points.fields();
         if (!fields.isEmpty()) {
             styles.add(Style.FIELD);
-            fields.stream().map(field -> field.getType().getSimpleName()).forEach(dependencies::add);
+            fields.stream()
+                .map(field -> field.getType().getSimpleName())
+                .forEach(dependencies::add);
             warnings.add(
-                "внедрение в поле: класс нельзя собрать обычным new — поля "
-                    + fields.stream().map(Field::getName).toList()
+                String.format(
+                    "внедрение в поле: класс нельзя собрать обычным new, поля %s",
+                    fields.stream().map(Field::getName).toList()
+                )
             );
         }
+    }
+
+    // внедрение через сеттеры: зависимость появляется уже после создания
+    private static void bySetter(
+        final InjectionPoints points, final List<Style> styles, final List<String> dependencies
+    ) {
         final List<Method> setters = points.setters();
         if (!setters.isEmpty()) {
             styles.add(Style.SETTER);
@@ -96,36 +142,32 @@ public final class InjectionAudit {
                 .map(setter -> setter.getParameterTypes()[0].getSimpleName())
                 .forEach(dependencies::add);
         }
-        final boolean locator = ApplicationContextAware.class.isAssignableFrom(this.type);
-        if (locator) {
-            styles.add(Style.SERVICE_LOCATOR);
-            warnings.add(
-                "Service Locator: класс сам ходит за зависимостями в контейнер — "
-                    + "они не видны в API и не подменяются в тесте"
-            );
-        }
+    }
+
+    // замечания, которые видны только по картине целиком
+    private void summarize(
+        final InjectionPoints points, final List<Style> styles,
+        final List<String> dependencies, final List<String> warnings, final boolean locator
+    ) {
         if (styles.contains(Style.CONSTRUCTOR) && !points.immutable()
-            && fields.isEmpty() && setters.isEmpty()) {
+            && !styles.contains(Style.FIELD) && !styles.contains(Style.SETTER)) {
             warnings.add(
-                "зависимости внедрены конструктором, но поля не final — "
-                    + "их всё ещё можно переприсвоить"
+                String.format(
+                    "%s%s",
+                    "зависимости внедрены конструктором, но поля не final, ",
+                    "их всё ещё можно переприсвоить"
+                )
             );
         }
         if (dependencies.size() > this.limit) {
             warnings.add(
-                "зависимостей " + dependencies.size() + " — вероятно, класс делает слишком много"
+                String.format(
+                    "зависимостей %d, вероятно, класс делает слишком много", dependencies.size()
+                )
             );
         }
         if (styles.size() > 1 && !locator) {
-            warnings.add("смешаны способы внедрения: " + styles);
+            warnings.add(String.format("смешаны способы внедрения: %s", styles));
         }
-        return new Report(
-            this.type,
-            styles,
-            dependencies,
-            styles.contains(Style.CONSTRUCTOR) && fields.isEmpty() && !locator,
-            points.immutable(),
-            warnings
-        );
     }
 }

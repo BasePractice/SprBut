@@ -37,12 +37,13 @@ final class CircularDependencyTest {
     @Test
     @DisplayName("@Lazy разрывает цикл: вместо бина подставляется прокси")
     void lazyBreaksTheCycle() {
-        try (var context = new AnnotationConfigApplicationContext(CircularBeans.LazyConfig.class)) {
-
-            final CircularBeans.Alpha alpha = context.getBean(CircularBeans.Alpha.class);
+        try (
+            AnnotationConfigApplicationContext context =
+                new AnnotationConfigApplicationContext(CircularBeans.LazyConfig.class)
+        ) {
             MatcherAssert.assertThat(
                 "lazy proxy cannot break the cycle",
-                alpha.describe(),
+                context.getBean(CircularBeans.Alpha.class).describe(),
                 Matchers.equalTo("alpha+beta")
             );
         }
@@ -51,13 +52,13 @@ final class CircularDependencyTest {
     @Test
     @DisplayName("Цикл через сеттеры разрешается, но объекты временно неполны")
     void setterCycleIsResolvable() {
-        try (var context = new AnnotationConfigApplicationContext(CircularBeans.SetterCycleConfig.class)) {
-
-            final CircularBeans.Gamma gamma = context.getBean(CircularBeans.Gamma.class);
-            final CircularBeans.Delta delta = context.getBean(CircularBeans.Delta.class);
+        try (
+            AnnotationConfigApplicationContext context =
+                new AnnotationConfigApplicationContext(CircularBeans.SetterCycleConfig.class)
+        ) {
             MatcherAssert.assertThat(
                 "setter cycle cannot be resolved by the container",
-                gamma.describe(),
+                context.getBean(CircularBeans.Gamma.class).describe(),
                 Matchers.equalTo("gamma+delta")
             );
         }
@@ -66,8 +67,10 @@ final class CircularDependencyTest {
     @Test
     @DisplayName("Правильное решение — третий бин: цикла нет вовсе")
     void extractingAThirdBeanRemovesTheCycle() {
-        try (var context = new AnnotationConfigApplicationContext(CircularBeans.RefactoredConfig.class)) {
-
+        try (
+            AnnotationConfigApplicationContext context =
+                new AnnotationConfigApplicationContext(CircularBeans.RefactoredConfig.class)
+        ) {
             MatcherAssert.assertThat(
                 "extracted third bean cannot remove the cycle",
                 context.getBean(CircularBeans.Epsilon.class).describe(),
@@ -77,14 +80,12 @@ final class CircularDependencyTest {
     }
 
     @Test
-    @DisplayName(
-        "оба бина зависят от общего третьего, и ни один — от другого"
-    )
+    @DisplayName("оба бина зависят от общего третьего, и ни один — от другого")
     void sharesTheExtractedBean() {
-        try (var context =
-                 new AnnotationConfigApplicationContext(
-                     CircularBeans.RefactoredConfig.class
-                 )) {
+        try (
+            AnnotationConfigApplicationContext context =
+                new AnnotationConfigApplicationContext(CircularBeans.RefactoredConfig.class)
+        ) {
             MatcherAssert.assertThat(
                 "shared bean cannot appear in the context",
                 Arrays.asList(context.getBeanDefinitionNames()),
@@ -96,13 +97,13 @@ final class CircularDependencyTest {
     @Test
     @DisplayName("@Lazy — обход симптома: прокси приходит вместо настоящего объекта")
     void lazyInjectsAProxy() {
-        try (var context = new AnnotationConfigApplicationContext(CircularBeans.LazyConfig.class)) {
-
-            final CircularBeans.Alpha alpha = context.getBean(CircularBeans.Alpha.class);
-            // сам alpha — обычный бин, но beta внутри него подменена прокси
+        try (
+            AnnotationConfigApplicationContext context =
+                new AnnotationConfigApplicationContext(CircularBeans.LazyConfig.class)
+        ) {
             MatcherAssert.assertThat(
                 "lazy proxy cannot stand in for the real object",
-                alpha.describe(),
+                context.getBean(CircularBeans.Alpha.class).describe(),
                 Matchers.containsString("beta")
             );
         }
