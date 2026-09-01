@@ -3,14 +3,17 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// имена полей сущности — предмет разговора о маппинге в DTO
+// @checkstyle MemberNameCheck disable
+// @checkstyle EmptyLineSeparatorCheck disable
 // @checkstyle ImplicitConstructorCheck disable
 package ru.sprbut.m10.lombok;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.math.BigDecimal;
-import java.time.LocalDate;
 
 /**
  * Lombok: {@code @Data} = {@code @Getter} + {@code @Setter} + {@code @ToString}

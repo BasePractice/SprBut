@@ -54,7 +54,7 @@ public final class Generated {
     /**
      * Арности конструкторов — по ним видно {@code @NoArgsConstructor}
      * и {@code @AllArgsConstructor}.
-     * @return Арности конструкторов — по ним видно {@code @NoArgsConstructor} и {@code @AllArgsConstructor}
+     * @return Арности конструкторов
      */
     public List<Integer> constructors() {
         return Arrays.stream(this.type.getDeclaredConstructors())
@@ -96,11 +96,13 @@ public final class Generated {
                     candidate.getModifiers()
                 )
             )
-            .orElseThrow(() -> new IllegalArgumentException(
-                String.format(
-                    "Нет метода '%s' в %s", method, this.type.getSimpleName()
+            .orElseThrow(
+                () -> new IllegalArgumentException(
+                    String.format(
+                        "Нет метода '%s' в %s", method, this.type.getSimpleName()
+                    )
                 )
-            ));
+            );
     }
 
     /**
@@ -108,18 +110,20 @@ public final class Generated {
      * @return Подчиняется ли сгенерированный класс соглашению JavaBeans из модуля 02
      */
     public boolean javaBean() {
-        final boolean constructible = Arrays.stream(this.type.getConstructors())
-            .anyMatch(candidate -> candidate.getParameterCount() == 0);
-        final boolean accessible = Arrays.stream(this.type.getDeclaredFields())
-            .filter(field -> !field.isSynthetic())
-            .filter(field -> !Modifier.isStatic(field.getModifiers()))
-            .map(Field::getName)
-            .allMatch(this::readable);
-        return constructible && accessible;
+        return Arrays.stream(this.type.getConstructors())
+            .anyMatch(candidate -> candidate.getParameterCount() == 0)
+            && Arrays.stream(this.type.getDeclaredFields())
+                .filter(field -> !field.isSynthetic())
+                .filter(field -> !Modifier.isStatic(field.getModifiers()))
+                .map(Field::getName)
+                .allMatch(this::readable);
     }
 
     private boolean readable(final String property) {
-        final String suffix = Character.toUpperCase(property.charAt(0)) + property.substring(1);
-        return this.methods().contains("get" + suffix) || this.methods().contains("is" + suffix);
+        final String suffix = String.format(
+            "%s%s", Character.toUpperCase(property.charAt(0)), property.substring(1)
+        );
+        return this.methods().contains(String.format("get%s", suffix))
+            || this.methods().contains(String.format("is%s", suffix));
     }
 }

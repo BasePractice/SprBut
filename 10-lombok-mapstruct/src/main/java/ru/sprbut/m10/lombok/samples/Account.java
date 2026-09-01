@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// аксессоры генерирует Lombok, поэтому qulice не видит обращений к полям
+// @checkstyle ConstantUsageCheck disable
 // @checkstyle ImplicitConstructorCheck disable
 package ru.sprbut.m10.lombok.samples;
 

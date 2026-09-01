@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// аксессоры генерирует Lombok; изменяемое поле показывает разницу
+// между @Data и @Value
+// @checkstyle ConstantUsageCheck disable
+// @checkstyle MemberNameCheck disable
 // @checkstyle ImplicitConstructorCheck disable
 package ru.sprbut.m10.lombok.samples;
 
@@ -35,5 +39,5 @@ public class Service {
     /**
      * Состояние.
      */
-    private String mutableState = "меняется";
+    private final String mutableState = "меняется";
 }

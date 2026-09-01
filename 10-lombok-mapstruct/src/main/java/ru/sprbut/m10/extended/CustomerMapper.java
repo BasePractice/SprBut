@@ -3,9 +3,16 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// MapStruct требует статических методов преобразования и имён вроде
+// birthDate, совпадающих с полями сущности — это и есть предмет модуля
+// @checkstyle ParameterNameCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m10.extended;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.List;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,10 +22,6 @@ import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 import ru.sprbut.m10.lombok.CustomerDto;
 import ru.sprbut.m10.lombok.CustomerEntity;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.Period;
-import java.util.List;
 
 /**
  * <b>Расширенный пример модуля 10.</b>
@@ -39,7 +42,6 @@ import java.util.List;
  * @since 1.0
  */
 @Mapper(unmappedTargetPolicy = ReportingPolicy.ERROR)
-@SuppressWarnings("PMD.ImplicitFunctionalInterface")
 public interface CustomerMapper {
 
     /**
@@ -57,7 +59,10 @@ public interface CustomerMapper {
      * @param entity Сущность
      * @return Объект передачи данных
      */
-    @Mapping(target = "fullName", expression = "java(entity.getFirstName() + \" \" + entity.getLastName())")
+    @Mapping(
+        target = "fullName",
+        expression = "java(entity.getFirstName() + \" \" + entity.getLastName())"
+    )
     @Mapping(target = "age", source = "birthDate", qualifiedByName = "toAge")
     @Mapping(target = "status", source = "vip", qualifiedByName = "toStatus")
     @Mapping(target = "balance", source = "balance")
@@ -76,10 +81,16 @@ public interface CustomerMapper {
      * @param birthDate Дата рождения
      * @return Возраст
      */
-    @SuppressWarnings("PMD.AvoidDirectAccessToStaticFields")
+    @SuppressWarnings({"PMD.AvoidDirectAccessToStaticFields", "PMD.ProhibitPublicStaticMethods"})
     @Named("toAge")
     static int toAge(final LocalDate birthDate) {
-        return birthDate == null ? 0 : Period.between(birthDate, REFERENCE_DATE).getYears();
+        final int age;
+        if (birthDate == null) {
+            age = 0;
+        } else {
+            age = Period.between(birthDate, REFERENCE_DATE).getYears();
+        }
+        return age;
     }
 
     /**
@@ -87,16 +98,25 @@ public interface CustomerMapper {
      * @param vip Признак привилегированного клиента
      * @return Статус
      */
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
     @Named("toStatus")
     static String toStatus(final boolean vip) {
-        return vip ? "VIP" : "STANDARD";
+        final String status;
+        if (vip) {
+            status = "VIP";
+        } else {
+            status = "STANDARD";
+        }
+        return status;
     }
 
     /**
      * {@code @AfterMapping} с {@code @MappingTarget} билдера — последний штрих
      * уже после основного маппинга. Так добавляют вычисляемые поля и нормализацию.
      * @param source Источник
+     * @param target Билдер объекта передачи данных
      */
+    @SuppressWarnings("PMD.ProhibitPublicStaticMethods")
     @AfterMapping
     static void normalizeBalance(
         final CustomerEntity source, @MappingTarget final CustomerDto.CustomerDtoBuilder target

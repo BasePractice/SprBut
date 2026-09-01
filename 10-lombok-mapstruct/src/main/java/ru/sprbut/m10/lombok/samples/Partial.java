@@ -28,23 +28,23 @@ public class Partial {
     private String visible;
 
     /**
+     * Поле, у которого геттер отключён.
+     */
+    @Getter(AccessLevel.NONE)
+    private String hidden;
+
+    /**
      * Открытый конструктор: экземпляр создаёт контейнер.
      */
     public Partial() {
-        // нечего инициализировать
+        this.hidden = "не виден снаружи";
     }
 
     /**
      * Единственный способ прочитать поле, у которого геттер отключён.
-     * @return Единственный способ прочитать поле, у которого геттер отключён
+     * @return Значение скрытого поля
      */
     public String peekHidden() {
         return this.hidden;
     }
-
-    /**
-     * Значение {@code hidden}.
-     */
-    @Getter(AccessLevel.NONE)
-    private String hidden = "не виден снаружи";
 }

@@ -3,12 +3,17 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
+// поля объявлены по-ломбоковски: @Value сам делает их private final,
+// а имена вроде fullName — предмет разговора о маппинге
+// @checkstyle VisibilityModifierCheck disable
+// @checkstyle MemberNameCheck disable
+// @checkstyle EmptyLineSeparatorCheck disable
 // @checkstyle ImplicitConstructorCheck disable
 package ru.sprbut.m10.lombok;
 
+import java.math.BigDecimal;
 import lombok.Builder;
 import lombok.Value;
-import java.math.BigDecimal;
 
 /**
  * Lombok: {@code @Value} — неизменяемый аналог {@code @Data}.
