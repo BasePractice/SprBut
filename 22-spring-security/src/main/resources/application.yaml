@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: sprbut-security
+server:
+  port: 8082

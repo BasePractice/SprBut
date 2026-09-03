@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: sprbut-webflux
+server:
+  port: 8081

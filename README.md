@@ -6,6 +6,9 @@
 **Презентация:**
 [SprBut — план курса и слайды](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit?usp=sharing&ouid=103425146937158568285&rtpof=true&sd=true)
 
+Разделы «Spring MVC», «WebFlux», «Spring Security» и «Spring Cloud» добавлены
+в презентацию после восьмой лекции; модули 20–23 сделаны по ним.
+
 ## О чём этот проект
 
 Курс отвечает на один вопрос: **почему код в исходниках и поведение в рантайме —
@@ -43,22 +46,27 @@
 | 17 | [spring-annotations](17-spring-annotations/) | Стереотипы, `@Configuration`, условия | Каталог с раскрытием композиций |
 | 18 | [boot-startup](18-boot-startup/) | Последовательность запуска Boot | Восстановление таймлайна старта |
 | 19 | [autoconfiguration](19-autoconfiguration/) | Стартеры, `imports`, условия | Программный отчёт об условиях |
-| 20 | [testing](20-testing/) | `@SpringBootTest`, срезы, `@MockitoBean` | Один функционал четырьмя способами |
-| 21 | [common-mistakes](21-common-mistakes/) | Пять типичных ошибок контейнера | Диагност падений в духе `FailureAnalyzer` |
-| 22 | [aot-native](22-aot-native/) | AOT, native image, `javax` → `jakarta` | Аудит готовности к native image |
-| 23 | [capstone](23-capstone/) | **Итоговое задание: SprBut Tracker** | **Карта контейнера: приложение о самом себе** |
+| 20 | [spring-mvc](20-spring-mvc/) | `DispatcherServlet`, контроллеры, `ResponseEntity` | Таблица маршрутов, снятая с приложения |
+| 21 | [webflux](21-webflux/) | `Mono`, `Flux`, неблокирующий ввод-вывод | Backpressure, показанный счётчиком |
+| 22 | [spring-security](22-spring-security/) | Цепочка фильтров, роли, `@PreAuthorize` | Цепочка фильтров, выписанная по именам |
+| 23 | [spring-cloud](23-spring-cloud/) | Discovery, балансировка, circuit breaker | Предохранитель, пойманный за работой |
+| 24 | [testing](24-testing/) | `@SpringBootTest`, срезы, `@MockitoBean` | Один функционал четырьмя способами |
+| 25 | [common-mistakes](25-common-mistakes/) | Пять типичных ошибок контейнера | Диагност падений в духе `FailureAnalyzer` |
+| 26 | [aot-native](26-aot-native/) | AOT, native image, `javax` → `jakarta` | Аудит готовности к native image |
+| 27 | [capstone](27-capstone/) | **Итоговое задание: SprBut Tracker** | **Карта контейнера: приложение о самом себе** |
 
 Разделы презентации, у которых материала на несколько занятий, разбиты
 на отдельные модули: Reflection — на 01–04, аннотации — на 05–06,
-annotation processor — на 07–09, IoC и DI — на 11–14, аннотации Spring — на 16–17.
+annotation processor — на 07–09, IoC и DI — на 11–14, аннотации Spring — на 16–17,
+веб-разработка — на 20–21.
 
 ## Итоговое задание
 
-[Модуль 23 — SprBut Tracker](23-capstone/) — трекер задач, в котором встречается
+[Модуль 27 — SprBut Tracker](27-capstone/) — трекер задач, в котором встречается
 каждая тема курса, от собственной аннотации с аспектом до подсказок для native image.
 
 Итоговый расширенный пример —
-[`ContextMap`](23-capstone/src/main/java/ru/sprbut/m23/extended/ContextMap.java):
+[`ContextMap`](27-capstone/src/main/java/ru/sprbut/m27/extended/ContextMap.java):
 приложение, которое рефлексией по живому контейнеру рассказывает о себе само —
 чем стали его бины, во что они обёрнуты и какие методы перехвачены.
 
@@ -68,8 +76,8 @@ annotation processor — на 07–09, IoC и DI — на 11–14, аннота�
 
 ```bash
 mvn test                      # все модули
-mvn -pl 23-capstone test      # один модуль
-mvn -pl 23-capstone spring-boot:run
+mvn -pl 27-capstone test      # один модуль
+mvn -pl 27-capstone spring-boot:run
 ```
 
 Модули 01–09 активно используют рефлексию, поэтому корневой `pom.xml` открывает

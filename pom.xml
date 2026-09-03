@@ -22,6 +22,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <spring-boot.version>4.1.1</spring-boot.version>
+        <spring-cloud.version>2025.1.3</spring-cloud.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <javapoet.version>1.13.0</javapoet.version>
         <auto-service.version>1.1.1</auto-service.version>
@@ -62,10 +63,14 @@
         <module>17-spring-annotations</module>
         <module>18-boot-startup</module>
         <module>19-autoconfiguration</module>
-        <module>20-testing</module>
-        <module>21-common-mistakes</module>
-        <module>22-aot-native</module>
-        <module>23-capstone</module>
+        <module>20-spring-mvc</module>
+        <module>21-webflux</module>
+        <module>22-spring-security</module>
+        <module>23-spring-cloud</module>
+        <module>24-testing</module>
+        <module>25-common-mistakes</module>
+        <module>26-aot-native</module>
+        <module>27-capstone</module>
     </modules>
 
     <dependencyManagement>
@@ -74,6 +79,13 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

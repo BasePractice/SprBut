@@ -1,0 +1,22 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Учебные репозитории
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+// @checkstyle RegexpSingleline disable
+package ru.sprbut.m25.circular;
+
+/**
+ * Счета. Интерфейс здесь не для красоты: {@code @Lazy} умеет подставить
+ * JDK-прокси только вместо интерфейса, и на этом строится лечение цикла.
+ * @since 1.0
+ */
+@SuppressWarnings("PMD.ImplicitFunctionalInterface")
+public interface Invoices {
+
+    /**
+     * Итоговая сумма по всем счетам.
+     * @return Сумма всех счетов
+     */
+    int total();
+}
