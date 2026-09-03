@@ -22,10 +22,13 @@
 4. Внешняя конфигурация с профилями и неизменяемой привязкой.
 5. Собственная автоконфигурация, отступающая перед бином приложения.
 6. Веб-слой с проверкой запросов и переводом ошибок домена в коды HTTP.
-7. Генерация кода на этапе компиляции: Lombok и MapStruct.
-8. Подсказки для native image.
-9. Тесты: полный контекст, срезы, юнит-тесты без контейнера.
-10. **Карта контейнера** — итоговый расширенный пример.
+7. Защита: цепочка фильтров перед диспетчером, роль на адресе и правило на методе.
+8. Тот же ресурс, отданный потоком, а не списком.
+9. Сосед по сети, который может не ответить, — и предохранитель на этот случай.
+10. Генерация кода на этапе компиляции: Lombok и MapStruct.
+11. Подсказки для native image.
+12. Тесты: полный контекст, срезы, юнит-тесты без контейнера.
+13. **Карта контейнера** — итоговый расширенный пример.
 
 ## Как темы курса легли в код
 
@@ -36,16 +39,20 @@
 | 05–06 Аннотации | [`Audited`](src/main/java/ru/sprbut/m27/audit/Audited.java): `RUNTIME`, `@Target(METHOD)`, элемент `value` |
 | 07–09 APT | [`TaskViews`](src/main/java/ru/sprbut/m27/web/TaskViews.java) — реализации нет в исходниках, её пишет компилятор |
 | 10 Lombok, MapStruct | [`TaskView`](src/main/java/ru/sprbut/m27/web/TaskView.java) на `@Value`/`@Builder` против `record` в [`NewTaskRequest`](src/main/java/ru/sprbut/m27/web/NewTaskRequest.java) |
-| 11–12 IoC и DI | [`TaskService`](src/main/java/ru/sprbut/m27/service/TaskService.java): три зависимости через конструктор, включая `Clock` |
+| 11–12 IoC и DI | [`TaskService`](src/main/java/ru/sprbut/m27/service/TaskService.java): четыре зависимости через конструктор, включая `Clock` |
 | 13–14 Bean и жизненный цикл | [`AuditTrail`](src/main/java/ru/sprbut/m27/audit/AuditTrail.java) — singleton, переживающий все запросы |
 | 15 Spring AOP | [`AuditAspect`](src/main/java/ru/sprbut/m27/audit/AuditAspect.java) и ловушка `getMostSpecificMethod` |
 | 16 Конфигурация | [`TrackerProperties`](src/main/java/ru/sprbut/m27/config/TrackerProperties.java), профиль `demo` |
 | 17 Аннотации Spring | [`TaskController`](src/main/java/ru/sprbut/m27/web/TaskController.java), [`Failures`](src/main/java/ru/sprbut/m27/web/Failures.java) |
 | 18 Запуск | [`TrackerRunner`](src/main/java/ru/sprbut/m27/startup/TrackerRunner.java) — `ApplicationRunner` |
 | 19 Автоконфигурация | [`ClockAutoConfiguration`](src/main/java/ru/sprbut/m27/autoconfigure/ClockAutoConfiguration.java) + `AutoConfiguration.imports` |
-| 20 Тестирование | `@SpringBootTest`, `@WebMvcTest`, `@DataJpaTest`, `@TestConfiguration` |
-| 21 Типичные ошибки | `@ConditionalOnMissingBean` вне автоконфигурации — разобрано ниже |
-| 22 AOT | [`TrackerHints`](src/main/java/ru/sprbut/m27/aot/TrackerHints.java) для DTO, которые собирает Jackson |
+| 20 Spring MVC | [`TaskController`](src/main/java/ru/sprbut/m27/web/TaskController.java) и таблица маршрутов, снятая с самого приложения |
+| 21 WebFlux | [`TaskFeed`](src/main/java/ru/sprbut/m27/web/TaskFeed.java) — `Flux` в сервлетном приложении и честная цена этого |
+| 22 Spring Security | [`TrackerSecurity`](src/main/java/ru/sprbut/m27/security/TrackerSecurity.java): роль на адресе, `@PreAuthorize` на закрытии задачи |
+| 23 Spring Cloud | [`Board`](src/main/java/ru/sprbut/m27/remote/Board.java) — сосед по имени, декларативный клиент, предохранитель |
+| 24 Тестирование | `@SpringBootTest`, `@WebMvcTest`, `@DataJpaTest`, `@TestConfiguration`, `@WithMockUser` |
+| 25 Типичные ошибки | `@ConditionalOnMissingBean` вне автоконфигурации и столкновение имён бинов — разобрано ниже |
+| 26 AOT | [`TrackerHints`](src/main/java/ru/sprbut/m27/aot/TrackerHints.java) для DTO, которые собирает Jackson |
 
 ## Расширенный пример: карта контейнера
 
@@ -53,12 +60,15 @@
 которое рассказывает о себе само.
 
 ```java
-map.cards();              // имя бина, настоящий класс, область видимости, @Audited-методы
-map.proxy("taskService"); // jdk
+map.cards();               // имя бина, настоящий класс, область видимости, @Audited-методы
+map.proxy("taskService");  // jdk
 map.proxied("auditTrail"); // false
+map.routes();              // POST /api/tasks, GET /api/tasks/stream, ...
+map.filters();             // ...BasicAuthenticationFilter, ..., AuthorizationFilter
 ```
 
-Доступно по HTTP: `GET /api/introspection/beans` и `GET /api/introspection/audit`.
+Доступно по HTTP — под ролью администратора: `GET /api/introspection/beans`,
+`/routes`, `/filters` и `/audit`.
 
 В одном классе сходится весь курс. Рефлексия читает настоящие классы бинов и ищет
 в них аннотации. `Audited` оказывается всего лишь меткой, которую кто-то должен
@@ -66,9 +76,16 @@ map.proxied("auditTrail"); // false
 снимает обёртку и показывает: **бин в контексте — не тот объект, что написан
 в исходниках**. Именно это и есть ответ на вопрос, ради которого затевался курс.
 
-## Три грабли, на которые модуль наступил при сборке
+Новые темы курса ложатся сюда же.
+Таблица маршрутов — это `@GetMapping` и `@PostMapping`, прочитанные при старте:
+«запрос ушёл не туда» — вопрос к ней, а не к исходникам. Цепочка фильтров — это
+то, во что превратилась конфигурация защиты: «почему 401 вместо 403» — вопрос
+к порядку в этом списке. Обе таблицы отвечают тем же самым: аннотацию давно
+прочли, работает результат чтения.
 
-Все три оставлены в коде вместе с разбором — они полезнее любого примера.
+## Грабли, на которые модуль наступил при сборке
+
+Все оставлены в коде вместе с разбором — они полезнее любого примера.
 
 **`@ConditionalOnMissingBean` в обычной `@Configuration` не работает.** Условие
 проверяет бины, зарегистрированные *к моменту проверки*, а обычные конфигурации
@@ -86,6 +103,17 @@ subclass». В [`application.yaml`](src/main/resources/application.yaml) пов�
 *интерфейса*, где никакого `@Audited` нет — аспект молча писал в журнал `open` вместо
 `task.open`. Спасает `AopUtils.getMostSpecificMethod`.
 
+**Имя бина берётся из имени метода, а не из типа.** `@Service` над классом `Board`
+и `@Bean BoardApi board(...)` в соседней конфигурации дают одно имя `board`
+на два разных бина, и контекст не поднимается вовсе:
+`BeanDefinitionOverrideException`. Метод переименован в `notices` — то же самое,
+что случается с двумя `@Bean`-методами одного имени в разных конфигурациях.
+
+**`RequestMappingHandlerMapping` в приложении не один.** Actuator заводит второй
+такой же бин для своих эндпоинтов, и выбор по типу становится неоднозначным:
+`NoUniqueBeanDefinitionException`. Карта берёт реестр по имени — тот случай,
+когда имя бина оказывается частью контракта, а не деталью.
+
 ## Ключевые выводы
 
 * Аннотация — метаданные, а не поведение. `@Audited` без аспекта, `@Transactional`
@@ -96,6 +124,15 @@ subclass». В [`application.yaml`](src/main/resources/application.yaml) пов�
   на нём стоит вся автоконфигурация.
 * Время, случайность и текущий пользователь — такие же зависимости, как репозиторий.
   Внедрённый `Clock` превращает хрупкий тест в обычный.
+* Решение пустить запрос принимается в фильтрах, до `DispatcherServlet`.
+  В контроллерах трекера нет ни одной проверки прав — и это следствие, а не упущение.
+* Правило на адресе защищает путь, правило на методе — операцию. `@PreAuthorize`
+  на закрытии задачи держится и тогда, когда до метода ведёт не HTTP.
+* `Flux` в ответе не делает приложение реактивным: за ним остаётся блокирующий JDBC.
+  Реактивен здесь ответ, а не работа с данными, и разница между модулями 20 и 21
+  проходит ровно по этой линии.
+* Отказ соседа — нормальный режим работы, а не авария. Закрытие задачи не отменяется
+  оттого, что доска молчит: в журнале появляется `board:offline`, и на этом всё.
 
 ## Запуск
 
@@ -104,8 +141,19 @@ mvn -pl 27-capstone test
 mvn -pl 27-capstone spring-boot:run
 ```
 
+Пользователей двое: `anna` с паролем `anna-pass` (роль `USER`) и `boris`
+с паролем `boris-pass` (роли `USER` и `ADMIN`).
+
 ```bash
-curl -X POST localhost:8080/api/tasks -H 'Content-Type: application/json' -d '{"title":"написать отчёт"}'
-curl localhost:8080/api/introspection/beans
-curl localhost:8080/actuator/conditions   # отчёт об условиях автоконфигурации
+curl -u anna:anna-pass -X POST localhost:8080/api/tasks \
+  -H 'Content-Type: application/json' -d '{"title":"написать отчёт"}'
+curl -u anna:anna-pass localhost:8080/api/tasks/stream   # тот же ресурс потоком
+curl -u boris:boris-pass localhost:8080/api/introspection/beans
+curl -u boris:boris-pass localhost:8080/api/introspection/routes
+curl -u boris:boris-pass localhost:8080/api/introspection/filters
+curl localhost:8080/actuator/health        # единственный открытый адрес
 ```
+
+Соседнего сервиса на `tracker-board` в репозитории нет, и это намеренно:
+закрытие задачи всё равно проходит, а в `/api/introspection/audit` появляется
+запись `board:offline`.

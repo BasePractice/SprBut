@@ -9,6 +9,7 @@ package ru.sprbut.m27.web;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import ru.sprbut.m27.domain.TaskStatus;
 import ru.sprbut.m27.service.Tasks;
 
@@ -45,13 +47,20 @@ public final class TaskController {
     private final TaskViews views;
 
     /**
+     * Поток задач.
+     */
+    private final TaskFeed feed;
+
+    /**
      * Основной конструктор.
      * @param tasks Задачи
      * @param views Представления
+     * @param feed Поток задач
      */
-    public TaskController(final Tasks tasks, final TaskViews views) {
+    public TaskController(final Tasks tasks, final TaskViews views, final TaskFeed feed) {
         this.tasks = tasks;
         this.views = views;
+        this.feed = feed;
     }
 
     /**
@@ -62,6 +71,16 @@ public final class TaskController {
     @GetMapping
     public List<TaskView> byStatus(final @RequestParam(defaultValue = "OPEN") TaskStatus status) {
         return this.views.views(this.tasks.byStatus(status));
+    }
+
+    /**
+     * Те же задачи, отданные потоком событий.
+     * @param status Статус
+     * @return Те же задачи, отданные потоком событий
+     */
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<TaskView> stream(final @RequestParam(defaultValue = "OPEN") TaskStatus status) {
+        return this.feed.stream(status);
     }
 
     /**

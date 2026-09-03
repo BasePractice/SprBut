@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sprbut.m27.audit.AuditTrail;
@@ -117,6 +119,7 @@ final class TaskServiceTest {
 
     @Test
     @DisplayName("закрытие задачи проходит через все переходы")
+    @WithMockUser(username = "boris", roles = "ADMIN")
     void finishesTaskThroughStages() {
         final long id = this.tasks.open("выкатить релиз").id();
         this.tasks.start(id);
@@ -124,6 +127,16 @@ final class TaskServiceTest {
             "started task cannot be finished",
             this.tasks.finish(id).status(),
             Matchers.equalTo(TaskStatus.DONE)
+        );
+    }
+
+    @Test
+    @DisplayName("правило на методе закрывает операцию и от вызова мимо контроллера")
+    @WithMockUser(username = "anna", roles = "USER")
+    void dontLetPlainUserFinishTask() {
+        final long id = this.tasks.open("закрыть не своими руками").id();
+        Assertions.assertThrows(
+            AccessDeniedException.class, () -> this.tasks.finish(id)
         );
     }
 

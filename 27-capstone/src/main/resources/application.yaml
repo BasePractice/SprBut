@@ -12,12 +12,36 @@ spring:
     hibernate:
       ddl-auto: create-drop
     open-in-view: false
+  # Сосед находится по имени, а не по адресу: список экземпляров даёт реестр.
+  # Здесь это простейший реестр из настроек, но пользуются им так же,
+  # как Eureka или Consul.
+  cloud:
+    discovery:
+      client:
+        simple:
+          instances:
+            tracker-board:
+              - uri: http://localhost:9099
 
 management:
   endpoints:
     web:
       exposure:
         include: health,beans,conditions,configprops
+
+# Пороги предохранителя — настройка, а не код: сколько неудач подряд считать
+# отказом соседа и как долго не ходить к нему после размыкания цепи.
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 4
+        minimum-number-of-calls: 4
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+    instances:
+      board:
+        base-config: default
 
 tracker:
   title: SprBut Tracker

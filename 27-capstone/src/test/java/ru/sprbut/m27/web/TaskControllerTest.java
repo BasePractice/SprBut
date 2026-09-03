@@ -13,12 +13,16 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.sprbut.m27.domain.Task;
+import ru.sprbut.m27.security.TrackerSecurity;
 import ru.sprbut.m27.service.Tasks;
 
 /**
@@ -27,6 +31,8 @@ import ru.sprbut.m27.service.Tasks;
  */
 @SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
 @WebMvcTest(TaskController.class)
+@Import(TrackerSecurity.class)
+@WithMockUser(username = "anna")
 @DisplayName("Срез @WebMvcTest: поднимается только веб-слой")
 final class TaskControllerTest {
 
@@ -47,6 +53,20 @@ final class TaskControllerTest {
      */
     @MockitoBean
     private TaskViews views;
+
+    /**
+     * Поток задач.
+     */
+    @MockitoBean
+    private TaskFeed feed;
+
+    @Test
+    @DisplayName("без пароля запрос отбивается цепочкой фильтров, до контроллера не доходя")
+    @WithAnonymousUser
+    void demandsAuthentication() throws Exception {
+        this.http.perform(MockMvcRequestBuilders.get("/api/tasks"))
+            .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
 
     @Test
     @DisplayName("создание задачи отвечает кодом 201")

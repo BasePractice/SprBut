@@ -6,14 +6,20 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m27.extended;
 
+import jakarta.servlet.Filter;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.security.web.FilterChainProxy;
 import org.springframework.stereotype.Component;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import ru.sprbut.m27.audit.Audited;
 
 /**
@@ -29,9 +35,15 @@ import ru.sprbut.m27.audit.Audited;
  * (модули 11–14). {@code AopProxyUtils} снимает обёртку и показывает, что бин
  * в контексте — не тот объект, который написан в исходниках (модуль 15).</p>
  *
- * <p>Практический смысл тот же, что у {@code /actuator/beans}: когда поведение
- * приложения расходится с кодом, разница почти всегда объясняется одной
- * из строчек этой карты.</p>
+ * <p>Карта не ограничивается бинами. Таблица маршрутов — это прочитанные
+ * аннотации {@code @GetMapping} и {@code @PostMapping} (модуль 20), цепочка
+ * фильтров — то, во что превратилась конфигурация защиты (модуль 22).
+ * И там и там аннотации давно прочитаны, а работает результат чтения.</p>
+ *
+ * <p>Практический смысл тот же, что у {@code /actuator/beans} и
+ * {@code /actuator/mappings}: когда поведение приложения расходится с кодом,
+ * разница почти всегда объясняется одной из строчек этой карты. «Запрос ушёл
+ * не туда» — вопрос к маршрутам, «почему 401 вместо 403» — к порядку фильтров.</p>
  *
  * @since 1.0
  */
@@ -88,6 +100,58 @@ public final class ContextMap {
             kind = "none";
         }
         return kind;
+    }
+
+    /**
+     * Маршруты приложения — то, что просматривает {@code DispatcherServlet}.
+     *
+     * <p>Реестр берётся по имени, а не по типу: actuator заводит второй такой же
+     * бин для своих эндпоинтов, и выбор по типу стал бы неоднозначным.</p>
+     *
+     * @return Маршруты приложения
+     */
+    public List<String> routes() {
+        return this.context
+            .getBean("requestMappingHandlerMapping", RequestMappingHandlerMapping.class)
+            .getHandlerMethods().entrySet().stream()
+            .filter(entry -> ContextMap.mine(entry.getValue().getBeanType().getName()))
+            .map(ContextMap::route)
+            .sorted()
+            .toList();
+    }
+
+    /**
+     * Фильтры защиты в том порядке, в каком их проходит запрос.
+     * @return Фильтры защиты в том порядке, в каком их проходит запрос
+     */
+    public List<String> filters() {
+        return this.context.getBean(FilterChainProxy.class)
+            .getFilterChains().getFirst().getFilters().stream()
+            .map(ContextMap::name)
+            .toList();
+    }
+
+    private static String route(final Map.Entry<RequestMappingInfo, HandlerMethod> entry) {
+        return String.format(
+            "%s %s",
+            String.join(
+                ",",
+                entry.getKey().getMethodsCondition().getMethods().stream()
+                    .map(Enum::name)
+                    .sorted()
+                    .toList()
+            ),
+            String.join(
+                ",",
+                entry.getKey().getPathPatternsCondition().getPatternValues().stream()
+                    .sorted()
+                    .toList()
+            )
+        );
+    }
+
+    private static String name(final Filter filter) {
+        return filter.getClass().getSimpleName();
     }
 
     private BeanCard card(final String name, final ConfigurableListableBeanFactory beans) {

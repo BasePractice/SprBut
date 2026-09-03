@@ -98,6 +98,26 @@ final class ContextMapTest {
     }
 
     @Test
+    @DisplayName("в карте маршрутов видно то, что прочитано из аннотаций контроллеров")
+    void listsApplicationRoutes() {
+        MatcherAssert.assertThat(
+            "context map cannot list the routes read from the annotations",
+            this.map.routes(),
+            Matchers.hasItem("POST /api/tasks")
+        );
+    }
+
+    @Test
+    @DisplayName("запрос опознаётся раньше, чем проверяются его права")
+    void checksIdentityBeforeRights() {
+        MatcherAssert.assertThat(
+            "authentication filter cannot stand before the authorization one",
+            this.map.filters().indexOf("BasicAuthenticationFilter"),
+            Matchers.lessThan(this.map.filters().indexOf("AuthorizationFilter"))
+        );
+    }
+
+    @Test
     @DisplayName("область видимости по умолчанию — singleton")
     void reportsSingletonScope() {
         MatcherAssert.assertThat(

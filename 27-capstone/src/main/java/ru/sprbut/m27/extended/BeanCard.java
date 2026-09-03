@@ -31,7 +31,7 @@ public record BeanCard(String name, String type, String scope, List<String> audi
     /**
      * Компактный конструктор.
      *
-     * <p>Копия списка операций снимается здесь: карточка обязана быть неизменяемой.</p>
+     * <p>Копия списка операций снимается здесь: карточка должна быть неизменяемой.</p>
      */
     public BeanCard {
         audited = List.copyOf(audited);

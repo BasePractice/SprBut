@@ -45,7 +45,7 @@ public final class AuditAspect {
 
     /**
      * Записывает операцию после её успешного выполнения.
-     * Совет вокруг обязан объявлять {@code Throwable}: сигнатуру диктует
+     * Совет вокруг должен объявлять {@code Throwable}: сигнатуру диктует
      * контракт {@code ProceedingJoinPoint.proceed}.
      * @param point Точка соединения
      * @return Результат работы целевого метода

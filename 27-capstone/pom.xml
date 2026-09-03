@@ -35,6 +35,28 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <!--
+            Реактивный стек целиком сюда не приезжает: приложение сервлетное.
+            Нужен только reactor-core — Spring MVC умеет отдавать Flux сам,
+            через ReactiveTypeHandler, и это тот случай из модуля 21,
+            где реактивным оказывается ответ, а не приложение.
+        -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-circuitbreaker-resilience4j</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
@@ -66,6 +88,20 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!--
+            Boot 4 разнёс срезы по стартерам и здесь: интеграция @WithMockUser
+            с MockMvc приезжает отдельным стартером, а не со spring-security-test.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -129,8 +165,14 @@
                                 Требование объявлять каждую из них отдельно противоречит
                                 теме раздела, поэтому проверка зависимостей отключена.
                             -->
+                            <!--
+                                Одиннадцать jar-ов resilience4j несут одинаковый
+                                COPYRIGHT.txt, и поиск дубликатов считает это
+                                конфликтом. Файл не наш и ни на что не влияет.
+                            -->
                             <excludes>
                                 <exclude>dependencies:.*</exclude>
+                                <exclude>duplicatefinder:.*</exclude>
                             </excludes>
                         </configuration>
                     </plugin>

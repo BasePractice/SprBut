@@ -9,6 +9,7 @@ package ru.sprbut.m27.service;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sprbut.m27.audit.Audited;
@@ -16,6 +17,7 @@ import ru.sprbut.m27.config.TrackerProperties;
 import ru.sprbut.m27.domain.Task;
 import ru.sprbut.m27.domain.TaskRepository;
 import ru.sprbut.m27.domain.TaskStatus;
+import ru.sprbut.m27.remote.Board;
 
 /**
  * Сервисный слой трекера.
@@ -25,8 +27,10 @@ import ru.sprbut.m27.domain.TaskStatus;
  * обращения к {@code Instant.now()}, иначе время стало бы скрытой зависимостью,
  * которую невозможно зафиксировать в тесте.</p>
  *
- * <p>{@code @Transactional} и {@link Audited} работают через один и тот же прокси:
- * обе аннотации сами по себе не значат ничего, поведение им даёт обёртка вокруг бина.</p>
+ * <p>{@code @Transactional}, {@link Audited} и {@code @PreAuthorize} работают через
+ * один и тот же прокси: все три аннотации сами по себе не значат ничего, поведение
+ * им даёт обёртка вокруг бина. Проверка прав на методе, а не на адресе, — не прихоть:
+ * до закрытия задачи ведёт не только HTTP, а правило на адресе прикрывает лишь путь.</p>
  *
  * @since 1.0
  */
@@ -49,16 +53,23 @@ public final class TaskService implements Tasks {
     private final Clock clock;
 
     /**
+     * Доска соседнего сервиса.
+     */
+    private final Board board;
+
+    /**
      * Основной конструктор.
      * @param repository Репозиторий
      * @param settings Настройки
      * @param clock Часы
+     * @param board Доска соседнего сервиса
      */
     public TaskService(final TaskRepository repository, final TrackerProperties settings,
-        final Clock clock) {
+        final Clock clock, final Board board) {
         this.repository = repository;
         this.settings = settings;
         this.clock = clock;
+        this.board = board;
     }
 
     @Override
@@ -85,10 +96,12 @@ public final class TaskService implements Tasks {
 
     @Override
     @Audited("task.finish")
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public Task finish(final long id) {
         final Task task = this.task(id);
         task.finish();
+        this.board.announce(task);
         return task;
     }
 

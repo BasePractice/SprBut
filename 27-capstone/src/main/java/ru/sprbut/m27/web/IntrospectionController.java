@@ -17,10 +17,14 @@ import ru.sprbut.m27.extended.ContextMap;
 /**
  * Приложение, объясняющее само себя, по HTTP.
  *
- * <p>{@code /api/introspection/beans} показывает, чем бины стали внутри контейнера,
- * а {@code /api/introspection/audit} — что успел записать аспект.
- * Вместе они отвечают на вопрос, ради которого затевался весь курс:
- * почему код в исходниках и поведение в рантайме — это не одно и то же.</p>
+ * <p>{@code /beans} показывает, чем бины стали внутри контейнера, {@code /routes} —
+ * таблицу, которую просматривает {@code DispatcherServlet}, {@code /filters} —
+ * цепочку, через которую запрос проходит до него, а {@code /audit} — что успел
+ * записать аспект. Вместе они отвечают на вопрос, ради которого затевался весь
+ * курс: почему код в исходниках и поведение в рантайме — это не одно и то же.</p>
+ *
+ * <p>Сама эта ветка закрыта ролью администратора: правило стоит на адресе,
+ * в {@code TrackerSecurity}, и в коде контроллера нет ни одной проверки.</p>
  *
  * @since 1.0
  */
@@ -55,6 +59,24 @@ public final class IntrospectionController {
     @GetMapping("/beans")
     public List<BeanCard> beans() {
         return this.map.cards();
+    }
+
+    /**
+     * Маршруты.
+     * @return Маршруты
+     */
+    @GetMapping("/routes")
+    public List<String> routes() {
+        return this.map.routes();
+    }
+
+    /**
+     * Фильтры.
+     * @return Фильтры
+     */
+    @GetMapping("/filters")
+    public List<String> filters() {
+        return this.map.filters();
     }
 
     /**
