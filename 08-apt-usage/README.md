@@ -1,6 +1,6 @@
 # Модуль 08 — APT: сборка
 
-[Слайды 66–71](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p66) ·
+[Слайды 72–77, СХЕМА 20 (слайд 78)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p69) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

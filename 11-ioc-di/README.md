@@ -1,6 +1,6 @@
 # Модуль 11 — IoC, DI и фабрики
 
-[Слайды 83–90](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p83) ·
+[Слайды 89–96, СХЕМА 5 (слайд 97)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p85) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

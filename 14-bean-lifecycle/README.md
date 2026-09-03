@@ -1,6 +1,6 @@
 # Модуль 14 — Жизненный цикл бина
 
-[Слайды 110–118, СХЕМА 7 (слайд 118)](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p118) ·
+[Слайды 121–129, СХЕМА 7 (слайд 130)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p116) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

@@ -1,6 +1,6 @@
 # Модуль 19 — Автоконфигурация
 
-[Слайды 174–178, СХЕМА 12](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p174) ·
+[Слайды 191–196, СХЕМА 12 (слайд 197)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p185) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

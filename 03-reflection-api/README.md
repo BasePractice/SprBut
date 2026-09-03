@@ -1,6 +1,6 @@
 # Модуль 03 — Reflection API
 
-[Слайды 20–27, СХЕМА 1 (слайд 27)](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p27) ·
+[Слайды 22–28, СХЕМА 1 (слайд 29)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p21) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

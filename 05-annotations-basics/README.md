@@ -1,6 +1,6 @@
 # Модуль 05 — Аннотации Java
 
-[Слайды 38–45](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p38) ·
+[Слайды 41–48, СХЕМА 18 (слайд 49)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p40) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

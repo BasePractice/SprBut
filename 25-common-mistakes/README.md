@@ -1,6 +1,6 @@
 # Модуль 25 — Типичные ошибки контейнера
 
-[Слайды 188–194](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p188) ·
+[Слайды 258–264, СХЕМА 23 (слайд 265)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p201) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

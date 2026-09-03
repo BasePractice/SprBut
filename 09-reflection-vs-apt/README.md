@@ -1,6 +1,6 @@
 # Модуль 09 — Reflection vs APT vs байткод
 
-[Слайды 72–78, СХЕМА 4 (слайд 78)](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p78) ·
+[Слайды 80–85, СХЕМА 4 (слайд 87)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p76) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

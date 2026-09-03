@@ -1,6 +1,6 @@
 # Модуль 23 — Spring Cloud
 
-[Слайды 221–230](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit?usp=sharing&ouid=103425146937158568285&rtpof=true&sd=true) ·
+[Слайды 236–247, СХЕМА 16 (слайд 248)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p262) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

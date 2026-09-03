@@ -1,6 +1,6 @@
 # Модуль 12 — DI: способы внедрения
 
-[Слайды 91–96](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p91) ·
+[Слайды 99–107, СХЕМА 6 (слайд 108)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p95) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

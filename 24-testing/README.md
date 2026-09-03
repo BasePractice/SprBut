@@ -1,6 +1,6 @@
 # Модуль 24 — Тестирование
 
-[Слайды 180–186](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p180) ·
+[Слайды 250–255, схема (слайд 256)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p193) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

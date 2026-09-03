@@ -1,6 +1,6 @@
 # Модуль 16 — Конфигурация
 
-[Слайды 128–138, СХЕМА 10 (слайд 138)](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p138) ·
+[Слайды 142–152, СХЕМА 10 (слайд 153)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p137) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

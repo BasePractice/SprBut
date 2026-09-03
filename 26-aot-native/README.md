@@ -1,6 +1,6 @@
 # Модуль 26 — AOT, native image, версии
 
-[Слайды 196–206](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p196) ·
+[Слайды 267–277, СХЕМА 24 (слайд 278)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p209) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

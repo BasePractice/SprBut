@@ -1,6 +1,6 @@
 # Модуль 22 — Spring Security
 
-[Слайды 211–220](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit?usp=sharing&ouid=103425146937158568285&rtpof=true&sd=true) ·
+[Слайды 223–233, СХЕМА 15 (слайд 234)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p250) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

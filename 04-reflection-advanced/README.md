@@ -1,6 +1,6 @@
 # Модуль 04 — Reflection: детали
 
-[Слайды 29–36, СХЕМА 2 (слайд 36)](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p36) ·
+[Слайды 31–38, СХЕМА 2 (слайд 39)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p30) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

@@ -1,6 +1,6 @@
 # Модуль 20 — Spring MVC
 
-[Слайды 193–201](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit?usp=sharing&ouid=103425146937158568285&rtpof=true&sd=true) ·
+[Слайды 199–208, СХЕМА 13 (слайд 209)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p228) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

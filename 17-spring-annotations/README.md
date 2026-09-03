@@ -1,6 +1,6 @@
 # Модуль 17 — Аннотации Spring
 
-[Слайды 140–149](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p140) ·
+[Слайды 155–172, СХЕМА 22 (слайд 173)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p150) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

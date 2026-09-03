@@ -1,6 +1,6 @@
 # Модуль 27 — Итоговое задание: SprBut Tracker
 
-[Слайды 208–214 («Итоги»)](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p208) ·
+[Слайды 280–285 («Итоги»)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.g3f87e69302f_0_3) ·
 [← к списку модулей](../README.md)
 
 ## Задание

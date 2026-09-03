@@ -1,6 +1,6 @@
 # Модуль 07 — Annotation processor
 
-[Слайды 57–64, СХЕМА 3 (слайд 64)](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p64) ·
+[Слайды 63–69, СХЕМА 3 (слайд 70)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p60) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

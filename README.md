@@ -4,7 +4,7 @@
 плюс итоговый модуль с расширенным заданием по всему курсу.
 
 **Презентация:**
-[SprBut — план курса и слайды](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit?usp=sharing&ouid=103425146937158568285&rtpof=true&sd=true)
+[SprBut — план курса и слайды](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit?usp=sharing&ouid=103425146937158568285&rtpof=true&sd=true)
 
 Разделы «Spring MVC», «WebFlux», «Spring Security» и «Spring Cloud» добавлены
 в презентацию после восьмой лекции; модули 20–23 сделаны по ним.

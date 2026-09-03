@@ -1,6 +1,6 @@
 # Модуль 06 — Аннотации: детали
 
-[Слайды 47–55](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p47) ·
+[Слайды 51–60, СХЕМА 19 (слайд 61)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p49) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

@@ -1,6 +1,6 @@
 # Модуль 15 — Модули Spring и Spring AOP
 
-[Слайды 120–126, СХЕМА 9](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p120) ·
+[Слайды 132–139, СХЕМА 8 (слайд 133) и СХЕМА 9 (слайд 140)](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p127) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

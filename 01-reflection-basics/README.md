@@ -1,6 +1,6 @@
 # Модуль 01 — Reflection и метаданные в runtime
 
-[Слайды 3–10](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p3) ·
+[Слайды 3–10](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p3) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации

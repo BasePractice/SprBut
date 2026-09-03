@@ -1,6 +1,6 @@
 # Модуль 10 — Готовые генераторы: Lombok и MapStruct
 
-[Слайды 79–82](https://docs.google.com/presentation/d/1bsebBSBpseNGlDBeEnZbYGq1Kt5A6qHR/edit#slide=id.p79) ·
+[Слайд 86](https://docs.google.com/presentation/d/1zJBrQvw25ehkCVgjoY5U0-Gap6JR3ogs/edit#slide=id.p83) ·
 [← к списку модулей](../README.md)
 
 ## Что в презентации
