@@ -15,79 +15,25 @@ import java.util.List;
  * поведение приложения: подменённая область видимости, потерянный
  * {@code @Transactional}, неперехваченный self-invocation.</p>
  *
+ * <p>{@code record} здесь не только короче обычного класса: Jackson знает
+ * про компоненты записи и сериализует их без геттеров в стиле JavaBeans,
+ * тогда как у финального класса с методами {@code name()} и {@code type()}
+ * он не нашёл бы ни одного свойства.</p>
+ *
+ * @param name Имя бина в контейнере
+ * @param type Настоящий класс за прокси, если прокси есть
+ * @param scope Область видимости: singleton, prototype или иная
+ * @param audited Методы, помеченные аннотацией аудита
  * @since 1.0
  */
-@SuppressWarnings("PMD.DataClass")
-public final class BeanCard {
+public record BeanCard(String name, String type, String scope, List<String> audited) {
 
     /**
-     * Имя.
-     */
-    private final String name;
-
-    /**
-     * Тип.
-     */
-    private final String type;
-
-    /**
-     * Область видимости.
-     */
-    private final String scope;
-
-    /**
-     * Значение {@code audited}.
-     */
-    private final List<String> audited;
-
-    /**
-     * Основной конструктор.
+     * Компактный конструктор.
      *
      * <p>Копия списка операций снимается здесь: карточка обязана быть неизменяемой.</p>
-     *
-     * @param name Имя
-     * @param type Тип
-     * @param scope Область видимости
-     * @param audited Имена аудируемых операций
-     * @checkstyle ConstructorsCodeFreeCheck (8 lines)
      */
-    public BeanCard(final String name, final String type, final String scope,
-        final List<String> audited) {
-        this.name = name;
-        this.type = type;
-        this.scope = scope;
-        this.audited = List.copyOf(audited);
-    }
-
-    /**
-     * Имя бина в контейнере.
-     * @return Имя бина в контейнере
-     */
-    public String name() {
-        return this.name;
-    }
-
-    /**
-     * Настоящий класс за прокси, если прокси есть.
-     * @return Настоящий класс за прокси, если прокси есть
-     */
-    public String type() {
-        return this.type;
-    }
-
-    /**
-     * Область видимости: singleton, prototype или иная.
-     * @return Область видимости: singleton, prototype или иная
-     */
-    public String scope() {
-        return this.scope;
-    }
-
-    /**
-     * Методы, помеченные аннотацией аудита.
-     * @return Методы, помеченные аннотацией аудита
-     */
-    public List<String> audited() {
-        return this.audited;
+    public BeanCard {
+        audited = List.copyOf(audited);
     }
 }
