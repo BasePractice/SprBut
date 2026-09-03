@@ -4,7 +4,7 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
-// контракт AspectJ: around-advice обязан объявлять throws Throwable
+// контракт AspectJ: around-advice должен объявлять throws Throwable
 // и пропускать через себя любое исключение цели
 // @checkstyle IllegalThrowsCheck disable
 // @checkstyle IllegalCatchCheck disable

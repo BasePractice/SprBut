@@ -81,7 +81,7 @@ public final class CircularBeans {
 
         /**
          * Альфа-зависимость: она никогда не читается — важен сам факт,
-         * что контейнер обязан её подставить, и цикл на этом замыкается.
+         * что контейнер должен её подставить, и цикл на этом замыкается.
          */
         @SuppressWarnings({"PMD.UnusedPrivateField", "UnusedVariable"})
         private final Alpha alpha;

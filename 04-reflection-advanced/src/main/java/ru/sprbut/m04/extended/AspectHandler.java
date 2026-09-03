@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
-// контракт InvocationHandler: invoke объявляет throws Throwable и обязан
+// контракт InvocationHandler: invoke объявляет throws Throwable и должен
 // пропускать через себя любое исключение цели, поэтому и весь внутренний
 // конвейер обработки объявлен так же
 // @checkstyle IllegalThrowsCheck disable

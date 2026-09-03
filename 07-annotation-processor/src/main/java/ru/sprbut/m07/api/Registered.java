@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  * <p>Это compile-time аналог {@code @Component}: вместо сканирования classpath
  * в runtime список собирается на этапе компиляции. Именно так работает
  * Spring AOT и Micronaut/Quarkus — и ровно поэтому им не нужна рефлексия
- * при старте (слайд 195, модуль 22).</p>
+ * при старте (слайд 195, модуль 26).</p>
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)

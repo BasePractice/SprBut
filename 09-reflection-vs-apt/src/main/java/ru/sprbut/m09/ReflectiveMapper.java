@@ -33,7 +33,7 @@ import ru.sprbut.m09.model.UserEntity;
 public final class ReflectiveMapper implements UserMapper {
 
     /**
-     * Пары «геттер источника ведёт к сеттер цели», найденные один раз при создании.
+     * Пары «геттер источника — сеттер цели», найденные один раз при создании.
      */
     private final Map<Method, Method> plan;
 

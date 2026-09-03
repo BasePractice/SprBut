@@ -4,7 +4,7 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // каталог механизмов: три константы и статические выборки по ним —
-// это и есть таблица сравнения со слайдов 73-77
+// это и есть таблица сравнения со слайдов 73–77
 // @checkstyle DeclarationOrderCheck disable
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m09.extended;

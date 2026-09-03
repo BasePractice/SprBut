@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
  * <li>{@link #chargeViaSelf} — обход через самовнедрение;</li>
  * <li>{@link #chargeViaAopContext} — обход через {@code AopContext}.</li>
  * </ul>
- * Правильное решение, впрочем, ни то и ни другое: метод стоит вынести
+ * Правильное решение, впрочем, ни то ни другое: метод стоит вынести
  * в отдельный бин, чтобы вызов честно шёл через прокси
  * (см. {@link ChargeExecutor}).</p>
  *

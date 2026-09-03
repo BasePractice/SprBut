@@ -17,14 +17,14 @@ import org.springframework.context.annotation.Primary;
 /**
  * Слайды 102–103: {@code @Autowired}, {@code @Qualifier}, {@code @Primary}.
  *
- * <p>Когда бинов одного типа несколько, контейнер обязан понять, какой брать.
+ * <p>Когда бинов одного типа несколько, контейнер должен понять, какой брать.
  * Порядок разрешения такой:
  * <ol>
  * <li>единственный кандидат — берём его;</li>
  * <li>есть {@code @Qualifier} в точке внедрения — берём названный;</li>
  * <li>есть {@code @Primary} — берём его;</li>
  * <li>имя параметра совпадает с именем бина — берём по имени;</li>
- * <li>иначе — {@code NoUniqueBeanDefinitionException} (модуль 21).</li>
+ * <li>иначе — {@code NoUniqueBeanDefinitionException} (модуль 25).</li>
  * </ol></p>
  *
  * @since 1.0

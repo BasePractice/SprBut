@@ -58,8 +58,8 @@ public final class AnnotationMembers {
     }
 
     /**
-     * Элементы без {@code default} — их обязаны задать при использовании.
-     * @return Элементы без {@code default} — их обязаны задать при использовании
+     * Элементы без {@code default} — их обязан задать тот, кто ставит аннотацию.
+     * @return Элементы без {@code default} — их обязан задать тот, кто ставит аннотацию
      */
     public List<String> required() {
         return Arrays.stream(this.annotation.getDeclaredMethods())

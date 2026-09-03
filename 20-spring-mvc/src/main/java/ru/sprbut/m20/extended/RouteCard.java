@@ -21,7 +21,7 @@ public record RouteCard(List<String> methods, List<String> patterns, String hand
     /**
      * Компактный конструктор.
      *
-     * <p>Копии списков снимаются здесь: карточка обязана быть неизменяемой.</p>
+     * <p>Копии списков снимаются здесь: карточка должна быть неизменяемой.</p>
      */
     public RouteCard {
         methods = List.copyOf(methods);

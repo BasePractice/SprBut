@@ -20,7 +20,7 @@ public record ChainCard(String matcher, List<String> filters) {
     /**
      * Компактный конструктор.
      *
-     * <p>Копия списка снимается здесь: карточка обязана быть неизменяемой.</p>
+     * <p>Копия списка снимается здесь: карточка должна быть неизменяемой.</p>
      */
     public ChainCard {
         filters = List.copyOf(filters);

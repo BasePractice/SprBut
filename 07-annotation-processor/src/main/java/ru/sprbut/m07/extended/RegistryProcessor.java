@@ -53,7 +53,7 @@ import ru.sprbut.m07.api.Registered;
  * генерации из настроек сборки;</li>
  * <li><b>{@code Supplier}-фабрики вместо {@code Class.forName}</b> — сгенерированный
  * код создаёт объекты обычным {@code new}, и именно поэтому такой подход
- * работает в native image (модуль 22).</li>
+ * работает в native image (модуль 26).</li>
  * </ul></p>
  *
  * @since 1.0

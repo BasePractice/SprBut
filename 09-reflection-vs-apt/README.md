@@ -57,7 +57,7 @@ new RequiredHints().byMapper();
   байткод — CGLIB-прокси для `@Transactional`, APT — `spring-boot-configuration-processor`
   и Spring AOT.
 * В native image выживает только compile-time механизм — это и есть причина, по которой
-  Spring 6 обзавёлся AOT (модуль 22).
+  Spring 6 обзавёлся AOT (модуль 26).
 
 ## Запуск
 

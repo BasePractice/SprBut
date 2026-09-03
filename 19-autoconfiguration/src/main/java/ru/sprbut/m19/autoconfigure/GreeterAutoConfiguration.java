@@ -18,7 +18,7 @@ import ru.sprbut.m19.greeter.GreeterProperties;
 import ru.sprbut.m19.greeter.SimpleGreeter;
 
 /**
- * Слайды 174–177 (СХЕМА 12): «starter ведёт к imports ведёт к условия ведёт к бин».
+ * Слайды 174–177 (СХЕМА 12): «от стартера через imports и условия к бину».
  *
  * <p>Настоящая автоконфигурация, целиком. В ней нет ничего, кроме трёх идей:
  * <ol>

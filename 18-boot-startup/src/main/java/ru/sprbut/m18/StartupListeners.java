@@ -21,7 +21,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.lang.NonNull;
 
 /**
- * Слайды 158–172 (СХЕМА 11): «run() ведёт к события ведёт к ApplicationReadyEvent».
+ * Слайды 158–172 (СХЕМА 11): «от run() через события к ApplicationReadyEvent».
  *
  * <p>Событий много, и различаются они тем, <b>что к этому моменту уже готово</b>.
  * Это и есть ответ на вопрос «куда вешать свой код»:

@@ -17,7 +17,7 @@
 
 | Класс | Слайд | Что показывает |
 |---|---|---|
-| [`BuilderProcessor`](src/main/java/ru/sprbut/m07/BuilderProcessor.java) | 58, 60 | Генерация исходника через `Filer` + анализ кода через `Messager`: класс обязан быть JavaBean, иначе сборка падает |
+| [`BuilderProcessor`](src/main/java/ru/sprbut/m07/BuilderProcessor.java) | 58, 60 | Генерация исходника через `Filer` + анализ кода через `Messager`: класс должен быть JavaBean, иначе сборка падает |
 | [`TodoProcessor`](src/main/java/ru/sprbut/m07/TodoProcessor.java) | 60 | Процессор, который **ничего не генерирует** — только диагностика, как Error Prone и NullAway |
 | [Аннотации](src/main/java/ru/sprbut/m07/api) | 58–60 | `@GenerateBuilder`, `@Registered`, `@Todo` — все с `RetentionPolicy.SOURCE` |
 | [`META-INF/services`](src/main/resources/META-INF/services/javax.annotation.processing.Processor) | 66 | Регистрация вручную, без `@AutoService` — чтобы механизм был виден целиком |
@@ -37,7 +37,7 @@ private static final Map<String, Supplier<Object>> FACTORIES =
 Здесь есть всё, чего нет в простом процессоре: накопление данных между раундами,
 **JavaPoet** вместо склейки строк, опции процессора (`-Aregistry.package=...`),
 и главное — ссылки на конструкторы `Xxx::new` вместо `Class.forName`. Именно
-поэтому такой код работает в native image (модуль 22).
+поэтому такой код работает в native image (модуль 26).
 
 ## Как тестируется процессор
 

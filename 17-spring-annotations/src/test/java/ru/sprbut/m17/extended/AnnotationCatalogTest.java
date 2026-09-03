@@ -75,7 +75,7 @@ final class AnnotationCatalogTest {
     }
 
     @Test
-    @DisplayName("@Configuration стереотипом тоже является")
+    @DisplayName("@Configuration — тоже стереотип")
     void treatsConfigurationAsStereotype() {
         MatcherAssert.assertThat(
             "@Configuration cannot be a stereotype",

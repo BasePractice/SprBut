@@ -13,7 +13,7 @@ import ru.sprbut.m09.model.UserEntity;
 /**
  * Тело метода {@code toDto} у сгенерированного класса.
  *
- * <p>Метод обязан быть {@code static} — так устроен {@code MethodDelegation}
+ * <p>Метод должен быть {@code static} — так устроен {@code MethodDelegation}
  * в ByteBuddy. Тот же код, что MapStruct пишет на этапе компиляции,
  * здесь появляется в runtime.</p>
  *

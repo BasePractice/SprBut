@@ -20,7 +20,7 @@ import java.util.Set;
  * не раскрывает. Искать их приходится рекурсивно вручную, что Spring и делает
  * в {@code AnnotatedElementUtils}.</p>
  *
- * <p>Обход обязан помнить, где был: {@code @Retention} помечена {@code @Retention},
+ * <p>Обход должен помнить, где был: {@code @Retention} помечена {@code @Retention},
  * и наивная рекурсия зациклилась бы на первом же шаге.</p>
  *
  * @since 1.0
