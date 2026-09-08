@@ -37,7 +37,7 @@
 | 08 | [apt-usage](08-apt-usage/) | Регистрация, раунды, `Filer` | Сборка, использующая сгенерированный код |
 | 09 | [reflection-vs-apt](09-reflection-vs-apt/) | Runtime, compile-time, байткод | Замер цены каждого подхода |
 | 10 | [lombok-mapstruct](10-lombok-mapstruct/) | Готовые генераторы | Слой отображения на MapStruct |
-| 11 | [ioc-di](11-ioc-di/) | IoC, DI, фабрики | **Работающий IoC-контейнер на 150 строк** |
+| 11 | [ioc-di](11-ioc-di/) | IoC, DI, фабрики, Dagger | **Работающий IoC-контейнер на 150 строк** |
 | 12 | [di-injection](12-di-injection/) | Конструктор, сеттер, поле, циклы | Аудитор точек внедрения |
 | 13 | [bean-annotations](13-bean-annotations/) | `@Bean`, `@Scope`, `@Qualifier`, `@Conditional` | Отчёт о содержимом контейнера |
 | 14 | [bean-lifecycle](14-bean-lifecycle/) | Восемь шагов жизненного цикла | Шкала с проверкой инвариантов порядка |
