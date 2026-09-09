@@ -33,11 +33,11 @@
 | 04 | [reflection-advanced](04-reflection-advanced/) | JPMS, дженерики, MethodHandles, Proxy | Динамический прокси со своим `InvocationHandler` |
 | 05 | [annotations-basics](05-annotations-basics/) | `@Target`, `@Retention`, `@Inherited` | Проверка объектов по аннотациям |
 | 06 | [annotations-advanced](06-annotations-advanced/) | `@Repeatable`, `TYPE_USE`, композиции | Раскрытие вложенных мета-аннотаций |
-| 07 | [annotation-processor](07-annotation-processor/) | `AbstractProcessor`, генерация кода | Свой процессор с JavaPoet |
+| 07 | [annotation-processor](07-annotation-processor/) | `AbstractProcessor`, генерация кода и байткода | Свой процессор с JavaPoet |
 | 08 | [apt-usage](08-apt-usage/) | Регистрация, раунды, `Filer` | Сборка, использующая сгенерированный код |
 | 09 | [reflection-vs-apt](09-reflection-vs-apt/) | Runtime, compile-time, байткод | Замер цены каждого подхода |
 | 10 | [lombok-mapstruct](10-lombok-mapstruct/) | Готовые генераторы | Слой отображения на MapStruct |
-| 11 | [ioc-di](11-ioc-di/) | IoC, DI, фабрики, Dagger | **Работающий IoC-контейнер на 150 строк** |
+| 11 | [ioc-di](11-ioc-di/) | IoC, DI, фабрики, пул, Dagger | **Работающий IoC-контейнер на 150 строк** |
 | 12 | [di-injection](12-di-injection/) | Конструктор, сеттер, поле, циклы | Аудитор точек внедрения |
 | 13 | [bean-annotations](13-bean-annotations/) | `@Bean`, `@Scope`, `@Qualifier`, `@Conditional` | Отчёт о содержимом контейнера |
 | 14 | [bean-lifecycle](14-bean-lifecycle/) | Восемь шагов жизненного цикла | Шкала с проверкой инвариантов порядка |
@@ -59,6 +59,17 @@
 на отдельные модули: Reflection — на 01–04, аннотации — на 05–06,
 annotation processor — на 07–09, IoC и DI — на 11–14, аннотации Spring — на 16–17,
 веб-разработка — на 20–21.
+
+## Шаги в сторону
+
+Три примера выходят за рамки слайдов: они показывают, что у темы есть и другой
+конец, о котором на занятии сказано вскользь.
+
+| Пример | Модуль | О чём |
+|---|---|---|
+| [`BytecodeProcessor`](07-annotation-processor/src/main/java/ru/sprbut/m07/bytecode/BytecodeProcessor.java) | 07 | `Filer.createClassFile` и ByteBuddy: класс кладётся готовым, javac в этой ветке не участвует |
+| [`ObjectPool`](11-ioc-di/src/main/java/ru/sprbut/m11/pool/ObjectPool.java) | 11 | Управление временем жизни без подбора зависимостей; аренда через `AutoCloseable` возвращает объект в пул сама |
+| [`WiringModule`](11-ioc-di/src/main/java/ru/sprbut/m11/step4/WiringModule.java) | 11 | Тот же граф зависимостей, но собранный Dagger'ом на этапе компиляции |
 
 ## Итоговое задание
 

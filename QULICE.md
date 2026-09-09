@@ -66,3 +66,18 @@ Lombok и MapStruct и потому не видит того, что они до
 В 23-spring-cloud дополнительно отключён поиск дубликатов — одиннадцать
 jar-ов resilience4j несут одинаковый `COPYRIGHT.txt`, и это считается
 конфликтом ресурсов.
+
+## Что добавлено после разбора
+
+Новые примеры пишутся сразу по правилам, поэтому столбец «было» для них
+не меняется:
+
+* [`ObjectPool`](11-ioc-di/src/main/java/ru/sprbut/m11/pool/ObjectPool.java)
+  в модуле 11 — ни одного подавления. Ёмкость пула приходит в конструктор,
+  а не живёт магическим числом; `ArrayBlockingQueue` создаётся с ёмкостью,
+  как того и требует проверка коллекций.
+* [`BytecodeProcessor`](07-annotation-processor/src/main/java/ru/sprbut/m07/bytecode/BytecodeProcessor.java)
+  в модуле 07 — одно подавление ErrorProne, `DoNotClaimAnnotations`: процессор
+  поглощает свою аннотацию (`return true`), как и соседний `RegistryProcessor`.
+  Проверка зависимостей в модуле 07 включена, поэтому `byte-buddy` объявлен
+  в его `pom.xml` напрямую.
