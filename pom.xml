@@ -25,6 +25,7 @@
         <spring-cloud.version>2025.1.3</spring-cloud.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <javapoet.version>1.13.0</javapoet.version>
+        <byte-buddy.version>1.18.11</byte-buddy.version>
         <auto-service.version>1.1.1</auto-service.version>
         <lombok.version>1.18.46</lombok.version>
 
@@ -103,6 +104,11 @@
                 <groupId>com.squareup</groupId>
                 <artifactId>javapoet</artifactId>
                 <version>${javapoet.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${byte-buddy.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.auto.service</groupId>

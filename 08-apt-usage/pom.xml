@@ -52,6 +52,16 @@
                             <artifactId>javapoet</artifactId>
                             <version>${javapoet.version}</version>
                         </path>
+                        <!--
+                            Процессоры тащат на processorpath свои библиотеки:
+                            javac поднимает через ServiceLoader все, что перечислены
+                            в META-INF/services, включая BytecodeProcessor.
+                        -->
+                        <path>
+                            <groupId>net.bytebuddy</groupId>
+                            <artifactId>byte-buddy</artifactId>
+                            <version>${byte-buddy.version}</version>
+                        </path>
                     </annotationProcessorPaths>
                     <compilerArgs>
                         <arg>-parameters</arg>
