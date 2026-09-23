@@ -120,7 +120,7 @@ public final class BeanRegistryReport {
                 type.getSimpleName()
             );
         } else if (candidates.size() == 1) {
-            explanation = String.format("единственный кандидат: %s", candidates.get(0));
+            explanation = String.format("единственный кандидат: %s", candidates.getFirst());
         } else {
             explanation = this.byPrimary(candidates);
         }
@@ -160,12 +160,12 @@ public final class BeanRegistryReport {
     private String byPrimary(final List<String> candidates) {
         final List<String> primary = this.entries().stream()
             .filter(Entry::primary)
-            .filter(entry -> candidates.contains(entry.name()))
             .map(Entry::name)
+            .filter(candidates::contains)
             .toList();
         final String explanation;
         if (primary.size() == 1) {
-            explanation = String.format("@Primary: %s из %s", primary.get(0), candidates);
+            explanation = String.format("@Primary: %s из %s", primary.getFirst(), candidates);
         } else if (primary.isEmpty()) {
             explanation = String.format(
                 "кандидатов %d %s, @Primary нет, нужен @Qualifier, иначе NoUniqueBeanDefinitionException",

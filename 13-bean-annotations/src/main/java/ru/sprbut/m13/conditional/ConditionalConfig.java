@@ -13,6 +13,8 @@ package ru.sprbut.m13.conditional;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;
@@ -96,7 +98,7 @@ public class ConditionalConfig {
      * @return Объект
      */
     @Bean
-    @Profile("dev")
+    @Profile({"dev", "prof1", "prof2"})
     public Marker devOnlyBean() {
         return new Marker("devOnlyBean");
     }
@@ -154,7 +156,7 @@ public class ConditionalConfig {
 
         @Override
         public boolean matches(
-            final ConditionContext context, final AnnotatedTypeMetadata metadata
+            final ConditionContext context, final @NonNull AnnotatedTypeMetadata metadata
         ) {
             return "true".equals(
                 context.getEnvironment().getProperty("sprbut.feature.enabled")

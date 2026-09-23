@@ -138,7 +138,6 @@ public class QualifierConfig {
     /**
      * Шлюз.
      * @param name Имя
-     * @return Шлюз
      */
     public record NamedGateway(String name) implements PaymentGateway {
 
@@ -151,7 +150,6 @@ public class QualifierConfig {
     /**
      * Потребитель главной реализации.
      * @param gateway Шлюз
-     * @return Потребитель главной реализации
      */
     public record PrimaryConsumer(PaymentGateway gateway) {
     }
@@ -159,7 +157,6 @@ public class QualifierConfig {
     /**
      * Потребитель с квалификатором.
      * @param gateway Шлюз
-     * @return Потребитель с квалификатором
      */
     public record QualifiedConsumer(PaymentGateway gateway) {
     }
@@ -167,7 +164,6 @@ public class QualifierConfig {
     /**
      * Потребитель с меткой.
      * @param gateway Шлюз
-     * @return Потребитель с меткой
      */
     public record TaggedConsumer(PaymentGateway gateway) {
     }
@@ -176,7 +172,6 @@ public class QualifierConfig {
      * Шлюз.
      * @param all Все элементы
      * @param byName Имя
-     * @return Шлюз
      */
     public record GatewayRegistry(List<PaymentGateway> all, Map<String, PaymentGateway> byName) {
     }
