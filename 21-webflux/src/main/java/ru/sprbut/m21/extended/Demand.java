@@ -7,13 +7,15 @@
 // @checkstyle NonStaticMethodCheck disable
 package ru.sprbut.m21.extended;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
+import org.jspecify.annotations.NonNull;
 import org.reactivestreams.Subscription;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * <b>Расширенный пример модуля.</b>
@@ -41,24 +43,25 @@ public final class Demand {
 
     /**
      * Сколько элементов дойдёт до подписчика, попросившего ограниченное число.
+     *
      * @param source Источник элементов
-     * @param limit Сколько элементов запрашивает подписчик
+     * @param limit  Сколько элементов запрашивает подписчик
      * @return Полученные элементы в порядке поступления
      */
     public List<Long> taken(final Flux<Long> source, final long limit) {
         final List<Long> taken = new ArrayList<>(0);
         source.subscribe(
-            new BaseSubscriber<Long>() {
-                @Override
-                protected void hookOnSubscribe(final Subscription subscription) {
-                    subscription.request(limit);
-                }
+                new BaseSubscriber<>() {
+                    @Override
+                    protected void hookOnSubscribe(final @NonNull Subscription subscription) {
+                        subscription.request(limit);
+                    }
 
-                @Override
-                protected void hookOnNext(final Long value) {
-                    taken.add(value);
+                    @Override
+                    protected void hookOnNext(final @NonNull Long value) {
+                        taken.add(value);
+                    }
                 }
-            }
         );
         return List.copyOf(taken);
     }
@@ -76,8 +79,8 @@ public final class Demand {
     public long produced(final long limit) {
         final AtomicLong count = new AtomicLong();
         this.taken(
-            Flux.range(1, 1000).map(Long::valueOf).doOnNext(item -> count.incrementAndGet()),
-            limit
+                Flux.range(1, 1000).map(Long::valueOf).doOnNext(item -> count.incrementAndGet()),
+                limit
         );
         return count.get();
     }

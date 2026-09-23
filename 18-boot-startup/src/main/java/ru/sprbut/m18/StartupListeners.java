@@ -9,6 +9,7 @@
 // @checkstyle ProhibitStaticNestedClassesCheck disable
 package ru.sprbut.m18;
 
+import jakarta.annotation.Nonnull;
 import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.boot.context.event.ApplicationFailedEvent;
@@ -76,7 +77,7 @@ public final class StartupListeners {
         }
 
         @Override
-        public void onApplicationEvent(final @NonNull ApplicationStartingEvent event) {
+        public void onApplicationEvent(final @Nonnull ApplicationStartingEvent event) {
             StartupLog.record("1-ApplicationStartingEvent");
         }
     }
@@ -96,7 +97,7 @@ public final class StartupListeners {
         }
 
         @Override
-        public void onApplicationEvent(final @NonNull ApplicationEnvironmentPreparedEvent event) {
+        public void onApplicationEvent(final @Nonnull ApplicationEnvironmentPreparedEvent event) {
             StartupLog.record("2-ApplicationEnvironmentPreparedEvent");
             StartupLog.record(
                 String.format(
@@ -122,7 +123,7 @@ public final class StartupListeners {
         }
 
         @Override
-        public void onApplicationEvent(final @NonNull ApplicationContextInitializedEvent event) {
+        public void onApplicationEvent(final @Nonnull ApplicationContextInitializedEvent event) {
             StartupLog.record("4-ApplicationContextInitializedEvent");
         }
     }
@@ -141,7 +142,7 @@ public final class StartupListeners {
         }
 
         @Override
-        public void onApplicationEvent(final @NonNull ApplicationPreparedEvent event) {
+        public void onApplicationEvent(final @Nonnull ApplicationPreparedEvent event) {
             StartupLog.record("5-ApplicationPreparedEvent");
         }
     }
@@ -160,7 +161,7 @@ public final class StartupListeners {
         }
 
         @Override
-        public void onApplicationEvent(final @NonNull ContextRefreshedEvent event) {
+        public void onApplicationEvent(final @Nonnull ContextRefreshedEvent event) {
             StartupLog.record("7-ContextRefreshedEvent");
         }
     }
@@ -179,7 +180,7 @@ public final class StartupListeners {
         }
 
         @Override
-        public void onApplicationEvent(final @NonNull ApplicationStartedEvent event) {
+        public void onApplicationEvent(final @Nonnull ApplicationStartedEvent event) {
             StartupLog.record("8-ApplicationStartedEvent");
         }
     }
@@ -198,7 +199,7 @@ public final class StartupListeners {
         }
 
         @Override
-        public void onApplicationEvent(final @NonNull ApplicationReadyEvent event) {
+        public void onApplicationEvent(final @Nonnull ApplicationReadyEvent event) {
             StartupLog.record("10-ApplicationReadyEvent");
         }
     }
@@ -217,7 +218,7 @@ public final class StartupListeners {
         }
 
         @Override
-        public void onApplicationEvent(final @NonNull ApplicationFailedEvent event) {
+        public void onApplicationEvent(final @Nonnull ApplicationFailedEvent event) {
             StartupLog.record(
                 String.format(
                     "x-ApplicationFailedEvent:%s",
