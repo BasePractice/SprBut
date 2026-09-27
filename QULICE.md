@@ -76,6 +76,9 @@ jar-ов resilience4j несут одинаковый `COPYRIGHT.txt`, и это
   в модуле 11 — ни одного подавления. Ёмкость пула приходит в конструктор,
   а не живёт магическим числом; `ArrayBlockingQueue` создаётся с ёмкостью,
   как того и требует проверка коллекций.
+* [`SanitizingFilter`](28-parts/28-p01-handlers/src/main/java/ru/sprbut/m28/filters/SanitizingFilter.java)
+  и соседи в части 28 p01 — ни одного подавления, кроме русскоязычных шапок.
+  Проверка зависимостей отключена: модуль стоит на стартерах Spring Boot.
 * [`BytecodeProcessor`](07-annotation-processor/src/main/java/ru/sprbut/m07/bytecode/BytecodeProcessor.java)
   в модуле 07 — одно подавление ErrorProne, `DoNotClaimAnnotations`: процессор
   поглощает свою аннотацию (`return true`), как и соседний `RegistryProcessor`.

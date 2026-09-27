@@ -72,6 +72,7 @@
         <module>25-common-mistakes</module>
         <module>26-aot-native</module>
         <module>27-capstone</module>
+        <module>28-parts/28-p01-handlers</module>
     </modules>
 
     <dependencyManagement>

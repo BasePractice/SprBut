@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: sprbut-m28-p01
+server:
+  port: 8084
