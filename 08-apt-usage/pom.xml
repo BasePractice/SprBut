@@ -65,11 +65,27 @@
                     </annotationProcessorPaths>
                     <compilerArgs>
                         <arg>-parameters</arg>
-                        <!-- Слайд 70: @SupportedOptions — параметры процессора -->
-                        <arg>-Aregistry.package=ru.sprbut.m08.generated</arg>
-                        <arg>-Aregistry.class=ModuleRegistry</arg>
                     </compilerArgs>
                 </configuration>
+                <executions>
+                    <!--
+                        Параметры процессора нужны только основной компиляции:
+                        реестр собирается по main-исходникам. Переданные ещё и
+                        тестовой компиляции, они остались бы никем не прочитаны,
+                        и javac сообщил бы о нераспознанных опциях.
+                    -->
+                    <execution>
+                        <id>default-compile</id>
+                        <configuration>
+                            <compilerArgs combine.self="override">
+                                <arg>-parameters</arg>
+                                <!-- Слайд 70: @SupportedOptions — параметры процессора -->
+                                <arg>-Aregistry.package=ru.sprbut.m08.generated</arg>
+                                <arg>-Aregistry.class=ModuleRegistry</arg>
+                            </compilerArgs>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -52,7 +52,7 @@ import ru.sprbut.m07.api.GenerateBuilder;
  * @since 1.0
  */
 @SupportedAnnotationTypes("ru.sprbut.m07.api.GenerateBuilder")
-@SupportedSourceVersion(SourceVersion.RELEASE_17)
+@SupportedSourceVersion(SourceVersion.RELEASE_25)
 public class BuilderProcessor extends AbstractProcessor {
 
     /**

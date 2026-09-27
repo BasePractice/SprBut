@@ -60,10 +60,26 @@
                     </annotationProcessorPaths>
                     <compilerArgs>
                         <arg>-parameters</arg>
-                        <!-- Незамапленное свойство должно быть ошибкой, а не тихой потерей данных -->
-                        <arg>-Amapstruct.unmappedTargetPolicy=ERROR</arg>
                     </compilerArgs>
                 </configuration>
+                <executions>
+                    <!--
+                        Параметр MapStruct нужен только основной компиляции: мапперы
+                        живут в main-исходниках. Переданный ещё и тестовой компиляции,
+                        он остался бы никем не прочитан, и javac сообщил бы
+                        о нераспознанной опции.
+                    -->
+                    <execution>
+                        <id>default-compile</id>
+                        <configuration>
+                            <compilerArgs combine.self="override">
+                                <arg>-parameters</arg>
+                                <!-- Незамапленное свойство должно быть ошибкой, а не тихой потерей данных -->
+                                <arg>-Amapstruct.unmappedTargetPolicy=ERROR</arg>
+                            </compilerArgs>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

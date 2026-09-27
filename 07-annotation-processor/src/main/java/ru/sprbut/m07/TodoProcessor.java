@@ -30,7 +30,7 @@ import ru.sprbut.m07.api.Todo;
  * @since 1.0
  */
 @SupportedAnnotationTypes("ru.sprbut.m07.api.Todo")
-@SupportedSourceVersion(SourceVersion.RELEASE_17)
+@SupportedSourceVersion(SourceVersion.RELEASE_25)
 public class TodoProcessor extends AbstractProcessor {
 
     /**

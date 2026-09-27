@@ -59,7 +59,7 @@ import ru.sprbut.m07.api.Registered;
  * @since 1.0
  */
 @SupportedAnnotationTypes("ru.sprbut.m07.api.Registered")
-@SupportedSourceVersion(SourceVersion.RELEASE_17)
+@SupportedSourceVersion(SourceVersion.RELEASE_25)
 @SupportedOptions({RegistryProcessor.PACKAGE_OPTION, RegistryProcessor.CLASS_OPTION})
 @SuppressWarnings("PMD.ConstructorShouldDoInitialization")
 public class RegistryProcessor extends AbstractProcessor {

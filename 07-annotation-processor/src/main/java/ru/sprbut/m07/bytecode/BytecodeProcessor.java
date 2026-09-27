@@ -52,7 +52,7 @@ import ru.sprbut.m07.api.Meta;
  * @since 1.0
  */
 @SupportedAnnotationTypes("ru.sprbut.m07.api.Instrumented")
-@SupportedSourceVersion(SourceVersion.RELEASE_17)
+@SupportedSourceVersion(SourceVersion.RELEASE_25)
 public class BytecodeProcessor extends AbstractProcessor {
 
     /**
