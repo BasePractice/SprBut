@@ -15,8 +15,10 @@
     <name>SprBut :: 28 :: p01 :: Участники обработки запроса</name>
     <description>
         Часть первая дополнительного раздела: кто трогает запрос по дороге
-        от сокета до метода контроллера — фильтр, интерсептор, конвертер,
-        резолвер аргумента и совет над телом запроса.
+        от сокета до метода контроллера и ответ по дороге обратно — фильтры,
+        интерсепторы, конвертеры и форматтеры, резолверы аргументов и
+        обработчики результатов, советы над телами, обработчики исключений
+        и аспекты.
     </description>
 
     <dependencies>
@@ -27,6 +29,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <!-- TrimmingAspect: аспект над контроллером -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

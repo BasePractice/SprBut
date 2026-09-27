@@ -8,7 +8,6 @@ package ru.sprbut.m28.interceptors;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Второй участник: интерсептор диспетчера.
@@ -20,9 +19,21 @@ import org.springframework.web.servlet.ModelAndView;
  *
  * <p>{@code preHandle} умеет прервать обработку, вернув {@code false}:
  * так работают проверки доступа, написанные без Spring Security.
- * Здесь же он только запоминает отметку времени, а {@code postHandle}
- * превращает разницу в заголовок ответа — между двумя вызовами лежит
- * ровно работа метода контроллера.</p>
+ * Здесь же он только ставит отметку времени.</p>
+ *
+ * <p>Заголовок с длительностью пишет не {@code postHandle}, хотя кажется,
+ * что место для него именно там. Для {@code @ResponseBody} конвертер
+ * сообщений записывает и сбрасывает тело ещё внутри вызова обработчика,
+ * ответ к {@code postHandle} уже отправлен, и настоящий контейнер
+ * сервлетов молча выбрасывает заголовки, выставленные после этого.
+ * {@code MockMvc} такой ошибки не покажет: его ответ принимает заголовки
+ * в любой момент. Заголовок пишет {@code ElapsedResponseAdvice} —
+ * последний, кто трогает ответ до записи тела.</p>
+ *
+ * <p>Отметка ставится только один раз. У асинхронного метода
+ * {@code preHandle} вызывается дважды: при исходной диспетчеризации и
+ * при повторной, когда результат готов. Перезаписанная отметка измерила
+ * бы только вторую половину.</p>
  *
  * @since 1.0
  */
@@ -44,20 +55,9 @@ public final class TimingInterceptor implements HandlerInterceptor {
     public boolean preHandle(
         final HttpServletRequest request, final HttpServletResponse response, final Object handler
     ) {
-        request.setAttribute(TimingInterceptor.STARTED, System.nanoTime());
+        if (request.getAttribute(TimingInterceptor.STARTED) == null) {
+            request.setAttribute(TimingInterceptor.STARTED, System.nanoTime());
+        }
         return true;
-    }
-
-    @Override
-    public void postHandle(
-        final HttpServletRequest request, final HttpServletResponse response,
-        final Object handler, final ModelAndView model
-    ) {
-        response.setHeader(
-            "X-Elapsed-Nanos",
-            String.valueOf(
-                System.nanoTime() - (long) request.getAttribute(TimingInterceptor.STARTED)
-            )
-        );
     }
 }

@@ -6,6 +6,7 @@
 package ru.sprbut.m28.converters;
 
 import java.util.Locale;
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import ru.sprbut.m28.dto.Login;
@@ -39,7 +40,7 @@ public final class LowerCaseConverter implements Converter<String, Login> {
     }
 
     @Override
-    public Login convert(final String source) {
+    public @NonNull Login convert(final String source) {
         return new Login(source.trim().toLowerCase(Locale.ROOT));
     }
 }

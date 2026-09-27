@@ -31,17 +31,27 @@ final class TimingInterceptorTest {
     }
 
     @Test
-    @DisplayName("postHandle дописывает в ответ длительность обработки")
-    void writesElapsedHeader() {
+    @DisplayName("preHandle ставит в запрос отметку начала обработки")
+    void stampsRequest() {
         final MockHttpServletRequest request = new MockHttpServletRequest();
-        final MockHttpServletResponse response = new MockHttpServletResponse();
-        final TimingInterceptor interceptor = new TimingInterceptor();
-        interceptor.preHandle(request, response, new Object());
-        interceptor.postHandle(request, response, new Object(), null);
+        new TimingInterceptor().preHandle(request, new MockHttpServletResponse(), new Object());
         MatcherAssert.assertThat(
-            "длительность обработки не попала в ответ",
-            response.getHeader("X-Elapsed-Nanos"),
-            Matchers.matchesRegex("\\d+")
+            "отметка начала обработки не попала в запрос",
+            request.getAttribute("sprbut.started"),
+            Matchers.instanceOf(Long.class)
+        );
+    }
+
+    @Test
+    @DisplayName("повторная диспетчеризация не сдвигает отметку начала")
+    void keepsFirstStamp() {
+        final MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setAttribute("sprbut.started", 42L);
+        new TimingInterceptor().preHandle(request, new MockHttpServletResponse(), new Object());
+        MatcherAssert.assertThat(
+            "вторая диспетчеризация перезаписала отметку начала",
+            request.getAttribute("sprbut.started"),
+            Matchers.is(42L)
         );
     }
 }

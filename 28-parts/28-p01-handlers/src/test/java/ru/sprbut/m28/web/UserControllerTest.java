@@ -97,4 +97,14 @@ final class UserControllerTest {
                 .content("{\"username\":\"  \",\"email\":\"ivan@example.com\"}")
         ).andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
+
+    @Test
+    @DisplayName("тело без логина отвечает кодом 400, а не падением метода")
+    void rejectsGreetingWithoutName() throws Exception {
+        this.http.perform(
+            MockMvcRequestBuilders.post("/api/users/greeting")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}")
+        ).andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
 }

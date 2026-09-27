@@ -79,6 +79,17 @@ jar-ов resilience4j несут одинаковый `COPYRIGHT.txt`, и это
 * [`SanitizingFilter`](28-parts/28-p01-handlers/src/main/java/ru/sprbut/m28/filters/SanitizingFilter.java)
   и соседи в части 28 p01 — ни одного подавления, кроме русскоязычных шапок.
   Проверка зависимостей отключена: модуль стоит на стартерах Spring Boot.
+  Расширение части добавило подавления там, где их требует сам Spring:
+  `ProtectedMethodInFinalClassCheck` у наследников `OncePerRequestFilter`,
+  `AbstractHttpMessageConverter`, `RequestMappingHandlerMapping` и
+  `ResponseEntityExceptionHandler` — переопределяемые методы у них
+  `protected`; `IllegalThrowsCheck` у аспекта — `proceed` бросает
+  `Throwable`; ErrorProne `DoNotCallSuggester` у метода, который нарочно
+  всегда бросает исключение; `ConstructorsCodeFreeCheck` у конструкторов,
+  которые отвергают `null` через `Objects.requireNonNull`, — немедленный
+  отказ требует RULE.md, а случиться он может только при сборке объекта. Перевод строки в CSV и построчном ответе
+  пишется символом, а не строковым литералом: его задаёт протокол,
+  а не ОС.
 * [`BytecodeProcessor`](07-annotation-processor/src/main/java/ru/sprbut/m07/bytecode/BytecodeProcessor.java)
   в модуле 07 — одно подавление ErrorProne, `DoNotClaimAnnotations`: процессор
   поглощает свою аннотацию (`return true`), как и соседний `RegistryProcessor`.

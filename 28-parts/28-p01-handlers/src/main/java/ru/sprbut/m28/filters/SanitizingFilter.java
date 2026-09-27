@@ -34,10 +34,14 @@ import org.springframework.stereotype.Component;
  * <p>Фильтр-бин контейнер регистрирует сам — в отличие от интерсептора
  * и резолвера аргумента, которым нужен {@code WebMvcConfigurer}.</p>
  *
+ * <p>Порядок — второй после самого первого: раньше тела должен успеть
+ * {@code LimitFilter}, иначе слишком длинное тело будет целиком прочитано
+ * в память ради того, чтобы потом его отвергнуть.</p>
+ *
  * @since 1.0
  */
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE + 1)
 public final class SanitizingFilter implements Filter {
 
     /**

@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import ru.sprbut.m28.validation.NotReserved;
 
 /**
  * Тело запроса на создание пользователя.
@@ -28,6 +29,9 @@ import jakarta.validation.constraints.Size;
  * и здесь: совет успевает замаскировать почту до того, как её увидит
  * проверка.</p>
  *
+ * <p>{@code @NotReserved} — правило, написанное в модуле: готовые правила
+ * проверяют форму имени, а это — его смысл.</p>
+ *
  * @param username Имя пользователя
  * @param email Почта пользователя
  * @since 1.0
@@ -40,6 +44,7 @@ public record CreateUserRequest(
         regexp = "[\\p{Alnum}_.-]*",
         message = "имя содержит что-то кроме букв, цифр, точки, дефиса и подчёркивания"
     )
+    @NotReserved
     String username,
 
     @NotBlank(message = "почта обязательна")

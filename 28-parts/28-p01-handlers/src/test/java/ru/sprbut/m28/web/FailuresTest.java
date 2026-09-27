@@ -98,4 +98,32 @@ final class FailuresTest {
             )
         );
     }
+
+    @Test
+    @DisplayName("зарезервированное имя отвергается своим правилом проверки")
+    void rejectsReservedUsername() throws Exception {
+        this.http.perform(
+            MockMvcRequestBuilders.post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"username\":\"System\",\"email\":\"ivan@example.com\"}")
+        ).andExpect(
+            MockMvcResultMatchers.jsonPath(
+                "$.errors[0]", Matchers.containsString("зарезервировано")
+            )
+        );
+    }
+
+    @Test
+    @DisplayName("неразборчивый JSON тоже отвечает в формате RFC 9457")
+    void answersBrokenJsonWithProblem() throws Exception {
+        this.http.perform(
+            MockMvcRequestBuilders.post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"username\":")
+        ).andExpect(
+            MockMvcResultMatchers.content().contentTypeCompatibleWith(
+                MediaType.APPLICATION_PROBLEM_JSON
+            )
+        );
+    }
 }

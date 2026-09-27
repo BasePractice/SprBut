@@ -6,6 +6,7 @@
 package ru.sprbut.m28.handlers;
 
 import java.util.Locale;
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -44,7 +45,7 @@ public final class CurrentUserArgumentResolver implements HandlerMethodArgumentR
     }
 
     @Override
-    public Object resolveArgument(
+    public @NonNull Object resolveArgument(
         final MethodParameter parameter, final ModelAndViewContainer container,
         final NativeWebRequest request, final WebDataBinderFactory factory
     ) {

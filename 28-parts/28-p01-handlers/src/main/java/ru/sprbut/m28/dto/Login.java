@@ -6,6 +6,9 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m28.dto;
 
+import java.util.Objects;
+import org.jspecify.annotations.NonNull;
+
 /**
  * Логин: строка запроса, доведённая до доменного типа.
  *
@@ -19,5 +22,13 @@ package ru.sprbut.m28.dto;
  * @param value Значение логина в нижнем регистре
  * @since 1.0
  */
-public record Login(String value) {
+public record Login(@NonNull String value) {
+
+    /**
+     * Компактный конструктор: логин без значения не бывает.
+     * @param value Значение логина в нижнем регистре
+     */
+    public Login {
+        Objects.requireNonNull(value, "у логина нет значения");
+    }
 }

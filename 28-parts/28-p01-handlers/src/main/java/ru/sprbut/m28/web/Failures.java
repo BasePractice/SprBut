@@ -3,16 +3,18 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
-// @checkstyle RegexpSingleline disable
-// @checkstyle NonStaticMethodCheck disable
+// @checkstyle ProtectedMethodInFinalClassCheck disable
 package ru.sprbut.m28.web;
 
 import java.util.List;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /**
  * Шестой участник: совет над ошибкой.
@@ -27,31 +29,38 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * отдельным свойством {@code errors}, по пункту на поле: клиенту нужно
  * знать не только что запрос отвергнут, но и какое поле чинить.</p>
  *
+ * <p>Базовый класс {@code ResponseEntityExceptionHandler} уже умеет
+ * превращать в {@code ProblemDetail} полтора десятка исключений самого
+ * Spring MVC: неразборчивый JSON, неподдержанный метод HTTP, не тот тип
+ * параметра, {@code ResponseStatusException}. Поэтому свой ответ на
+ * проверку тела здесь не объявлен через {@code @ExceptionHandler}, а
+ * переопределён: базовый класс уже держит обработчик для
+ * {@code MethodArgumentNotValidException}, и второй такой же контекст
+ * отверг бы на старте как неоднозначный.</p>
+ *
  * @since 1.0
  */
 @RestControllerAdvice
-public final class Failures {
+public final class Failures extends ResponseEntityExceptionHandler {
 
     /**
      * Открытый конструктор: экземпляр создаёт контейнер.
      */
     public Failures() {
-        // нечего инициализировать
+        super();
     }
 
-    /**
-     * Нарушенные правила проверки становятся ответом 400.
-     * @param error Исключение проверки
-     * @return Ответ 400 с перечнем нарушенных правил
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail invalid(final MethodArgumentNotValidException error) {
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+        final MethodArgumentNotValidException error, final HttpHeaders headers,
+        final HttpStatusCode status, final WebRequest request
+    ) {
         final ProblemDetail detail = ProblemDetail.forStatusAndDetail(
-            HttpStatus.BAD_REQUEST, "пользователь не прошёл проверку"
+            status, "запрос не прошёл проверку"
         );
-        detail.setTitle("Тело запроса отвергнуто");
+        detail.setTitle("Запрос отвергнут");
         detail.setProperty("errors", Failures.messages(error));
-        return detail;
+        return this.handleExceptionInternal(error, detail, headers, status, request);
     }
 
     private static List<String> messages(final MethodArgumentNotValidException error) {
