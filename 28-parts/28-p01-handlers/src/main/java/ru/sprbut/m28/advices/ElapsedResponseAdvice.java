@@ -5,6 +5,7 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m28.advices;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -48,16 +49,16 @@ public final class ElapsedResponseAdvice implements ResponseBodyAdvice<Object> {
 
     @Override
     public boolean supports(
-        final MethodParameter type, final Class<? extends HttpMessageConverter<?>> converter
+            final @NonNull MethodParameter type, final @NonNull Class<? extends HttpMessageConverter<?>> converter
     ) {
         return true;
     }
 
     @Override
     public Object beforeBodyWrite(
-        final Object body, final MethodParameter type, final MediaType media,
-        final Class<? extends HttpMessageConverter<?>> converter,
-        final ServerHttpRequest request, final ServerHttpResponse response
+            final Object body, final @NonNull MethodParameter type, final @NonNull MediaType media,
+            final @NonNull Class<? extends HttpMessageConverter<?>> converter,
+            final @NonNull ServerHttpRequest request, final @NonNull ServerHttpResponse response
     ) {
         final Object started = ((ServletServerHttpRequest) request).getServletRequest()
             .getAttribute("sprbut.started");

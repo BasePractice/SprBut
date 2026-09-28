@@ -63,8 +63,8 @@ public final class AuditFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-        final HttpServletRequest request, final HttpServletResponse response,
-        final FilterChain chain
+            final @NonNull HttpServletRequest request, final @NonNull HttpServletResponse response,
+            final FilterChain chain
     ) throws ServletException, IOException {
         final ContentCachingRequestWrapper cached =
             new ContentCachingRequestWrapper(request, this.limit);

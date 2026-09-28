@@ -8,6 +8,8 @@ package ru.sprbut.m28.filters;
 
 import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletInputStream;
+import org.jspecify.annotations.NonNull;
+
 import java.io.ByteArrayInputStream;
 
 /**
@@ -41,7 +43,7 @@ public final class SanitizedStream extends ServletInputStream {
     }
 
     @Override
-    public int read(final byte[] bytes, final int off, final int len) {
+    public int read(final byte @NonNull [] bytes, final int off, final int len) {
         return this.body.read(bytes, off, len);
     }
 

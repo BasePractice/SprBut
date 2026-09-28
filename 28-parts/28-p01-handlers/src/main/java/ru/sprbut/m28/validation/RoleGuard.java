@@ -5,6 +5,7 @@
 // @checkstyle MultiLineCommentCheck disable
 package ru.sprbut.m28.validation;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import ru.sprbut.m28.dto.ProfileForm;
@@ -34,12 +35,12 @@ public final class RoleGuard implements Validator {
     }
 
     @Override
-    public boolean supports(final Class<?> type) {
+    public boolean supports(final @NonNull Class<?> type) {
         return ProfileForm.class.equals(type);
     }
 
     @Override
-    public void validate(final Object target, final Errors errors) {
+    public void validate(final @NonNull Object target, final @NonNull Errors errors) {
         if (((ProfileForm) target).role() != null) {
             errors.rejectValue("role", "self.assigned", "роль назначает сервер");
         }

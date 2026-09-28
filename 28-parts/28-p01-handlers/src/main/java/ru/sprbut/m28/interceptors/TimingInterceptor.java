@@ -7,6 +7,7 @@ package ru.sprbut.m28.interceptors;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
@@ -53,7 +54,7 @@ public final class TimingInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(
-        final HttpServletRequest request, final HttpServletResponse response, final Object handler
+            final HttpServletRequest request, final @NonNull HttpServletResponse response, final @NonNull Object handler
     ) {
         if (request.getAttribute(TimingInterceptor.STARTED) == null) {
             request.setAttribute(TimingInterceptor.STARTED, System.nanoTime());

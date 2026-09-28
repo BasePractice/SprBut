@@ -7,6 +7,8 @@
 package ru.sprbut.m28.routing;
 
 import java.lang.reflect.Method;
+
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
@@ -37,7 +39,7 @@ public final class ClientHandlerMapping extends RequestMappingHandlerMapping {
     }
 
     @Override
-    protected RequestCondition<?> getCustomMethodCondition(final Method method) {
+    protected RequestCondition<?> getCustomMethodCondition(final @NonNull Method method) {
         final Client client = AnnotatedElementUtils.findMergedAnnotation(method, Client.class);
         final RequestCondition<?> condition;
         if (client == null) {

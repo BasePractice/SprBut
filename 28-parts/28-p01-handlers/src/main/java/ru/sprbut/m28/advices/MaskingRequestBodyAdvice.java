@@ -6,6 +6,8 @@
 package ru.sprbut.m28.advices;
 
 import java.lang.reflect.Type;
+
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -42,16 +44,16 @@ public final class MaskingRequestBodyAdvice extends RequestBodyAdviceAdapter {
 
     @Override
     public boolean supports(
-        final MethodParameter parameter, final Type target,
-        final Class<? extends HttpMessageConverter<?>> converter
+            final @NonNull MethodParameter parameter, final @NonNull Type target,
+            final @NonNull Class<? extends HttpMessageConverter<?>> converter
     ) {
         return CreateUserRequest.class.equals(target);
     }
 
     @Override
     public Object afterBodyRead(
-        final Object body, final HttpInputMessage input, final MethodParameter parameter,
-        final Type target, final Class<? extends HttpMessageConverter<?>> converter
+            final @NonNull Object body, final @NonNull HttpInputMessage input, final @NonNull MethodParameter parameter,
+            final @NonNull Type target, final @NonNull Class<? extends HttpMessageConverter<?>> converter
     ) {
         final CreateUserRequest request = (CreateUserRequest) body;
         final Object read;

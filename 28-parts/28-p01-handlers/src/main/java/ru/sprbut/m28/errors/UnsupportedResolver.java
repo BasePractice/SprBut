@@ -7,6 +7,7 @@ package ru.sprbut.m28.errors;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
@@ -39,8 +40,8 @@ public final class UnsupportedResolver implements HandlerExceptionResolver {
 
     @Override
     public ModelAndView resolveException(
-        final HttpServletRequest request, final HttpServletResponse response,
-        final Object handler, final Exception error
+            final @NonNull HttpServletRequest request, final @NonNull HttpServletResponse response,
+            final Object handler, final @NonNull Exception error
     ) {
         final ModelAndView view;
         if (error instanceof UnsupportedOperationException) {

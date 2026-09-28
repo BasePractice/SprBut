@@ -46,8 +46,8 @@ public final class CurrentUserArgumentResolver implements HandlerMethodArgumentR
 
     @Override
     public @NonNull Object resolveArgument(
-        final MethodParameter parameter, final ModelAndViewContainer container,
-        final NativeWebRequest request, final WebDataBinderFactory factory
+            final @NonNull MethodParameter parameter, final ModelAndViewContainer container,
+            final NativeWebRequest request, final WebDataBinderFactory factory
     ) {
         final String raw = request.getHeader("X-User");
         final String user;

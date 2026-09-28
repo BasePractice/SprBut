@@ -12,6 +12,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.UUID;
+
+import org.jspecify.annotations.NonNull;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -53,8 +55,8 @@ public final class CorrelationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-        final HttpServletRequest request, final HttpServletResponse response,
-        final FilterChain chain
+            final @NonNull HttpServletRequest request, final HttpServletResponse response,
+            final FilterChain chain
     ) throws ServletException, IOException {
         final String id = CorrelationFilter.id(request);
         request.setAttribute("sprbut.correlation", id);

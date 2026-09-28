@@ -6,6 +6,8 @@
 package ru.sprbut.m28.formatters;
 
 import java.util.Set;
+
+import org.jspecify.annotations.NonNull;
 import org.springframework.format.AnnotationFormatterFactory;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
@@ -41,12 +43,12 @@ public final class PhoneFormatterFactory implements AnnotationFormatterFactory<P
     }
 
     @Override
-    public Printer<?> getPrinter(final PhoneNumber annotation, final Class<?> type) {
+    public Printer<?> getPrinter(final PhoneNumber annotation, final @NonNull Class<?> type) {
         return new PhoneFormatter(annotation.country());
     }
 
     @Override
-    public Parser<?> getParser(final PhoneNumber annotation, final Class<?> type) {
+    public Parser<?> getParser(final PhoneNumber annotation, final @NonNull Class<?> type) {
         return new PhoneFormatter(annotation.country());
     }
 }

@@ -44,7 +44,7 @@ public final class PhoneFormatter implements Formatter<Phone> {
     }
 
     @Override
-    public Phone parse(final String text, final Locale locale) throws ParseException {
+    public Phone parse(final String text, final @NonNull Locale locale) throws ParseException {
         final String digits = text.replaceAll("\\D", "");
         final Phone phone;
         if (digits.length() == 10) {
@@ -60,7 +60,7 @@ public final class PhoneFormatter implements Formatter<Phone> {
     }
 
     @Override
-    public String print(final Phone phone, final Locale locale) {
+    public String print(final Phone phone, final @NonNull Locale locale) {
         return String.format("+%s", phone.digits());
     }
 }

@@ -9,6 +9,8 @@ package ru.sprbut.m28.messages;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -47,18 +49,18 @@ public final class UserCsvConverter extends AbstractHttpMessageConverter<UserDto
     }
 
     @Override
-    public boolean canRead(final Class<?> type, final MediaType media) {
+    public boolean canRead(final @NonNull Class<?> type, final MediaType media) {
         return false;
     }
 
     @Override
-    protected boolean supports(final Class<?> type) {
+    protected boolean supports(final @NonNull Class<?> type) {
         return UserDto.class.equals(type);
     }
 
     @Override
     protected UserDto readInternal(
-        final Class<? extends UserDto> type, final HttpInputMessage input
+            final @NonNull Class<? extends UserDto> type, final @NonNull HttpInputMessage input
     ) {
         throw new HttpMessageNotReadableException("пользователь в CSV не читается", input);
     }

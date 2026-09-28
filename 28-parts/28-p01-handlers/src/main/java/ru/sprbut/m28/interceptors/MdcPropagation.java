@@ -7,6 +7,8 @@ package ru.sprbut.m28.interceptors;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
+
+import org.jspecify.annotations.NonNull;
 import org.slf4j.MDC;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
@@ -48,7 +50,7 @@ public final class MdcPropagation implements CallableProcessingInterceptor {
 
     @Override
     public <T> void beforeConcurrentHandling(
-        final NativeWebRequest request, final Callable<T> task
+            final @NonNull NativeWebRequest request, final @NonNull Callable<T> task
     ) {
         final Map<String, String> context = MDC.getCopyOfContextMap();
         if (context != null) {
@@ -58,7 +60,7 @@ public final class MdcPropagation implements CallableProcessingInterceptor {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> void preProcess(final NativeWebRequest request, final Callable<T> task) {
+    public <T> void preProcess(final NativeWebRequest request, final @NonNull Callable<T> task) {
         if (request.getAttribute("sprbut.mdc", RequestAttributes.SCOPE_REQUEST)
             instanceof Map<?, ?> context) {
             MDC.setContextMap((Map<String, String>) context);
@@ -67,7 +69,7 @@ public final class MdcPropagation implements CallableProcessingInterceptor {
 
     @Override
     public <T> void postProcess(
-        final NativeWebRequest request, final Callable<T> task, final Object result
+            final @NonNull NativeWebRequest request, final @NonNull Callable<T> task, final Object result
     ) {
         MDC.clear();
     }

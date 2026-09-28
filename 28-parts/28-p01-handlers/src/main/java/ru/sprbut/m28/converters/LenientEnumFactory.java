@@ -6,6 +6,8 @@
 package ru.sprbut.m28.converters;
 
 import java.util.Locale;
+
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 
@@ -37,7 +39,7 @@ public final class LenientEnumFactory implements ConverterFactory<String, Enum> 
     }
 
     @Override
-    public <T extends Enum> Converter<String, T> getConverter(final Class<T> type) {
+    public <T extends Enum> Converter<String, T> getConverter(final @NonNull Class<T> type) {
         return source -> (T) Enum.valueOf(type, source.trim().toUpperCase(Locale.ROOT));
     }
 }

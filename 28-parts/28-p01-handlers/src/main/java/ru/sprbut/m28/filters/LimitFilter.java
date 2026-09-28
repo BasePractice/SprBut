@@ -68,8 +68,8 @@ public final class LimitFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-        final HttpServletRequest request, final HttpServletResponse response,
-        final FilterChain chain
+        final HttpServletRequest request, final @NonNull HttpServletResponse response,
+        final @NonNull FilterChain chain
     ) throws ServletException, IOException {
         if (request.getContentLengthLong() > this.limit) {
             this.resolver.resolveException(

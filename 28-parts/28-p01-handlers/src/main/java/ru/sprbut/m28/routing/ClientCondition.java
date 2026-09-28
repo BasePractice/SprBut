@@ -44,7 +44,7 @@ public final class ClientCondition implements RequestCondition<ClientCondition> 
     }
 
     @Override
-    public ClientCondition combine(final ClientCondition other) {
+    public ClientCondition combine(final @NonNull ClientCondition other) {
         return other;
     }
 
@@ -60,7 +60,7 @@ public final class ClientCondition implements RequestCondition<ClientCondition> 
     }
 
     @Override
-    public int compareTo(final ClientCondition other, final HttpServletRequest request) {
+    public int compareTo(final @NonNull ClientCondition other, final @NonNull HttpServletRequest request) {
         return 0;
     }
 }
