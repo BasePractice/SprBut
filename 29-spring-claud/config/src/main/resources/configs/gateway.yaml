@@ -1,0 +1,24 @@
+server:
+  port: 8080
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: auth
+              uri: lb://auth
+              predicates:
+                - Path=/auth/**
+            - id: profile
+              uri: lb://profile
+              predicates:
+                - Path=/profiles/**
+auth:
+  url: http://auth
+profile:
+  url: http://profile
+parameters:
+  url: http://parameters
+gateway:
+  session-cache: PT10S

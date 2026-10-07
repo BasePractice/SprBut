@@ -1,0 +1,151 @@
+# Сквозная проверка двух экземпляров, поднятых через docker compose.
+# Запускать целиком сверху вниз в окружении "docker": запросы передают друг
+# другу значения метрик через client.global.
+# Уведомления отправляются через второй экземпляр, а приём проверяется по
+# метрикам первого: так видно, что событие прошло через Redis.
+
+### Первый экземпляр жив
+GET {{one}}/actuator/health
+
+> {%
+    client.test("Первый экземпляр отвечает UP", () => {
+        client.assert(response.status === 200, `Здоровье ответило ${response.status}`);
+        client.assert(response.body.status === "UP", `Статус ${response.body.status}`);
+    });
+%}
+
+### Второй экземпляр жив
+GET {{two}}/actuator/health
+
+> {%
+    client.test("Второй экземпляр отвечает UP", () => {
+        client.assert(response.status === 200, `Здоровье ответило ${response.status}`);
+        client.assert(response.body.status === "UP", `Статус ${response.body.status}`);
+    });
+%}
+
+### Сколько уведомлений первый экземпляр получил из Redis до отправки
+GET {{one}}/actuator/prometheus
+
+> {%
+    const received = response.body.match(/^redis_sse_receive_total\{[^}]*} (\S+)$/m);
+    client.test("Метрика полученных уведомлений есть", () => {
+        client.assert(received !== null, "Нет метрики redis_sse_receive_total");
+    });
+    client.global.set("receivedBefore", received[1]);
+%}
+
+### Сколько уведомлений второй экземпляр отправил до отправки
+GET {{two}}/actuator/prometheus
+
+> {%
+    const published = response.body.match(/^redis_sse_publish_total\{[^}]*} (\S+)$/m);
+    client.test("Метрика отправленных уведомлений есть", () => {
+        client.assert(published !== null, "Нет метрики redis_sse_publish_total");
+    });
+    client.global.set("publishedBefore", published[1]);
+%}
+
+### Уведомление пользователю через второй экземпляр
+< {%
+    request.variables.set("user", $random.integer(1, 1000000).toString());
+%}
+POST {{two}}/sse/send/user/{{user}}
+Content-Type: text/plain
+
+Привет, {{$random.alphanumeric(8)}}
+
+> {%
+    client.test("Уведомление пользователю принято", () => {
+        client.assert(response.status === 200, `Отправка ответила ${response.status}`);
+    });
+%}
+
+### Уведомление всем через второй экземпляр
+POST {{two}}/sse/send/broadcast
+Content-Type: text/plain
+
+Всем, {{$random.alphanumeric(8)}}
+
+> {%
+    client.test("Уведомление всем принято", () => {
+        client.assert(response.status === 200, `Отправка ответила ${response.status}`);
+    });
+%}
+
+### Пользователь не число
+POST {{two}}/sse/send/user/ничей
+Content-Type: text/plain
+
+текст
+
+> {%
+    client.test("Нечисловой пользователь даёт 400", () => {
+        client.assert(response.status === 400, `Ожидался 400, пришёл ${response.status}`);
+    });
+%}
+
+### Уведомление без текста
+POST {{two}}/sse/send/broadcast
+Content-Type: text/plain
+
+> {%
+    client.test("Пустое уведомление даёт 400", () => {
+        client.assert(response.status === 400, `Ожидался 400, пришёл ${response.status}`);
+    });
+%}
+
+### Второй экземпляр отправил оба уведомления в Redis
+GET {{two}}/actuator/prometheus
+
+> {%
+    const published = response.body.match(/^redis_sse_publish_total\{[^}]*} (\S+)$/m);
+    client.test("Отправлено ровно два уведомления", () => {
+        const delta = Number(published[1]) - Number(client.global.get("publishedBefore"));
+        client.assert(delta === 2, `Отправлено ${delta}`);
+    });
+%}
+
+### Первый экземпляр получил оба уведомления из Redis
+GET {{one}}/actuator/prometheus
+
+> {%
+    const received = response.body.match(/^redis_sse_receive_total\{[^}]*} (\S+)$/m);
+    client.test("Получено ровно два уведомления", () => {
+        const delta = Number(received[1]) - Number(client.global.get("receivedBefore"));
+        client.assert(delta === 2, `Получено ${delta}`);
+    });
+%}
+
+### Поток пользователя открывается и пингует
+# Пинг в docker compose приходит раз в 2 секунды; поток закрывается после первого.
+# @timeout 10
+GET {{one}}/sse/stream/{{$random.integer(1, 1000000)}}
+Accept: text/event-stream
+
+> {%
+    client.test("Поток отдаётся как text/event-stream", () => {
+        client.assert(response.status === 200, `Поток ответил ${response.status}`);
+        client.assert(
+            response.contentType.mimeType === "text/event-stream",
+            `Тип ${response.contentType.mimeType}`
+        );
+    });
+    client.global.set("streamLine", "");
+    response.body.onEachLine((line, unsubscribe) => {
+        client.global.set("streamLine", line);
+        unsubscribe();
+    });
+%}
+
+### Первая строка потока — пинг
+# Проверки внутри onEachLine клиент не показывает, поэтому строка потока
+# проверяется здесь, в обработчике следующего запроса.
+GET {{one}}/actuator/health
+
+> {%
+    client.test("Поток начался с пинга", () => {
+        const line = client.global.get("streamLine");
+        client.assert(line.includes("ping"), `Первая строка потока: [${line}]`);
+    });
+%}

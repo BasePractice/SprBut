@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: sse
+  aop:
+    proxy-target-class: off
+  main:
+    banner-mode: off
+  data:
+    redis:
+      host: localhost
+      database: 1
+      connect-timeout: 5s
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+sse:
+  heartbeat-timeout: 20s
+  topic: sse-events
+  retry-pause: 1s

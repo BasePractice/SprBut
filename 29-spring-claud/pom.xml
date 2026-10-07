@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+SPDX-FileCopyrightText: Copyright (c) 2026 Pastor
+SPDX-License-Identifier: MIT
+-->
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>ru.sprbut</groupId>
+        <artifactId>sprbut-course</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>29-spring-claud</artifactId>
+    <packaging>pom</packaging>
+    <name>SprBut :: 29 :: Микросервисы на Spring Cloud: настройки, дискавери, параметры и пользователи</name>
+    <modules>
+        <module>identity</module>
+        <module>discovery</module>
+        <module>config</module>
+        <module>parameters</module>
+        <module>auth</module>
+        <module>profile</module>
+        <module>gateway</module>
+    </modules>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!--
+                    Родитель курса не наследует spring-boot-starter-parent, поэтому
+                    цель repackage не привязана сама: без неё jar не запускается
+                    как приложение и в образ Docker попадает пустым.
+                -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+    <profiles>
+        <profile>
+            <id>qulice</id>
+            <activation>
+                <jdk>[21,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.qulice</groupId>
+                        <artifactId>qulice-maven-plugin</artifactId>
+                        <configuration>
+                            <!--
+                                Сервисы стоят на стартерах Spring Boot и Spring Cloud: стартер
+                                и нужен ради согласованного набора зависимостей, которыми код
+                                пользуется напрямую. Требование объявить каждую из них
+                                отдельно противоречит теме раздела.
+                            -->
+                            <!--
+                                Стартеры Eureka и Config приносят одинаковые классы и ресурсы
+                                в разных jar-ах: Jersey, JGit, commons-logging рядом с jcl-over-slf4j.
+                                Дубликаты не в нашем коде, и выбрать из них нечего.
+                            -->
+                            <excludes>
+                                <exclude>dependencies:.*</exclude>
+                                <exclude>duplicatefinder:.*</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

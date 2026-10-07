@@ -1,0 +1,14 @@
+server:
+  port: 8082
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/auth
+  flyway:
+    placeholders:
+      admin_hash: ${ADMIN_PASSWORD_HASH}
+jwt:
+  private-key: ${AUTH_PRIVATE_KEY}
+  access-ttl: PT1H
+  refresh-ttl: P30D
+profile:
+  url: http://profile

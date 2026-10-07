@@ -2,3 +2,4 @@
 target
 docs
 .DS_Store
+.env

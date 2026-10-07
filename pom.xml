@@ -73,6 +73,8 @@
         <module>26-aot-native</module>
         <module>27-capstone</module>
         <module>28-parts/28-p01-handlers</module>
+        <module>29-spring-claud</module>
+        <module>30-spring-sse</module>
     </modules>
 
     <dependencyManagement>

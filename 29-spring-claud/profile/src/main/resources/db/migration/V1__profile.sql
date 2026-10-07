@@ -1,0 +1,5 @@
+CREATE TABLE profile (
+    id UUID PRIMARY KEY,
+    login VARCHAR(64) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL
+);

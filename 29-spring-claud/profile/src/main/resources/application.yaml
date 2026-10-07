@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: profile
+  config:
+    import: configserver:${CONFIG_URL:http://localhost:8888}

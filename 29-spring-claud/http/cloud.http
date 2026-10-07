@@ -1,0 +1,553 @@
+# Сквозная проверка проекта, поднятого через docker compose. Все запросы идут
+# через gateway, кроме первого — к реестру Eureka.
+# Запускать целиком сверху вниз в окружении "docker": запросы передают друг другу
+# токены и идентификаторы через client.global. Каждый прогон регистрирует нового
+# пользователя со случайным логином и в конце удаляет его.
+# Gateway помнит ответ «сессия активна» 10 секунд, поэтому перед проверкой отзыва
+# access-токена сценарий ждёт 11 секунд.
+
+### Все сервисы зарегистрированы в Eureka
+GET {{discovery}}/eureka/apps
+Accept: application/json
+
+> {%
+    client.test("Реестр отвечает", () => {
+        client.assert(response.status === 200, `Реестр ответил ${response.status}`);
+    });
+    client.test("auth, profile, parameters и gateway в реестре", () => {
+        const names = response.body.applications.application.map(app => app.name);
+        ["AUTH", "PROFILE", "PARAMETERS", "GATEWAY"].forEach(name => {
+            client.assert(names.includes(name), `В реестре нет ${name}: ${names}`);
+        });
+    });
+%}
+
+### Вход администратора
+POST {{gateway}}/auth/login
+Content-Type: application/json
+
+{
+  "login": "{{adminLogin}}",
+  "password": "{{adminPassword}}"
+}
+
+> {%
+    client.test("Администратор входит и получает пару токенов", () => {
+        client.assert(response.status === 200, `Вход ответил ${response.status}`);
+        client.assert(typeof response.body.access_token === "string", "Нет access_token");
+        client.assert(typeof response.body.refresh_token === "string", "Нет refresh_token");
+        client.assert(response.body.token_type === "Bearer", `Тип ${response.body.token_type}`);
+    });
+    client.global.set("adminToken", response.body.access_token);
+%}
+
+### Вход с неверным паролем отклоняется
+POST {{gateway}}/auth/login
+Content-Type: application/json
+
+{
+  "login": "{{adminLogin}}",
+  "password": "неверный-{{$random.alphanumeric(6)}}"
+}
+
+> {%
+    client.test("Неверный пароль даёт 401", () => {
+        client.assert(response.status === 401, `Ожидался 401, пришёл ${response.status}`);
+    });
+%}
+
+### Регистрация пользователя
+< {%
+    client.global.set("login", "user" + Date.now());
+    client.global.set("password", "п4роль-" + Math.random().toString(36).slice(2));
+%}
+POST {{gateway}}/auth/register
+Content-Type: application/json
+
+{
+  "login": "{{login}}",
+  "password": "{{password}}",
+  "name": "Иван"
+}
+
+> {%
+    client.test("Учётка создана с ролью USER", () => {
+        client.assert(response.status === 201, `Регистрация ответила ${response.status}`);
+        client.assert(response.body.role === "USER", `Роль ${response.body.role}`);
+    });
+    client.test("Пароль не возвращается", () => {
+        client.assert(!("password" in response.body), "В ответе есть пароль");
+    });
+    client.global.set("userId", response.body.id);
+%}
+
+### Повторная регистрация того же логина
+POST {{gateway}}/auth/register
+Content-Type: application/json
+
+{
+  "login": "{{login}}",
+  "password": "другой",
+  "name": "Двойник"
+}
+
+> {%
+    client.test("Занятый логин даёт 409", () => {
+        client.assert(response.status === 409, `Ожидался 409, пришёл ${response.status}`);
+    });
+%}
+
+### Вход пользователя
+POST {{gateway}}/auth/login
+Content-Type: application/json
+
+{
+  "login": "{{login}}",
+  "password": "{{password}}"
+}
+
+> {%
+    client.test("Пользователь входит", () => {
+        client.assert(response.status === 200, `Вход ответил ${response.status}`);
+    });
+    client.global.set("userToken", response.body.access_token);
+    client.global.set("userRefresh", response.body.refresh_token);
+%}
+
+### Без токена /me недоступен
+GET {{gateway}}/me
+
+> {%
+    client.test("Аноним получает 401", () => {
+        client.assert(response.status === 401, `Ожидался 401, пришёл ${response.status}`);
+    });
+%}
+
+### Поддельные заголовки X-User-* без токена не помогают
+GET {{gateway}}/profiles/{{userId}}
+X-User-Id: {{userId}}
+X-User-Role: ADMIN
+X-User-Login: hacker
+
+> {%
+    client.test("Подделка заголовков даёт 401", () => {
+        client.assert(response.status === 401, `Ожидался 401, пришёл ${response.status}`);
+    });
+%}
+
+### /me собирает профиль и характеристики
+GET {{gateway}}/me
+Authorization: Bearer {{userToken}}
+
+> {%
+    client.test("/me отвечает", () => {
+        client.assert(response.status === 200, `/me ответил ${response.status}`);
+    });
+    client.test("Профиль свой, роль из токена", () => {
+        client.assert(response.body.profile.login === client.global.get("login"), "Чужой логин");
+        client.assert(response.body.profile.name === "Иван", `Имя ${response.body.profile.name}`);
+        client.assert(response.body.profile.role === "USER", `Роль ${response.body.profile.role}`);
+    });
+    client.test("Характеристик пока нет", () => {
+        client.assert(Object.keys(response.body.parameters).length === 0, "Характеристики не пусты");
+    });
+%}
+
+### Пользователь читает свой профиль
+GET {{gateway}}/profiles/{{userId}}
+Authorization: Bearer {{userToken}}
+
+> {%
+    client.test("Свой профиль доступен", () => {
+        client.assert(response.status === 200, `Чтение ответило ${response.status}`);
+        client.assert(response.body.login === client.global.get("login"), "Чужой логин в ответе");
+    });
+%}
+
+### Список профилей не виден обычному пользователю
+GET {{gateway}}/profiles
+Authorization: Bearer {{userToken}}
+
+> {%
+    client.test("Пользователь получает 403 на список", () => {
+        client.assert(response.status === 403, `Ожидался 403, пришёл ${response.status}`);
+    });
+%}
+
+### Список профилей видит администратор
+GET {{gateway}}/profiles
+Authorization: Bearer {{adminToken}}
+
+> {%
+    client.test("Администратор видит нового пользователя в списке", () => {
+        client.assert(response.status === 200, `Список ответил ${response.status}`);
+        const ids = response.body.map(profile => profile.id);
+        client.assert(ids.includes(client.global.get("userId")), "Нового пользователя нет в списке");
+    });
+%}
+
+### Пользователь не читает чужой профиль
+GET {{gateway}}/profiles/{{adminId}}
+Authorization: Bearer {{userToken}}
+
+> {%
+    client.test("Чужой профиль даёт 403", () => {
+        client.assert(response.status === 403, `Ожидался 403, пришёл ${response.status}`);
+    });
+%}
+
+### Пользователь не удаляет учётку в обход профиля
+DELETE {{gateway}}/auth/users/{{userId}}
+Authorization: Bearer {{userToken}}
+
+> {%
+    client.test("Внутреннее удаление учётки закрыто gateway", () => {
+        client.assert(response.status === 403, `Ожидался 403, пришёл ${response.status}`);
+    });
+%}
+
+### Пользователь меняет имя
+PUT {{gateway}}/profiles/{{userId}}
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "name": "Иван Петров"
+}
+
+> {%
+    client.test("Имя сменилось", () => {
+        client.assert(response.status === 200, `Правка ответила ${response.status}`);
+        client.assert(response.body.name === "Иван Петров", `Имя ${response.body.name}`);
+    });
+%}
+
+### Пользователь сохраняет характеристику
+PUT {{gateway}}/profiles/{{userId}}/parameters/eyes
+Authorization: Bearer {{userToken}}
+Content-Type: text/plain; charset=UTF-8
+
+серо-зелёные
+
+> {%
+    client.test("Характеристика сохранена", () => {
+        client.assert(response.status === 204, `Сохранение ответило ${response.status}`);
+    });
+%}
+
+### Пользователь читает характеристику
+GET {{gateway}}/profiles/{{userId}}/parameters/eyes
+Authorization: Bearer {{userToken}}
+
+> {%
+    client.test("Значение вернулось без порчи кириллицы", () => {
+        client.assert(response.status === 200, `Чтение ответило ${response.status}`);
+        client.assert(response.body === "серо-зелёные", `Пришло: ${response.body}`);
+    });
+%}
+
+### Отсутствующая характеристика
+GET {{gateway}}/profiles/{{userId}}/parameters/height
+Authorization: Bearer {{userToken}}
+
+> {%
+    client.test("Отсутствующая характеристика даёт 404", () => {
+        client.assert(response.status === 404, `Ожидался 404, пришёл ${response.status}`);
+    });
+%}
+
+### /me видит новое имя и характеристику
+GET {{gateway}}/me
+Authorization: Bearer {{userToken}}
+
+> {%
+    client.test("Имя и характеристика в /me", () => {
+        client.assert(response.status === 200, `/me ответил ${response.status}`);
+        client.assert(response.body.profile.name === "Иван Петров", `Имя ${response.body.profile.name}`);
+        client.assert(response.body.parameters.eyes === "серо-зелёные", `Пришло: ${JSON.stringify(response.body.parameters)}`);
+    });
+%}
+
+### Пользователь видит свою сессию
+GET {{gateway}}/auth/users/{{userId}}/sessions
+Authorization: Bearer {{userToken}}
+
+> {%
+    client.test("Одна активная сессия без токенов", () => {
+        client.assert(response.status === 200, `Сессии ответили ${response.status}`);
+        client.assert(response.body.length === 1, `Сессий ${response.body.length}`);
+        client.assert(!("refresh_token" in response.body[0]), "В списке сессий есть токен");
+    });
+%}
+
+### Обмен refresh-токена на новую пару
+POST {{gateway}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{userRefresh}}"
+}
+
+> {%
+    const previous = client.global.get("userRefresh");
+    client.test("Обмен выдал новую пару", () => {
+        client.assert(response.status === 200, `Обмен ответил ${response.status}`);
+        client.assert(response.body.refresh_token !== previous, "Refresh не сменился");
+    });
+    client.global.set("oldRefresh", previous);
+    client.global.set("userRefresh", response.body.refresh_token);
+    client.global.set("userToken", response.body.access_token);
+%}
+
+### Повторный обмен старого refresh-токена
+POST {{gateway}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{oldRefresh}}"
+}
+
+> {%
+    client.test("Старый refresh даёт 401", () => {
+        client.assert(response.status === 401, `Ожидался 401, пришёл ${response.status}`);
+    });
+%}
+
+### После повтора старого refresh вся сессия закрыта
+POST {{gateway}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{userRefresh}}"
+}
+
+> {%
+    client.test("Новый refresh той же сессии тоже даёт 401", () => {
+        client.assert(response.status === 401, `Ожидался 401, пришёл ${response.status}`);
+    });
+%}
+
+### Access-токен закрытой сессии отвергается gateway
+< {%
+    const start = Date.now();
+    while (Date.now() - start < 11000) {
+        // Ждём, пока у gateway истечёт кэш ответа «сессия активна».
+    }
+%}
+GET {{gateway}}/me
+Authorization: Bearer {{userToken}}
+
+> {%
+    client.test("Отозванный access-токен даёт 401", () => {
+        client.assert(response.status === 401, `Ожидался 401, пришёл ${response.status}`);
+    });
+%}
+
+### Новый вход пользователя
+POST {{gateway}}/auth/login
+Content-Type: application/json
+
+{
+  "login": "{{login}}",
+  "password": "{{password}}"
+}
+
+> {%
+    client.test("Пользователь снова входит", () => {
+        client.assert(response.status === 200, `Вход ответил ${response.status}`);
+    });
+    client.global.set("userToken", response.body.access_token);
+    client.global.set("userRefresh", response.body.refresh_token);
+%}
+
+### Пользователь не назначает себе роль
+PUT {{gateway}}/auth/users/{{userId}}/role
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "role": "ADMIN"
+}
+
+> {%
+    client.test("Самоназначение роли даёт 403", () => {
+        client.assert(response.status === 403, `Ожидался 403, пришёл ${response.status}`);
+    });
+%}
+
+### Администратор назначает роль
+PUT {{gateway}}/auth/users/{{userId}}/role
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "role": "ADMIN"
+}
+
+> {%
+    client.test("Роль назначена", () => {
+        client.assert(response.status === 200, `Назначение ответило ${response.status}`);
+        client.assert(response.body.role === "ADMIN", `Роль ${response.body.role}`);
+    });
+%}
+
+### Смена роли закрыла сессии пользователя
+GET {{gateway}}/auth/users/{{userId}}/sessions
+Authorization: Bearer {{adminToken}}
+
+> {%
+    client.test("Активных сессий не осталось", () => {
+        client.assert(response.status === 200, `Сессии ответили ${response.status}`);
+        client.assert(response.body.length === 0, `Сессий ${response.body.length}`);
+    });
+%}
+
+### Вход с новой ролью
+POST {{gateway}}/auth/login
+Content-Type: application/json
+
+{
+  "login": "{{login}}",
+  "password": "{{password}}"
+}
+
+> {%
+    client.global.set("userToken", response.body.access_token);
+    client.global.set("userRefresh", response.body.refresh_token);
+%}
+
+### /me показывает новую роль
+GET {{gateway}}/me
+Authorization: Bearer {{userToken}}
+
+> {%
+    client.test("Роль в /me сменилась", () => {
+        client.assert(response.status === 200, `/me ответил ${response.status}`);
+        client.assert(response.body.profile.role === "ADMIN", `Роль ${response.body.profile.role}`);
+    });
+%}
+
+### Пользователь меняет пароль
+< {%
+    client.global.set("oldPassword", client.global.get("password"));
+    client.global.set("password", "новый-" + Math.random().toString(36).slice(2));
+%}
+PUT {{gateway}}/auth/users/{{userId}}/password
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "password": "{{password}}"
+}
+
+> {%
+    client.test("Пароль сменён", () => {
+        client.assert(response.status === 204, `Смена ответила ${response.status}`);
+    });
+%}
+
+### Старый пароль больше не подходит
+POST {{gateway}}/auth/login
+Content-Type: application/json
+
+{
+  "login": "{{login}}",
+  "password": "{{oldPassword}}"
+}
+
+> {%
+    client.test("Старый пароль даёт 401", () => {
+        client.assert(response.status === 401, `Ожидался 401, пришёл ${response.status}`);
+    });
+%}
+
+### Вход с новым паролем
+POST {{gateway}}/auth/login
+Content-Type: application/json
+
+{
+  "login": "{{login}}",
+  "password": "{{password}}"
+}
+
+> {%
+    client.test("Новый пароль подходит", () => {
+        client.assert(response.status === 200, `Вход ответил ${response.status}`);
+    });
+    client.global.set("userToken", response.body.access_token);
+    client.global.set("userRefresh", response.body.refresh_token);
+%}
+
+### Выход
+POST {{gateway}}/auth/logout
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "refresh_token": "{{userRefresh}}"
+}
+
+> {%
+    client.test("Выход выполнен", () => {
+        client.assert(response.status === 204, `Выход ответил ${response.status}`);
+    });
+%}
+
+### После выхода refresh не обменивается
+POST {{gateway}}/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{userRefresh}}"
+}
+
+> {%
+    client.test("Refresh после выхода даёт 401", () => {
+        client.assert(response.status === 401, `Ожидался 401, пришёл ${response.status}`);
+    });
+%}
+
+### Администратор отзывает все сессии пользователя
+POST {{gateway}}/auth/users/{{userId}}/revoke
+Authorization: Bearer {{adminToken}}
+
+> {%
+    client.test("Сессии отозваны", () => {
+        client.assert(response.status === 204, `Отзыв ответил ${response.status}`);
+    });
+%}
+
+### Администратор удаляет пользователя вместе с учёткой и характеристиками
+DELETE {{gateway}}/profiles/{{userId}}
+Authorization: Bearer {{adminToken}}
+
+> {%
+    client.test("Пользователь удалён", () => {
+        client.assert(response.status === 204, `Удаление ответило ${response.status}`);
+    });
+%}
+
+### Удалённый профиль не находится
+GET {{gateway}}/profiles/{{userId}}
+Authorization: Bearer {{adminToken}}
+
+> {%
+    client.test("Удалённый профиль даёт 404", () => {
+        client.assert(response.status === 404, `Ожидался 404, пришёл ${response.status}`);
+    });
+%}
+
+### Удалённый пользователь не входит
+POST {{gateway}}/auth/login
+Content-Type: application/json
+
+{
+  "login": "{{login}}",
+  "password": "{{password}}"
+}
+
+> {%
+    client.test("Удалённая учётка даёт 401", () => {
+        client.assert(response.status === 401, `Ожидался 401, пришёл ${response.status}`);
+    });
+%}

@@ -1,0 +1,115 @@
+x-tcp-check: &tcp-check
+  interval: 5s
+  timeout: 3s
+  retries: 30
+
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: cloud
+      POSTGRES_PASSWORD: cloud
+    volumes:
+      - ./docker/postgres.sql:/docker-entrypoint-initdb.d/postgres.sql:ro
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cloud"]
+      <<: *tcp-check
+
+  discovery:
+    build:
+      context: .
+      args:
+        MODULE: discovery
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8761"]
+      <<: *tcp-check
+
+  config:
+    build:
+      context: .
+      args:
+        MODULE: config
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8888"]
+      <<: *tcp-check
+
+  parameters:
+    build:
+      context: .
+      args:
+        MODULE: parameters
+    environment:
+      CONFIG_URL: http://config:8888
+      EUREKA_URL: http://discovery:8761/eureka
+      DB_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+
+  auth:
+    build:
+      context: .
+      args:
+        MODULE: auth
+    environment:
+      CONFIG_URL: http://config:8888
+      EUREKA_URL: http://discovery:8761/eureka
+      DB_HOST: postgres
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:?ADMIN_PASSWORD_HASH is required}
+      AUTH_PRIVATE_KEY: ${AUTH_PRIVATE_KEY:?AUTH_PRIVATE_KEY is required}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+
+  profile:
+    build:
+      context: .
+      args:
+        MODULE: profile
+    environment:
+      CONFIG_URL: http://config:8888
+      EUREKA_URL: http://discovery:8761/eureka
+      DB_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+      config:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+
+  gateway:
+    build:
+      context: .
+      args:
+        MODULE: gateway
+    ports:
+      - "8080:8080"
+    environment:
+      CONFIG_URL: http://config:8888
+      EUREKA_URL: http://discovery:8761/eureka
+    depends_on:
+      config:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+      auth:
+        condition: service_started
+      profile:
+        condition: service_started
+      parameters:
+        condition: service_started
+
+volumes:
+  pgdata:

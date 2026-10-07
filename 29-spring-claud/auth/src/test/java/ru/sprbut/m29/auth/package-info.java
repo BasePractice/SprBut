@@ -1,0 +1,10 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 Pastor
+ * SPDX-License-Identifier: MIT
+ */
+// @checkstyle MultiLineCommentCheck disable
+/**
+ * Учётки пользователей, выпуск, обмен и отзыв токенов.
+ * @since 1.0
+ */
+package ru.sprbut.m29.auth;
