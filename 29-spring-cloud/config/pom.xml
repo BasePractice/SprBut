@@ -9,16 +9,16 @@ SPDX-License-Identifier: MIT
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>ru.sprbut</groupId>
-        <artifactId>29-spring-claud</artifactId>
+        <artifactId>29-spring-cloud</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>29-discovery</artifactId>
-    <name>SprBut :: 29 :: discovery</name>
-    <description>Реестр сервисов Eureka</description>
+    <artifactId>29-config</artifactId>
+    <name>SprBut :: 29 :: config</name>
+    <description>Сервер настроек Spring Cloud Config</description>
     <dependencies>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+            <artifactId>spring-cloud-config-server</artifactId>
         </dependency>
     </dependencies>
     <build>

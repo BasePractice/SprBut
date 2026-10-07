@@ -9,42 +9,29 @@ SPDX-License-Identifier: MIT
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>ru.sprbut</groupId>
-        <artifactId>29-spring-claud</artifactId>
+        <artifactId>29-spring-cloud</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>29-profile</artifactId>
-    <name>SprBut :: 29 :: profile</name>
-    <description>Профили пользователей и их характеристики</description>
+    <artifactId>29-gateway</artifactId>
+    <name>SprBut :: 29 :: gateway</name>
+    <description>Единая точка входа: проверка токена, заголовки пользователя, метод /me</description>
     <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webmvc</artifactId>
-        </dependency>
         <dependency>
             <groupId>ru.sprbut</groupId>
             <artifactId>29-identity</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway-server-webflux</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <artifactId>spring-boot-starter-security-oauth2-resource-server</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-flyway</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -57,11 +44,6 @@ SPDX-License-Identifier: MIT
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

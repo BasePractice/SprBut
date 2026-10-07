@@ -9,29 +9,16 @@ SPDX-License-Identifier: MIT
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>ru.sprbut</groupId>
-        <artifactId>29-spring-claud</artifactId>
+        <artifactId>29-spring-cloud</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>29-auth</artifactId>
-    <name>SprBut :: 29 :: auth</name>
-    <description>Учётки пользователей, выпуск, обмен и отзыв токенов</description>
+    <artifactId>29-parameters</artifactId>
+    <name>SprBut :: 29 :: parameters</name>
+    <description>Хранилище параметров по владельцу и имени</description>
     <dependencies>
-        <dependency>
-            <groupId>ru.sprbut</groupId>
-            <artifactId>29-identity</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-oauth2-jose</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -61,11 +48,6 @@ SPDX-License-Identifier: MIT
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

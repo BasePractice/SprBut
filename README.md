@@ -68,7 +68,7 @@ annotation processor — на 07–09, IoC и DI — на 11–14, аннота�
 | № | Часть | Продолжает | О чём |
 |---|---|---|---|
 | 28 p01 | [handlers](28-parts/28-p01-handlers/) | [20 spring-mvc](20-spring-mvc/) | Участники обработки запроса и ответа: фильтры, условия выбора метода, интерсепторы, конвертеры и форматтеры, резолверы, советы над телами, обработчики результата и исключений, аспект |
-| 29 | [spring-claud](29-spring-claud/) | [23 spring-cloud](23-spring-cloud/) | Система сервисов: Eureka, Config Server, gateway с проверкой токена, учётки и отзыв сессий, профили и параметры в Postgres, стенд в Docker |
+| 29 | [spring-cloud](29-spring-cloud/) | [23 spring-cloud](23-spring-cloud/) | Система сервисов: Eureka, Config Server, gateway с проверкой токена, учётки и отзыв сессий, профили и параметры в Postgres, стенд в Docker |
 | 30 | [spring-sse](30-spring-sse/) | [21 webflux](21-webflux/) | События пользователям по SSE на нескольких экземплярах через общий канал Redis, метрики Micrometer |
 
 ## Шаги в сторону

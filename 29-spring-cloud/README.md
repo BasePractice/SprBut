@@ -113,21 +113,21 @@ Access-токен живёт час, refresh — 30 дней. Первый ад�
 Тесты не требуют ни Postgres, ни соседей — базы и сервисы подменены фейками:
 
 ```bash
-mvn -pl 29-spring-claud -amd test
+mvn -pl 29-spring-cloud -amd test
 ```
 
 Стенд целиком поднимается в Docker. Учебные ключ подписи и хеш пароля `admin`
 лежат в [`.env.example`](.env.example):
 
 ```bash
-cp 29-spring-claud/.env.example 29-spring-claud/.env
-mvn -pl 29-spring-claud -amd -DskipTests package
-docker compose -f 29-spring-claud/docker-compose.yaml up -d --build
+cp 29-spring-cloud/.env.example 29-spring-cloud/.env
+mvn -pl 29-spring-cloud -amd -DskipTests package
+docker compose -f 29-spring-cloud/docker-compose.yaml up -d --build
 ```
 
 Сквозной сценарий — [`http/cloud.http`](http/cloud.http), окружение `docker`
 в IntelliJ HTTP Client. Без IDE, из каталога модуля:
 
 ```bash
-docker run --rm --network 29-spring-claud_default -v "$PWD/http":/workdir jetbrains/intellij-http-client --env-file http-client.env.json --env docker -V gateway=http://gateway:8080 -V discovery=http://discovery:8761 cloud.http
+docker run --rm --network 29-spring-cloud_default -v "$PWD/http":/workdir jetbrains/intellij-http-client --env-file http-client.env.json --env docker -V gateway=http://gateway:8080 -V discovery=http://discovery:8761 cloud.http
 ```
