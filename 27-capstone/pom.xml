@@ -111,6 +111,18 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <!--
+                    Родитель курса не наследует spring-boot-starter-parent, поэтому
+                    цель repackage не привязана сама: без неё jar не запускается
+                    как приложение.
+                -->
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
