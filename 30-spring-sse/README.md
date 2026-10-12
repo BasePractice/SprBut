@@ -32,6 +32,13 @@
 меняют карту только атомарно. Иначе последний уходящий мог бы отписаться
 от канала, на который как раз подписывается новый.
 
+Работа экземпляра разделена на два пула потоков. Сообщения всех подписок
+приходят в одном потоке соединения Redis, поэтому доставка уходит из него
+в пул `sse.delivery`: медленный пользователь не задерживает остальных,
+а события одного канала сохраняют порядок. Вызовы gRPC выполняются в пуле
+`grpc.commands` вместо неограниченного пула grpc-java по умолчанию.
+Всплеск отправок не отнимает потоки у доставки, и наоборот.
+
 Схема развёртывания и компонентов экземпляра — в [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Примеры
@@ -46,6 +53,9 @@
 | [`RedisBus`](src/main/java/ru/sprbut/m30/RedisBus.java) | Каналы на `ReactiveRedisMessageListenerContainer`: все подписки на одном соединении |
 | [`ResilientBus`](src/main/java/ru/sprbut/m30/ResilientBus.java) | Обрыв подписки лечится переподпиской с растущей паузой |
 | [`Relay`](src/main/java/ru/sprbut/m30/Relay.java) | `SmartLifecycle`: подписка на `sse:broadcast` живёт вместе с контекстом |
+| [`ScheduledBus`](src/main/java/ru/sprbut/m30/ScheduledBus.java) | Доставка событий в пуле `sse.delivery` через `publishOn`: порядок внутри канала сохраняется, каналы идут параллельно |
+| [`GrpcExecutor`](src/main/java/ru/sprbut/m30/GrpcExecutor.java) | `GrpcServerExecutorProvider`: вызовы gRPC выполняются в ограниченном пуле `grpc.commands` |
+| [`Pool`](src/main/java/ru/sprbut/m30/Pool.java), [`Pools`](src/main/java/ru/sprbut/m30/Pools.java) | Настройки пулов `sse.pools.*` и `ThreadPoolExecutor` с ограниченной очередью и метриками |
 | [`ParsedNotice`](src/main/java/ru/sprbut/m30/ParsedNotice.java) | Уведомление из канала разбирается отдельно, поэтому ошибка разбора не рвёт подписку |
 | [`MeteredAudience`](src/main/java/ru/sprbut/m30/MeteredAudience.java), [`MeteredBus`](src/main/java/ru/sprbut/m30/MeteredBus.java) | Метрики декораторами: открытые потоки, отправленные и полученные уведомления |
 
@@ -56,12 +66,47 @@
 | HTTP | `GET /sse/stream/{user-id}` | Поток событий пользователя (`text/event-stream`) |
 | gRPC | `Notifier/SendToUser` | Событие одному пользователю на всех экземплярах; имя по умолчанию `user-event` |
 | gRPC | `Notifier/Broadcast` | Событие всем подключённым; имя по умолчанию `broadcast` |
-| HTTP | `GET /actuator/prometheus` | Метрики `sse_server_*` и `redis_sse_*` |
+| HTTP | `GET /actuator/prometheus` | Метрики `sse_server_*`, `redis_sse_*` и пулов `executor_*` |
 
 gRPC слушает порт `9090`. Ответ `Accepted.receivers` — сколько экземпляров
 получили PUBLISH. Пустой текст и перевод строки в имени события отвергаются
 кодом `INVALID_ARGUMENT`: перевод строки разорвал бы формат SSE. Если Redis
 не принял публикацию, ответ — `UNAVAILABLE`.
+
+## Пулы потоков
+
+Оба пула настраиваются одинаково, свойства — в
+[`application.yaml`](src/main/resources/application.yaml):
+
+| Свойство | `delivery` | `commands` | Что задаёт |
+|---|---|---|---|
+| `sse.pools.*.core-size` | 4 | 8 | Потоки, живущие всегда |
+| `sse.pools.*.max-size` | 4 | 32 | Предел потоков |
+| `sse.pools.*.queue-capacity` | 10000 | 500 | Ёмкость очереди заданий; `0` — без очереди, из рук в руки |
+| `sse.pools.*.keep-alive` | 60s | 30s | Сколько живёт простаивающий поток сверх ядра |
+
+`ThreadPoolExecutor` добавляет потоки сверх `core-size`, только когда очередь
+уже полна. Поэтому у доставки ядро равно пределу: потоков всегда столько,
+сколько задано, а всплеск ложится в очередь. Когда заняты все потоки и полна
+очередь, задание отвергается:
+
+* в `sse.delivery` — подписка на канал обрывается, и `ResilientBus`
+  восстанавливает её с паузой. События, пришедшие за это время, теряются,
+  как и при любом обрыве pub/sub;
+* в `grpc.commands` — grpc-java сбрасывает поток HTTP/2, и клиент получает
+  ошибку сразу, а не ждёт в бесконечной очереди.
+
+Метрики пулов собирает `ExecutorServiceMetrics` из Micrometer, тег `name`
+различает пулы (`sse.delivery`, `grpc.commands`):
+
+| Метрика | Что показывает |
+|---|---|
+| `executor_pool_size_threads`, `executor_active_threads` | Потоки в пуле и занятые из них |
+| `executor_pool_core_threads`, `executor_pool_max_threads` | Настроенные ядро и предел |
+| `executor_queued_tasks`, `executor_queue_remaining_tasks` | Задания в очереди и свободные места |
+| `executor_completed_tasks_total` | Выполненные задания |
+| `executor_seconds`, `executor_idle_seconds` | Время выполнения задания и его ожидания в очереди |
+| `executor_rejected_tasks_total` | Отвергнутые задания: признак, что пул мал |
 
 Поток не проверяет, чей он: идентификатор пользователя берётся из пути.
 В настоящей системе его приносит gateway, как в [части 29](../29-spring-cloud/README.md).
@@ -81,6 +126,12 @@ gRPC слушает порт `9090`. Ответ `Accepted.receivers` — ско�
 * Redis pub/sub ничего не хранит: экземпляр, не подписанный на канал в момент
   публикации, уведомление не получит никогда. Для событий, которые нельзя
   терять, нужен журнал — Redis Streams или брокер.
+* Поток соединения Redis общий для всех подписок, работать в нём нельзя:
+  доставка уходит в свой пул. Команды gRPC идут в другом пуле, чтобы
+  нагрузка одной стороны не отнимала потоки у другой.
+* Ограниченная очередь превращает перегрузку в быструю ошибку вместо
+  растущей задержки и памяти; рост `executor_queued_tasks` и ненулевой
+  `executor_rejected_tasks_total` показывают, что пул пора увеличить.
 * Медленный клиент не должен тормозить остальных: источник
   `directBestEffort` отдаёт событие тем, кто готов его принять,
   и не ждёт отстающих.

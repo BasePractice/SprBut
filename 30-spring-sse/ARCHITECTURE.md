@@ -84,6 +84,11 @@ sequenceDiagram
 `{"event", "text"}`, а возвращаются как `ParsedNotice`: битое пропускается,
 подписку оно не рвёт.
 
+Работа идёт в двух пулах из `sse.pools.*`. `ScheduledBus` переносит события
+подписок из потока соединения Redis в пул `sse.delivery`, а сервер gRPC
+выполняет вызовы в пуле `grpc.commands`, который отдаёт ему `GrpcExecutor`.
+Метрики обоих пулов — `executor.*` с тегом `name`.
+
 ```mermaid
 flowchart TB
     browser["Клиент SSE"]
@@ -93,6 +98,7 @@ flowchart TB
     subgraph instance["Экземпляр сервиса"]
         endpoint["SseEndpoint<br/>/sse, пинг раз в sse.heartbeat-timeout"]
         grpc["GrpcEndpoint<br/>Notifier, порт 9090"]
+        commands["GrpcExecutor<br/>пул grpc.commands"]
 
         subgraph audience["Audience"]
             metered_audience["MeteredAudience"]
@@ -103,6 +109,7 @@ flowchart TB
         subgraph bus["Bus"]
             metered_bus["MeteredBus"]
             resilient_bus["ResilientBus<br/>переподписка с паузой sse.retry-pause"]
+            scheduled_bus["ScheduledBus<br/>publishOn в пул sse.delivery"]
             redis_bus["RedisBus"]
             container["ReactiveRedisMessageListenerContainer<br/>одно соединение"]
             template["ReactiveStringRedisTemplate"]
@@ -114,7 +121,8 @@ flowchart TB
     end
 
     browser -->|"GET /sse/stream/{user-id}"| endpoint
-    sender -->|"SendToUser / Broadcast"| grpc
+    sender -->|"SendToUser / Broadcast"| commands
+    commands -->|"вызов в потоке пула"| grpc
 
     endpoint -->|"stream(user)"| metered_audience
     grpc -->|"publish(user, notice) / publish(notice)"| metered_bus
@@ -124,7 +132,8 @@ flowchart TB
     crowd -->|"user(user-id)"| metered_bus
 
     metered_bus --> resilient_bus
-    resilient_bus --> redis_bus
+    resilient_bus --> scheduled_bus
+    scheduled_bus --> redis_bus
     redis_bus --> container
     redis_bus --> template
     template -->|"PUBLISH"| redis
@@ -135,5 +144,7 @@ flowchart TB
 
     metered_audience -->|"sse.server.*"| registry
     metered_bus -->|"redis.sse.*"| registry
+    commands -->|"executor.*"| registry
+    scheduled_bus -->|"executor.*"| registry
     registry --> actuator
 ```

@@ -28,3 +28,18 @@ management:
 sse:
   heartbeat-timeout: 20s
   retry-pause: 1s
+  # Пулы потоков: ThreadPoolExecutor растёт сверх core-size, только когда
+  # полна очередь, а при полной очереди и max-size потоков отвергает задание.
+  pools:
+    # Доставка событий из каналов Redis в потоки пользователей.
+    delivery:
+      core-size: 4
+      max-size: 4
+      queue-capacity: 10000
+      keep-alive: 60s
+    # Обработка вызовов gRPC.
+    commands:
+      core-size: 8
+      max-size: 32
+      queue-capacity: 500
+      keep-alive: 30s
