@@ -4,7 +4,7 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 /**
- * Доставка событий пользователям по SSE через общий канал Redis.
+ * Доставка событий пользователям по SSE через каналы Redis.
  * @since 1.0
  */
 package ru.sprbut.m30;

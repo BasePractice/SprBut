@@ -13,7 +13,17 @@ SPDX-License-Identifier: MIT
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>30-spring-sse</artifactId>
-    <name>SprBut :: 30 :: Доставка событий пользователям по SSE через общий канал Redis</name>
+    <name>SprBut :: 30 :: Доставка событий пользователям по SSE через каналы Redis</name>
+    <properties>
+        <!--
+            Свойства импортированного BOM Spring Boot в модуль не наследуются,
+            поэтому версии компилятора protobuf и плагина gRPC повторены здесь
+            вслед за spring-boot-dependencies.
+        -->
+        <protobuf-java.version>4.35.1</protobuf-java.version>
+        <grpc-java.version>1.83.1</grpc-java.version>
+        <protobuf-maven-plugin.version>5.1.8</protobuf-maven-plugin.version>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -33,6 +43,10 @@ SPDX-License-Identifier: MIT
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-grpc-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
@@ -44,6 +58,29 @@ SPDX-License-Identifier: MIT
     </dependencies>
     <build>
         <plugins>
+            <plugin>
+                <groupId>io.github.ascopes</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>${protobuf-maven-plugin.version}</version>
+                <configuration>
+                    <protoc>${protobuf-java.version}</protoc>
+                    <plugins>
+                        <plugin kind="binary-maven">
+                            <groupId>io.grpc</groupId>
+                            <artifactId>protoc-gen-grpc-java</artifactId>
+                            <version>${grpc-java.version}</version>
+                            <options>@generated=omit</options>
+                        </plugin>
+                    </plugins>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

@@ -10,7 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
- * Сервис, доставляющий события пользователям по SSE через общий канал Redis.
+ * Сервис, доставляющий события пользователям по SSE через каналы Redis.
  * @since 1.0
  */
 @SpringBootApplication(proxyBeanMethods = false)

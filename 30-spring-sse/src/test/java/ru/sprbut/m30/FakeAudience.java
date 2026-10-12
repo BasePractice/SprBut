@@ -12,13 +12,13 @@ import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
 
 /**
- * Пользователи, записывающие доставки строками «кому событие данные».
+ * Пользователи, записывающие общие рассылки строками «all событие данные».
  * @since 1.0
  */
 final class FakeAudience implements Audience {
 
     /**
-     * Записанные доставки.
+     * Записанные рассылки.
      */
     private final Collection<String> log;
 
@@ -31,7 +31,7 @@ final class FakeAudience implements Audience {
 
     /**
      * Конструктор.
-     * @param log Записанные доставки
+     * @param log Записанные рассылки
      */
     FakeAudience(final Collection<String> log) {
         this.log = log;
@@ -43,18 +43,13 @@ final class FakeAudience implements Audience {
     }
 
     @Override
-    public void deliver(final long user, final ServerSentEvent<String> event) {
-        this.log.add(String.format("%d %s %s", user, event.event(), event.data()));
-    }
-
-    @Override
     public void broadcast(final ServerSentEvent<String> event) {
         this.log.add(String.format("all %s %s", event.event(), event.data()));
     }
 
     /**
-     * Записанные доставки.
-     * @return Строки в порядке доставки
+     * Записанные рассылки.
+     * @return Строки в порядке рассылки
      */
     Collection<String> deliveries() {
         return this.log;

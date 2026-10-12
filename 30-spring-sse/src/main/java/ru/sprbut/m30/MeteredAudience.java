@@ -89,11 +89,6 @@ public final class MeteredAudience implements Audience {
     }
 
     @Override
-    public void deliver(final long user, final ServerSentEvent<String> event) {
-        this.origin.deliver(user, event);
-    }
-
-    @Override
     public void broadcast(final ServerSentEvent<String> event) {
         this.origin.broadcast(event);
     }

@@ -6,7 +6,6 @@
 package ru.sprbut.m30;
 
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
@@ -22,68 +21,37 @@ import tools.jackson.databind.json.JsonMapper;
 final class ParsedNoticeTest {
 
     @Test
-    @DisplayName("уведомление из JSON доставляет личное уведомление")
-    void deliversUserNoticeFromJson() {
-        final FakeAudience audience = new FakeAudience();
-        final long user = ThreadLocalRandom.current().nextLong(1L, 1000L);
-        final String text = UUID.randomUUID().toString();
-        new ParsedNotice(new UserNotice(user, text).json(), new JsonMapper()).deliver(audience);
+    @DisplayName("уведомление из JSON восстанавливает имя события")
+    void readsEventFromJson() {
+        final String event = UUID.randomUUID().toString();
         MatcherAssert.assertThat(
-            "личное уведомление из JSON не доставлено",
-            audience.deliveries(),
-            Matchers.contains(String.format("%d user-event %s", user, text))
+            "имя события не восстановлено из JSON",
+            new ParsedNotice(new TextNotice(event, "текст").json(), new JsonMapper())
+                .sse().event(),
+            Matchers.equalTo(event)
         );
     }
 
     @Test
-    @DisplayName("уведомление из JSON доставляет общее уведомление")
-    void deliversBroadcastNoticeFromJson() {
-        final FakeAudience audience = new FakeAudience();
+    @DisplayName("уведомление из JSON восстанавливает текст")
+    void readsTextFromJson() {
         final String text = UUID.randomUUID().toString();
-        new ParsedNotice(new BroadcastNotice(text).json(), new JsonMapper()).deliver(audience);
         MatcherAssert.assertThat(
-            "общее уведомление из JSON не доставлено",
-            audience.deliveries(),
-            Matchers.contains(String.format("all broadcast %s", text))
-        );
-    }
-
-    @Test
-    @DisplayName("читается общее уведомление прошлой версии с пустым пользователем")
-    void readsLegacyBroadcastWithNullUser() {
-        final FakeAudience audience = new FakeAudience();
-        new ParsedNotice(
-            "{\"type\":\"BROADCAST\",\"userId\":null,\"text\":\"старое\"}", new JsonMapper()
-        ).deliver(audience);
-        MatcherAssert.assertThat(
-            "общее уведомление прошлой версии не прочитано",
-            audience.deliveries(),
-            Matchers.contains("all broadcast старое")
+            "текст не восстановлен из JSON",
+            new ParsedNotice(new TextNotice("user-event", text).json(), new JsonMapper())
+                .sse().data(),
+            Matchers.equalTo(text)
         );
     }
 
     @Test
     @DisplayName("уведомление из JSON возвращает исходный JSON без изменений")
     void returnsJsonAsIs() {
-        final String json = String.format("{\"type\":\"%s\"}", UUID.randomUUID());
+        final String json = String.format("{\"event\":\"%s\"}", UUID.randomUUID());
         MatcherAssert.assertThat(
             "исходный JSON уведомления изменился",
             new ParsedNotice(json, new JsonMapper()).json(),
             Matchers.equalTo(json)
-        );
-    }
-
-    @Test
-    @DisplayName("уведомление неизвестного типа отвергается с указанием типа")
-    void rejectsUnknownType() {
-        MatcherAssert.assertThat(
-            "неизвестный тип принят молча или не назван в ошибке",
-            Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> new ParsedNotice("{\"type\":\"GHOST\",\"text\":\"x\"}", new JsonMapper())
-                    .deliver(new FakeAudience())
-            ).getMessage(),
-            Matchers.containsString("GHOST")
         );
     }
 
@@ -94,21 +62,33 @@ final class ParsedNoticeTest {
             "битый JSON принят молча",
             Assertions.assertThrows(
                 JacksonException.class,
-                () -> new ParsedNotice("{\"type\":", new JsonMapper()).deliver(new FakeAudience())
+                () -> new ParsedNotice("{\"event\":", new JsonMapper()).sse()
             ),
             Matchers.notNullValue()
         );
     }
 
     @Test
-    @DisplayName("личное уведомление без пользователя отвергается")
-    void rejectsUserNoticeWithoutUser() {
+    @DisplayName("уведомление без текста отвергается")
+    void rejectsNoticeWithoutText() {
         MatcherAssert.assertThat(
-            "личное уведомление без пользователя доставлено",
+            "уведомление без текста разобрано",
             Assertions.assertThrows(
                 JacksonException.class,
-                () -> new ParsedNotice("{\"type\":\"USER\",\"text\":\"x\"}", new JsonMapper())
-                    .deliver(new FakeAudience())
+                () -> new ParsedNotice("{\"event\":\"user-event\"}", new JsonMapper()).sse()
+            ),
+            Matchers.notNullValue()
+        );
+    }
+
+    @Test
+    @DisplayName("уведомление без имени события отвергается")
+    void rejectsNoticeWithoutEvent() {
+        MatcherAssert.assertThat(
+            "уведомление без имени события разобрано",
+            Assertions.assertThrows(
+                JacksonException.class,
+                () -> new ParsedNotice("{\"text\":\"x\"}", new JsonMapper()).sse()
             ),
             Matchers.notNullValue()
         );

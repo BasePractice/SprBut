@@ -13,6 +13,7 @@ import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.codec.ServerSentEvent;
 
 /**
  * Тесты {@link MeteredBus}.
@@ -21,44 +22,45 @@ import org.junit.jupiter.api.Test;
 final class MeteredBusTest {
 
     @Test
-    @DisplayName("шина считает опубликованные уведомления")
+    @DisplayName("каналы считают опубликованные уведомления")
     void countsPublishedNotices() {
         final MeterRegistry registry = new SimpleMeterRegistry();
         final Bus bus = new MeteredBus(new FakeBus(), registry);
-        bus.publish(new BroadcastNotice("раз")).block(Duration.ofSeconds(5L));
-        bus.publish(new UserNotice(3L, "два")).block(Duration.ofSeconds(5L));
+        bus.publish(new TextNotice("broadcast", "раз")).block(Duration.ofSeconds(5L));
+        bus.publish(3L, new TextNotice("user-event", "два")).block(Duration.ofSeconds(5L));
         MatcherAssert.assertThat(
-            "шина ошиблась в числе опубликованных уведомлений",
+            "каналы ошиблись в числе опубликованных уведомлений",
             registry.get("redis.sse.publish.total").counter().count(),
             Matchers.equalTo(2.0)
         );
     }
 
     @Test
-    @DisplayName("шина считает полученные уведомления")
+    @DisplayName("каналы считают уведомления, полученные из личного и общего канала")
     void countsReceivedNotices() {
         final MeterRegistry registry = new SimpleMeterRegistry();
         final Bus bus = new MeteredBus(new FakeBus(), registry);
-        bus.publish(new BroadcastNotice(UUID.randomUUID().toString()))
-            .block(Duration.ofSeconds(5L));
-        bus.notices().take(1L).blockLast(Duration.ofSeconds(5L));
+        bus.publish(new TextNotice("broadcast", "всем")).block(Duration.ofSeconds(5L));
+        bus.publish(4L, new TextNotice("user-event", "лично")).block(Duration.ofSeconds(5L));
+        bus.broadcasts().take(1L).blockLast(Duration.ofSeconds(5L));
+        bus.user(4L).take(1L).blockLast(Duration.ofSeconds(5L));
         MatcherAssert.assertThat(
-            "шина ошиблась в числе полученных уведомлений",
+            "каналы ошиблись в числе полученных уведомлений",
             registry.get("redis.sse.receive.total").counter().count(),
-            Matchers.equalTo(1.0)
+            Matchers.equalTo(2.0)
         );
     }
 
     @Test
-    @DisplayName("шина с метриками пропускает уведомления к исходной")
+    @DisplayName("каналы с метриками пропускают уведомления к исходным")
     void passesNoticesThrough() {
         final Bus bus = new MeteredBus(new FakeBus(), new SimpleMeterRegistry());
         final String text = UUID.randomUUID().toString();
-        bus.publish(new BroadcastNotice(text)).block(Duration.ofSeconds(5L));
+        bus.publish(new TextNotice("broadcast", text)).block(Duration.ofSeconds(5L));
         MatcherAssert.assertThat(
-            "уведомление не прошло через исходную шину",
-            bus.notices().next().map(Notice::json).block(Duration.ofSeconds(5L)),
-            Matchers.containsString(text)
+            "уведомление не прошло через исходные каналы",
+            bus.broadcasts().next().map(ServerSentEvent::data).block(Duration.ofSeconds(5L)),
+            Matchers.equalTo(text)
         );
     }
 }

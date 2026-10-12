@@ -23,13 +23,6 @@ public interface Audience {
     Flux<ServerSentEvent<String>> stream(long user);
 
     /**
-     * Доставить событие одному пользователю, если он подключён.
-     * @param user Идентификатор пользователя
-     * @param event Событие
-     */
-    void deliver(long user, ServerSentEvent<String> event);
-
-    /**
      * Доставить событие всем подключённым пользователям.
      * @param event Событие
      */

@@ -6,17 +6,19 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m30;
 
+import org.springframework.http.codec.ServerSentEvent;
+
 /**
- * Уведомление, которое идёт через общий канал ко всем экземплярам сервиса.
+ * Уведомление, которое идёт через каналы Redis к экземплярам сервиса.
  * @since 1.0
  */
 public interface Notice {
 
     /**
-     * Доставить уведомление тем пользователям, кому оно адресовано.
-     * @param audience Подключённые пользователи
+     * Уведомление в виде события SSE.
+     * @return Событие
      */
-    void deliver(Audience audience);
+    ServerSentEvent<String> sse();
 
     /**
      * Уведомление в виде JSON для канала.

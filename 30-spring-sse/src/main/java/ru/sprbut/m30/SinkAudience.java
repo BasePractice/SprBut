@@ -15,8 +15,10 @@ import reactor.core.publisher.Flux;
 /**
  * Пользователи этого экземпляра, у каждого — своя толпа открытых потоков.
  *
- * <p>Вход и выход подписчика меняют карту только атомарно, внутри {@link Map#compute},
- * поэтому толпа исчезает ровно тогда, когда уходит её последний подписчик.</p>
+ * <p>Первый поток пользователя подписывает экземпляр на личный канал
+ * пользователя, последний — отписывает. Вход и выход подписчика меняют карту
+ * только атомарно, внутри {@link Map#compute}, поэтому толпа и её подписка
+ * исчезают ровно тогда, когда уходит последний подписчик.</p>
  *
  * @since 1.0
  */
@@ -28,25 +30,27 @@ public final class SinkAudience implements Audience {
     private final ConcurrentMap<Long, Crowd> map;
 
     /**
+     * Каналы уведомлений.
+     */
+    private final Bus bus;
+
+    /**
      * Конструктор.
      * @param map Толпы по пользователям
+     * @param bus Каналы уведомлений
      */
-    SinkAudience(final ConcurrentMap<Long, Crowd> map) {
+    SinkAudience(final ConcurrentMap<Long, Crowd> map, final Bus bus) {
         this.map = map;
+        this.bus = bus;
     }
 
     @Override
     public Flux<ServerSentEvent<String>> stream(final long user) {
         return Flux.defer(
-            () -> this.map.compute(user, (key, crowd) -> SinkAudience.joined(crowd)).flux()
+            () -> this.map.compute(user, this::joined).flux()
         ).doFinally(
             signal -> this.map.computeIfPresent(user, (key, crowd) -> SinkAudience.left(crowd))
         );
-    }
-
-    @Override
-    public void deliver(final long user, final ServerSentEvent<String> event) {
-        Optional.ofNullable(this.map.get(user)).ifPresent(crowd -> crowd.emit(event));
     }
 
     @Override
@@ -54,13 +58,16 @@ public final class SinkAudience implements Audience {
         this.map.values().forEach(crowd -> crowd.emit(event));
     }
 
-    private static Crowd joined(final Crowd crowd) {
-        return Optional.ofNullable(crowd).map(Crowd::joined).orElseGet(Crowd::new);
+    private Crowd joined(final long user, final Crowd crowd) {
+        return Optional.ofNullable(crowd).map(Crowd::joined).orElseGet(
+            () -> new Crowd().attached(this.bus.user(user))
+        );
     }
 
     private static Crowd left(final Crowd crowd) {
         final Crowd rest;
         if (crowd.last()) {
+            crowd.close();
             rest = null;
         } else {
             rest = crowd.left();

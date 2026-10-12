@@ -14,6 +14,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.codec.ServerSentEvent;
+import reactor.core.publisher.Sinks;
 
 /**
  * Тесты {@link Crowd}.
@@ -63,6 +64,35 @@ final class CrowdTest {
             "толпа после присоединения потеряла общий источник событий",
             received.get(5L, TimeUnit.SECONDS),
             Matchers.contains(text)
+        );
+    }
+
+    @Test
+    @DisplayName("толпа передаёт подписчикам события своего канала")
+    void forwardsChannelEvents() throws Exception {
+        final Sinks.Many<ServerSentEvent<String>> channel = Sinks.many().multicast()
+            .directBestEffort();
+        final String text = UUID.randomUUID().toString();
+        final Future<List<String>> received = new Crowd().attached(channel.asFlux()).flux()
+            .map(ServerSentEvent::data).take(1L).collectList().toFuture();
+        channel.tryEmitNext(ServerSentEvent.builder(text).build());
+        MatcherAssert.assertThat(
+            "событие канала не дошло до подписчиков толпы",
+            received.get(5L, TimeUnit.SECONDS),
+            Matchers.contains(text)
+        );
+    }
+
+    @Test
+    @DisplayName("закрытая толпа отписывается от своего канала")
+    void unsubscribesChannelOnClose() {
+        final Sinks.Many<ServerSentEvent<String>> channel = Sinks.many().multicast()
+            .directBestEffort();
+        new Crowd().attached(channel.asFlux()).joined().left().close();
+        MatcherAssert.assertThat(
+            "закрытая толпа осталась подписанной на канал",
+            channel.currentSubscriberCount(),
+            Matchers.equalTo(0)
         );
     }
 }

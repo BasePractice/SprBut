@@ -27,7 +27,7 @@ final class MeteredAudienceTest {
     void countsActiveStreams() {
         final MeterRegistry registry = new SimpleMeterRegistry();
         final Audience audience = new MeteredAudience(
-            new SinkAudience(new ConcurrentHashMap<>(0)), registry
+            new SinkAudience(new ConcurrentHashMap<>(0), new FakeBus()), registry
         );
         audience.stream(1L).subscribe();
         audience.stream(2L).subscribe();
@@ -44,7 +44,7 @@ final class MeteredAudienceTest {
     void countsOpenedStreams() {
         final MeterRegistry registry = new SimpleMeterRegistry();
         final Audience audience = new MeteredAudience(
-            new SinkAudience(new ConcurrentHashMap<>(0)), registry
+            new SinkAudience(new ConcurrentHashMap<>(0), new FakeBus()), registry
         );
         audience.stream(4L).subscribe().dispose();
         audience.stream(4L).subscribe().dispose();
@@ -59,11 +59,12 @@ final class MeteredAudienceTest {
     @DisplayName("аудитория считает отправленные события")
     void countsSentEvents() {
         final MeterRegistry registry = new SimpleMeterRegistry();
+        final FakeBus bus = new FakeBus();
         final Audience audience = new MeteredAudience(
-            new SinkAudience(new ConcurrentHashMap<>(0)), registry
+            new SinkAudience(new ConcurrentHashMap<>(0), bus), registry
         );
         audience.stream(5L).take(2L).subscribe();
-        audience.deliver(5L, ServerSentEvent.builder("раз").build());
+        bus.publish(5L, new TextNotice("user-event", "раз")).block(Duration.ofSeconds(5L));
         audience.broadcast(ServerSentEvent.builder("два").build());
         MatcherAssert.assertThat(
             "аудитория ошиблась в числе отправленных событий",
@@ -75,13 +76,14 @@ final class MeteredAudienceTest {
     @Test
     @DisplayName("аудитория с метриками пропускает события к исходной")
     void passesEventsThrough() {
+        final FakeBus bus = new FakeBus();
         final Audience audience = new MeteredAudience(
-            new SinkAudience(new ConcurrentHashMap<>(0)), new SimpleMeterRegistry()
+            new SinkAudience(new ConcurrentHashMap<>(0), bus), new SimpleMeterRegistry()
         );
         final Mono<String> first = audience.stream(6L)
             .map(ServerSentEvent::data).next().cache();
         first.subscribe();
-        audience.deliver(6L, ServerSentEvent.builder("насквозь").build());
+        bus.publish(6L, new TextNotice("user-event", "насквозь")).block(Duration.ofSeconds(5L));
         MatcherAssert.assertThat(
             "событие не дошло до исходной аудитории",
             first.block(Duration.ofSeconds(5L)),

@@ -6,6 +6,7 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m30;
 
+import org.springframework.http.codec.ServerSentEvent;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -36,30 +37,15 @@ public final class ParsedNotice implements Notice {
     }
 
     @Override
-    public void deliver(final Audience audience) {
-        this.origin().deliver(audience);
+    public ServerSentEvent<String> sse() {
+        final JsonNode node = this.mapper.readTree(this.text);
+        return new TextNotice(
+            node.required("event").asString(), node.required("text").asString()
+        ).sse();
     }
 
     @Override
     public String json() {
         return this.text;
-    }
-
-    private Notice origin() {
-        final JsonNode node = this.mapper.readTree(this.text);
-        final String type = node.required("type").asString();
-        final Notice notice;
-        if ("USER".equals(type)) {
-            notice = new UserNotice(
-                node.required("userId").asLong(), node.required("text").asString()
-            );
-        } else if ("BROADCAST".equals(type)) {
-            notice = new BroadcastNotice(node.required("text").asString());
-        } else {
-            throw new IllegalArgumentException(
-                String.format("Тип уведомления '%s' неизвестен в %s", type, this.text)
-            );
-        }
-        return notice;
     }
 }

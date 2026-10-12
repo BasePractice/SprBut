@@ -6,12 +6,16 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m30;
 
+import java.time.Duration;
 import org.springframework.http.codec.ServerSentEvent;
+import reactor.core.Disposable;
+import reactor.core.Disposables;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 /**
- * Открытые потоки одного пользователя: общий источник событий и число подписчиков.
+ * Открытые потоки одного пользователя: общий источник событий, число подписчиков
+ * и подписка на личный канал пользователя.
  *
  * <p>Число подписчиков ведётся самим объектом, а не берётся у источника: подключение
  * учитывается до подписки, и параллельный уход последнего подписчика не выбросит
@@ -32,20 +36,36 @@ final class Crowd {
     private final int size;
 
     /**
-     * Конструктор толпы из одного подписчика.
+     * Подписка на личный канал.
+     */
+    private final Disposable link;
+
+    /**
+     * Конструктор толпы из одного подписчика без подписки на канал.
      */
     Crowd() {
-        this(Sinks.many().multicast().directBestEffort(), 1);
+        this(Sinks.many().multicast().directBestEffort(), 1, Disposables.disposed());
     }
 
     /**
      * Конструктор.
      * @param sink Источник событий
      * @param size Число подписчиков
+     * @param link Подписка на личный канал
      */
-    Crowd(final Sinks.Many<ServerSentEvent<String>> sink, final int size) {
+    Crowd(final Sinks.Many<ServerSentEvent<String>> sink, final int size, final Disposable link) {
         this.sink = sink;
         this.size = size;
+        this.link = link;
+    }
+
+    /**
+     * Толпа, получающая события из канала.
+     * @param source События личного канала
+     * @return Новая толпа с тем же источником и подпиской на канал
+     */
+    Crowd attached(final Flux<ServerSentEvent<String>> source) {
+        return new Crowd(this.sink, this.size, source.subscribe(this::emit));
     }
 
     /**
@@ -53,7 +73,7 @@ final class Crowd {
      * @return Новая толпа с тем же источником
      */
     Crowd joined() {
-        return new Crowd(this.sink, this.size + 1);
+        return new Crowd(this.sink, this.size + 1, this.link);
     }
 
     /**
@@ -61,7 +81,7 @@ final class Crowd {
      * @return Новая толпа с тем же источником
      */
     Crowd left() {
-        return new Crowd(this.sink, this.size - 1);
+        return new Crowd(this.sink, this.size - 1, this.link);
     }
 
     /**
@@ -82,9 +102,20 @@ final class Crowd {
 
     /**
      * Отправить событие всем подписчикам толпы.
+     *
+     * <p>События приходят из личного канала и из общего, то есть из разных
+     * потоков, поэтому одновременная отправка не теряется, а повторяется.</p>
+     *
      * @param event Событие
      */
     void emit(final ServerSentEvent<String> event) {
-        this.sink.tryEmitNext(event);
+        this.sink.emitNext(event, Sinks.EmitFailureHandler.busyLooping(Duration.ofSeconds(1L)));
+    }
+
+    /**
+     * Отписаться от личного канала.
+     */
+    void close() {
+        this.link.dispose();
     }
 }

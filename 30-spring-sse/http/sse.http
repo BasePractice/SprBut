@@ -1,8 +1,8 @@
 # Сквозная проверка двух экземпляров, поднятых через docker compose.
 # Запускать целиком сверху вниз в окружении "docker": запросы передают друг
 # другу значения метрик через client.global.
-# Уведомления отправляются через второй экземпляр, а приём проверяется по
-# метрикам первого: так видно, что событие прошло через Redis.
+# Уведомления отправляются по gRPC через второй экземпляр, а приём проверяется
+# по ответу PUBLISH и метрикам первого: так видно, что событие прошло через Redis.
 
 ### Первый экземпляр жив
 GET {{one}}/actuator/health
@@ -46,52 +46,35 @@ GET {{two}}/actuator/prometheus
     client.global.set("publishedBefore", published[1]);
 %}
 
-### Уведомление пользователю через второй экземпляр
-< {%
-    request.variables.set("user", $random.integer(1, 1000000).toString());
-%}
-POST {{two}}/sse/send/user/{{user}}
-Content-Type: text/plain
+### Уведомление пользователю без открытого потока через второй экземпляр
+# Канал пользователя никто не слушает: PUBLISH отвечает нулём получателей,
+# а нулевое поле proto3 в JSON-ответе опускается.
+GRPC {{grpcTwo}}/ru.sprbut.m30.Notifier/SendToUser
 
-Привет, {{$random.alphanumeric(8)}}
+{
+  "userId": {{$random.integer(1, 1000000)}},
+  "text": "Привет, {{$random.alphanumeric(8)}}"
+}
 
 > {%
-    client.test("Уведомление пользователю принято", () => {
-        client.assert(response.status === 200, `Отправка ответила ${response.status}`);
+    client.test("Уведомление пользователю без потока не получил ни один экземпляр", () => {
+        const receivers = Number(response.body.receivers || 0);
+        client.assert(receivers === 0, `Получателей ${receivers}`);
     });
 %}
 
 ### Уведомление всем через второй экземпляр
-POST {{two}}/sse/send/broadcast
-Content-Type: text/plain
+GRPC {{grpcTwo}}/ru.sprbut.m30.Notifier/Broadcast
 
-Всем, {{$random.alphanumeric(8)}}
-
-> {%
-    client.test("Уведомление всем принято", () => {
-        client.assert(response.status === 200, `Отправка ответила ${response.status}`);
-    });
-%}
-
-### Пользователь не число
-POST {{two}}/sse/send/user/ничей
-Content-Type: text/plain
-
-текст
+{
+  "event": "news",
+  "text": "Всем, {{$random.alphanumeric(8)}}"
+}
 
 > {%
-    client.test("Нечисловой пользователь даёт 400", () => {
-        client.assert(response.status === 400, `Ожидался 400, пришёл ${response.status}`);
-    });
-%}
-
-### Уведомление без текста
-POST {{two}}/sse/send/broadcast
-Content-Type: text/plain
-
-> {%
-    client.test("Пустое уведомление даёт 400", () => {
-        client.assert(response.status === 400, `Ожидался 400, пришёл ${response.status}`);
+    client.test("Общее уведомление получили оба экземпляра", () => {
+        const receivers = Number(response.body.receivers || 0);
+        client.assert(receivers === 2, `Получателей ${receivers}`);
     });
 %}
 
@@ -106,14 +89,15 @@ GET {{two}}/actuator/prometheus
     });
 %}
 
-### Первый экземпляр получил оба уведомления из Redis
+### Первый экземпляр получил из Redis только общее уведомление
+# На личный канал пользователя без потока экземпляр не подписан.
 GET {{one}}/actuator/prometheus
 
 > {%
     const received = response.body.match(/^redis_sse_receive_total\{[^}]*} (\S+)$/m);
-    client.test("Получено ровно два уведомления", () => {
+    client.test("Получено ровно одно уведомление", () => {
         const delta = Number(received[1]) - Number(client.global.get("receivedBefore"));
-        client.assert(delta === 2, `Получено ${delta}`);
+        client.assert(delta === 1, `Получено ${delta}`);
     });
 %}
 

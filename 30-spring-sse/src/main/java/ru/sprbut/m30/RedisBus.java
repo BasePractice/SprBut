@@ -6,26 +6,53 @@
 // @checkstyle RegexpSingleline disable
 package ru.sprbut.m30;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer;
+import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Канал уведомлений на pub/sub Redis.
+ * Каналы уведомлений на pub/sub Redis.
+ *
+ * <p>Все подписки экземпляра идут через один контейнер, то есть через одно
+ * соединение Redis: SUBSCRIBE и UNSUBSCRIBE на нём добавляют и убирают
+ * каналы, не открывая новых соединений. Публикация идёт через шаблон,
+ * потому что соединение в режиме подписки ничего, кроме подписок,
+ * не принимает. Битое уведомление пропускается, не обрывая подписку.</p>
+ *
  * @since 1.0
  */
 public final class RedisBus implements Bus {
 
     /**
-     * Клиент Redis.
+     * Журнал.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(RedisBus.class);
+
+    /**
+     * Шаблон имени личного канала.
+     */
+    private static final String USER = "sse:user:%d";
+
+    /**
+     * Имя общего канала.
+     */
+    private static final String BROADCAST = "sse:broadcast";
+
+    /**
+     * Клиент Redis для публикации.
      */
     private final ReactiveStringRedisTemplate redis;
 
     /**
-     * Имя канала.
+     * Контейнер подписок на одном соединении.
      */
-    private final String topic;
+    private final ReactiveRedisMessageListenerContainer container;
 
     /**
      * Разборщик JSON.
@@ -34,29 +61,55 @@ public final class RedisBus implements Bus {
 
     /**
      * Конструктор.
-     * @param redis Клиент Redis
-     * @param topic Имя канала
+     * @param redis Клиент Redis для публикации
+     * @param container Контейнер подписок
      * @param mapper Разборщик JSON
      */
     public RedisBus(
         final ReactiveStringRedisTemplate redis,
-        final String topic,
+        final ReactiveRedisMessageListenerContainer container,
         final ObjectMapper mapper
     ) {
         this.redis = redis;
-        this.topic = topic;
+        this.container = container;
         this.mapper = mapper;
     }
 
     @Override
-    public Mono<Void> publish(final Notice notice) {
-        return this.redis.convertAndSend(this.topic, notice.json()).then();
+    public Mono<Long> publish(final long user, final Notice notice) {
+        return this.redis.convertAndSend(String.format(RedisBus.USER, user), notice.json());
     }
 
     @Override
-    public Flux<Notice> notices() {
-        return this.redis.listenToChannel(this.topic).map(
-            message -> new ParsedNotice(message.getMessage(), this.mapper)
-        );
+    public Mono<Long> publish(final Notice notice) {
+        return this.redis.convertAndSend(RedisBus.BROADCAST, notice.json());
+    }
+
+    @Override
+    public Flux<ServerSentEvent<String>> user(final long user) {
+        return this.events(String.format(RedisBus.USER, user));
+    }
+
+    @Override
+    public Flux<ServerSentEvent<String>> broadcasts() {
+        return this.events(RedisBus.BROADCAST);
+    }
+
+    private Flux<ServerSentEvent<String>> events(final String channel) {
+        return this.container.receive(ChannelTopic.of(channel))
+            .map(message -> new ParsedNotice(message.getMessage(), this.mapper))
+            .concatMap(
+                notice -> Mono.fromCallable(notice::sse)
+                    .doOnError(
+                        ex -> RedisBus.LOG.warn(
+                            String.format(
+                                "Уведомление %s из канала %s пропущено: его не удалось разобрать",
+                                notice.json(), channel
+                            ),
+                            ex
+                        )
+                    )
+                    .onErrorComplete()
+            );
     }
 }

@@ -10,10 +10,15 @@ import org.springframework.http.codec.ServerSentEvent;
 import tools.jackson.databind.node.JsonNodeFactory;
 
 /**
- * Уведомление всем подключённым пользователям.
+ * Уведомление из имени события и текста.
  * @since 1.0
  */
-public final class BroadcastNotice implements Notice {
+public final class TextNotice implements Notice {
+
+    /**
+     * Имя события.
+     */
+    private final String event;
 
     /**
      * Текст.
@@ -22,23 +27,23 @@ public final class BroadcastNotice implements Notice {
 
     /**
      * Конструктор.
+     * @param event Имя события
      * @param text Текст
      */
-    public BroadcastNotice(final String text) {
+    public TextNotice(final String event, final String text) {
+        this.event = event;
         this.text = text;
     }
 
     @Override
-    public void deliver(final Audience audience) {
-        audience.broadcast(
-            ServerSentEvent.<String>builder().event("broadcast").data(this.text).build()
-        );
+    public ServerSentEvent<String> sse() {
+        return ServerSentEvent.<String>builder().event(this.event).data(this.text).build();
     }
 
     @Override
     public String json() {
         return JsonNodeFactory.instance.objectNode()
-            .put("type", "BROADCAST")
+            .put("event", this.event)
             .put("text", this.text)
             .toString();
     }

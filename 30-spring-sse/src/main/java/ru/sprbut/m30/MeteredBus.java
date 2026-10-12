@@ -8,17 +8,18 @@ package ru.sprbut.m30;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * Канал, чьи отправленные и полученные уведомления считаются в метриках.
+ * Каналы, чьи отправленные и полученные уведомления считаются в метриках.
  * @since 1.0
  */
 public final class MeteredBus implements Bus {
 
     /**
-     * Исходный канал.
+     * Исходные каналы.
      */
     private final Bus origin;
 
@@ -34,7 +35,7 @@ public final class MeteredBus implements Bus {
 
     /**
      * Конструктор, регистрирующий метрики в реестре.
-     * @param origin Исходный канал
+     * @param origin Исходные каналы
      * @param registry Реестр метрик
      */
     public MeteredBus(final Bus origin, final MeterRegistry registry) {
@@ -51,7 +52,7 @@ public final class MeteredBus implements Bus {
 
     /**
      * Конструктор.
-     * @param origin Исходный канал
+     * @param origin Исходные каналы
      * @param published Счётчик отправленных уведомлений
      * @param received Счётчик полученных уведомлений
      */
@@ -62,12 +63,22 @@ public final class MeteredBus implements Bus {
     }
 
     @Override
-    public Mono<Void> publish(final Notice notice) {
-        return this.origin.publish(notice).doOnSuccess(done -> this.published.increment());
+    public Mono<Long> publish(final long user, final Notice notice) {
+        return this.origin.publish(user, notice).doOnSuccess(count -> this.published.increment());
     }
 
     @Override
-    public Flux<Notice> notices() {
-        return this.origin.notices().doOnNext(notice -> this.received.increment());
+    public Mono<Long> publish(final Notice notice) {
+        return this.origin.publish(notice).doOnSuccess(count -> this.published.increment());
+    }
+
+    @Override
+    public Flux<ServerSentEvent<String>> user(final long user) {
+        return this.origin.user(user).doOnNext(event -> this.received.increment());
+    }
+
+    @Override
+    public Flux<ServerSentEvent<String>> broadcasts() {
+        return this.origin.broadcasts().doOnNext(event -> this.received.increment());
     }
 }

@@ -10,6 +10,9 @@ spring:
       host: localhost
       database: 1
       connect-timeout: 5s
+  grpc:
+    server:
+      port: 9090
 management:
   endpoints:
     web:
@@ -24,5 +27,4 @@ management:
         enabled: true
 sse:
   heartbeat-timeout: 20s
-  topic: sse-events
   retry-pause: 1s
