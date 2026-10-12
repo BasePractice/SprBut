@@ -8,6 +8,8 @@ package ru.sprbut.m30;
 
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
 
@@ -15,6 +17,7 @@ import reactor.core.publisher.Flux;
  * Пользователи, записывающие общие рассылки строками «all событие данные».
  * @since 1.0
  */
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 final class FakeAudience implements Audience {
 
     /**
@@ -27,14 +30,6 @@ final class FakeAudience implements Audience {
      */
     FakeAudience() {
         this(new CopyOnWriteArrayList<>());
-    }
-
-    /**
-     * Конструктор.
-     * @param log Записанные рассылки
-     */
-    FakeAudience(final Collection<String> log) {
-        this.log = log;
     }
 
     @Override

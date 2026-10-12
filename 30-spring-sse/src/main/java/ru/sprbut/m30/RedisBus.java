@@ -4,10 +4,11 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
+// @checkstyle ImplicitConstructorCheck disable
 package ru.sprbut.m30;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.ReactiveRedisMessageListenerContainer;
@@ -27,12 +28,9 @@ import tools.jackson.databind.ObjectMapper;
  *
  * @since 1.0
  */
+@RequiredArgsConstructor
+@Slf4j
 public final class RedisBus implements Bus {
-
-    /**
-     * Журнал.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(RedisBus.class);
 
     /**
      * Шаблон имени личного канала.
@@ -58,22 +56,6 @@ public final class RedisBus implements Bus {
      * Разборщик JSON.
      */
     private final ObjectMapper mapper;
-
-    /**
-     * Конструктор.
-     * @param redis Клиент Redis для публикации
-     * @param container Контейнер подписок
-     * @param mapper Разборщик JSON
-     */
-    public RedisBus(
-        final ReactiveStringRedisTemplate redis,
-        final ReactiveRedisMessageListenerContainer container,
-        final ObjectMapper mapper
-    ) {
-        this.redis = redis;
-        this.container = container;
-        this.mapper = mapper;
-    }
 
     @Override
     public Mono<Long> publish(final long user, final Notice notice) {
@@ -101,7 +83,7 @@ public final class RedisBus implements Bus {
             .concatMap(
                 notice -> Mono.fromCallable(notice::sse)
                     .doOnError(
-                        ex -> RedisBus.LOG.warn(
+                        ex -> log.warn(
                             String.format(
                                 "Уведомление %s из канала %s пропущено: его не удалось разобрать",
                                 notice.json(), channel

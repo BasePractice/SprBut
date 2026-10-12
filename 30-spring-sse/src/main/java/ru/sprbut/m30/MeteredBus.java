@@ -8,6 +8,8 @@ package ru.sprbut.m30;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -16,6 +18,7 @@ import reactor.core.publisher.Mono;
  * Каналы, чьи отправленные и полученные уведомления считаются в метриках.
  * @since 1.0
  */
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public final class MeteredBus implements Bus {
 
     /**
@@ -48,18 +51,6 @@ public final class MeteredBus implements Bus {
                 .description("Сколько всего сообщений получено из Redis")
                 .register(registry)
         );
-    }
-
-    /**
-     * Конструктор.
-     * @param origin Исходные каналы
-     * @param published Счётчик отправленных уведомлений
-     * @param received Счётчик полученных уведомлений
-     */
-    MeteredBus(final Bus origin, final Counter published, final Counter received) {
-        this.origin = origin;
-        this.published = published;
-        this.received = received;
     }
 
     @Override

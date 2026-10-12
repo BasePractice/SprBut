@@ -9,6 +9,8 @@ package ru.sprbut.m30;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
 
@@ -16,6 +18,7 @@ import reactor.core.publisher.Flux;
  * Пользователи, чьи подключения и полученные события считаются в метриках.
  * @since 1.0
  */
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public final class MeteredAudience implements Audience {
 
     /**
@@ -54,25 +57,6 @@ public final class MeteredAudience implements Audience {
                 .description("Сколько всего SSE-событий отправлено")
                 .register(registry)
         );
-    }
-
-    /**
-     * Конструктор.
-     * @param origin Исходные пользователи
-     * @param active Число открытых потоков
-     * @param opened Счётчик открытых потоков
-     * @param sent Счётчик отправленных событий
-     */
-    MeteredAudience(
-        final Audience origin,
-        final AtomicInteger active,
-        final Counter opened,
-        final Counter sent
-    ) {
-        this.origin = origin;
-        this.active = active;
-        this.opened = opened;
-        this.sent = sent;
     }
 
     @Override

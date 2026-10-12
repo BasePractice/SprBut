@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
-// @checkstyle RegexpSingleline disable
+// @checkstyle ImplicitConstructorCheck disable
 package ru.sprbut.m30;
 
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import lombok.RequiredArgsConstructor;
 import org.springframework.grpc.server.service.GrpcService;
 import reactor.core.publisher.Mono;
 import ru.sprbut.m30.grpc.Accepted;
@@ -22,20 +23,13 @@ import ru.sprbut.m30.grpc.UserMessage;
  * @since 1.0
  */
 @GrpcService
+@RequiredArgsConstructor
 public final class GrpcEndpoint extends NotifierGrpc.NotifierImplBase {
 
     /**
      * Каналы уведомлений.
      */
     private final Bus bus;
-
-    /**
-     * Конструктор.
-     * @param bus Каналы уведомлений
-     */
-    public GrpcEndpoint(final Bus bus) {
-        this.bus = bus;
-    }
 
     @Override
     public void sendToUser(final UserMessage request, final StreamObserver<Accepted> observer) {

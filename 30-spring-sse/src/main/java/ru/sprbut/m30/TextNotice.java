@@ -11,29 +11,11 @@ import tools.jackson.databind.node.JsonNodeFactory;
 
 /**
  * Уведомление из имени события и текста.
+ * @param event Имя события
+ * @param text Текст
  * @since 1.0
  */
-public final class TextNotice implements Notice {
-
-    /**
-     * Имя события.
-     */
-    private final String event;
-
-    /**
-     * Текст.
-     */
-    private final String text;
-
-    /**
-     * Конструктор.
-     * @param event Имя события
-     * @param text Текст
-     */
-    public TextNotice(final String event, final String text) {
-        this.event = event;
-        this.text = text;
-    }
+public record TextNotice(String event, String text) implements Notice {
 
     @Override
     public ServerSentEvent<String> sse() {

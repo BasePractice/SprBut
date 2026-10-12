@@ -3,12 +3,14 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
-// @checkstyle RegexpSingleline disable
+// @checkstyle ImplicitConstructorCheck disable
 package ru.sprbut.m30;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentMap;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
 
@@ -22,6 +24,7 @@ import reactor.core.publisher.Flux;
  *
  * @since 1.0
  */
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public final class SinkAudience implements Audience {
 
     /**
@@ -33,16 +36,6 @@ public final class SinkAudience implements Audience {
      * Каналы уведомлений.
      */
     private final Bus bus;
-
-    /**
-     * Конструктор.
-     * @param map Толпы по пользователям
-     * @param bus Каналы уведомлений
-     */
-    SinkAudience(final ConcurrentMap<Long, Crowd> map, final Bus bus) {
-        this.map = map;
-        this.bus = bus;
-    }
 
     @Override
     public Flux<ServerSentEvent<String>> stream(final long user) {

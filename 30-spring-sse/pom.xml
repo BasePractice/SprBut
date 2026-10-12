@@ -46,6 +46,12 @@ SPDX-License-Identifier: MIT
             <artifactId>spring-boot-starter-grpc-server</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -58,6 +64,19 @@ SPDX-License-Identifier: MIT
     </dependencies>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>io.github.ascopes</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
@@ -111,9 +130,13 @@ SPDX-License-Identifier: MIT
                                 ради согласованного набора зависимостей, которыми код
                                 пользуется напрямую. Требование объявить каждую из них
                                 отдельно противоречит теме раздела.
+                                ErrorProne компилирует исходники сам, без процессора
+                                Lombok, поэтому не видит сгенерированных им конструкторов
+                                и журналов.
                             -->
                             <excludes>
                                 <exclude>dependencies:.*</exclude>
+                                <exclude>errorprone:.*</exclude>
                             </excludes>
                         </configuration>
                     </plugin>

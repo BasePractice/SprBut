@@ -4,11 +4,12 @@
  */
 // @checkstyle MultiLineCommentCheck disable
 // @checkstyle RegexpSingleline disable
+// @checkstyle ImplicitConstructorCheck disable
 package ru.sprbut.m30;
 
 import java.time.Duration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -19,12 +20,9 @@ import reactor.util.retry.Retry;
  * с растущей паузой, пока его не отменят.
  * @since 1.0
  */
+@RequiredArgsConstructor
+@Slf4j
 public final class ResilientBus implements Bus {
-
-    /**
-     * Журнал.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(ResilientBus.class);
 
     /**
      * Исходные каналы.
@@ -35,16 +33,6 @@ public final class ResilientBus implements Bus {
      * Пауза перед первой переподпиской.
      */
     private final Duration pause;
-
-    /**
-     * Конструктор.
-     * @param origin Исходные каналы
-     * @param pause Пауза перед первой переподпиской
-     */
-    public ResilientBus(final Bus origin, final Duration pause) {
-        this.origin = origin;
-        this.pause = pause;
-    }
 
     @Override
     public Mono<Long> publish(final long user, final Notice notice) {
@@ -72,7 +60,7 @@ public final class ResilientBus implements Bus {
         return Retry.backoff(Long.MAX_VALUE, this.pause)
             .maxBackoff(this.pause.multipliedBy(30L))
             .doBeforeRetry(
-                signal -> ResilientBus.LOG.warn(
+                signal -> log.warn(
                     String.format(
                         "Подписка на %s потеряна, попытка восстановления номер %d",
                         channel, signal.totalRetries() + 1L

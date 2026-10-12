@@ -11,12 +11,15 @@ import io.grpc.stub.StreamObserver;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Получатель ответа gRPC, запоминающий первый ответ или ошибку.
  * @param <T> Тип ответа
  * @since 1.0
  */
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 final class FakeObserver<T> implements StreamObserver<T> {
 
     /**
@@ -29,14 +32,6 @@ final class FakeObserver<T> implements StreamObserver<T> {
      */
     FakeObserver() {
         this(new CompletableFuture<>());
-    }
-
-    /**
-     * Конструктор.
-     * @param future Ответ или ошибка
-     */
-    FakeObserver(final CompletableFuture<T> future) {
-        this.future = future;
     }
 
     @Override

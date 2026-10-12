@@ -7,8 +7,9 @@
 package ru.sprbut.m30;
 
 import java.util.concurrent.atomic.AtomicReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.SmartLifecycle;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
@@ -23,12 +24,9 @@ import reactor.core.publisher.Mono;
  *
  * @since 1.0
  */
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+@Slf4j
 public final class Relay implements SmartLifecycle {
-
-    /**
-     * Журнал.
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(Relay.class);
 
     /**
      * Каналы уведомлений.
@@ -54,18 +52,6 @@ public final class Relay implements SmartLifecycle {
         this(bus, audience, new AtomicReference<>(Disposables.disposed()));
     }
 
-    /**
-     * Конструктор.
-     * @param bus Каналы уведомлений
-     * @param audience Подключённые пользователи
-     * @param link Текущая подписка на общий канал
-     */
-    Relay(final Bus bus, final Audience audience, final AtomicReference<Disposable> link) {
-        this.bus = bus;
-        this.audience = audience;
-        this.link = link;
-    }
-
     @Override
     public void start() {
         this.link.getAndSet(
@@ -73,7 +59,7 @@ public final class Relay implements SmartLifecycle {
                 .concatMap(
                     event -> Mono.fromRunnable(() -> this.audience.broadcast(event))
                         .doOnError(
-                            ex -> Relay.LOG.warn(
+                            ex -> log.warn(
                                 String.format(
                                     "Событие %s пропущено: его не удалось разослать",
                                     event.data()

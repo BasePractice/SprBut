@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 // @checkstyle MultiLineCommentCheck disable
-// @checkstyle RegexpSingleline disable
+// @checkstyle ImplicitConstructorCheck disable
 package ru.sprbut.m30;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.codec.ServerSentEvent;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -14,6 +15,7 @@ import tools.jackson.databind.ObjectMapper;
  * Уведомление, пришедшее из канала в виде JSON и разбираемое при доставке.
  * @since 1.0
  */
+@RequiredArgsConstructor
 public final class ParsedNotice implements Notice {
 
     /**
@@ -25,16 +27,6 @@ public final class ParsedNotice implements Notice {
      * Разборщик JSON.
      */
     private final ObjectMapper mapper;
-
-    /**
-     * Конструктор.
-     * @param text Исходный JSON
-     * @param mapper Разборщик JSON
-     */
-    public ParsedNotice(final String text, final ObjectMapper mapper) {
-        this.text = text;
-        this.mapper = mapper;
-    }
 
     @Override
     public ServerSentEvent<String> sse() {

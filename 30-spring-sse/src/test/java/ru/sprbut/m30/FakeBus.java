@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -26,6 +28,7 @@ import reactor.core.publisher.Sinks;
  *
  * @since 1.0
  */
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 final class FakeBus implements Bus {
 
     /**
@@ -56,22 +59,6 @@ final class FakeBus implements Bus {
      */
     FakeBus(final int breaks) {
         this(Sinks.many().replay().all(), new ConcurrentHashMap<>(0), new AtomicInteger(breaks));
-    }
-
-    /**
-     * Конструктор.
-     * @param sink Опубликованные события
-     * @param map Число подписок по каналам
-     * @param breaks Сколько подписок оборвать
-     */
-    FakeBus(
-        final Sinks.Many<Map.Entry<String, ServerSentEvent<String>>> sink,
-        final ConcurrentMap<String, AtomicInteger> map,
-        final AtomicInteger breaks
-    ) {
-        this.sink = sink;
-        this.map = map;
-        this.breaks = breaks;
     }
 
     @Override

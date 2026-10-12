@@ -7,6 +7,8 @@
 package ru.sprbut.m30;
 
 import java.time.Duration;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
@@ -23,6 +25,7 @@ import reactor.core.publisher.Sinks;
  *
  * @since 1.0
  */
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 final class Crowd {
 
     /**
@@ -45,18 +48,6 @@ final class Crowd {
      */
     Crowd() {
         this(Sinks.many().multicast().directBestEffort(), 1, Disposables.disposed());
-    }
-
-    /**
-     * Конструктор.
-     * @param sink Источник событий
-     * @param size Число подписчиков
-     * @param link Подписка на личный канал
-     */
-    Crowd(final Sinks.Many<ServerSentEvent<String>> sink, final int size, final Disposable link) {
-        this.sink = sink;
-        this.size = size;
-        this.link = link;
     }
 
     /**
